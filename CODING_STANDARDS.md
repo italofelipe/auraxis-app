@@ -789,13 +789,47 @@ const styles = StyleSheet.create({
 
 ## 9. Testes
 
-### 9.1 Configuração
+> **Por que jest-expo e não Vitest?**
+> Vitest não tem suporte oficial a React Native. O `@testing-library/react-native` é incompatível
+> com o Vitest runtime. A biblioteca não-oficial `vitest-react-native` está abandonada (2 anos,
+> 0 dependentes). O `jest-expo` resolve módulos `.ios.tsx`/`.android.tsx`, mocka o SDK do Expo
+> e configura transformações específicas de plataforma. Esta escolha é definitiva enquanto o
+> ecossistema RN não oferecer suporte nativo ao Vitest.
 
-```typescript
+### 9.1 O que testar
+
+| Alvo | Ferramenta | Obrigatório |
+|:-----|:-----------|:-----------:|
+| Hooks customizados (`hooks/`) | jest-expo + `renderHook` | ✅ |
+| Utilitários (`utils/`) | jest-expo | ✅ |
+| Serviços HTTP | jest-expo (`jest.mock('fetch')`) | ✅ |
+| Componentes com lógica condicional | jest-expo + @testing-library/react-native | ✅ |
+| Fluxos críticos (login, pagamento) | Detox E2E (quando macOS runner disponível) | ✅ |
+| Componentes de apresentação pura | jest-expo | ⚠️ Opcional |
+| Navegação (Expo Router) | Mock em `jest.setup.ts` | ⚠️ Opcional |
+
+### 9.2 Configuração
+
+```javascript
 // jest.config.js
 module.exports = {
   preset: 'jest-expo',
-  setupFilesAfterFramework: ['@testing-library/react-native/extend-expect'],
+  setupFilesAfterFramework: [
+    '@testing-library/jest-native/extend-expect',
+    './jest.setup.ts',
+  ],
+  transformIgnorePatterns: [
+    'node_modules/(?!(' +
+      '@react-native|react-native|expo|@expo|@unimodules|' +
+      'sentry-expo|native-base|react-navigation|@react-navigation|' +
+      'expo-router|expo-modules-core|expo-font|expo-asset|expo-constants|' +
+      'expo-file-system|expo-secure-store' +
+    ')/)',
+  ],
+  moduleNameMapper: {
+    '\\.svg$': '<rootDir>/__mocks__/svgMock.ts',
+    '\\.(png|jpg|jpeg|gif|webp)$': '<rootDir>/__mocks__/imageMock.ts',
+  },
   collectCoverageFrom: [
     'components/**/*.{ts,tsx}',
     'hooks/**/*.{ts,tsx}',
@@ -804,18 +838,33 @@ module.exports = {
     '!**/*.d.ts',
     '!**/index.ts',
   ],
-  coverageThresholds: {
-    global: {
-      branches: 80,
-      functions: 80,
-      lines: 80,
-      statements: 80,
-    },
+  coverageThreshold: {
+    global: { lines: 80, functions: 80, statements: 80, branches: 75 },
   },
 }
 ```
 
-### 9.2 Estrutura de teste
+### 9.3 Mocks disponíveis (jest.setup.ts)
+
+| Mock | O que fornece |
+|:-----|:-------------|
+| `expo-router` | `useRouter`, `useLocalSearchParams`, `Link`, `Stack`, `Tabs` |
+| `expo-constants` | `expoConfig.name`, `expoConfig.slug` |
+| `__mocks__/svgMock.ts` | `<View testID="svg-mock" />` |
+| `__mocks__/imageMock.ts` | string `'image-mock'` |
+| `@testing-library/jest-native` | `toBeVisible`, `toHaveText`, `toBeOnTheScreen`, etc. |
+
+Para mockar módulo nativo adicional:
+```typescript
+// jest.setup.ts
+jest.mock('expo-secure-store', () => ({
+  getItemAsync: jest.fn(),
+  setItemAsync: jest.fn(),
+  deleteItemAsync: jest.fn(),
+}))
+```
+
+### 9.4 Teste de componente
 
 ```typescript
 // components/portfolio/__tests__/PortfolioCard.test.tsx
@@ -841,9 +890,7 @@ function makePortfolio(overrides: Partial<Portfolio> = {}): Portfolio {
 describe('PortfolioCard', () => {
   it('renderiza nome e valor do portfólio', () => {
     const portfolio = makePortfolio({ name: 'Renda Variável', totalValue: 25000 })
-
     render(<PortfolioCard portfolio={portfolio} onPress={jest.fn()} />)
-
     expect(screen.getByText('Renda Variável')).toBeOnTheScreen()
     expect(screen.getByText(/R\$ 25\.000/)).toBeOnTheScreen()
   })
@@ -851,73 +898,70 @@ describe('PortfolioCard', () => {
   it('chama onPress com o id ao pressionar', () => {
     const onPress = jest.fn()
     const portfolio = makePortfolio({ id: 'port-abc' })
-
     render(<PortfolioCard portfolio={portfolio} onPress={onPress} />)
     fireEvent.press(screen.getByTestId('portfolio-card-port-abc'))
-
-    expect(onPress).toHaveBeenCalledTimes(1)
     expect(onPress).toHaveBeenCalledWith('port-abc')
+  })
+
+  it('exibe estado de loading', () => {
+    render(<PortfolioCard portfolio={makePortfolio()} onPress={jest.fn()} isLoading />)
+    expect(screen.getByTestId('loading-indicator')).toBeOnTheScreen()
   })
 })
 ```
 
-### 9.3 Teste de hooks
+### 9.5 Teste de hooks
 
 ```typescript
 // hooks/__tests__/usePortfolios.test.ts
-import { renderHook, act, waitFor } from '@testing-library/react-native'
+import { renderHook, waitFor } from '@testing-library/react-native'
 import { usePortfolios } from '../usePortfolios'
 import { portfolioService } from '@/services/portfolioService'
 
 jest.mock('@/services/portfolioService')
-const mockPortfolioService = portfolioService as jest.Mocked<typeof portfolioService>
+const mockService = portfolioService as jest.Mocked<typeof portfolioService>
 
 describe('usePortfolios', () => {
   it('carrega portfólios com sucesso', async () => {
     const portfolios = [makePortfolio(), makePortfolio({ id: 'port-2' })]
-    mockPortfolioService.list.mockResolvedValue(portfolios)
+    mockService.list.mockResolvedValue(portfolios)
 
     const { result } = renderHook(() => usePortfolios())
-
     expect(result.current.isLoading).toBe(true)
 
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.portfolios).toEqual(portfolios)
     expect(result.current.error).toBeNull()
   })
 
   it('expõe erro quando o serviço falha', async () => {
-    mockPortfolioService.list.mockRejectedValue(new Error('Servidor indisponível'))
+    mockService.list.mockRejectedValue(new Error('Servidor indisponível'))
 
     const { result } = renderHook(() => usePortfolios())
-
-    await waitFor(() => {
-      expect(result.current.isLoading).toBe(false)
-    })
+    await waitFor(() => expect(result.current.isLoading).toBe(false))
 
     expect(result.current.error?.message).toBe('Servidor indisponível')
+    expect(result.current.portfolios).toEqual([])
   })
 })
 ```
 
-### 9.4 Regras de testes
+### 9.6 Regras de testes
 
 **DEVE:**
 - Testar **comportamento**, não implementação (`fireEvent.press`, não `instance.handlePress()`)
-- `testID` em todo elemento interativo do componente
-- Factories para criar dados de teste (`makePortfolio`, `makeUser`)
+- `testID` em todo elemento interativo — seletor estável para RNTL e Detox
+- Factories para criar dados (`makePortfolio`, `makeUser`) — sem objeto literal inline nos testes
 - Mock de serviços nos testes de hooks e telas
-- Todos os mocks em `__mocks__/` ou dentro do arquivo de teste (`jest.mock`)
 - Cobrir: happy path, erro de rede, estado vazio, estado de loading
 
 **NUNCA:**
-- `act()` manual desnecessário (RNTL faz automaticamente)
-- Snapshots como teste principal (use assertions explícitas)
+- `act()` manual desnecessário — RNTL envolve automaticamente
+- Snapshots como teste principal — use assertions explícitas
 - Testar detalhes internos de hooks (`result.current._internalState`)
-- `waitFor` com sleep manual (`await new Promise(resolve => setTimeout(resolve, 1000))`)
+- `waitFor` com sleep manual (`await new Promise(r => setTimeout(r, 1000))`)
+- Testar estilos visuais — use Storybook ou testes visuais dedicados
 
 ---
 
@@ -1084,67 +1128,92 @@ async function openExternalUrl(url: string) {
 
 ## 12. Quality Gates
 
-### 12.1 Gates locais (antes de todo commit)
+### 12.1 Gates locais (antes de todo commit — obrigatório)
 
 ```bash
-# 1. Lint (ESLint)
-npm run lint
-# ou: npx eslint . --ext .ts,.tsx
+# Comando único — roda tudo:
+npm run quality-check
+# = npm run lint && npm run typecheck && npm run test:coverage
 
-# 2. Type-check
-npx tsc --noEmit
+# Individualmente:
+npm run lint           # ESLint (--max-warnings 0)
+npm run typecheck      # tsc --noEmit
+npm run test           # jest-expo (todos os testes)
+npm run test:coverage  # jest-expo + coverage report
+npm run test:watch     # modo watch durante desenvolvimento
 
-# 3. Testes
-npx jest --passWithNoTests
+# Arquivo específico:
+npx jest src/hooks/useBalance.test.ts --watch
 
-# Comando combinado:
-npm run lint && npx tsc --noEmit && npx jest --passWithNoTests
+# Limpar cache (quando módulos mudam):
+npx jest --clearCache
 ```
 
-| Gate | Threshold | Notas |
-|:-----|:----------|:------|
-| ESLint | 0 erros | Warnings aceitos com consciência |
-| TypeScript | 0 erros | `strict: true` obrigatório |
-| Jest (quando existe suite) | 80% coverage, 100% pass | `--passWithNoTests` durante bootstrap |
+| Gate | Threshold | Bloqueia |
+|:-----|:----------|:---------|
+| ESLint | 0 erros, 0 warnings | commit (lint-staged) + CI |
+| TypeScript | 0 erros | commit (pre-push) + CI |
+| jest-expo — testes | 100% passando | CI |
+| jest-expo — lines | ≥ 80% | CI |
+| jest-expo — functions | ≥ 80% | CI |
+| jest-expo — statements | ≥ 80% | CI |
+| jest-expo — branches | ≥ 75% | CI |
 
 ### 12.2 Pre-commit hooks (husky + lint-staged)
 
-```bash
-# .husky/pre-commit
-npx lint-staged
-
-# lint-staged.config.js
+```javascript
+// lint-staged.config.js
 module.exports = {
   '**/*.{ts,tsx}': [
-    'eslint --fix',
-    'bash -c "tsc --noEmit"',
+    'eslint --fix --max-warnings 0 --no-warn-ignored',
+  ],
+  '**/*.{json,md}': [
+    'prettier --write',
   ],
 }
 ```
 
-### 12.3 Gates de CI (GitHub Actions)
+Hooks ativos:
+- `pre-commit` → lint-staged (ESLint + Prettier nos arquivos staged)
+- `commit-msg` → commitlint (Conventional Commits)
+- `pre-push` → `tsc --noEmit` + `jest --passWithNoTests`
 
-Os seguintes gates rodam em CI a cada push/PR:
+### 12.3 Gates de CI (GitHub Actions — 10 jobs)
 
-| Job | Comando | Threshold |
-|:----|:--------|:----------|
-| lint | `npm run lint` | 0 erros |
-| typecheck | `npx tsc --noEmit` | 0 erros |
-| test | `npx jest --coverage` | 80% coverage |
-| secret-scan | `gitleaks detect` | 0 secrets |
+```
+push / PR → master
+│
+├── lint              (ESLint — 0 erros, --max-warnings 0)
+├── typecheck         (tsc --noEmit — 0 erros)
+├── test              (jest-expo + coverage ≥ 80%)
+│
+├── expo-bundle       (export android — valida que bundle JS compila)
+│   └── bundle-analysis   (comenta tamanho no PR; hard limit 6 MB)
+│
+├── secret-scan-gitleaks    (0 secrets — bloqueia)
+├── secret-scan-trufflehog  (0 secrets validados — bloqueia)
+├── audit             (npm audit --audit-level=high — bloqueia)
+├── sonarcloud        (análise estática + hotspots de segurança)
+└── commitlint        (apenas em PR — Conventional Commits)
 
-> **Build nativo (EAS Build) não faz parte do gate de commit local** — apenas CI.
+└── ci-passed (gate final — bloqueia merge se qualquer job falhar)
+```
 
-### 12.4 Gaps documentados (roadmap)
+Workflows adicionais:
+- `dependency-review.yml` — bloqueia PRs com CVEs ≥ high em novas deps
+- `auto-merge.yml` — auto squash-merge de PRs Dependabot (patch; não react-native/react minor)
+
+### 12.4 Roadmap de gates (pendentes)
 
 | Item | Situação | Quando implementar |
 |:-----|:---------|:-------------------|
-| Stryker (mutation testing) | A implementar | APP5+ |
-| EAS Build gate em CI | A configurar | APP5 |
-| EAS Update (OTA) | A configurar | APP5 |
-| Detox (E2E) | A implementar | Fase Beta |
+| Detox E2E no CI | Scaffold pronto — requer macOS runner | APP5 / Fase Beta |
+| EAS Build gate | Requer conta EAS | APP5 |
+| EAS Update / OTA | Requer aprovação de release | Pós-MVP |
 | Sentry (error tracking) | A integrar | APP3+ |
-| Bundle size budget | A definir | APP3+ |
+| Stryker (mutation testing) | A avaliar | APP5+ |
+
+> **Build nativo (EAS) não faz parte do gate de commit local** — apenas CI/EAS Cloud.
 
 ---
 
@@ -1174,4 +1243,4 @@ Os seguintes gates rodam em CI a cada push/PR:
 ---
 
 *Última atualização: 2026-02-23*
-*Relacionado: FRONTEND_GUIDE.md, steering.md, .context/quality_gates.md*
+*Relacionado: steering.md, .context/quality_gates.md, auraxis-platform/.context/25_quality_security_playbook.md*

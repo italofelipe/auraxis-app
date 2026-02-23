@@ -1,72 +1,271 @@
 # steering.md — auraxis-app
 
+> Documento canônico de governança técnica para o aplicativo mobile do Auraxis.
+> Vinculante para todos os agentes e desenvolvedores.
+> Atualizado: 2026-02-23
+
+---
+
+## Stack técnica
+
+| Camada | Tecnologia | Versão |
+|:-------|:-----------|:-------|
+| Plataforma | React Native | 0.81.5 |
+| SDK | Expo SDK | ~54.0 |
+| Navegação | Expo Router v6 | ~6.0 |
+| Linguagem | TypeScript strict | ~5.9 |
+| Gerenciador de pacotes | npm | — |
+| Lint | ESLint + eslint-config-expo | ^9.25 |
+| Formatação | Prettier | ^3.8 |
+| Testes unitários | jest-expo + @testing-library/react-native | ^54.0 / ^13.0 |
+| Testes E2E | Detox (scaffold — requer macOS runner) | — |
+| Análise estática | SonarCloud | — |
+| Secret scan | Gitleaks + TruffleHog | — |
+| Dep update | Dependabot | auto-merge patch; manual para RN/React minor |
+
+> **Por que Jest e não Vitest?**
+> Vitest não tem suporte a React Native. Não existe `@vitest/react-native` oficial.
+> O ecossistema RN depende do jest-expo para resolução de módulos nativos,
+> mocks do Expo SDK e transformações por plataforma (.ios.tsx / .android.tsx).
+> Trocar para Vitest exigiria implementar toda essa infra do zero, sem suporte da comunidade.
+
+---
+
 ## Princípios técnicos
 
-- **TypeScript strict** em todo o código (`strict: true` no tsconfig).
-- **Expo SDK 54 + React Native 0.81.5** como plataforma.
-- **Expo Router** como solução de navegação (file-based).
-- **ESLint** com `eslint-config-expo` para lint.
-- **Sem lógica de negócio no frontend** — toda regra fica em auraxis-api.
-- **Contratos de API**: consumir apenas endpoints documentados e versionados em auraxis-api.
-- **Testes**: Jest + React Native Testing Library.
+- **TypeScript strict** em todo o código — `strict: true` no tsconfig, sem exceções.
+- **Sem lógica de negócio no frontend** — toda regra de negócio fica em `auraxis-api`.
+- **Contratos de API**: consumir apenas endpoints documentados e versionados.
+- **Plataforma primeiro** — usar APIs nativas do RN antes de bibliotecas externas.
+- **Segurança por padrão** — token em `expo-secure-store`, nunca em `AsyncStorage`.
+- **Testes não são opcionais** — toda lógica nova tem teste antes de merge.
+- **Performance mobile** — bundle Android/iOS ≤ 6 MB (hard limit no CI).
+
+---
 
 ## Convenções de código
 
-- Componentes em `components/` são genéricos e reutilizáveis.
-- Telas ficam em `app/` seguindo a convenção do Expo Router.
-- Hooks customizados em `hooks/`.
-- Constantes e temas em `constants/`.
-- Tipos e interfaces em `types/` (nunca inline em componentes).
-- Serviços HTTP em `services/` (um arquivo por domínio de API).
-- Dados sensíveis em `expo-secure-store` — nunca em `AsyncStorage` sem criptografia.
+| Diretório | O que vai aqui |
+|:----------|:---------------|
+| `app/` | Telas (Expo Router — file-based routing) |
+| `components/` | Componentes reutilizáveis |
+| `hooks/` | Hooks customizados (prefixo `use`) |
+| `store/` | Estado global |
+| `services/` | Chamadas HTTP (um arquivo por domínio de API) |
+| `utils/` | Funções puras sem side-effects |
+| `types/` | Interfaces e tipos TypeScript |
+| `types/api/` | Tipos do contrato com auraxis-api |
+| `constants/` | Constantes e temas de cor |
+| `__tests__/` | Testes unitários (alternativa a co-localização) |
+| `e2e/` | Testes Detox (scaffold — requer macOS runner) |
+| `__mocks__/` | Mocks globais (SVG, imagens) |
 
-## Quality Gates (obrigatórios antes de todo commit)
+**Variáveis de ambiente:**
+- Usar `expo-constants` para acessar variáveis do `app.json`/`app.config.js`
+- **Nunca** hardcodar URLs de API ou tokens no código
+- Segredos em `expo-secure-store`, nunca em `AsyncStorage`
+
+---
+
+## Quality Gates — obrigatórios antes de todo commit
+
+Execute na ordem:
 
 ```bash
 # 1. Lint
 npm run lint
-# ou equivalente:
-npx eslint . --ext .ts,.tsx
 
 # 2. Type-check
-npx tsc --noEmit
+npm run typecheck
 
-# 3. Testes unitários
-npx jest --passWithNoTests
+# 3. Testes unitários com coverage
+npm run test:coverage
 
-# Comando combinado (rodar sempre antes de commitar):
-npm run lint && npx tsc --noEmit && npx jest --passWithNoTests
+# Comando combinado (obrigatório antes de commitar):
+npm run quality-check
 ```
 
-> **Falha em qualquer gate = não commitar.** Registrar o bloqueio em `tasks.md` se for dependência de outro time.
+> **Falha em qualquer gate = não commitar.**
+> Se o bloqueio é dependência de outro time, registrar em `tasks.md` e abrir issue.
 
-### Thresholds
+### Thresholds locais (jest.config.js)
 
-| Gate | Threshold | Observação |
-|:-----|:----------|:-----------|
-| ESLint | 0 erros | Warnings são aceitos com consciência |
-| TypeScript | 0 erros | `strict: true` obrigatório |
-| Jest | 100% dos testes passando | `--passWithNoTests` aceito enquanto suite não está estabelecida |
+| Gate | Threshold | Falha quando |
+|:-----|:----------|:-------------|
+| ESLint | 0 erros | Qualquer violação de lint |
+| TypeScript strict | 0 erros | `any` implícito, tipos incompatíveis |
+| Jest — testes passando | 100% | Qualquer teste quebrando |
+| Jest — coverage lines | ≥ 80% | Cobertura abaixo do threshold |
+| Jest — coverage functions | ≥ 80% | Cobertura abaixo do threshold |
+| Jest — coverage statements | ≥ 80% | Cobertura abaixo do threshold |
+| Jest — coverage branches | ≥ 75% | Cobertura de branches abaixo |
 
-> **Nota sobre build:** Build nativo (EAS Build) não faz parte do gate de commit local — apenas do gate de CI. Não é necessário rodar `eas build` antes de commitar.
+### Thresholds de CI (automáticos — GitHub Actions)
 
-## Integrações externas
+| Gate CI | Threshold | Job |
+|:--------|:----------|:----|
+| Bundle Android | ≤ 6 MB hard limit | `bundle-analysis` |
+| Bundle iOS | ≤ 6 MB hard limit | `bundle-analysis` |
+| CVEs em novas deps | 0 high/critical | `dependency-review` |
+| Secrets detectados | 0 | `gitleaks` + `trufflehog` |
+| SonarCloud quality gate | Pass | `sonarcloud` |
+| JS bundle compila | sem erros | `expo-bundle` |
 
-- **auraxis-api**: única fonte de verdade para dados.
-- **Expo EAS Build**: pipeline de build mobile (a configurar — APP5).
-- **Expo EAS Update**: OTA updates (a configurar).
+---
+
+## Pipeline CI — 10 jobs
+
+```
+push / PR → master
+│
+├── lint              (ESLint — 0 erros)
+├── typecheck         (tsc --noEmit — 0 erros)
+├── test              (jest-expo + coverage ≥ 80%)
+│
+├── expo-bundle       (export android — valida que bundle JS compila)
+│   └── bundle-analysis   (comenta tamanho no PR; hard limit 6 MB)
+│
+├── secret-scan-gitleaks
+├── secret-scan-trufflehog
+├── audit             (npm audit --audit-level=high)
+├── sonarcloud        (análise estática + coverage)
+└── commitlint        (apenas em PR — Conventional Commits)
+
+└── ci-passed         (status gate — bloqueia merge se qualquer job falhar)
+```
+
+Workflows adicionais:
+- `dependency-review.yml` — bloqueia PRs com CVEs ≥ high em novas deps
+- `auto-merge.yml` — squash-merge automático de PRs Dependabot (patch; minor não-RN)
+
+> **Detox E2E:** job `detox-e2e` está no CI mas comentado.
+> Requer self-hosted runner com macOS + Xcode. Descomentar quando infra disponível.
+
+---
+
+## Escrevendo testes
+
+### Estrutura de arquivos
+
+```
+components/
+  Button/
+    Button.tsx
+    Button.test.tsx       ← co-localizado com o componente
+
+hooks/
+  useBalance.ts
+  useBalance.test.ts      ← co-localizado com o hook
+
+utils/
+  currency.ts
+  currency.test.ts
+
+__tests__/
+  integration/
+    auth.test.ts          ← testes de integração
+
+e2e/
+  app.e2e.ts             ← Detox (scaffold — requer macOS runner)
+```
+
+### Testes unitários (jest-expo + @testing-library/react-native)
+
+```typescript
+// Button.test.tsx
+import React from 'react'
+import { render, fireEvent } from '@testing-library/react-native'
+import Button from './Button'
+
+describe('Button', () => {
+  it('renders label correctly', () => {
+    const { getByText } = render(<Button label="Confirmar" onPress={() => {}} />)
+    expect(getByText('Confirmar')).toBeTruthy()
+  })
+
+  it('calls onPress when tapped', () => {
+    const onPress = jest.fn()
+    const { getByText } = render(<Button label="Enviar" onPress={onPress} />)
+    fireEvent.press(getByText('Enviar'))
+    expect(onPress).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not call onPress when disabled', () => {
+    const onPress = jest.fn()
+    const { getByText } = render(<Button label="Enviar" onPress={onPress} disabled />)
+    fireEvent.press(getByText('Enviar'))
+    expect(onPress).not.toHaveBeenCalled()
+  })
+})
+```
+
+### Testando hooks
+
+```typescript
+// useBalance.test.ts
+import { renderHook, act } from '@testing-library/react-native'
+import { useBalance } from './useBalance'
+
+describe('useBalance', () => {
+  it('returns initial balance as zero', () => {
+    const { result } = renderHook(() => useBalance())
+    expect(result.current.balance).toBe(0)
+  })
+
+  it('updates balance correctly', () => {
+    const { result } = renderHook(() => useBalance())
+    act(() => result.current.addTransaction(100))
+    expect(result.current.balance).toBe(100)
+  })
+})
+```
+
+### O que deve ter teste
+
+| O que | Obrigatório | Tipo |
+|:------|:-----------:|:-----|
+| Hooks customizados (`hooks/`) | ✅ | Unitário (Jest) |
+| Utilitários (`utils/`) | ✅ | Unitário (Jest) |
+| Serviços HTTP | ✅ | Unitário (mock de `fetch`) |
+| Componentes com lógica condicional | ✅ | Unitário (Jest + RNTL) |
+| Fluxos críticos (login, pagamento) | ✅ | Detox E2E (quando runner disponível) |
+| Componentes de apresentação pura | ⚠️ | Opcional |
+| Navegação (Expo Router) | ⚠️ | Mock no jest.setup.ts |
+
+---
 
 ## Segurança
 
-- Nunca armazenar tokens em `AsyncStorage` sem criptografia.
-- Usar `expo-secure-store` para dados sensíveis (tokens JWT, refresh tokens).
-- Nunca expor chaves de API ou tokens no código.
-- Nunca commitar `.env`, `.env.local`.
-- Não incluir logs de produção que exponham dados de usuário.
+- **Nunca** armazenar tokens JWT em `AsyncStorage` — usar `expo-secure-store`
+- **Nunca** expor chaves de API ou URLs de backend em código-fonte
+- **Nunca** commitar `.env`, `.env.local`
+- Verificar `app.json` antes de commitar — afeta stores e builds
+- Secret scan automático via Gitleaks + TruffleHog no CI (bloqueia PR)
+- CVEs em novas deps bloqueados pelo Dependency Review Action
+
+---
+
+## Definição de pronto — checklist por PR
+
+```
+[ ] npm run quality-check passou (lint + typecheck + test:coverage)
+[ ] Testes escritos para toda lógica nova (hooks, utils, componentes com lógica)
+[ ] Coverage não regrediu abaixo de 80% (lines/functions) / 75% (branches)
+[ ] Nenhum `any` implícito ou `@ts-ignore` sem comentário explicativo
+[ ] Tokens e segredos em expo-secure-store (nunca AsyncStorage)
+[ ] Nenhum secret hardcoded (Gitleaks + TruffleHog verificam automaticamente)
+[ ] Mensagem de commit em Conventional Commits (commitlint valida)
+[ ] PR com título claro e descrição do que muda e por quê
+[ ] CI verde (todos os 10 jobs passando)
+```
+
+---
 
 ## Referências
 
 - Governança global: `auraxis-platform/.context/07_steering_global.md`
 - Contrato de agente: `auraxis-platform/.context/08_agent_contract.md`
+- Playbook de qualidade: `auraxis-platform/.context/25_quality_security_playbook.md`
 - Definição de pronto: `auraxis-platform/.context/23_definition_of_done.md`
+- Quality gates detalhados: `.context/quality_gates.md`
 - Workflow de sessão: `auraxis-platform/workflows/agent-session.md`
