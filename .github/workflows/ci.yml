@@ -4,7 +4,7 @@
 #
 # Secrets necessários (Settings → Secrets and variables → Actions):
 #   EXPO_TOKEN    — Expo account token (expo.dev → Account Settings → Access Tokens)
-#   SONAR_TOKEN   — SonarCloud (sonarcloud.io → My Account → Security)
+#   SONAR_AURAXIS_APP_TOKEN — SonarCloud (sonarcloud.io → My Account → Security)
 #
 # Nota sobre Detox / EAS Build nativo:
 #   Builds iOS/Android nativos requerem macOS runner (custo) ou self-hosted.
@@ -226,7 +226,7 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_AURAXIS_APP_TOKEN }}
 
   # ── 10. Commit lint ────────────────────────────────────────────────────
   commitlint:

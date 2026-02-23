@@ -1,6 +1,6 @@
 # tasks.md — auraxis-app
 
-Última atualização: 2026-02-22
+Última atualização: 2026-02-23
 
 ## Legenda
 
@@ -19,10 +19,10 @@
 
 ### P0 — Pré-requisito para qualquer desenvolvimento
 
-- [ ] **APP1** `chore` — Configurar lint e type-check (ESLint + TypeScript strict)
+- [x] **APP1** `chore` — Configurar lint e type-check (ESLint + TypeScript strict)
   - Critério: `npm run lint` e `tsc --noEmit` passam sem erros no scaffold atual.
   - Dependência: nenhuma
-  - Commit: —
+  - Commit: `3eaa519`, `33ffc22`
   - Risco residual: regras de ESLint podem conflitar com código gerado pelo Expo.
 
 - [ ] **APP2** `chore` — Configurar cliente HTTP para auraxis-api
@@ -47,10 +47,10 @@
 
 ### P2 — Normal
 
-- [ ] **APP5** `chore` — Configurar CI (GitHub Actions)
+- [x] **APP5** `chore` — Configurar CI (GitHub Actions)
   - Critério: workflow roda `lint` + `tsc` + `jest` (quando houver testes) a cada PR contra `main`. Build Expo não está no CI nesta fase (requer EAS).
   - Dependência: APP1
-  - Commit: —
+  - Commit: `3eaa519`, `884122c`
 
 - [ ] **APP6** `chore` — Configurar EAS Build (Expo Application Services)
   - Critério: `eas build --platform android --profile preview` gera APK instalável. Perfis `development`, `preview` e `production` configurados em `eas.json`.
@@ -79,3 +79,5 @@
 - [x] Scaffold inicial Expo SDK 54 + React Native 0.81 | Data: 2026-02-22
 - [x] Governance baseline: CLAUDE.md, .gitignore, tasks.md, steering.md | Data: 2026-02-22
 - [x] Registrado como submodule em auraxis-platform | Commit: `05ca2ff` | Data: 2026-02-22
+- [x] APP1 concluído: lint + typecheck + strict mode estabilizados | Commits: `3eaa519`, `33ffc22` | Data: 2026-02-23
+- [x] APP5 concluído: pipeline CI com gates de qualidade e segurança | Commits: `3eaa519`, `884122c` | Data: 2026-02-23
