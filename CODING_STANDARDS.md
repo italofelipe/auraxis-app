@@ -1,0 +1,1177 @@
+# CODING_STANDARDS.md — auraxis-app
+
+> Manual canônico de padrões de código para o aplicativo mobile do Auraxis.
+> Stack: React Native 0.81.5 · Expo SDK 54 · TypeScript strict · Expo Router v6
+>
+> Este documento define **como escrever código** neste repo. Não é opcional.
+> Cada seção tem regras (**deve/nunca**) e exemplos práticos.
+
+---
+
+## Índice
+
+1. [Princípios fundamentais](#1-princípios-fundamentais)
+2. [TypeScript](#2-typescript)
+3. [Componentes React Native](#3-componentes-react-native)
+4. [Hooks customizados](#4-hooks-customizados)
+5. [Navegação (Expo Router)](#5-navegação-expo-router)
+6. [Serviços HTTP](#6-serviços-http)
+7. [Estado e contexto](#7-estado-e-contexto)
+8. [Estilização](#8-estilização)
+9. [Testes](#9-testes)
+10. [Performance](#10-performance)
+11. [Segurança](#11-segurança)
+12. [Quality Gates](#12-quality-gates)
+13. [Referência de nomenclatura](#13-referência-de-nomenclatura)
+
+---
+
+## 1. Princípios fundamentais
+
+| Princípio | Significado prático |
+|:----------|:--------------------|
+| **Explícito > Implícito** | Prefira verbosidade legível a magic strings ou inferências silenciosas |
+| **Responsabilidade única** | Um arquivo = um propósito. Componente renderiza. Hook isola lógica. Serviço faz HTTP. |
+| **Falha rápida** | Validação no limite do sistema (serviços), não espalhada nos componentes |
+| **Sem lógica de negócio no front** | Toda regra de negócio fica em auraxis-api. Front exibe e navega. |
+| **Plataforma primeiro** | Use APIs nativas do RN (`FlatList`, `Pressable`, `ActivityIndicator`) antes de libs externas |
+| **Segurança por padrão** | Token em `expo-secure-store`, nunca em `AsyncStorage` |
+
+---
+
+## 2. TypeScript
+
+### 2.1 Configuração obrigatória
+
+```json
+// tsconfig.json — não modificar sem aprovação
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": true,
+    "paths": {
+      "@/*": ["./*"]
+    }
+  }
+}
+```
+
+### 2.2 Regras gerais
+
+**DEVE:**
+
+```typescript
+// ✅ Tipos explícitos em interfaces
+interface InvestorProfile {
+  id: string
+  name: string
+  riskScore: number
+  profileType: 'conservative' | 'moderate' | 'aggressive'
+}
+
+// ✅ Retorno explícito em funções utilitárias e hooks
+function formatCurrency(value: number, currency: string): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency,
+  }).format(value)
+}
+
+// ✅ Props com interface nomeada
+interface PortfolioCardProps {
+  portfolio: Portfolio
+  onPress: (id: string) => void
+  isLoading?: boolean
+}
+
+// ✅ Union types para estados finitos
+type LoadingState = 'idle' | 'loading' | 'success' | 'error'
+
+// ✅ Genéricos com restrição
+function getById<T extends { id: string }>(items: T[], id: string): T | undefined {
+  return items.find((item) => item.id === id)
+}
+```
+
+**NUNCA:**
+
+```typescript
+// ❌ any
+const data: any = response.data
+
+// ❌ type assertion sem validação
+const user = response as User
+
+// ❌ Non-null assertion sem garantia
+const name = user!.name
+
+// ❌ Enum (use union type)
+enum Status { Active, Inactive }  // ❌
+type Status = 'active' | 'inactive'  // ✅
+
+// ❌ Props inline
+const Card = ({ title, value }: { title: string; value: number }) => {}  // ❌ para componentes públicos
+
+// ❌ Ignorar erros TypeScript
+// @ts-ignore
+// @ts-expect-error (só permitido em testes, com comentário explicativo)
+```
+
+### 2.3 Separação de tipos
+
+```
+types/
+  api/        # Resposta crua da API (sufixo Response)
+    portfolio.response.ts
+  domain/     # Entidades de domínio limpas (sem sufixo)
+    portfolio.ts
+  ui/         # Props e estado local (sufixo Props, State)
+    portfolio-card.props.ts
+```
+
+```typescript
+// types/api/portfolio.response.ts
+export interface PortfolioResponse {
+  id: string
+  name: string
+  total_value: number       // snake_case da API
+  created_at: string        // ISO string da API
+}
+
+// types/domain/portfolio.ts
+export interface Portfolio {
+  id: string
+  name: string
+  totalValue: number        // camelCase no domínio
+  createdAt: Date           // Date no domínio
+}
+```
+
+---
+
+## 3. Componentes React Native
+
+### 3.1 Estrutura canônica
+
+Todo componente segue esta ordem:
+
+```typescript
+// components/portfolio/PortfolioCard.tsx
+import React, { useCallback } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+
+// ---- 1. Imports --------------------------------------------------------
+
+import { usePortfolioCard } from '@/hooks/usePortfolioCard'
+import { formatCurrency } from '@/utils/format'
+import type { Portfolio } from '@/types/domain/portfolio'
+import { colors, spacing, typography } from '@/constants/theme'
+
+// ---- 2. Interface de props ---------------------------------------------
+
+interface PortfolioCardProps {
+  portfolio: Portfolio
+  onPress: (id: string) => void
+  testID?: string
+}
+
+// ---- 3. Componente -----------------------------------------------------
+
+export function PortfolioCard({ portfolio, onPress, testID }: PortfolioCardProps) {
+  // 3a. Hooks
+  const { isExpanded, toggleExpand } = usePortfolioCard(portfolio.id)
+
+  // 3b. Handlers
+  const handlePress = useCallback(() => {
+    onPress(portfolio.id)
+  }, [onPress, portfolio.id])
+
+  // 3c. Derivações simples
+  const formattedValue = formatCurrency(portfolio.totalValue, 'BRL')
+
+  // 3d. Render
+  return (
+    <Pressable
+      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+      onPress={handlePress}
+      testID={testID ?? `portfolio-card-${portfolio.id}`}
+      accessibilityRole="button"
+      accessibilityLabel={`Portfólio ${portfolio.name}`}
+    >
+      <View style={styles.header}>
+        <Text style={styles.name}>{portfolio.name}</Text>
+        <Text style={styles.value}>{formattedValue}</Text>
+      </View>
+    </Pressable>
+  )
+}
+
+// ---- 4. Estilos --------------------------------------------------------
+
+const styles = StyleSheet.create({
+  container: {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: spacing.md,
+  },
+  pressed: {
+    opacity: 0.8,
+  },
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  name: {
+    ...typography.body1,
+    color: colors.textPrimary,
+  },
+  value: {
+    ...typography.body1Bold,
+    color: colors.textPrimary,
+  },
+})
+```
+
+### 3.2 Regras de componentes
+
+**DEVE:**
+
+- Componentes são **funções nomeadas** (`export function X`, não `export default`)
+- Props tipadas com `interface`, nunca inline
+- Usar `Pressable` em vez de `TouchableOpacity` (React Native moderno)
+- Atributos de acessibilidade em elementos interativos (`accessibilityRole`, `accessibilityLabel`)
+- `testID` em elementos interativos para testes
+- Usar `useCallback` em handlers passados como prop para evitar re-renders
+- `StyleSheet.create({})` — sempre, mesmo para um estilo único
+- Exportação nomeada, nunca default (facilita refactoring e tree-shaking)
+
+**NUNCA:**
+
+```typescript
+// ❌ default export
+export default function Card() {}
+
+// ❌ Estilos inline (salvo valores dinâmicos que PRECISAM ser inline)
+<View style={{ padding: 16, backgroundColor: '#fff' }}>
+
+// ❌ Lógica de negócio no componente
+function PortfolioCard({ portfolioId }: Props) {
+  const [portfolio, setPortfolio] = useState(null)
+  useEffect(() => {
+    fetch(`/api/portfolios/${portfolioId}`)  // ❌ HTTP no componente
+      .then(r => r.json())
+      .then(setPortfolio)
+  }, [portfolioId])
+}
+
+// ❌ Mutação de estado direta
+state.portfolios.push(newPortfolio)  // ❌
+
+// ❌ console.log em produção
+console.log('debug:', data)  // ❌ usar __DEV__ se necessário
+
+// ❌ Ignorar dependências do useEffect
+useEffect(() => {
+  fetchData(id)
+}, [])  // ❌ id faltando nas deps
+```
+
+### 3.3 Componentes com dados assíncronos
+
+```typescript
+// ✅ Padrão correto: hook isola o fetch, componente renderiza
+function PortfolioScreen() {
+  const { portfolios, isLoading, error, refetch } = usePortfolios()
+
+  if (isLoading) return <LoadingScreen />
+  if (error) return <ErrorScreen message={error.message} onRetry={refetch} />
+
+  return (
+    <FlatList
+      data={portfolios}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <PortfolioCard portfolio={item} onPress={navigateToDetail} />
+      )}
+      ListEmptyComponent={<EmptyState message="Nenhum portfólio encontrado" />}
+    />
+  )
+}
+```
+
+### 3.4 Memoização
+
+```typescript
+// ✅ Memoizar componentes que recebem props estáveis e re-renderizam com frequência
+export const PortfolioCard = React.memo(function PortfolioCard({ portfolio, onPress }: Props) {
+  // ...
+})
+
+// ✅ useMemo para computações custosas
+const sortedPortfolios = useMemo(
+  () => [...portfolios].sort((a, b) => b.totalValue - a.totalValue),
+  [portfolios]
+)
+
+// ✅ useCallback para handlers passados como prop
+const handlePress = useCallback((id: string) => {
+  router.push(`/portfolios/${id}`)
+}, [router])
+```
+
+---
+
+## 4. Hooks customizados
+
+### 4.1 Estrutura canônica
+
+```typescript
+// hooks/usePortfolios.ts
+import { useCallback, useEffect, useState } from 'react'
+import { portfolioService } from '@/services/portfolioService'
+import type { Portfolio } from '@/types/domain/portfolio'
+
+// ---- Interface de retorno explícita ------------------------------------
+
+interface UsePortfoliosReturn {
+  portfolios: Portfolio[]
+  isLoading: boolean
+  error: Error | null
+  refetch: () => Promise<void>
+}
+
+// ---- Hook --------------------------------------------------------------
+
+export function usePortfolios(): UsePortfoliosReturn {
+  const [portfolios, setPortfolios] = useState<Portfolio[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<Error | null>(null)
+
+  const fetchPortfolios = useCallback(async () => {
+    setIsLoading(true)
+    setError(null)
+    try {
+      const data = await portfolioService.list()
+      setPortfolios(data)
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Erro ao carregar portfólios'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    fetchPortfolios()
+  }, [fetchPortfolios])
+
+  return {
+    portfolios,
+    isLoading,
+    error,
+    refetch: fetchPortfolios,
+  }
+}
+```
+
+### 4.2 Regras de hooks
+
+**DEVE:**
+- Nome sempre começa com `use`
+- Retorno tipado com interface explícita
+- Erros capturados internamente — componente recebe `error: Error | null`
+- `useCallback` em funções retornadas pelo hook
+- Um arquivo por hook
+
+**NUNCA:**
+- Retornar valores mutáveis sem wrapper (`Dispatch` setState pode ser exposto, mas documente)
+- Hooks com efeitos colaterais fora de `useEffect`
+- Chamar hooks condicionalmente
+
+---
+
+## 5. Navegação (Expo Router)
+
+### 5.1 Estrutura de rotas
+
+```
+app/
+  _layout.tsx           # Root layout (providers globais, fonte)
+  (auth)/               # Grupo de autenticação (não aparece na URL)
+    _layout.tsx         # AuthLayout — redireciona autenticados para (tabs)
+    login.tsx
+    register.tsx
+  (tabs)/               # Grupo principal (bottom tabs)
+    _layout.tsx         # TabsLayout — configuração das tabs
+    index.tsx           # /  (dashboard)
+    portfolios/
+      _layout.tsx
+      index.tsx         # /portfolios
+      [id].tsx          # /portfolios/:id
+    profile.tsx         # /profile
+  +not-found.tsx        # 404
+```
+
+### 5.2 Auth guard
+
+```typescript
+// app/(auth)/_layout.tsx
+import { Redirect, Stack } from 'expo-router'
+import { useAuth } from '@/hooks/useAuth'
+
+export default function AuthLayout() {
+  const { isAuthenticated, isLoading } = useAuth()
+
+  if (isLoading) return <SplashScreen />
+  if (isAuthenticated) return <Redirect href="/(tabs)/" />
+
+  return <Stack screenOptions={{ headerShown: false }} />
+}
+```
+
+### 5.3 Navegação tipada
+
+```typescript
+// ✅ Usar tipagem de rotas do Expo Router
+import { router } from 'expo-router'
+import type { Href } from 'expo-router'
+
+// Navegação programática
+router.push('/portfolios/abc123')
+router.replace('/(auth)/login')
+
+// ✅ Params tipados em telas dinâmicas
+import { useLocalSearchParams } from 'expo-router'
+
+interface PortfolioDetailParams {
+  id: string
+}
+
+export default function PortfolioDetailScreen() {
+  const { id } = useLocalSearchParams<PortfolioDetailParams>()
+  // id é string garantido pelo tipo
+}
+```
+
+### 5.4 Screen options
+
+```typescript
+// ✅ Metadata de tela na própria tela (não no layout)
+import { Stack } from 'expo-router'
+
+export default function PortfolioDetailScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>()
+
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          title: 'Detalhes do Portfólio',
+          headerBackTitle: 'Portfólios',
+        }}
+      />
+      {/* conteúdo */}
+    </>
+  )
+}
+```
+
+---
+
+## 6. Serviços HTTP
+
+### 6.1 Client base
+
+```typescript
+// services/api-client.ts
+import * as SecureStore from 'expo-secure-store'
+
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:5000'
+
+async function getAuthHeader(): Promise<Record<string, string>> {
+  const token = await SecureStore.getItemAsync('auth_token')
+  return token ? { Authorization: `Bearer ${token}` } : {}
+}
+
+export async function apiRequest<T>(
+  path: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const authHeader = await getAuthHeader()
+
+  const response = await fetch(`${BASE_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...authHeader,
+      ...options.headers,
+    },
+  })
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Erro desconhecido' }))
+    throw new ApiError(error.message ?? 'Erro na requisição', response.status)
+  }
+
+  return response.json() as Promise<T>
+}
+
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    public readonly statusCode: number
+  ) {
+    super(message)
+    this.name = 'ApiError'
+  }
+}
+```
+
+### 6.2 Serviço de domínio
+
+```typescript
+// services/portfolioService.ts
+import { apiRequest } from './api-client'
+import type { PortfolioResponse } from '@/types/api/portfolio.response'
+import type { Portfolio } from '@/types/domain/portfolio'
+
+// ---- Mapper: API → Domínio ---------------------------------------------
+
+function toPortfolio(raw: PortfolioResponse): Portfolio {
+  return {
+    id: raw.id,
+    name: raw.name,
+    totalValue: raw.total_value,
+    createdAt: new Date(raw.created_at),
+  }
+}
+
+// ---- Serviço -----------------------------------------------------------
+
+export const portfolioService = {
+  async list(): Promise<Portfolio[]> {
+    const raw = await apiRequest<PortfolioResponse[]>('/v1/portfolios')
+    return raw.map(toPortfolio)
+  },
+
+  async getById(id: string): Promise<Portfolio> {
+    const raw = await apiRequest<PortfolioResponse>(`/v1/portfolios/${id}`)
+    return toPortfolio(raw)
+  },
+
+  async create(payload: CreatePortfolioPayload): Promise<Portfolio> {
+    const raw = await apiRequest<PortfolioResponse>('/v1/portfolios', {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    })
+    return toPortfolio(raw)
+  },
+}
+```
+
+### 6.3 Regras de serviços
+
+**DEVE:**
+- Um arquivo por domínio: `portfolioService.ts`, `authService.ts`, `userService.ts`
+- Mapper `toX(raw: XResponse): X` para cada entidade — isola a API do domínio
+- Erros propagados como `ApiError` (não silenciados)
+- Token sempre via `expo-secure-store`, nunca hardcoded
+- Tipos de resposta em `types/api/`, tipos de domínio em `types/domain/`
+
+**NUNCA:**
+- Lógica de apresentação em serviços (sem `formatCurrency`, `toDateString`)
+- Estado local em serviços (sem `useState`, sem variáveis de módulo que acumulam dados)
+- `console.log` em produção (use `__DEV__ && console.log(...)` se necessário)
+
+---
+
+## 7. Estado e contexto
+
+### 7.1 Hierarquia de estado
+
+```
+Nível           Onde fica           Exemplo
+──────────────────────────────────────────────────────────────
+Local UI        useState no comp.   modal aberto, item selecionado
+Tela/Feature    hook customizado    dados do portfólio + loading
+Global authn    AuthContext         usuário autenticado, token
+Global app      AppContext          tema, locale, preferências
+```
+
+### 7.2 AuthContext canônico
+
+```typescript
+// contexts/AuthContext.tsx
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react'
+import * as SecureStore from 'expo-secure-store'
+import { authService } from '@/services/authService'
+import type { User } from '@/types/domain/user'
+
+interface AuthContextValue {
+  user: User | null
+  isAuthenticated: boolean
+  isLoading: boolean
+  login: (email: string, password: string) => Promise<void>
+  logout: () => Promise<void>
+}
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined)
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // Restaurar sessão ao abrir o app
+    async function restoreSession() {
+      try {
+        const token = await SecureStore.getItemAsync('auth_token')
+        if (token) {
+          const me = await authService.getMe()
+          setUser(me)
+        }
+      } catch {
+        await SecureStore.deleteItemAsync('auth_token')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+    restoreSession()
+  }, [])
+
+  const login = useCallback(async (email: string, password: string) => {
+    const { token, user: loggedUser } = await authService.login({ email, password })
+    await SecureStore.setItemAsync('auth_token', token)
+    setUser(loggedUser)
+  }, [])
+
+  const logout = useCallback(async () => {
+    await SecureStore.deleteItemAsync('auth_token')
+    setUser(null)
+  }, [])
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        isAuthenticated: user !== null,
+        isLoading,
+        login,
+        logout,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  )
+}
+
+export function useAuth(): AuthContextValue {
+  const ctx = useContext(AuthContext)
+  if (!ctx) throw new Error('useAuth deve ser usado dentro de AuthProvider')
+  return ctx
+}
+```
+
+### 7.3 Regras de estado
+
+**DEVE:**
+- `AuthContext` é o único estado global de autenticação
+- Preferir hooks por feature a Context para estado local de tela
+- Persistência segura sempre via `expo-secure-store`
+- Context separado por domínio (não um "God Context" global)
+
+**NUNCA:**
+- `AsyncStorage` para tokens JWT ou dados sensíveis
+- Estado derivável como estado (`const doubled = count * 2` — computed, não state)
+- Prop drilling além de 2 níveis (criar Context ou hook compartilhado)
+
+---
+
+## 8. Estilização
+
+### 8.1 Design system
+
+```typescript
+// constants/theme.ts
+export const colors = {
+  // Brand
+  primary: '#1A56DB',
+  primaryDark: '#1044BF',
+  secondary: '#10B981',
+
+  // Semantic
+  success: '#10B981',
+  error: '#EF4444',
+  warning: '#F59E0B',
+  info: '#3B82F6',
+
+  // Neutros
+  background: '#F9FAFB',
+  surface: '#FFFFFF',
+  border: '#E5E7EB',
+  textPrimary: '#111827',
+  textSecondary: '#6B7280',
+  textDisabled: '#D1D5DB',
+} as const
+
+export const spacing = {
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
+  xxl: 48,
+} as const
+
+export const typography = {
+  h1: { fontSize: 32, fontWeight: '700' as const, lineHeight: 40 },
+  h2: { fontSize: 24, fontWeight: '700' as const, lineHeight: 32 },
+  h3: { fontSize: 20, fontWeight: '600' as const, lineHeight: 28 },
+  body1: { fontSize: 16, fontWeight: '400' as const, lineHeight: 24 },
+  body1Bold: { fontSize: 16, fontWeight: '600' as const, lineHeight: 24 },
+  body2: { fontSize: 14, fontWeight: '400' as const, lineHeight: 20 },
+  caption: { fontSize: 12, fontWeight: '400' as const, lineHeight: 16 },
+} as const
+
+export const borderRadius = {
+  sm: 4,
+  md: 8,
+  lg: 12,
+  xl: 16,
+  full: 9999,
+} as const
+```
+
+### 8.2 StyleSheet.create
+
+```typescript
+// ✅ Correto — sempre StyleSheet.create
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.background,
+    padding: spacing.md,
+  },
+  title: {
+    ...typography.h2,
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  },
+})
+
+// ❌ Nunca estilos inline sem necessidade
+<View style={{ flex: 1, padding: 16 }}>
+
+// ✅ Estilos dinâmicos — inline somente quando o valor muda em runtime
+<View style={[styles.container, { opacity: isVisible ? 1 : 0 }]}>
+```
+
+### 8.3 Regras de estilização
+
+**DEVE:**
+- Toda cor, espaçamento e tipografia via `constants/theme.ts`
+- `StyleSheet.create({})` para todos os estilos estáticos
+- Respeitar `SafeAreaView` / `useSafeAreaInsets` em todas as telas
+- Usar `Platform.select` para diferenças iOS/Android quando necessário
+- Testar em ambas as plataformas antes de commitar
+
+**NUNCA:**
+- Valores mágicos: `padding: 16` (use `spacing.md`)
+- Cores hardcoded: `color: '#1A56DB'` (use `colors.primary`)
+- `position: 'absolute'` sem comentário explicando por quê
+- Ignorar suporte a dark mode se o design system suportar
+
+---
+
+## 9. Testes
+
+### 9.1 Configuração
+
+```typescript
+// jest.config.js
+module.exports = {
+  preset: 'jest-expo',
+  setupFilesAfterFramework: ['@testing-library/react-native/extend-expect'],
+  collectCoverageFrom: [
+    'components/**/*.{ts,tsx}',
+    'hooks/**/*.{ts,tsx}',
+    'services/**/*.{ts,tsx}',
+    'utils/**/*.{ts,tsx}',
+    '!**/*.d.ts',
+    '!**/index.ts',
+  ],
+  coverageThresholds: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+}
+```
+
+### 9.2 Estrutura de teste
+
+```typescript
+// components/portfolio/__tests__/PortfolioCard.test.tsx
+import React from 'react'
+import { render, fireEvent, screen } from '@testing-library/react-native'
+import { PortfolioCard } from '../PortfolioCard'
+import type { Portfolio } from '@/types/domain/portfolio'
+
+// ---- Factory -----------------------------------------------------------
+
+function makePortfolio(overrides: Partial<Portfolio> = {}): Portfolio {
+  return {
+    id: 'portfolio-1',
+    name: 'Renda Fixa',
+    totalValue: 10000,
+    createdAt: new Date('2024-01-01'),
+    ...overrides,
+  }
+}
+
+// ---- Testes ------------------------------------------------------------
+
+describe('PortfolioCard', () => {
+  it('renderiza nome e valor do portfólio', () => {
+    const portfolio = makePortfolio({ name: 'Renda Variável', totalValue: 25000 })
+
+    render(<PortfolioCard portfolio={portfolio} onPress={jest.fn()} />)
+
+    expect(screen.getByText('Renda Variável')).toBeOnTheScreen()
+    expect(screen.getByText(/R\$ 25\.000/)).toBeOnTheScreen()
+  })
+
+  it('chama onPress com o id ao pressionar', () => {
+    const onPress = jest.fn()
+    const portfolio = makePortfolio({ id: 'port-abc' })
+
+    render(<PortfolioCard portfolio={portfolio} onPress={onPress} />)
+    fireEvent.press(screen.getByTestId('portfolio-card-port-abc'))
+
+    expect(onPress).toHaveBeenCalledTimes(1)
+    expect(onPress).toHaveBeenCalledWith('port-abc')
+  })
+})
+```
+
+### 9.3 Teste de hooks
+
+```typescript
+// hooks/__tests__/usePortfolios.test.ts
+import { renderHook, act, waitFor } from '@testing-library/react-native'
+import { usePortfolios } from '../usePortfolios'
+import { portfolioService } from '@/services/portfolioService'
+
+jest.mock('@/services/portfolioService')
+const mockPortfolioService = portfolioService as jest.Mocked<typeof portfolioService>
+
+describe('usePortfolios', () => {
+  it('carrega portfólios com sucesso', async () => {
+    const portfolios = [makePortfolio(), makePortfolio({ id: 'port-2' })]
+    mockPortfolioService.list.mockResolvedValue(portfolios)
+
+    const { result } = renderHook(() => usePortfolios())
+
+    expect(result.current.isLoading).toBe(true)
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.portfolios).toEqual(portfolios)
+    expect(result.current.error).toBeNull()
+  })
+
+  it('expõe erro quando o serviço falha', async () => {
+    mockPortfolioService.list.mockRejectedValue(new Error('Servidor indisponível'))
+
+    const { result } = renderHook(() => usePortfolios())
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false)
+    })
+
+    expect(result.current.error?.message).toBe('Servidor indisponível')
+  })
+})
+```
+
+### 9.4 Regras de testes
+
+**DEVE:**
+- Testar **comportamento**, não implementação (`fireEvent.press`, não `instance.handlePress()`)
+- `testID` em todo elemento interativo do componente
+- Factories para criar dados de teste (`makePortfolio`, `makeUser`)
+- Mock de serviços nos testes de hooks e telas
+- Todos os mocks em `__mocks__/` ou dentro do arquivo de teste (`jest.mock`)
+- Cobrir: happy path, erro de rede, estado vazio, estado de loading
+
+**NUNCA:**
+- `act()` manual desnecessário (RNTL faz automaticamente)
+- Snapshots como teste principal (use assertions explícitas)
+- Testar detalhes internos de hooks (`result.current._internalState`)
+- `waitFor` com sleep manual (`await new Promise(resolve => setTimeout(resolve, 1000))`)
+
+---
+
+## 10. Performance
+
+### 10.1 Listas
+
+```typescript
+// ✅ FlatList para listas longas — NUNCA ScrollView + map
+<FlatList
+  data={portfolios}
+  keyExtractor={(item) => item.id}
+  renderItem={({ item }) => <PortfolioCard portfolio={item} onPress={handlePress} />}
+  initialNumToRender={10}
+  maxToRenderPerBatch={10}
+  windowSize={5}
+  removeClippedSubviews
+  ListEmptyComponent={<EmptyState />}
+  ListFooterComponent={isLoading ? <ActivityIndicator /> : null}
+/>
+
+// ❌ Nunca para listas com dados dinâmicos
+<ScrollView>
+  {portfolios.map(p => <PortfolioCard key={p.id} portfolio={p} />)}
+</ScrollView>
+```
+
+### 10.2 Imagens
+
+```typescript
+// ✅ Usar expo-image (lazy load, cache automático)
+import { Image } from 'expo-image'
+
+<Image
+  source={{ uri: user.avatarUrl }}
+  style={styles.avatar}
+  placeholder={blurhash}
+  contentFit="cover"
+  transition={200}
+/>
+
+// ❌ Evitar Image do React Native para conteúdo remoto
+import { Image } from 'react-native'  // ❌ sem lazy load nativo
+```
+
+### 10.3 Interações
+
+```typescript
+// ✅ useCallback em handlers passados para componentes filhos
+const handlePortfolioPress = useCallback((id: string) => {
+  router.push(`/portfolios/${id}`)
+}, [router])
+
+// ✅ useMemo para listas derivadas custosas
+const sortedAndFilteredPortfolios = useMemo(
+  () =>
+    portfolios
+      .filter((p) => p.totalValue > 0)
+      .sort((a, b) => b.totalValue - a.totalValue),
+  [portfolios]
+)
+
+// ✅ React.memo em componentes de lista
+export const PortfolioCard = React.memo(PortfolioCardComponent)
+```
+
+### 10.4 Métricas obrigatórias
+
+| Métrica | Target |
+|:--------|:-------|
+| Cold start (app launch → interativo) | < 2s |
+| Transição de tela | < 300ms |
+| FPS em scroll de lista | ≥ 60fps |
+| JS bundle size | < 500KB gzip |
+| Re-renders desnecessários | 0 (verificar com React DevTools Profiler) |
+
+---
+
+## 11. Segurança
+
+### 11.1 Armazenamento seguro
+
+```typescript
+// ✅ SEMPRE expo-secure-store para dados sensíveis
+import * as SecureStore from 'expo-secure-store'
+
+// Salvar token
+await SecureStore.setItemAsync('auth_token', token)
+
+// Ler token
+const token = await SecureStore.getItemAsync('auth_token')
+
+// Remover token (logout)
+await SecureStore.deleteItemAsync('auth_token')
+
+// ❌ NUNCA AsyncStorage para tokens
+import AsyncStorage from '@react-native-async-storage/async-storage'
+await AsyncStorage.setItem('auth_token', token)  // ❌ não criptografado
+```
+
+### 11.2 Comunicação segura
+
+```typescript
+// ✅ HTTPS sempre em produção (garantido via EXPO_PUBLIC_API_URL)
+// ✅ Certificate Pinning (para apps com alta sensibilidade financeira)
+// A configurar via expo-build-properties + React Native native modules
+
+// ✅ Validar que URL da API vem de variável de ambiente
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL
+if (!BASE_URL) throw new Error('EXPO_PUBLIC_API_URL não configurado')
+```
+
+### 11.3 Dados sensíveis no código
+
+**NUNCA:**
+```typescript
+// ❌ Hardcoded secrets
+const API_KEY = 'abc123secret'
+
+// ❌ Token em variável sem criptografia
+const token = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
+
+// ❌ Logs que expõem dados de usuário
+console.log('User data:', user)
+console.log('Token:', token)
+```
+
+**DEVE:**
+```typescript
+// ✅ Variáveis de ambiente para configuração
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL
+
+// ✅ __DEV__ guard em qualquer log de debug
+if (__DEV__) {
+  console.log('Debug info:', sanitizedInfo)
+}
+
+// ✅ Sanitizar antes de qualquer log
+const sanitizedUser = { id: user.id, email: '[REDACTED]' }
+```
+
+### 11.4 Deep links e inputs externos
+
+```typescript
+// ✅ Validar params de rotas antes de usar
+const { id } = useLocalSearchParams<{ id: string }>()
+if (!id || typeof id !== 'string') {
+  router.replace('/not-found')
+  return null
+}
+
+// ✅ Validar URLs externas antes de abrir
+import { Linking } from 'react-native'
+const ALLOWED_DOMAINS = ['auraxis.com.br', 'api.auraxis.com.br']
+
+async function openExternalUrl(url: string) {
+  const parsed = new URL(url)
+  if (!ALLOWED_DOMAINS.includes(parsed.hostname)) return
+  await Linking.openURL(url)
+}
+```
+
+---
+
+## 12. Quality Gates
+
+### 12.1 Gates locais (antes de todo commit)
+
+```bash
+# 1. Lint (ESLint)
+npm run lint
+# ou: npx eslint . --ext .ts,.tsx
+
+# 2. Type-check
+npx tsc --noEmit
+
+# 3. Testes
+npx jest --passWithNoTests
+
+# Comando combinado:
+npm run lint && npx tsc --noEmit && npx jest --passWithNoTests
+```
+
+| Gate | Threshold | Notas |
+|:-----|:----------|:------|
+| ESLint | 0 erros | Warnings aceitos com consciência |
+| TypeScript | 0 erros | `strict: true` obrigatório |
+| Jest (quando existe suite) | 80% coverage, 100% pass | `--passWithNoTests` durante bootstrap |
+
+### 12.2 Pre-commit hooks (husky + lint-staged)
+
+```bash
+# .husky/pre-commit
+npx lint-staged
+
+# lint-staged.config.js
+module.exports = {
+  '**/*.{ts,tsx}': [
+    'eslint --fix',
+    'bash -c "tsc --noEmit"',
+  ],
+}
+```
+
+### 12.3 Gates de CI (GitHub Actions)
+
+Os seguintes gates rodam em CI a cada push/PR:
+
+| Job | Comando | Threshold |
+|:----|:--------|:----------|
+| lint | `npm run lint` | 0 erros |
+| typecheck | `npx tsc --noEmit` | 0 erros |
+| test | `npx jest --coverage` | 80% coverage |
+| secret-scan | `gitleaks detect` | 0 secrets |
+
+> **Build nativo (EAS Build) não faz parte do gate de commit local** — apenas CI.
+
+### 12.4 Gaps documentados (roadmap)
+
+| Item | Situação | Quando implementar |
+|:-----|:---------|:-------------------|
+| Stryker (mutation testing) | A implementar | APP5+ |
+| EAS Build gate em CI | A configurar | APP5 |
+| EAS Update (OTA) | A configurar | APP5 |
+| Detox (E2E) | A implementar | Fase Beta |
+| Sentry (error tracking) | A integrar | APP3+ |
+| Bundle size budget | A definir | APP3+ |
+
+---
+
+## 13. Referência de nomenclatura
+
+| Elemento | Convenção | Exemplo |
+|:---------|:----------|:--------|
+| Componente | PascalCase | `PortfolioCard`, `LoadingSpinner` |
+| Hook | camelCase com `use` | `usePortfolios`, `useAuth` |
+| Serviço | camelCase + `Service` | `portfolioService`, `authService` |
+| Context | PascalCase + `Context` | `AuthContext`, `ThemeContext` |
+| Provider | PascalCase + `Provider` | `AuthProvider` |
+| Interface de props | PascalCase + `Props` | `PortfolioCardProps` |
+| Interface de retorno de hook | PascalCase + `Return` | `UsePortfoliosReturn` |
+| Tipo de API | PascalCase + `Response` | `PortfolioResponse` |
+| Arquivo de componente | PascalCase | `PortfolioCard.tsx` |
+| Arquivo de hook | camelCase | `usePortfolios.ts` |
+| Arquivo de serviço | camelCase | `portfolioService.ts` |
+| Arquivo de tipo | kebab-case | `portfolio.response.ts`, `portfolio.ts` |
+| Arquivo de teste | `*.test.tsx` | `PortfolioCard.test.tsx` |
+| Diretório de testes | `__tests__/` | `components/portfolio/__tests__/` |
+| Constante global | camelCase | `colors.primary`, `spacing.md` |
+| Variável de ambiente | `EXPO_PUBLIC_*` | `EXPO_PUBLIC_API_URL` |
+| Branch git | `tipo/escopo` | `feat/portfolio-detail-screen` |
+| testID | kebab-case descritivo | `portfolio-card-abc123`, `login-button` |
+
+---
+
+*Última atualização: 2026-02-23*
+*Relacionado: FRONTEND_GUIDE.md, steering.md, .context/quality_gates.md*
