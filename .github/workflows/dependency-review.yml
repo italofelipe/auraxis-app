@@ -1,0 +1,33 @@
+# Dependency Review — auraxis-app
+# Bloqueia PRs que introduzem dependências com vulnerabilidades conhecidas (CVEs).
+# Usa o banco de dados do GitHub Advisory Database — gratuito e sem configuração extra.
+# Executa apenas em pull_request (não em push direto a master).
+
+name: Dependency Review
+
+on:
+  pull_request:
+    branches: [master, main]
+
+permissions:
+  contents: read
+  pull-requests: write  # Para comentar no PR com o resumo
+
+jobs:
+  dependency-review:
+    name: Dependency Review (CVE check)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          # Falha se qualquer CVE de severidade >= high for introduzido
+          fail-on-severity: high
+          # Comenta no PR com o resumo de vulnerabilidades
+          comment-summary-in-pr: always
+          # Bloqueia licenças restritivas em produção
+          deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0
+          # Avisa (não bloqueia) licenças que precisam de atenção
+          warn-licenses: LGPL-2.0, LGPL-3.0, CDDL-1.0

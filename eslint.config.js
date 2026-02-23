@@ -5,6 +5,11 @@ const expoConfig = require('eslint-config-expo/flat');
 module.exports = defineConfig([
   expoConfig,
   {
-    ignores: ['dist/*'],
+    // Arquivos ignorados pelo ESLint
+    ignores: [
+      'dist/*',
+      'e2e/**',        // E2E (Detox) tem deps separadas não instaladas no CI padrão
+      'artifacts/**',
+    ],
   },
 ]);
