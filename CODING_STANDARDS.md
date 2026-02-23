@@ -1242,5 +1242,151 @@ Workflows adicionais:
 
 ---
 
+---
+
+## 14. Arquitetura feature-based
+
+> Regra central: **features não importam de outras features.**
+> Todo compartilhamento passa por `shared/`.
+
+```
+src/
+  shared/
+    components/        ← Button, Input, Card (sem lógica de negócio)
+    hooks/             ← useDebounce, useLocalStorage (agnósticos de domínio)
+    theme/             ← TODOS os tokens de design (ver seção 15)
+    types/             ← tipos globais compartilhados
+    utils/             ← funções puras agnósticas
+    constants/         ← constantes globais
+
+  features/
+    auth/
+      components/      ← LoginForm, PinPad (só usados por auth)
+      hooks/           ← useAuth, useSession, useOTP
+      screens/         ← LoginScreen, ForgotPasswordScreen
+      services/        ← authService (chama a API)
+      types/           ← AuthUser, LoginPayload, SessionToken
+      tests/           ← unitários co-localizados
+      e2e/             ← specs Detox desta feature
+    transactions/
+      ...
+
+  app/                 ← Expo Router: routing, providers, _layout.tsx
+```
+
+**Regra de importação:**
+
+```typescript
+// ✅ Feature importa de shared
+import { Button } from '@/shared/components/Button'
+import { colors } from '@/shared/theme'
+
+// ✅ Feature importa de si mesma
+import { useAuth } from '../hooks/useAuth'
+
+// ❌ NUNCA — feature importa de outra feature
+import { useTransactions } from '@/features/transactions/hooks/useTransactions'
+// ↑ isso em features/auth/ é uma violação
+```
+
+---
+
+## 15. Design Tokens — Zero valores hardcoded
+
+Nenhum valor de estilo pode aparecer diretamente em um componente.
+Todo valor pertence ao sistema de tokens em `shared/theme/`.
+
+```
+shared/theme/
+  tokens/
+    primitives.ts    ← valores brutos (não usar em componentes)
+    semantic.ts      ← tokens semânticos (use estes)
+    typography.ts    ← escala tipográfica
+    spacing.ts       ← escala de espaçamento
+    radius.ts        ← border-radius
+    shadows.ts       ← elevações
+    motion.ts        ← durações e easings
+  index.ts           ← exporta tudo
+```
+
+```typescript
+// ❌ NUNCA — valores hardcoded
+const styles = StyleSheet.create({
+  title: { fontSize: 16, color: '#6366F1', marginTop: 8 }
+})
+
+// ✅ SEMPRE — tokens semânticos
+import { typography, colors, spacing } from '@/shared/theme'
+
+const styles = StyleSheet.create({
+  title: {
+    fontSize:  typography.size.md,   // $font-md = 16
+    color:     colors.action.primary,
+    marginTop: spacing.sm,           // $space-sm = 8
+  }
+})
+```
+
+Hierarquia de tokens:
+- **Primitivos** → `color.indigo500: '#6366F1'` — nunca referenciar em componentes
+- **Semânticos** → `colors.action.primary: primitives.color.indigo500` — usar estes
+
+---
+
+## 16. Limite de arquivo e extração
+
+- **Máximo 250 linhas por arquivo de componente.** Acima disso, algo deve ser extraído.
+- Se o componente tem mais de um bloco visual independente → dois componentes.
+- Se há lógica reutilizável → hook separado.
+- Se há constantes de tema → `shared/theme/`.
+
+```
+Sinal de que deve extrair:
+  → Arquivo > 250 linhas
+  → useState com mais de 3 variáveis relacionadas → hook
+  → Bloco de JSX que se repete → subcomponente
+  → StyleSheet com > 15 entradas → arquivo de estilo separado ou tokens
+```
+
+---
+
+## 17. Zero `any` — TypeScript como Java
+
+`any` é proibido em qualquer forma. O compilador está em `strict: true` e
+`noImplicitAny: true`. Trate TypeScript como Java: se não tem tipo, não compila.
+
+```typescript
+// ❌ NUNCA
+const handle = (data: any) => { ... }
+const result = (response as any).payload
+const items: object[] = []
+
+// ✅ Discriminated union para estados
+type AsyncState<T> =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: Error }
+
+// ✅ unknown com narrowing obrigatório
+function parseError(err: unknown): string {
+  if (err instanceof Error) return err.message
+  if (typeof err === 'string') return err
+  return 'Unexpected error'
+}
+
+// ✅ satisfies para validar sem perder tipo
+const theme = {
+  colors: { primary: '#6366F1' }
+} satisfies DeepPartial<ThemeConfig>
+```
+
+Tipos de retorno explícitos são obrigatórios em:
+- Todos os hooks customizados (interface `Use*Return` exportada)
+- Todos os serviços de API
+- Todas as funções públicas com lógica não trivial
+
+---
+
 *Última atualização: 2026-02-23*
-*Relacionado: steering.md, .context/quality_gates.md, auraxis-platform/.context/25_quality_security_playbook.md*
+*Relacionado: steering.md, .context/quality_gates.md, auraxis-platform/.context/25_quality_security_playbook.md, auraxis-platform/.context/26_frontend_architecture.md*
