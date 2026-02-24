@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run lint -- --max-warnings 0
 
   # ── 2. Type-check ──────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run typecheck
 
   # ── 3. Testes com coverage (Jest) ──────────────────────────────────────
@@ -65,7 +65,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Run tests with coverage
         run: npm run test:coverage
       - name: Upload coverage report
@@ -90,7 +90,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
@@ -122,7 +122,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
@@ -225,46 +225,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Audit runtime deps (high/critical) with temporary Expo allowlist
-        run: |
-          npm audit --omit=dev --json > audit.json || true
-          node - <<'NODE'
-          const fs = require('fs');
-          const audit = JSON.parse(fs.readFileSync('audit.json', 'utf8'));
-          const allowedIds = new Set(['GHSA-3ppc-4f35-3m26', '1113371']);
-          const vulns = audit.vulnerabilities || {};
-          const findings = [];
-
-          for (const [pkg, info] of Object.entries(vulns)) {
-            const vias = Array.isArray(info.via) ? info.via : [];
-            for (const via of vias) {
-              if (!via || typeof via === 'string') continue;
-              const severity = via.severity || info.severity || 'unknown';
-              if (severity !== 'high' && severity !== 'critical') continue;
-              const ghsa = typeof via.url === 'string' ? via.url.split('/').pop() : '';
-              const source = String(via.source ?? '');
-              const isAllowed = allowedIds.has(ghsa) || allowedIds.has(source);
-              if (!isAllowed) {
-                findings.push({
-                  pkg,
-                  severity,
-                  id: ghsa || source || via.title || 'unknown',
-                });
-              }
-            }
-          }
-
-          if (findings.length > 0) {
-            console.error('Disallowed high/critical vulnerabilities found:');
-            for (const f of findings) {
-              console.error(`- [${f.severity}] ${f.pkg}: ${f.id}`);
-            }
-            process.exit(1);
-          }
-
-          console.log('Audit gate passed (only allowlisted Expo minimatch advisory detected).');
-          NODE
+        run: node scripts/ci-audit-gate.js
 
   # ── 9. SonarCloud ──────────────────────────────────────────────────────
   # Modelo oficial: CI-based analysis (Automatic Analysis desabilitado no SonarCloud).
@@ -282,7 +245,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Generate coverage for Sonar
         run: npm run test:coverage
       - name: SonarCloud Scan
@@ -306,7 +269,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
   # ── 11. Detox E2E (scaffold — self-hosted macOS runner) ────────────────
@@ -322,7 +285,7 @@ jobs:
   #       with:
   #         node-version: ${{ env.NODE_VERSION }}
   #         cache: npm
-  #     - run: npm ci
+  #     - run: npm ci --ignore-scripts
   #     - name: Setup Detox
   #       run: npm run detox:build:ios
   #     - name: Run Detox tests

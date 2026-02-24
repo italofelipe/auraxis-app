@@ -38,6 +38,7 @@ const config = {
   // Cobertura
   // APP9 baseline: cobertura inicial em fluxo crítico de tema/renderização.
   collectCoverageFrom: [
+    'lib/api.ts',
     'components/themed-text.tsx',
     'components/themed-view.tsx',
     'components/ui/collapsible.tsx',
@@ -48,10 +49,10 @@ const config = {
 
   coverageThreshold: {
     global: {
-      lines: 80,
-      functions: 80,
-      branches: 75,
-      statements: 80,
+      lines: 85,
+      functions: 85,
+      branches: 85,
+      statements: 85,
     },
   },
 

@@ -18,6 +18,8 @@ Antes de qualquer ação, leia a partir da platform:
 4. `auraxis-platform/.context/01_status_atual.md` — status atual
 5. `auraxis-platform/.context/02_backlog_next.md` — prioridades
 6. Este arquivo — diretiva do repo mobile
+7. `product.md` — visão e escopo ativo do app
+8. `.context/templates/feature_card_template.md` e `.context/templates/delivery_report_template.md` — artefatos SDD obrigatórios
 
 ## Estrutura do repo
 
@@ -86,3 +88,9 @@ npm run lint
 Este repo é orchestrado por `auraxis-platform`.
 Handoffs e decisões de arquitetura ficam em `auraxis-platform/.context/`.
 Contratos de API são definidos em `auraxis-api`.
+
+## SDD (obrigatório para features)
+
+- Antes de codar: registrar Feature Card em `.context/reports/` (ou no `tasks.md`) com critérios de aceite.
+- Ao finalizar bloco: registrar Delivery Report em `.context/reports/`.
+- Se interromper sessão: registrar handoff em `.context/handoffs/`.

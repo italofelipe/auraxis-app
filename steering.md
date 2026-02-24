@@ -95,10 +95,10 @@ npm run quality-check
 | ESLint | 0 erros | Qualquer violação de lint |
 | TypeScript strict | 0 erros | `any` implícito, tipos incompatíveis |
 | Jest — testes passando | 100% | Qualquer teste quebrando |
-| Jest — coverage lines | ≥ 80% | Cobertura abaixo do threshold |
-| Jest — coverage functions | ≥ 80% | Cobertura abaixo do threshold |
-| Jest — coverage statements | ≥ 80% | Cobertura abaixo do threshold |
-| Jest — coverage branches | ≥ 75% | Cobertura de branches abaixo |
+| Jest — coverage lines | ≥ 85% | Cobertura abaixo do threshold |
+| Jest — coverage functions | ≥ 85% | Cobertura abaixo do threshold |
+| Jest — coverage statements | ≥ 85% | Cobertura abaixo do threshold |
+| Jest — coverage branches | ≥ 85% | Cobertura de branches abaixo |
 
 ### Thresholds de CI (automáticos — GitHub Actions)
 
@@ -120,7 +120,7 @@ push / PR → master
 │
 ├── lint              (ESLint — 0 erros)
 ├── typecheck         (tsc --noEmit — 0 erros)
-├── test              (jest-expo + coverage ≥ 80%)
+├── test              (jest-expo + coverage ≥ 85%)
 │
 ├── expo-bundle       (export android — valida que bundle JS compila)
 │   └── bundle-analysis   (comenta tamanho no PR; hard limit 6 MB)
@@ -251,7 +251,7 @@ describe('useBalance', () => {
 ```
 [ ] npm run quality-check passou (lint + typecheck + test:coverage)
 [ ] Testes escritos para toda lógica nova (hooks, utils, componentes com lógica)
-[ ] Coverage não regrediu abaixo de 80% (lines/functions) / 75% (branches)
+[ ] Coverage não regrediu abaixo de 85% (lines/functions/branches)
 [ ] Nenhum `any` implícito ou `@ts-ignore` sem comentário explicativo
 [ ] Tokens e segredos em expo-secure-store (nunca AsyncStorage)
 [ ] Nenhum secret hardcoded (Gitleaks + TruffleHog verificam automaticamente)
