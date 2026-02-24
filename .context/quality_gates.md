@@ -21,6 +21,9 @@ npm run test:coverage
 
 # Atalho — tudo de uma vez (obrigatório antes de commitar):
 npm run quality-check
+
+# Paridade CI local (ambiente dockerizado Node 22, igual ao runner Linux):
+npm run ci:local
 ```
 
 > Se qualquer gate falhar: **não commitar**. Corrigir o problema primeiro.

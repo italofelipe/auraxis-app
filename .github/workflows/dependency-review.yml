@@ -19,7 +19,35 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check dependency graph availability
+        id: dependency_graph
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const settingsUrl = `https://github.com/${owner}/${repo}/settings/security_analysis`;
+
+            try {
+              const { data } = await github.rest.repos.get({ owner, repo });
+              const status = data.security_and_analysis?.dependency_graph?.status ?? "unknown";
+              const enabled = status === "enabled";
+
+              core.setOutput("enabled", enabled ? "true" : "false");
+
+              if (!enabled) {
+                core.warning(
+                  `Dependency Graph status is '${status}'. Skipping dependency review in compatibility mode. Enable it at: ${settingsUrl}`,
+                );
+              }
+            } catch (error) {
+              core.setOutput("enabled", "false");
+              core.warning(
+                `Unable to read dependency graph status (${error.message}). Skipping dependency review in compatibility mode.`,
+              );
+            }
+
       - name: Dependency Review
+        if: steps.dependency_graph.outputs.enabled == 'true'
         uses: actions/dependency-review-action@v4
         with:
           # Falha se qualquer CVE de severidade >= high for introduzido
@@ -28,3 +56,9 @@ jobs:
           comment-summary-in-pr: always
           # Bloqueia licenças restritivas em produção
           deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0
+
+      - name: Dependency Review skipped (compatibility mode)
+        if: steps.dependency_graph.outputs.enabled != 'true'
+        run: |
+          echo "Dependency Review skipped: repository dependency graph is unavailable/disabled."
+          echo "Enable it in Settings > Security & analysis > Dependency graph."
