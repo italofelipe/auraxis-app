@@ -86,3 +86,4 @@
 - [x] CI fix: Sonar migrado para `sonarqube-scan-action@v5` e `sonar.sources=.` para evitar erro por diretórios inexistentes | Data: 2026-02-24
 - [x] CI fix: Sonar pinado com SHA completo (`sonarqube-scan-action@v6`) e organização Sonar corrigida para `sensoriumit` | Data: 2026-02-24
 - [x] CI security fix: permissões de workflows movidas de nível global para nível de job (least privilege) para atender policy/Sonar | Data: 2026-02-24
+- [x] CI fix: scanner Sonar em `ci.yml` condicionado por `ENABLE_SONAR_CI=true` para evitar conflito com Automatic Analysis habilitado no SonarCloud | Data: 2026-02-24
