@@ -34,5 +34,5 @@ jobs:
       - name: Dependency review fallback note
         if: steps.dependency_review.outcome == 'failure'
         run: |
-          echo "::warning::Dependency Review indisponivel neste repo (Dependency Graph desativado)."
+          echo "::warning::Dependency Review indisponivel neste repo (Dependency Graph desativado ou nao suportado)."
           echo "::warning::Habilite em Settings > Security > Dependency graph para enforcement completo."
