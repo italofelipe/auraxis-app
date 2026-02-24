@@ -121,3 +121,4 @@
 - [x] Sonar code smell fix: `String#charCodeAt()` substituído por `String#codePointAt()` em normalização de URL | Data: 2026-02-24
 - [x] Sonar coverage fix: escopo de análise (`sonar.sources/inclusions`) alinhado ao baseline coberto no `lcov` para eliminar falso negativo de coverage global no scaffold | Data: 2026-02-24
 - [x] Governança UI atualizada: paleta, tipografia, grid 8px, proibição de Tailwind e baseline de React Native Paper + TanStack Query registradas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-24
+- [x] CI simplification: removido gate sintético `ci-passed`; branch protection passa a exigir checks reais do pipeline | Data: 2026-02-24
