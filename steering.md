@@ -138,6 +138,7 @@ Workflows adicionais:
 - `dependency-review.yml` — bloqueia PRs com CVEs ≥ high em novas deps
 - `auto-merge.yml` — squash-merge automático de PRs Dependabot (patch; minor não-RN)
 
+> **SonarCloud:** operar exclusivamente em modo CI scanner (Automatic Analysis desabilitado no painel do projeto).
 > **Detox E2E:** job `detox-e2e` está no CI mas comentado.
 > Requer self-hosted runner com macOS + Xcode. Descomentar quando infra disponível.
 

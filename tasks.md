@@ -82,8 +82,8 @@
 - [x] APP1 concluído: lint + typecheck + strict mode estabilizados | Commits: `3eaa519`, `33ffc22` | Data: 2026-02-23
 - [x] APP5 concluído: pipeline CI com gates de qualidade e segurança | Commits: `3eaa519`, `884122c` | Data: 2026-02-23
 - [x] CI fix: comentário de bundle-size no PR tornado resiliente a `403` de integração GitHub e audit npm ajustado para gate com allowlist temporária do advisory `GHSA-3ppc-4f35-3m26` (cadeia Expo) | Data: 2026-02-24
-- [x] CI fix: `dependency-review-action` ajustado (remoção de input inválido + fallback não-bloqueante enquanto Dependency Graph estiver desativado) | Data: 2026-02-24
+- [x] CI hardening: `dependency-review-action` ajustado para modo bloqueante (sem fallback permissivo) | Data: 2026-02-24
 - [x] CI fix: Sonar migrado para `sonarqube-scan-action@v5` e `sonar.sources=.` para evitar erro por diretórios inexistentes | Data: 2026-02-24
 - [x] CI fix: Sonar pinado com SHA completo (`sonarqube-scan-action@v6`) e organização Sonar corrigida para `sensoriumit` | Data: 2026-02-24
 - [x] CI security fix: permissões de workflows movidas de nível global para nível de job (least privilege) para atender policy/Sonar | Data: 2026-02-24
-- [x] CI fix: scanner Sonar em `ci.yml` condicionado por `ENABLE_SONAR_CI=true` para evitar conflito com Automatic Analysis habilitado no SonarCloud | Data: 2026-02-24
+- [x] CI hardening: Sonar padronizado para CI scanner sempre ativo (Automatic Analysis deve permanecer desabilitado no SonarCloud) | Data: 2026-02-24
