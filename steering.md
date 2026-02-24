@@ -2,7 +2,7 @@
 
 > Documento canônico de governança técnica para o aplicativo mobile do Auraxis.
 > Vinculante para todos os agentes e desenvolvedores.
-> Atualizado: 2026-02-23
+> Atualizado: 2026-02-24
 
 ---
 
@@ -19,6 +19,8 @@
 | Formatação | Prettier | ^3.8 |
 | Testes unitários | jest-expo + @testing-library/react-native | ^54.0 / ^13.0 |
 | Testes E2E | Detox (scaffold — requer macOS runner) | — |
+| UI base | React Native Paper | ^5.x |
+| Estado de servidor | TanStack Query (React) | ^5.x |
 | Análise estática | SonarCloud | — |
 | Secret scan | Gitleaks + TruffleHog | — |
 | Dep update | Dependabot | auto-merge patch; manual para RN/React minor |
@@ -31,6 +33,17 @@
 
 ---
 
+## Diretriz de UI e Design System
+
+- Paleta oficial: `#262121`, `#ffbe4d`, `#413939`, `#0b0909`, `#ffd180`, `#ffab1a`.
+- Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
+- Grid base: `8px` (spacing estrutural em múltiplos de 8).
+- Componentes mobile devem partir de base **React Native Paper** customizada para o tema Auraxis.
+- **Tailwind não é permitido** neste repositório.
+- Server-state remoto deve preferir `@tanstack/react-query` para cache, retry e invalidação.
+
+---
+
 ## Princípios técnicos
 
 - **TypeScript strict** em todo o código — `strict: true` no tsconfig, sem exceções.
@@ -40,6 +53,8 @@
 - **Segurança por padrão** — token em `expo-secure-store`, nunca em `AsyncStorage`.
 - **Testes não são opcionais** — toda lógica nova tem teste antes de merge.
 - **Performance mobile** — bundle Android/iOS ≤ 6 MB (hard limit no CI).
+- **UI consistente por contrato** — React Native Paper custom + tokens oficiais são obrigatórios.
+- **Server-state com TanStack Query** — evitar fetch manual distribuído em telas/componentes.
 
 ---
 
@@ -50,7 +65,8 @@
 | `app/` | Telas (Expo Router — file-based routing) |
 | `components/` | Componentes reutilizáveis |
 | `hooks/` | Hooks customizados (prefixo `use`) |
-| `store/` | Estado global |
+| `store/` | Estado global de cliente |
+| `providers/` | Providers globais (Theme, QueryClient, Session) |
 | `services/` | Chamadas HTTP (um arquivo por domínio de API) |
 | `utils/` | Funções puras sem side-effects |
 | `types/` | Interfaces e tipos TypeScript |

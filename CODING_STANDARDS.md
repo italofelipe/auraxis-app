@@ -1,7 +1,7 @@
 # CODING_STANDARDS.md — auraxis-app
 
 > Manual canônico de padrões de código para o aplicativo mobile do Auraxis.
-> Stack: React Native 0.81.5 · Expo SDK 54 · TypeScript strict · Expo Router v6
+> Stack: React Native 0.81.5 · Expo SDK 54 · TypeScript strict · Expo Router v6 · React Native Paper · TanStack Query
 >
 > Este documento define **como escrever código** neste repo. Não é opcional.
 > Cada seção tem regras (**deve/nunca**) e exemplos práticos.
@@ -36,6 +36,17 @@
 | **Sem lógica de negócio no front** | Toda regra de negócio fica em auraxis-api. Front exibe e navega. |
 | **Plataforma primeiro** | Use APIs nativas do RN (`FlatList`, `Pressable`, `ActivityIndicator`) antes de libs externas |
 | **Segurança por padrão** | Token em `expo-secure-store`, nunca em `AsyncStorage` |
+
+---
+
+## 1.1 Design System e UI Stack (obrigatório)
+
+- Paleta oficial: `#262121`, `#ffbe4d`, `#413939`, `#0b0909`, `#ffd180`, `#ffab1a`.
+- Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
+- Grid base: `8px` (layout em múltiplos de 8).
+- Componentes base mobile devem derivar de React Native Paper customizado.
+- Tailwind é proibido no app.
+- Server-state deve preferir `@tanstack/react-query` para integração com API.
 
 ---
 
@@ -699,42 +710,42 @@ export function useAuth(): AuthContextValue {
 // constants/theme.ts
 export const colors = {
   // Brand
-  primary: '#1A56DB',
-  primaryDark: '#1044BF',
-  secondary: '#10B981',
+  primary: '#ffab1a',
+  primaryDark: '#ffbe4d',
+  secondary: '#ffd180',
 
   // Semantic
-  success: '#10B981',
-  error: '#EF4444',
-  warning: '#F59E0B',
-  info: '#3B82F6',
+  success: '#ffbe4d',
+  error: '#ffab1a',
+  warning: '#ffd180',
+  info: '#ffbe4d',
 
   // Neutros
-  background: '#F9FAFB',
-  surface: '#FFFFFF',
-  border: '#E5E7EB',
-  textPrimary: '#111827',
-  textSecondary: '#6B7280',
-  textDisabled: '#D1D5DB',
+  background: '#0b0909',
+  surface: '#262121',
+  border: '#413939',
+  textPrimary: '#ffd180',
+  textSecondary: '#ffbe4d',
+  textDisabled: '#413939',
 } as const
 
 export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
+  xs: 8,
+  sm: 16,
+  md: 24,
+  lg: 32,
+  xl: 40,
   xxl: 48,
 } as const
 
 export const typography = {
-  h1: { fontSize: 32, fontWeight: '700' as const, lineHeight: 40 },
-  h2: { fontSize: 24, fontWeight: '700' as const, lineHeight: 32 },
-  h3: { fontSize: 20, fontWeight: '600' as const, lineHeight: 28 },
-  body1: { fontSize: 16, fontWeight: '400' as const, lineHeight: 24 },
-  body1Bold: { fontSize: 16, fontWeight: '600' as const, lineHeight: 24 },
-  body2: { fontSize: 14, fontWeight: '400' as const, lineHeight: 20 },
-  caption: { fontSize: 12, fontWeight: '400' as const, lineHeight: 16 },
+  h1: { fontSize: 32, fontWeight: '700' as const, lineHeight: 40, fontFamily: 'PlayfairDisplay-Bold' },
+  h2: { fontSize: 24, fontWeight: '700' as const, lineHeight: 32, fontFamily: 'PlayfairDisplay-Bold' },
+  h3: { fontSize: 20, fontWeight: '600' as const, lineHeight: 28, fontFamily: 'PlayfairDisplay-SemiBold' },
+  body1: { fontSize: 16, fontWeight: '400' as const, lineHeight: 24, fontFamily: 'Raleway-Regular' },
+  body1Bold: { fontSize: 16, fontWeight: '600' as const, lineHeight: 24, fontFamily: 'Raleway-SemiBold' },
+  body2: { fontSize: 14, fontWeight: '400' as const, lineHeight: 20, fontFamily: 'Raleway-Regular' },
+  caption: { fontSize: 12, fontWeight: '400' as const, lineHeight: 16, fontFamily: 'Raleway-Regular' },
 } as const
 
 export const borderRadius = {
@@ -781,7 +792,7 @@ const styles = StyleSheet.create({
 
 **NUNCA:**
 - Valores mágicos: `padding: 16` (use `spacing.md`)
-- Cores hardcoded: `color: '#1A56DB'` (use `colors.primary`)
+- Cores hardcoded: `color: '#ffab1a'` (use `colors.primary`)
 - `position: 'absolute'` sem comentário explicando por quê
 - Ignorar suporte a dark mode se o design system suportar
 
@@ -1312,7 +1323,7 @@ shared/theme/
 ```typescript
 // ❌ NUNCA — valores hardcoded
 const styles = StyleSheet.create({
-  title: { fontSize: 16, color: '#6366F1', marginTop: 8 }
+  title: { fontSize: 16, color: '#ffab1a', marginTop: 8 }
 })
 
 // ✅ SEMPRE — tokens semânticos
@@ -1328,8 +1339,8 @@ const styles = StyleSheet.create({
 ```
 
 Hierarquia de tokens:
-- **Primitivos** → `color.indigo500: '#6366F1'` — nunca referenciar em componentes
-- **Semânticos** → `colors.action.primary: primitives.color.indigo500` — usar estes
+- **Primitivos** → `color.brandPrimary: '#ffab1a'` — nunca referenciar em componentes
+- **Semânticos** → `colors.action.primary: primitives.color.brandPrimary` — usar estes
 
 ---
 
@@ -1377,7 +1388,7 @@ function parseError(err: unknown): string {
 
 // ✅ satisfies para validar sem perder tipo
 const theme = {
-  colors: { primary: '#6366F1' }
+  colors: { primary: '#ffab1a' }
 } satisfies DeepPartial<ThemeConfig>
 ```
 
