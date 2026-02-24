@@ -97,3 +97,4 @@
 - [x] CI compat: `dependency-review-action` com fallback controlado para repo sem Dependency Graph suportado/habilitado | Data: 2026-02-24
 - [x] CI hardening: Sonar scanner estrito reativado após desativação do Automatic Analysis no SonarCloud | Data: 2026-02-24
 - [x] APP9 concluído: baseline de testes reais criado, `--passWithNoTests` removido dos scripts e coverage validado no gate local | Data: 2026-02-24
+- [x] Lint hardening: perfil ESLint estrito aplicado (estilo + complexidade + disciplina TypeScript), com padrão de formatação (`.prettierrc.json`) e `--max-warnings 0` no script de lint | Data: 2026-02-24

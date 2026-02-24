@@ -1,39 +1,39 @@
-import { fireEvent, render } from '@testing-library/react-native'
-import { Text } from 'react-native'
+import { fireEvent, render } from "@testing-library/react-native";
+import { Text } from "react-native";
 
-import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useColorScheme } from "@/hooks/use-color-scheme";
 
-import { Collapsible } from './collapsible'
+import { Collapsible } from "./collapsible";
 
-jest.mock('@/components/ui/icon-symbol', () => ({
+jest.mock("@/components/ui/icon-symbol", () => ({
   IconSymbol: () => null,
-}))
+}));
 
-jest.mock('@/hooks/use-color-scheme', () => ({
+jest.mock("@/hooks/use-color-scheme", () => ({
   useColorScheme: jest.fn(),
-}))
+}));
 
-const mockedUseColorScheme = jest.mocked(useColorScheme)
+const mockedUseColorScheme = jest.mocked(useColorScheme);
 
-describe('Collapsible', () => {
+describe("Collapsible", () => {
   beforeEach(() => {
-    mockedUseColorScheme.mockReset()
-    mockedUseColorScheme.mockReturnValue('light')
-  })
+    mockedUseColorScheme.mockReset();
+    mockedUseColorScheme.mockReturnValue("light");
+  });
 
-  it('alterna conteúdo ao pressionar o cabeçalho', () => {
+  it("alterna conteúdo ao pressionar o cabeçalho", () => {
     const { getByText, queryByText } = render(
       <Collapsible title="Secao">
         <Text>Conteudo interno</Text>
       </Collapsible>,
-    )
+    );
 
-    expect(queryByText('Conteudo interno')).toBeNull()
+    expect(queryByText("Conteudo interno")).toBeNull();
 
-    fireEvent.press(getByText('Secao'))
-    expect(getByText('Conteudo interno')).toBeTruthy()
+    fireEvent.press(getByText("Secao"));
+    expect(getByText("Conteudo interno")).toBeTruthy();
 
-    fireEvent.press(getByText('Secao'))
-    expect(queryByText('Conteudo interno')).toBeNull()
-  })
-})
+    fireEvent.press(getByText("Secao"));
+    expect(queryByText("Conteudo interno")).toBeNull();
+  });
+});

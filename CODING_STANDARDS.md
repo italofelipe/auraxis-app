@@ -1388,5 +1388,36 @@ Tipos de retorno explícitos são obrigatórios em:
 
 ---
 
-*Última atualização: 2026-02-23*
+## 18. Perfil ESLint estrito (mix OO + funcional)
+
+Este repositório adota lint **rigoroso** para evitar código solto e manter consistência entre agentes.
+
+Regras obrigatórias de estilo:
+- `semi: always`
+- `quotes: double`
+- `eqeqeq: always`
+- `curly: all`
+- `no-console` (exceto `warn` e `error`)
+
+Regras obrigatórias de disciplina:
+- `complexity <= 12`
+- `max-params <= 3`
+- `max-lines-per-function <= 80` (ignorando comentários e linhas em branco)
+- `max-depth <= 3`
+- `max-statements <= 18`
+- `consistent-return`
+
+Regras obrigatórias de TypeScript:
+- `@typescript-eslint/no-explicit-any`
+- `@typescript-eslint/no-unused-vars` (prefixo `_` permitido para parâmetros ignorados)
+- `@typescript-eslint/consistent-type-imports`
+
+Diretriz arquitetural:
+- Em camadas de domínio/aplicação (`services`, `repositories`, `use-cases`), manter design orientado a objeto com alta coesão.
+- Em UI/hook (`components`, `hooks`, `app`), permitir estilo funcional, mantendo regras de complexidade e clareza.
+- Em testes (`*.test.*`, `*.spec.*`), limites de complexidade e tamanho de função são mais altos para setup de cenário.
+
+---
+
+*Última atualização: 2026-02-24*
 *Relacionado: steering.md, .context/quality_gates.md, auraxis-platform/.context/25_quality_security_playbook.md, auraxis-platform/.context/26_frontend_architecture.md*
