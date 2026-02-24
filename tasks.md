@@ -1,6 +1,6 @@
 # tasks.md — auraxis-app
 
-Última atualização: 2026-02-23
+Última atualização: 2026-02-24
 
 ## Legenda
 
@@ -81,3 +81,4 @@
 - [x] Registrado como submodule em auraxis-platform | Commit: `05ca2ff` | Data: 2026-02-22
 - [x] APP1 concluído: lint + typecheck + strict mode estabilizados | Commits: `3eaa519`, `33ffc22` | Data: 2026-02-23
 - [x] APP5 concluído: pipeline CI com gates de qualidade e segurança | Commits: `3eaa519`, `884122c` | Data: 2026-02-23
+- [x] CI fix: comentário de bundle-size no PR tornado resiliente a `403` de integração GitHub e audit npm ajustado para gate com allowlist temporária do advisory `GHSA-3ppc-4f35-3m26` (cadeia Expo) | Data: 2026-02-24
