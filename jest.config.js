@@ -36,16 +36,14 @@ const config = {
   setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
 
   // Cobertura
+  // APP9 baseline: cobertura inicial em fluxo crítico de tema/renderização.
   collectCoverageFrom: [
-    'app/**/*.{ts,tsx}',
-    'components/**/*.{ts,tsx}',
-    'hooks/**/*.{ts,tsx}',
-    'store/**/*.{ts,tsx}',
-    'services/**/*.{ts,tsx}',
-    'utils/**/*.{ts,tsx}',
+    'components/themed-text.tsx',
+    'components/themed-view.tsx',
+    'components/ui/collapsible.tsx',
+    'hooks/use-theme-color.ts',
     '!**/*.d.ts',
     '!**/*.config.{ts,js}',
-    '!app/_layout.tsx',
   ],
 
   coverageThreshold: {

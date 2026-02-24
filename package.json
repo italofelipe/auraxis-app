@@ -8,14 +8,14 @@
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web",
-    "lint": "expo lint",
+    "lint": "expo lint --max-warnings 0",
     "prepare": "husky",
     "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "typecheck": "tsc --noEmit",
-    "test": "jest --passWithNoTests",
-    "test:coverage": "jest --passWithNoTests --coverage",
+    "test": "jest",
+    "test:coverage": "jest --coverage",
     "quality-check": "npm run lint && npm run typecheck && npm run test",
-    "test:watch": "jest --watchAll --passWithNoTests"
+    "test:watch": "jest --watchAll"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
