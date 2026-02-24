@@ -51,6 +51,18 @@
   - Commit: —
   - Risco residual: paginação não implementada nesta fase.
 
+- [ ] **APP10** `chore` — Padronizar UI mobile com React Native Paper customizado
+  - Critério: tema base do Paper configurado com paleta oficial, tipografia (`Playfair Display` + `Raleway`) e grid de 8px.
+  - Dependência: APP1
+  - Commit: —
+  - Risco residual: telas legadas podem conviver temporariamente com componentes não migrados.
+
+- [ ] **APP11** `chore` — Adotar TanStack Query para server-state no app
+  - Critério: `QueryClientProvider` global configurado e primeiro fluxo de integração com API usando `@tanstack/react-query` (cache/retry/invalidation).
+  - Dependência: APP2
+  - Commit: —
+  - Risco residual: transição inicial pode coexistir com hooks legados de fetch manual.
+
 ### P2 — Normal
 
 - [x] **APP5** `chore` — Configurar CI (GitHub Actions)
@@ -108,3 +120,4 @@
 - [x] CI parity local: criado `scripts/run_ci_like_actions_local.sh` + `scripts/ci-audit-gate.js`; workflow de audit passou a reutilizar script compartilhado | Data: 2026-02-24
 - [x] Sonar code smell fix: `String#charCodeAt()` substituído por `String#codePointAt()` em normalização de URL | Data: 2026-02-24
 - [x] Sonar coverage fix: escopo de análise (`sonar.sources/inclusions`) alinhado ao baseline coberto no `lcov` para eliminar falso negativo de coverage global no scaffold | Data: 2026-02-24
+- [x] Governança UI atualizada: paleta, tipografia, grid 8px, proibição de Tailwind e baseline de React Native Paper + TanStack Query registradas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-24
