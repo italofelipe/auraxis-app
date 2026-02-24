@@ -39,10 +39,14 @@ jest.mock('expo-constants', () => ({
 
 // Silencia logs desnecessários durante testes
 beforeAll(() => {
-  jest.spyOn(console, 'warn').mockImplementation((msg) => {
+  const originalWarn = console.warn.bind(console)
+
+  jest.spyOn(console, 'warn').mockImplementation((...args) => {
+    const [msg] = args
+
     // Permite warnings de negócio, silencia apenas warnings de infra do RN
     if (typeof msg === 'string' && msg.includes('Warning: An update to')) return
-    console.warn(msg)
+    originalWarn(...args)
   })
 })
 
