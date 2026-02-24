@@ -31,6 +31,12 @@
   - Commit: —
   - Risco residual: env vars no Expo requerem prefixo `EXPO_PUBLIC_` para exposição no client.
 
+- [ ] **APP9** `chore` — Estabelecer baseline de testes para remover `--passWithNoTests`
+  - Critério: pelo menos 1 suíte real cobrindo fluxo crítico inicial e scripts `test/test:coverage` sem `--passWithNoTests`.
+  - Dependência: APP1
+  - Commit: —
+  - Risco residual: manter `passWithNoTests` mascara regressões e reduz confiabilidade dos gates.
+
 ### P1 — Alta
 
 - [ ] **APP3** `feat` — Estrutura de autenticação (contexto de sessão + telas de login)
@@ -87,3 +93,4 @@
 - [x] CI fix: Sonar pinado com SHA completo (`sonarqube-scan-action@v6`) e organização Sonar corrigida para `sensoriumit` | Data: 2026-02-24
 - [x] CI security fix: permissões de workflows movidas de nível global para nível de job (least privilege) para atender policy/Sonar | Data: 2026-02-24
 - [x] CI hardening: Sonar padronizado para CI scanner sempre ativo (Automatic Analysis deve permanecer desabilitado no SonarCloud) | Data: 2026-02-24
+- [x] CI fix: `jest.config.js` corrigido (`setupFilesAfterFramework` -> `setupFilesAfterEnv`) para eliminar warning de configuração inválida | Data: 2026-02-24

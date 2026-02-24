@@ -33,7 +33,7 @@ const config = {
   },
 
   // Setup files: configura @testing-library/jest-native matchers
-  setupFilesAfterFramework: ['@testing-library/jest-native/extend-expect'],
+  setupFilesAfterEnv: ['@testing-library/jest-native/extend-expect'],
 
   // Cobertura
   collectCoverageFrom: [
