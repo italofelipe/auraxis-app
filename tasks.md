@@ -75,25 +75,25 @@
   - Dependência: conta EAS ativa
   - Commit: —
 
-- [ ] **APP12** `chore` — Preparar publicação contínua para Play Store/App Store
+- [~] **APP12** `chore` — Preparar publicação contínua para Play Store/App Store
   - Critério: trilhas/configuração de release prontas (Google Play Internal + TestFlight), com credenciais seguras e checklist de submissão documentado.
   - Dependência: APP6
   - Commit: —
   - Risco residual: aprovação de loja e requisitos legais variam por plataforma/região.
 
-- [ ] **APP13** `chore` — Configurar versionamento automático do app
+- [~] **APP13** `chore` — Configurar versionamento automático do app
   - Critério: incremento automático de versão (`version`, `versionCode`, `buildNumber`) e changelog por Conventional Commits, sem ajuste manual.
   - Dependência: APP5
   - Commit: —
   - Risco residual: alinhamento incorreto com pipelines EAS pode gerar versões rejeitadas nas lojas.
 
-- [ ] **APP14** `chore` — Integrar feature toggle OSS no app
+- [~] **APP14** `chore` — Integrar feature toggle OSS no app
   - Critério: provider de flags integrado no bootstrap, cache offline seguro e primeiro flag controlando tela/fluxo real.
   - Dependência: APP2
   - Commit: —
   - Risco residual: sincronização de flags entre ambientes sem governança pode causar comportamento inconsistente.
 
-- [ ] **APP15** `chore` — Deploy mínimo do frontend mobile (baseline distribuível)
+- [~] **APP15** `chore` — Deploy mínimo do frontend mobile (baseline distribuível)
   - Critério: build de preview distribuída para teste interno (Android/iOS), com evidência de instalação e execução do fluxo inicial.
   - Dependência: APP12
   - Commit: —
@@ -152,3 +152,6 @@
 - [x] Sonar coverage fix: escopo de análise (`sonar.sources/inclusions`) alinhado ao baseline coberto no `lcov` para eliminar falso negativo de coverage global no scaffold | Data: 2026-02-24
 - [x] Governança UI atualizada: paleta, tipografia, grid 8px, proibição de Tailwind e baseline de React Native Paper + TanStack Query registradas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-24
 - [x] CI simplification: removido gate sintético `ci-passed`; branch protection passa a exigir checks reais do pipeline | Data: 2026-02-24
+- [x] PLT3 foundation (app): `release-please` configurado com PR/tag/changelog automáticos (`.release-please-*` + workflow) | Data: 2026-02-24
+- [x] PLT2 foundation (app): `eas.json` criado com perfis de build/submit e workflow manual de store release (`store-release.yml`) | Data: 2026-02-24
+- [x] PLT5 foundation (app): deploy mínimo via artifact web + build preview opcional no EAS (`deploy-minimum.yml`) | Data: 2026-02-24

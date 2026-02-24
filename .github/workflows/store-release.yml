@@ -1,0 +1,87 @@
+name: Store Release (Manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "Plataforma alvo do build"
+        required: true
+        default: all
+        type: choice
+        options:
+          - android
+          - ios
+          - all
+      profile:
+        description: "Perfil do EAS Build"
+        required: true
+        default: production
+        type: choice
+        options:
+          - preview
+          - production
+      auto_submit:
+        description: "Submeter automaticamente para store"
+        required: false
+        default: "false"
+        type: choice
+        options:
+          - "false"
+          - "true"
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  build-and-submit:
+    name: Build/Submit to Stores
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate EXPO_TOKEN
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "${EXPO_TOKEN:-}" ]; then
+            echo "Missing required secret: EXPO_TOKEN" >&2
+            exit 1
+          fi
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@c7b66a9c327a43a8fa7c0158e7f30d6040d2481e # v8
+        with:
+          expo-version: latest
+          eas-version: latest
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Trigger build/submission
+        env:
+          BUILD_PLATFORM: ${{ inputs.platform }}
+          BUILD_PROFILE: ${{ inputs.profile }}
+          AUTO_SUBMIT: ${{ inputs.auto_submit }}
+        run: |
+          set -euo pipefail
+
+          extra_args=""
+          if [ "$AUTO_SUBMIT" = "true" ]; then
+            extra_args="--auto-submit"
+          fi
+
+          npx eas build \
+            --platform "$BUILD_PLATFORM" \
+            --profile "$BUILD_PROFILE" \
+            --non-interactive \
+            $extra_args
