@@ -1,11 +1,11 @@
 # Auto-merge — auraxis-app
 # Habilita auto-merge automaticamente em PRs do Dependabot com label "auto-merge".
-# O merge só ocorre após todos os status checks de "ci-passed" passarem.
+# O merge só ocorre após todos os status checks obrigatórios passarem.
 #
 # Pré-requisito no GitHub:
 #   Settings → General → "Allow auto-merge" = habilitado
 #   Settings → Branches → master → branch protection:
-#     - "Require status checks": ci-passed
+#     - "Require status checks": checks obrigatórios reais do CI
 #     - "Require branches to be up to date"
 
 name: Auto-merge Dependabot PRs

@@ -296,29 +296,3 @@ jobs:
   #       with:
   #         name: detox-artifacts
   #         path: artifacts/
-
-  # ── Status gate ────────────────────────────────────────────────────────
-  ci-passed:
-    name: CI Passed
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs:
-      - lint
-      - typecheck
-      - test
-      - expo-bundle
-      - secret-scan-gitleaks
-      - secret-scan-trufflehog
-      - audit
-      - sonarcloud
-    if: always()
-    steps:
-      - name: Check all required jobs
-        run: |
-          results="${{ join(needs.*.result, ' ') }}"
-          if echo "$results" | grep -qw "failure"; then
-            echo "❌ One or more required CI jobs failed."
-            exit 1
-          fi
-          echo "✅ All CI jobs passed."
