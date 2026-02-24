@@ -25,11 +25,11 @@
   - Commit: `3eaa519`, `33ffc22`
   - Risco residual: regras de ESLint podem conflitar com código gerado pelo Expo.
 
-- [ ] **APP2** `chore` — Configurar cliente HTTP para auraxis-api
+- [x] **APP2** `chore` — Configurar cliente HTTP para auraxis-api
   - Critério: módulo `lib/api.ts` exporta client configurado com base URL via env var. Requisição de teste para `/health` retorna 200 em DEV.
   - Dependência: auraxis-api rodando em DEV
-  - Commit: —
-  - Risco residual: env vars no Expo requerem prefixo `EXPO_PUBLIC_` para exposição no client.
+  - Commit: a definir (branch `chore/app9-test-baseline`)
+  - Risco residual: healthcheck cobre conectividade base; autenticação/refresh serão cobertos no APP3.
 
 - [x] **APP9** `chore` — Estabelecer baseline de testes para remover `--passWithNoTests`
   - Critério: pelo menos 1 suíte real cobrindo fluxo crítico inicial e scripts `test/test:coverage` sem `--passWithNoTests`.
@@ -98,3 +98,7 @@
 - [x] CI hardening: Sonar scanner estrito reativado após desativação do Automatic Analysis no SonarCloud | Data: 2026-02-24
 - [x] APP9 concluído: baseline de testes reais criado, `--passWithNoTests` removido dos scripts e coverage validado no gate local | Data: 2026-02-24
 - [x] Lint hardening: perfil ESLint estrito aplicado (estilo + complexidade + disciplina TypeScript), com padrão de formatação (`.prettierrc.json`) e `--max-warnings 0` no script de lint | Data: 2026-02-24
+- [x] APP2 concluído: cliente HTTP (`lib/api.ts`) com base URL por `EXPO_PUBLIC_API_URL`, healthcheck `/health` e testes unitários dedicados | Data: 2026-02-24
+- [x] SDD hardening: templates locais (`feature_card`/`delivery_report`) + `product.md` + diretórios `handoffs/reports` adicionados para execução autônoma | Data: 2026-02-24
+- [x] CI security hardening: `npm ci` do pipeline alterado para `npm ci --ignore-scripts` | Data: 2026-02-24
+- [x] Dependency review hardening: fallback permissivo removido (`continue-on-error`) para enforcement real no PR gate | Data: 2026-02-24

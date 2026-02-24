@@ -35,7 +35,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run lint -- --max-warnings 0
 
   # ── 2. Type-check ──────────────────────────────────────────────────────
@@ -50,7 +50,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npm run typecheck
 
   # ── 3. Testes com coverage (Jest) ──────────────────────────────────────
@@ -65,7 +65,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Run tests with coverage
         run: npm run test:coverage
       - name: Upload coverage report
@@ -90,7 +90,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
@@ -122,7 +122,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Setup Expo
         uses: expo/expo-github-action@v8
         with:
@@ -225,7 +225,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Audit runtime deps (high/critical) with temporary Expo allowlist
         run: |
           npm audit --omit=dev --json > audit.json || true
@@ -282,7 +282,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - name: Generate coverage for Sonar
         run: npm run test:coverage
       - name: SonarCloud Scan
@@ -306,7 +306,7 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci
+      - run: npm ci --ignore-scripts
       - run: npx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
 
   # ── 11. Detox E2E (scaffold — self-hosted macOS runner) ────────────────
@@ -322,7 +322,7 @@ jobs:
   #       with:
   #         node-version: ${{ env.NODE_VERSION }}
   #         cache: npm
-  #     - run: npm ci
+  #     - run: npm ci --ignore-scripts
   #     - name: Setup Detox
   #       run: npm run detox:build:ios
   #     - name: Run Detox tests

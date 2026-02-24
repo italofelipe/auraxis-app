@@ -10,6 +10,10 @@ Complementa (não substitui) o contexto global em `auraxis-platform/.context/`.
 | `README.md` | Este índice | Sempre — primeiro |
 | `architecture.md` | Estrutura de diretórios, decisões de stack, fluxo de dados | Antes de criar componentes ou telas |
 | `quality_gates.md` | Gates completos com comandos, thresholds e CI | Antes de commitar qualquer código |
+| `templates/feature_card_template.md` | Card SDD para iniciar feature | Antes de implementar qualquer task nova |
+| `templates/delivery_report_template.md` | Relatório de entrega por feature | Ao concluir um bloco de entrega |
+| `handoffs/` | Handoffs operacionais por sessão/agente | Ao pausar ou encerrar bloco |
+| `reports/` | Relatórios de entrega de features | Ao fechar task em `tasks.md` |
 
 ## Contexto global obrigatório (leia na platform)
 

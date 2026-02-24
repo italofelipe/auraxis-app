@@ -20,8 +20,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Dependency Review
-        id: dependency_review
-        continue-on-error: true
         uses: actions/dependency-review-action@v4
         with:
           # Falha se qualquer CVE de severidade >= high for introduzido
@@ -30,9 +28,3 @@ jobs:
           comment-summary-in-pr: always
           # Bloqueia licenças restritivas em produção
           deny-licenses: GPL-2.0, GPL-3.0, AGPL-3.0
-
-      - name: Dependency review fallback note
-        if: steps.dependency_review.outcome == 'failure'
-        run: |
-          echo "::warning::Dependency Review indisponivel neste repo (Dependency Graph desativado ou nao suportado)."
-          echo "::warning::Habilite em Settings > Security > Dependency graph para enforcement completo."

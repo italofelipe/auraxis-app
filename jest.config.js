@@ -38,6 +38,7 @@ const config = {
   // Cobertura
   // APP9 baseline: cobertura inicial em fluxo crítico de tema/renderização.
   collectCoverageFrom: [
+    'lib/api.ts',
     'components/themed-text.tsx',
     'components/themed-view.tsx',
     'components/ui/collapsible.tsx',
