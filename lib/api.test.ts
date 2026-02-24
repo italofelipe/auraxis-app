@@ -8,8 +8,8 @@ describe("ApiClient", () => {
     global.fetch = originalFetch;
   });
 
-  it("normaliza a base URL removendo barra final", () => {
-    const client = new ApiClient("http://localhost:5000/");
+  it("normaliza a base URL removendo barras finais", () => {
+    const client = new ApiClient("http://localhost:5000///");
 
     expect(client.getBaseUrl()).toBe("http://localhost:5000");
   });
@@ -32,6 +32,43 @@ describe("ApiClient", () => {
 
     expect(fetchMock).toHaveBeenCalledWith("http://localhost:5000/health", { method: "GET" });
     expect(response).toEqual({ status: "ok" });
+  });
+
+  it("normaliza path sem barra inicial ao executar GET", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: {
+        get: () => "application/json",
+      },
+      json: async () => ({ status: "ok" }),
+      text: async () => "",
+    } as unknown as Response);
+
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const client = new ApiClient("http://localhost:5000");
+    await client.get("health");
+
+    expect(fetchMock).toHaveBeenCalledWith("http://localhost:5000/health", { method: "GET" });
+  });
+
+  it("retorna texto para respostas nao-JSON", async () => {
+    const fetchMock = jest.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      headers: {
+        get: () => "text/plain",
+      },
+      json: async () => ({}),
+      text: async () => "pong",
+    } as unknown as Response);
+
+    global.fetch = fetchMock as unknown as typeof fetch;
+
+    const client = new ApiClient("http://localhost:5000");
+
+    await expect(client.get<string>("/health")).resolves.toBe("pong");
   });
 
   it("lanca erro tipado quando resposta nao e sucesso", async () => {

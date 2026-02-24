@@ -34,10 +34,10 @@ npm run quality-check
 | ESLint | 0 erros, 0 warnings (--max-warnings 0) | `eslint.config.js` |
 | TypeScript | 0 erros | `tsconfig.json` (strict: true) |
 | Jest — testes passando | 100% | `jest.config.js` |
-| Jest — coverage lines | ≥ 80% | `jest.config.js#coverageThreshold` |
-| Jest — coverage functions | ≥ 80% | `jest.config.js#coverageThreshold` |
-| Jest — coverage statements | ≥ 80% | `jest.config.js#coverageThreshold` |
-| Jest — coverage branches | ≥ 75% | `jest.config.js#coverageThreshold` |
+| Jest — coverage lines | ≥ 85% | `jest.config.js#coverageThreshold` |
+| Jest — coverage functions | ≥ 85% | `jest.config.js#coverageThreshold` |
+| Jest — coverage statements | ≥ 85% | `jest.config.js#coverageThreshold` |
+| Jest — coverage branches | ≥ 85% | `jest.config.js#coverageThreshold` |
 
 ---
 
@@ -49,7 +49,7 @@ npm run quality-check
 |:----|:--------------|:----------|:----------------|
 | `lint` | ESLint | 0 erros | ✅ sim |
 | `typecheck` | TypeScript strict | 0 erros | ✅ sim |
-| `test` | Jest + coverage | ≥ 80% lines | ✅ sim |
+| `test` | Jest + coverage | ≥ 85% (lines/functions/statements/branches) | ✅ sim |
 | `expo-bundle` | JS bundle compila | sem erros | ✅ sim |
 | `bundle-analysis` | Tamanho do bundle | ≤ 6 MB hard (Android/iOS) | ✅ sim (PR apenas) |
 | `secret-scan-gitleaks` | Secrets no código | 0 detectados | ✅ sim |

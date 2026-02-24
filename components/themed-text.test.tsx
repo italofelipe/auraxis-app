@@ -16,12 +16,45 @@ describe("ThemedText", () => {
     mockedUseThemeColor.mockReturnValue("#123456");
   });
 
+  it("renderiza com estilo default quando type nao e informado", () => {
+    const { getByText } = render(<ThemedText>Default</ThemedText>);
+
+    expect(getByText("Default")).toHaveStyle({
+      color: "#123456",
+      fontSize: 16,
+      lineHeight: 24,
+    });
+  });
+
   it("renderiza com estilo title quando type=title", () => {
     const { getByText } = render(<ThemedText type="title">Title</ThemedText>);
 
     expect(getByText("Title")).toHaveStyle({
       color: "#123456",
       fontSize: 32,
+      fontWeight: "bold",
+    });
+  });
+
+  it("renderiza com estilo defaultSemiBold quando type=defaultSemiBold", () => {
+    const { getByText } = render(
+      <ThemedText type="defaultSemiBold">SemiBold</ThemedText>,
+    );
+
+    expect(getByText("SemiBold")).toHaveStyle({
+      color: "#123456",
+      fontSize: 16,
+      lineHeight: 24,
+      fontWeight: "600",
+    });
+  });
+
+  it("renderiza com estilo subtitle quando type=subtitle", () => {
+    const { getByText } = render(<ThemedText type="subtitle">Subtitle</ThemedText>);
+
+    expect(getByText("Subtitle")).toHaveStyle({
+      color: "#123456",
+      fontSize: 20,
       fontWeight: "bold",
     });
   });

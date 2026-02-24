@@ -1,6 +1,14 @@
 const DEFAULT_API_BASE_URL = "http://localhost:5000";
 
-const normalizeBaseUrl = (rawUrl: string): string => rawUrl.replace(/\/+$/, "");
+const removeTrailingSlashes = (rawUrl: string): string => {
+  let end = rawUrl.length;
+
+  while (end > 0 && rawUrl.charCodeAt(end - 1) === 47) {
+    end -= 1;
+  }
+
+  return rawUrl.slice(0, end);
+};
 
 const normalizePath = (path: string): string => {
   if (path.startsWith("/")) {
@@ -12,7 +20,7 @@ const normalizePath = (path: string): string => {
 
 const resolveBaseUrlFromEnv = (): string => {
   const envUrl = process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_API_BASE_URL;
-  return normalizeBaseUrl(envUrl);
+  return removeTrailingSlashes(envUrl);
 };
 
 const parseResponse = async <T>(response: Response): Promise<T> => {
@@ -47,7 +55,7 @@ export class ApiClient {
   private readonly baseUrl: string;
 
   public constructor(baseUrl = resolveBaseUrlFromEnv()) {
-    this.baseUrl = normalizeBaseUrl(baseUrl);
+    this.baseUrl = removeTrailingSlashes(baseUrl);
   }
 
   public getBaseUrl(): string {

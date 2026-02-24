@@ -839,7 +839,7 @@ module.exports = {
     '!**/index.ts',
   ],
   coverageThreshold: {
-    global: { lines: 80, functions: 80, statements: 80, branches: 75 },
+    global: { lines: 85, functions: 85, statements: 85, branches: 85 },
   },
 }
 ```
@@ -1154,10 +1154,10 @@ npx jest --clearCache
 | ESLint | 0 erros, 0 warnings | commit (lint-staged) + CI |
 | TypeScript | 0 erros | commit (pre-push) + CI |
 | jest-expo — testes | 100% passando | CI |
-| jest-expo — lines | ≥ 80% | CI |
-| jest-expo — functions | ≥ 80% | CI |
-| jest-expo — statements | ≥ 80% | CI |
-| jest-expo — branches | ≥ 75% | CI |
+| jest-expo — lines | ≥ 85% | CI |
+| jest-expo — functions | ≥ 85% | CI |
+| jest-expo — statements | ≥ 85% | CI |
+| jest-expo — branches | ≥ 85% | CI |
 
 ### 12.2 Pre-commit hooks (husky + lint-staged)
 
@@ -1185,7 +1185,7 @@ push / PR → master
 │
 ├── lint              (ESLint — 0 erros, --max-warnings 0)
 ├── typecheck         (tsc --noEmit — 0 erros)
-├── test              (jest-expo + coverage ≥ 80%)
+├── test              (jest-expo + coverage ≥ 85%)
 │
 ├── expo-bundle       (export android — valida que bundle JS compila)
 │   └── bundle-analysis   (comenta tamanho no PR; hard limit 6 MB)
