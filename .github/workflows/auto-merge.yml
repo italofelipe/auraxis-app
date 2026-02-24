@@ -14,14 +14,13 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, labeled]
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
   auto-merge:
     name: Enable auto-merge for Dependabot PRs
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     if: |
       github.actor == 'dependabot[bot]' &&
       contains(github.event.pull_request.labels.*.name, 'auto-merge')

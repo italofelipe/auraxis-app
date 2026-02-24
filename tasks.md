@@ -1,6 +1,6 @@
 # tasks.md — auraxis-app
 
-Última atualização: 2026-02-22
+Última atualização: 2026-02-24
 
 ## Legenda
 
@@ -19,10 +19,10 @@
 
 ### P0 — Pré-requisito para qualquer desenvolvimento
 
-- [ ] **APP1** `chore` — Configurar lint e type-check (ESLint + TypeScript strict)
+- [x] **APP1** `chore` — Configurar lint e type-check (ESLint + TypeScript strict)
   - Critério: `npm run lint` e `tsc --noEmit` passam sem erros no scaffold atual.
   - Dependência: nenhuma
-  - Commit: —
+  - Commit: `3eaa519`, `33ffc22`
   - Risco residual: regras de ESLint podem conflitar com código gerado pelo Expo.
 
 - [ ] **APP2** `chore` — Configurar cliente HTTP para auraxis-api
@@ -47,10 +47,10 @@
 
 ### P2 — Normal
 
-- [ ] **APP5** `chore` — Configurar CI (GitHub Actions)
+- [x] **APP5** `chore` — Configurar CI (GitHub Actions)
   - Critério: workflow roda `lint` + `tsc` + `jest` (quando houver testes) a cada PR contra `main`. Build Expo não está no CI nesta fase (requer EAS).
   - Dependência: APP1
-  - Commit: —
+  - Commit: `3eaa519`, `884122c`
 
 - [ ] **APP6** `chore` — Configurar EAS Build (Expo Application Services)
   - Critério: `eas build --platform android --profile preview` gera APK instalável. Perfis `development`, `preview` e `production` configurados em `eas.json`.
@@ -79,3 +79,11 @@
 - [x] Scaffold inicial Expo SDK 54 + React Native 0.81 | Data: 2026-02-22
 - [x] Governance baseline: CLAUDE.md, .gitignore, tasks.md, steering.md | Data: 2026-02-22
 - [x] Registrado como submodule em auraxis-platform | Commit: `05ca2ff` | Data: 2026-02-22
+- [x] APP1 concluído: lint + typecheck + strict mode estabilizados | Commits: `3eaa519`, `33ffc22` | Data: 2026-02-23
+- [x] APP5 concluído: pipeline CI com gates de qualidade e segurança | Commits: `3eaa519`, `884122c` | Data: 2026-02-23
+- [x] CI fix: comentário de bundle-size no PR tornado resiliente a `403` de integração GitHub e audit npm ajustado para gate com allowlist temporária do advisory `GHSA-3ppc-4f35-3m26` (cadeia Expo) | Data: 2026-02-24
+- [x] CI fix: `dependency-review-action` ajustado (remoção de input inválido + fallback não-bloqueante enquanto Dependency Graph estiver desativado) | Data: 2026-02-24
+- [x] CI fix: Sonar migrado para `sonarqube-scan-action@v5` e `sonar.sources=.` para evitar erro por diretórios inexistentes | Data: 2026-02-24
+- [x] CI fix: Sonar pinado com SHA completo (`sonarqube-scan-action@v6`) e organização Sonar corrigida para `sensoriumit` | Data: 2026-02-24
+- [x] CI security fix: permissões de workflows movidas de nível global para nível de job (least privilege) para atender policy/Sonar | Data: 2026-02-24
+- [x] CI fix: scanner Sonar em `ci.yml` condicionado por `ENABLE_SONAR_CI=true` para evitar conflito com Automatic Analysis habilitado no SonarCloud | Data: 2026-02-24

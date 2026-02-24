@@ -56,6 +56,8 @@ npm run quality-check
 | `secret-scan-trufflehog` | Secrets com entropia | 0 verificados | ✅ sim |
 | `audit` | CVEs em deps instaladas | 0 high/critical | ✅ sim |
 | `sonarcloud` | Análise estática | quality gate pass | ✅ sim |
+
+> **Secret Sonar:** GitHub Secret = `SONAR_AURAXIS_APP_TOKEN` · `.env` local = `SONAR_AURAXIS_APP_TOKEN=<token>`
 | `commitlint` | Conventional Commits | válido | ✅ sim (PR apenas) |
 | `dependency-review` | CVEs em novas deps | 0 high/critical | ✅ sim (PR apenas) |
 
