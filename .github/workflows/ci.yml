@@ -268,10 +268,13 @@ jobs:
 
   # ── 9. SonarCloud ──────────────────────────────────────────────────────
   # Modelo oficial: CI-based analysis (Automatic Analysis desabilitado no SonarCloud).
+  # Enquanto o Automatic Analysis estiver habilitado no SonarCloud, mantenha
+  # ENABLE_SONAR_CI=false para evitar conflito entre modos de análise.
   sonarcloud:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: [test]
+    if: vars.ENABLE_SONAR_CI == 'true'
     permissions:
       contents: read
     steps:

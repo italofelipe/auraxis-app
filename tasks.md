@@ -94,3 +94,5 @@
 - [x] CI security fix: permissões de workflows movidas de nível global para nível de job (least privilege) para atender policy/Sonar | Data: 2026-02-24
 - [x] CI hardening: Sonar padronizado para CI scanner sempre ativo (Automatic Analysis deve permanecer desabilitado no SonarCloud) | Data: 2026-02-24
 - [x] CI fix: `jest.config.js` corrigido (`setupFilesAfterFramework` -> `setupFilesAfterEnv`) para eliminar warning de configuração inválida | Data: 2026-02-24
+- [x] CI compat: Sonar protegido por `ENABLE_SONAR_CI` enquanto Automatic Analysis não for desabilitado no SonarCloud | Data: 2026-02-24
+- [x] CI compat: `dependency-review-action` com fallback controlado para repo sem Dependency Graph suportado/habilitado | Data: 2026-02-24
