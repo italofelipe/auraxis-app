@@ -84,3 +84,4 @@
 - [x] CI fix: comentário de bundle-size no PR tornado resiliente a `403` de integração GitHub e audit npm ajustado para gate com allowlist temporária do advisory `GHSA-3ppc-4f35-3m26` (cadeia Expo) | Data: 2026-02-24
 - [x] CI fix: `dependency-review-action` ajustado (remoção de input inválido + fallback não-bloqueante enquanto Dependency Graph estiver desativado) | Data: 2026-02-24
 - [x] CI fix: Sonar migrado para `sonarqube-scan-action@v5` e `sonar.sources=.` para evitar erro por diretórios inexistentes | Data: 2026-02-24
+- [x] CI fix: Sonar pinado com SHA completo (`sonarqube-scan-action@v6`) e organização Sonar corrigida para `sensoriumit` | Data: 2026-02-24
