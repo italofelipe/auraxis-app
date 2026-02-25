@@ -52,3 +52,14 @@ Preparar o app para:
 
 - Definir provider OSS (Unleash/OpenFeature) e integrar o cliente de flags no bootstrap do app.
 - Estabelecer política de governança de flags (owner, expiração e remoção).
+
+## PLT4.1 (higiene de flags) — entregue
+
+- Catálogo versionado de flags:
+  - `config/feature-flags.json`
+- Validador de metadados:
+  - `scripts/check-feature-flags.cjs`
+- Gate no CI:
+  - job `Feature Flags Hygiene` em `.github/workflows/ci.yml`
+- Paridade local:
+  - etapa `flags:hygiene` em `scripts/run_ci_like_actions_local.sh`

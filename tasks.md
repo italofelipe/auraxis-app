@@ -1,6 +1,6 @@
 # tasks.md — auraxis-app
 
-Última atualização: 2026-02-24
+Última atualização: 2026-02-25
 
 ## Legenda
 
@@ -93,6 +93,12 @@
   - Commit: —
   - Risco residual: sincronização de flags entre ambientes sem governança pode causar comportamento inconsistente.
 
+- [x] **APP17** `chore` — Automatizar hygiene de feature flags no CI
+  - Critério: catálogo versionado de flags com metadados obrigatórios e validação bloqueante no CI/local parity para owner, removeBy e expiração.
+  - Dependência: APP14
+  - Commit: —
+  - Risco residual: ainda depende de disciplina para remover código morto após cleanup de flag.
+
 - [~] **APP15** `chore` — Deploy mínimo do frontend mobile (baseline distribuível)
   - Critério: build de preview distribuída para teste interno (Android/iOS), com evidência de instalação e execução do fluxo inicial.
   - Dependência: APP12
@@ -155,3 +161,4 @@
 - [x] PLT3 foundation (app): `release-please` configurado com PR/tag/changelog automáticos (`.release-please-*` + workflow) | Data: 2026-02-24
 - [x] PLT2 foundation (app): `eas.json` criado com perfis de build/submit e workflow manual de store release (`store-release.yml`) | Data: 2026-02-24
 - [x] PLT5 foundation (app): deploy mínimo via artifact web + build preview opcional no EAS (`deploy-minimum.yml`) | Data: 2026-02-24
+- [x] PLT4.1 (app): catálogo de flags em `config/feature-flags.json` + gate `Feature Flags Hygiene` no CI + validação local em `scripts/run_ci_like_actions_local.sh` | Data: 2026-02-25
