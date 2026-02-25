@@ -14,6 +14,7 @@
     "typecheck": "tsc --noEmit",
     "test": "jest",
     "test:coverage": "jest --coverage",
+    "flags:check": "node scripts/check-feature-flags.cjs",
     "quality-check": "npm run lint && npm run typecheck && npm run test:coverage",
     "test:watch": "jest --watchAll",
     "ci:local": "bash scripts/run_ci_like_actions_local.sh"
