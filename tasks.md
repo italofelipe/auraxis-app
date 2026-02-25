@@ -70,10 +70,11 @@
   - Dependência: APP1
   - Commit: `3eaa519`, `884122c`
 
-- [ ] **APP6** `chore` — Configurar EAS Build (Expo Application Services)
+- [~] **APP6** `chore` — Configurar EAS Build (Expo Application Services)
   - Critério: `eas build --platform android --profile preview` gera APK instalável. Perfis `development`, `preview` e `production` configurados em `eas.json`.
   - Dependência: conta EAS ativa
   - Commit: —
+  - Status atual (2026-02-25): `eas init` + `eas build:configure --platform all` concluídos; pendente executar build preview completo e validar artifact instalável.
 
 - [~] **APP12** `chore` — Preparar publicação contínua para Play Store/App Store
   - Critério: trilhas/configuração de release prontas (Google Play Internal + TestFlight), com credenciais seguras e checklist de submissão documentado.
@@ -121,13 +122,6 @@
   - Commit: —
   - Prioridade de produto: baixa
 
-### Bloqueados
-
-- [!] **APP6** — EAS Build requer conta EAS configurada e `eas login` autenticado.
-  - Bloqueador: configuração manual da conta EAS pelo humano.
-
----
-
 ## Concluídos
 
 - [x] Scaffold inicial Expo SDK 54 + React Native 0.81 | Data: 2026-02-22
@@ -162,3 +156,4 @@
 - [x] PLT2 foundation (app): `eas.json` criado com perfis de build/submit e workflow manual de store release (`store-release.yml`) | Data: 2026-02-24
 - [x] PLT5 foundation (app): deploy mínimo via artifact web + build preview opcional no EAS (`deploy-minimum.yml`) | Data: 2026-02-24
 - [x] PLT4.1 (app): catálogo de flags em `config/feature-flags.json` + gate `Feature Flags Hygiene` no CI + validação local em `scripts/run_ci_like_actions_local.sh` | Data: 2026-02-25
+- [x] APP6 avanço: `eas init` concluído com `owner`/`projectId` em `app.json` e `eas build:configure --platform all` validado no ambiente local | Data: 2026-02-25
