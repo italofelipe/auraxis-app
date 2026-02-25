@@ -80,7 +80,7 @@ jobs:
             extra_args="--auto-submit"
           fi
 
-          npx eas build \
+          eas build \
             --platform "$BUILD_PLATFORM" \
             --profile "$BUILD_PROFILE" \
             --non-interactive \
