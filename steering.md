@@ -39,6 +39,8 @@
 - Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
 - Grid base: `8px` (spacing estrutural em múltiplos de 8).
 - Componentes mobile devem partir de base **React Native Paper** customizada para o tema Auraxis.
+- Componentes novos devem usar prioritariamente React Native Paper; customizações devem ocorrer por extensão/composição e wrappers internos.
+- É proibido usar valores literais de cor, spacing, radius, shadow, font-size e line-height em telas/componentes. Usar tokens semânticos.
 - **Tailwind não é permitido** neste repositório.
 - Server-state remoto deve preferir `@tanstack/react-query` para cache, retry e invalidação.
 
@@ -54,6 +56,7 @@
 - **Testes não são opcionais** — toda lógica nova tem teste antes de merge.
 - **Performance mobile** — bundle Android/iOS ≤ 6 MB (hard limit no CI).
 - **UI consistente por contrato** — React Native Paper custom + tokens oficiais são obrigatórios.
+- **Token-first styling** — qualquer estilo visual deve referenciar tokens; valores soltos no código são não conformidade.
 - **Server-state com TanStack Query** — evitar fetch manual distribuído em telas/componentes.
 
 ---

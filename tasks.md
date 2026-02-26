@@ -1,6 +1,6 @@
 # tasks.md — auraxis-app
 
-Última atualização: 2026-02-25
+Última atualização: 2026-02-26
 
 ## Legenda
 
@@ -39,25 +39,25 @@
 
 ### P1 — Alta
 
-- [ ] **APP3** `feat` — Estrutura de autenticação (contexto de sessão + telas de login)
+- [~] **APP3** `feat` — Estrutura de autenticação (contexto de sessão + telas de login)
   - Critério: usuário consegue autenticar com email/senha via `POST /auth/login`. Token armazenado em `expo-secure-store`. Logout limpa o store. Fluxo protegido redireciona para login se sem token.
   - Dependência: APP2
   - Commit: —
   - Risco residual: refresh token não implementado nesta fase — sessão expira e força re-login.
 
-- [ ] **APP4** `feat` — Tela de dashboard (listagem de transações e saldo)
+- [~] **APP4** `feat` — Tela de dashboard (listagem de transações e saldo)
   - Critério: tela inicial exibe saldo atual e lista das últimas 20 transações consumindo `GET /transactions`. Loading state e error state tratados.
   - Dependência: APP3
   - Commit: —
   - Risco residual: paginação não implementada nesta fase.
 
-- [ ] **APP10** `chore` — Padronizar UI mobile com React Native Paper customizado
+- [~] **APP10** `chore` — Padronizar UI mobile com React Native Paper customizado
   - Critério: tema base do Paper configurado com paleta oficial, tipografia (`Playfair Display` + `Raleway`) e grid de 8px.
   - Dependência: APP1
   - Commit: —
   - Risco residual: telas legadas podem conviver temporariamente com componentes não migrados.
 
-- [ ] **APP11** `chore` — Adotar TanStack Query para server-state no app
+- [~] **APP11** `chore` — Adotar TanStack Query para server-state no app
   - Critério: `QueryClientProvider` global configurado e primeiro fluxo de integração com API usando `@tanstack/react-query` (cache/retry/invalidation).
   - Dependência: APP2
   - Commit: —
@@ -99,6 +99,18 @@
   - Dependência: APP14
   - Commit: —
   - Risco residual: ainda depende de disciplina para remover código morto após cleanup de flag.
+
+- [x] **APP18** `chore` — Scaffold administrativo pré-feature (providers, estado, contratos, hooks e utilitários)
+  - Critério: `QueryClientProvider`, `PaperProvider` customizado, estado global com `zustand` (sem ContextAPI), cliente HTTP (`axios`) e contratos tipados de auth/dashboard/carteira/ferramentas configurados.
+  - Dependência: APP1, APP2
+  - Commit: a definir (branch `feat/foundation-ui-data-scaffold`)
+  - Risco residual: endpoints finais do backend ainda podem evoluir e exigir ajustes de contrato.
+
+- [x] **APP19** `feat` — Telas placeholder do ciclo inicial (login, forgot-password, dashboard, carteira e ferramentas)
+  - Critério: telas navegáveis via Expo Router com conteúdo placeholder, formulário validado com `react-hook-form` + `zod`, hooks de query/mutation prontos para integração real.
+  - Dependência: APP18
+  - Commit: a definir (branch `feat/foundation-ui-data-scaffold`)
+  - Risco residual: falta aplicar design final e refino de UX quando o pacote visual estiver pronto.
 
 - [~] **APP15** `chore` — Deploy mínimo do frontend mobile (baseline distribuível)
   - Critério: build de preview distribuída para teste interno (Android/iOS), com evidência de instalação e execução do fluxo inicial.
@@ -157,3 +169,5 @@
 - [x] PLT5 foundation (app): deploy mínimo via artifact web + build preview opcional no EAS (`deploy-minimum.yml`) | Data: 2026-02-24
 - [x] PLT4.1 (app): catálogo de flags em `config/feature-flags.json` + gate `Feature Flags Hygiene` no CI + validação local em `scripts/run_ci_like_actions_local.sh` | Data: 2026-02-25
 - [x] APP6 avanço: `eas init` concluído com `owner`/`projectId` em `app.json` e `eas build:configure --platform all` validado no ambiente local | Data: 2026-02-25
+- [x] APP18 concluído: fundação administrativa mobile configurada (`react-native-paper` + `zustand` + `@tanstack/react-query` + contratos tipados + cliente HTTP + secure storage) | Data: 2026-02-26
+- [x] APP19 concluído: telas placeholder de login/forgot-password/dashboard/carteira/ferramentas publicadas com validação `zod` + `react-hook-form` e hooks prontos para integração de dados | Data: 2026-02-26
