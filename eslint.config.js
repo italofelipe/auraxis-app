@@ -64,14 +64,6 @@ module.exports = defineConfig([
     },
   },
   {
-    // Arquivos de scaffold inicial do Expo Router têm exemplo verboso por padrão.
-    files: ["app/(tabs)/index.tsx", "app/(tabs)/explore.tsx"],
-    rules: {
-      "max-lines-per-function": "off",
-      "no-alert": "off",
-    },
-  },
-  {
     // Testes permitem funções maiores/mais complexas para setup e cenários.
     files: ["**/*.{test,spec}.{js,jsx,ts,tsx}", "**/__tests__/**/*.{js,jsx,ts,tsx}"],
     rules: {
