@@ -45,6 +45,8 @@
 - Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
 - Grid base: `8px` (layout em múltiplos de 8).
 - Componentes base mobile devem derivar de React Native Paper customizado.
+- Componentes de produto devem usar primariamente React Native Paper; componentes custom só por extensão/composição com wrappers internos.
+- É proibido usar valores literais de cor, spacing, radius, shadow, font-size e line-height em telas/componentes. Sempre usar tokens.
 - Tailwind é proibido no app.
 - Server-state deve preferir `@tanstack/react-query` para integração com API.
 
