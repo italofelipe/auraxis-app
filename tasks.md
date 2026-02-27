@@ -1,6 +1,6 @@
 # tasks.md — auraxis-app
 
-Última atualização: 2026-02-26
+Última atualização: 2026-02-27
 
 ## Legenda
 
@@ -194,3 +194,4 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
 - [x] APP18 concluído: fundação administrativa mobile configurada (`react-native-paper` + `zustand` + `@tanstack/react-query` + contratos tipados + cliente HTTP + secure storage) | Data: 2026-02-26
 - [x] APP19 concluído: telas placeholder de login/forgot-password/dashboard/carteira/ferramentas publicadas com validação `zod` + `react-hook-form` e hooks prontos para integração de dados | Data: 2026-02-26
 - [x] Guardrail de governança frontend reforçado: `scripts/check-frontend-governance.cjs` integrado em `quality-check`, lint-staged, CI (`frontend-governance`) e parity local, com enforcement de `shared/*` canônico + token-first styling + TS-only | Data: 2026-02-27
+- [x] Governança cross-platform sincronizada: referências obrigatórias ao guideline unificado (`.context/32_frontend_unified_guideline.md`) e ao fluxo de `Feature Contract Pack` adicionadas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-27

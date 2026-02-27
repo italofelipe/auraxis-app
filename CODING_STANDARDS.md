@@ -6,6 +6,11 @@
 > Este documento define **como escrever código** neste repo. Não é opcional.
 > Cada seção tem regras (**deve/nunca**) e exemplos práticos.
 
+Referências mandatórias:
+
+- `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/32_frontend_unified_guideline.md`
+- `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/feature_contracts/README.md`
+
 ---
 
 ## Índice
