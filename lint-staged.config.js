@@ -10,6 +10,7 @@ module.exports = {
   // --no-warn-ignored: suprime warning de arquivos ignorados (e.g., e2e/)
   '**/*.{ts,tsx}': [
     'eslint --fix --max-warnings 0 --no-warn-ignored',
+    'node scripts/check-frontend-governance.cjs',
   ],
 
   // JSON — formatação

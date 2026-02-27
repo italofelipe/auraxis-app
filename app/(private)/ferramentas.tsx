@@ -3,7 +3,7 @@ import { Card, Text } from "react-native-paper";
 
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ScreenContainer } from "@/components/ui/screen-container";
-import { spacing } from "@/config/design-tokens";
+import { colorPalette, spacing } from "@/config/design-tokens";
 import { useToolsCatalogQuery } from "@/hooks/queries/use-tools-query";
 
 const styles = StyleSheet.create({
@@ -13,8 +13,8 @@ const styles = StyleSheet.create({
   card: {
     gap: spacing(1),
     padding: spacing(2),
-    borderRadius: 12,
-    backgroundColor: "rgba(255, 190, 77, 0.15)",
+    borderRadius: spacing(1.5),
+    backgroundColor: colorPalette.brand300,
   },
 });
 

@@ -193,3 +193,4 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
 - [x] APP6 avanço: `eas init` concluído com `owner`/`projectId` em `app.json` e `eas build:configure --platform all` validado no ambiente local | Data: 2026-02-25
 - [x] APP18 concluído: fundação administrativa mobile configurada (`react-native-paper` + `zustand` + `@tanstack/react-query` + contratos tipados + cliente HTTP + secure storage) | Data: 2026-02-26
 - [x] APP19 concluído: telas placeholder de login/forgot-password/dashboard/carteira/ferramentas publicadas com validação `zod` + `react-hook-form` e hooks prontos para integração de dados | Data: 2026-02-26
+- [x] Guardrail de governança frontend reforçado: `scripts/check-frontend-governance.cjs` integrado em `quality-check`, lint-staged, CI (`frontend-governance`) e parity local, com enforcement de `shared/*` canônico + token-first styling + TS-only | Data: 2026-02-27
