@@ -15,6 +15,26 @@
 
 ---
 
+## Diretriz global de layout (obrigatória para agentes)
+
+Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
+
+1. Fonte visual canônica:
+   - `/Users/italochagas/Desktop/projetos/auraxis-platform/designs/1920w default.png`
+   - `/Users/italochagas/Desktop/projetos/auraxis-platform/designs/Background.svg`
+2. Spec operacional obrigatório:
+   - `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/30_design_reference.md`
+3. Regras de aceite visual:
+   - reproduzir hierarquia/composição do layout de referência (adaptando responsividade mobile sem descaracterizar a estrutura);
+   - usar tokens de tema para 100% dos valores visuais (zero cor/spacing/radius hardcoded);
+   - aplicar tipografia oficial (`Playfair Display` + `Raleway`) e grid de `8px`;
+   - usar componentes-base do React Native Paper com extensão por tema.
+4. Evidência obrigatória por task de UI:
+   - screenshot local comparativa com a referência;
+   - registro explícito de fidelidade visual e gaps no handoff/report da task.
+
+---
+
 ## Ciclo A — Fundação e integração básica
 
 ### P0 — Pré-requisito para qualquer desenvolvimento
@@ -47,6 +67,7 @@
 
 - [~] **APP4** `feat` — Tela de dashboard (listagem de transações e saldo)
   - Critério: tela inicial exibe saldo atual e lista das últimas 20 transações consumindo `GET /transactions`. Loading state e error state tratados.
+  - Critério visual obrigatório: aderência ao blueprint de dashboard em `designs/1920w default.png` conforme `.context/30_design_reference.md`.
   - Dependência: APP3
   - Commit: —
   - Risco residual: paginação não implementada nesta fase.
@@ -108,6 +129,7 @@
 
 - [x] **APP19** `feat` — Telas placeholder do ciclo inicial (login, forgot-password, dashboard, carteira e ferramentas)
   - Critério: telas navegáveis via Expo Router com conteúdo placeholder, formulário validado com `react-hook-form` + `zod`, hooks de query/mutation prontos para integração real.
+  - Critério visual obrigatório: placeholders já devem respeitar estrutura/hierarquia dos assets canônicos em `designs/`.
   - Dependência: APP18
   - Commit: a definir (branch `feat/foundation-ui-data-scaffold`)
   - Risco residual: falta aplicar design final e refino de UX quando o pacote visual estiver pronto.
