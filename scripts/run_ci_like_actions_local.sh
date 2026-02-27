@@ -61,6 +61,9 @@ run_core_pipeline() {
   echo "[ci-like-local] step=frontend:governance"
   npm run policy:check
 
+  echo "[ci-like-local] step=contracts:smoke"
+  npm run contracts:check
+
   echo "[ci-like-local] step=audit-gate"
   node scripts/ci-audit-gate.js
 

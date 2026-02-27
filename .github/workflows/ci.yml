@@ -105,12 +105,28 @@ jobs:
           path: coverage/
           retention-days: 14
 
+  # ── 4.1 Contract Smoke (OpenAPI + Feature Contract Packs) ──────────────
+  contract-smoke:
+    name: Contract Smoke (OpenAPI + Packs)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Validate generated OpenAPI types and contract pack baseline
+        run: npm run contracts:check
+
   # ── 5. Expo JS Bundle Check ────────────────────────────────────────────
   # Verifica que o bundle JS compila sem erros (não requer macOS).
   expo-bundle:
     name: Expo JS Bundle Check
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test]
+    needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test, contract-smoke]
     permissions:
       contents: read
     steps:

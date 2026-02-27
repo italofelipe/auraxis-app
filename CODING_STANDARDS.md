@@ -6,6 +6,17 @@
 > Este documento define **como escrever código** neste repo. Não é opcional.
 > Cada seção tem regras (**deve/nunca**) e exemplos práticos.
 
+Referências mandatórias:
+
+- `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/32_frontend_unified_guideline.md`
+- `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/feature_contracts/README.md`
+- `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/openapi/README.md`
+
+Contrato tipado obrigatório (OpenAPI + packs):
+
+- `npm run contracts:sync` para atualizar snapshot OpenAPI, tipos gerados e baseline de packs.
+- `npm run contracts:check` para validar drift de contrato no gate local/CI.
+
 ---
 
 ## Índice

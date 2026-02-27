@@ -6,6 +6,27 @@
 
 ---
 
+## Base canônica cross-platform
+
+Este repositório deve seguir os mesmos conceitos de engenharia frontend do web,
+conforme `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/32_frontend_unified_guideline.md`.
+
+Diferenças permitidas aqui são apenas as inerentes ao stack mobile (React Native/Expo).
+Qualquer desvio conceitual (arquitetura, contratos, gates, modularidade) exige registro
+em decision log antes da implementação.
+
+Para integração com backend recém-entregue:
+
+- ler `Feature Contract Pack` em
+  `/Users/italochagas/Desktop/projetos/auraxis-platform/.context/feature_contracts/<TASK_ID>.md`
+  antes de implementar consumo de endpoint.
+- manter baseline de contrato em `contracts/feature-contract-baseline.json` e validar
+  via `npm run contracts:check` (bloqueante em CI).
+- manter tipos OpenAPI gerados em `shared/types/generated/openapi.ts` via
+  `npm run contracts:sync`.
+
+---
+
 ## Stack técnica
 
 | Camada | Tecnologia | Versão |
