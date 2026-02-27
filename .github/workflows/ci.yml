@@ -98,7 +98,7 @@ jobs:
       - name: Run tests with coverage
         run: npm run test:coverage
       - name: Upload coverage report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: always()
         with:
           name: coverage-report
@@ -145,7 +145,7 @@ jobs:
         run: npx expo export --platform all --output-dir dist
         continue-on-error: false
       - name: Upload bundle artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: expo-bundle-all
           path: dist/
@@ -345,7 +345,7 @@ jobs:
   #     - name: Run Detox tests
   #       run: npm run detox:test:ios
   #     - name: Upload Detox artifacts
-  #       uses: actions/upload-artifact@v4
+  #       uses: actions/upload-artifact@v7
   #       if: always()
   #       with:
   #         name: detox-artifacts
