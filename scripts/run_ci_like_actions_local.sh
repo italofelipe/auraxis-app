@@ -58,6 +58,9 @@ run_core_pipeline() {
   echo "[ci-like-local] step=flags:hygiene"
   npm run flags:check
 
+  echo "[ci-like-local] step=frontend:governance"
+  npm run policy:check
+
   echo "[ci-like-local] step=audit-gate"
   node scripts/ci-audit-gate.js
 

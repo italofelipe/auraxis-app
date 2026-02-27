@@ -4,6 +4,7 @@ import { StyleSheet, TouchableOpacity } from "react-native";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { IconSymbol } from "@/components/ui/icon-symbol";
+import { spacing } from "@/config/design-tokens";
 import { Colors } from "@/constants/theme";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 
@@ -36,10 +37,10 @@ const styles = StyleSheet.create({
   heading: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: spacing(0.75),
   },
   content: {
-    marginTop: 6,
-    marginLeft: 24,
+    marginTop: spacing(0.75),
+    marginLeft: spacing(3),
   },
 });

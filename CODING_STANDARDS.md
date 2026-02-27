@@ -1146,11 +1146,12 @@ async function openExternalUrl(url: string) {
 ```bash
 # Comando único — roda tudo:
 npm run quality-check
-# = npm run lint && npm run typecheck && npm run test:coverage
+# = npm run lint && npm run typecheck && npm run policy:check && npm run test:coverage
 
 # Individualmente:
 npm run lint           # ESLint (--max-warnings 0)
 npm run typecheck      # tsc --noEmit
+npm run policy:check   # guardrails frontend (TS-only + shared + token-first)
 npm run test           # jest-expo (todos os testes)
 npm run test:coverage  # jest-expo + coverage report
 npm run test:watch     # modo watch durante desenvolvimento

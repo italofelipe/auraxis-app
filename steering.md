@@ -2,7 +2,7 @@
 
 > Documento canônico de governança técnica para o aplicativo mobile do Auraxis.
 > Vinculante para todos os agentes e desenvolvedores.
-> Atualizado: 2026-02-24
+> Atualizado: 2026-02-27
 
 ---
 
@@ -68,12 +68,12 @@
 | `app/` | Telas (Expo Router — file-based routing) |
 | `components/` | Componentes reutilizáveis |
 | `hooks/` | Hooks customizados (prefixo `use`) |
-| `store/` | Estado global de cliente |
-| `providers/` | Providers globais (Theme, QueryClient, Session) |
+| `stores/` | Estado global de cliente |
 | `services/` | Chamadas HTTP (um arquivo por domínio de API) |
 | `utils/` | Funções puras sem side-effects |
 | `types/` | Interfaces e tipos TypeScript |
 | `types/api/` | Tipos do contrato com auraxis-api |
+| `shared/` | Código compartilhado (`shared/components`, `shared/types`, `shared/validators`, `shared/utils`) |
 | `constants/` | Constantes e temas de cor |
 | `__tests__/` | Testes unitários (alternativa a co-localização) |
 | `e2e/` | Testes Detox (scaffold — requer macOS runner) |
@@ -97,7 +97,10 @@ npm run lint
 # 2. Type-check
 npm run typecheck
 
-# 3. Testes unitários com coverage
+# 3. Guardrails de governança frontend
+npm run policy:check
+
+# 4. Testes unitários com coverage
 npm run test:coverage
 
 # Comando combinado (obrigatório antes de commitar):
@@ -139,6 +142,7 @@ push / PR → master
 │
 ├── lint              (ESLint — 0 erros)
 ├── typecheck         (tsc --noEmit — 0 erros)
+├── frontend-governance (TS-only + shared dirs + token-first styling)
 ├── test              (jest-expo + coverage ≥ 85%)
 │
 ├── expo-bundle       (export android — valida que bundle JS compila)

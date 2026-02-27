@@ -67,6 +67,21 @@ jobs:
       - name: Validate feature flags metadata
         run: node scripts/check-feature-flags.cjs
 
+  # ── 4. Frontend Governance Guardrails ──────────────────────────────────
+  frontend-governance:
+    name: Frontend Governance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm run policy:check
+
   # ── 4. Testes com coverage (Jest) ──────────────────────────────────────
   test:
     name: Tests + Coverage (Jest)
@@ -95,7 +110,7 @@ jobs:
   expo-bundle:
     name: Expo JS Bundle Check
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, feature-flag-hygiene, test]
+    needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test]
     permissions:
       contents: read
     steps:
