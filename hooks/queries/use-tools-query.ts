@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { toolsApi, toolsPlaceholder } from "@/lib/tools-api";
+import { applyToolsFlags, toolsApi, toolsPlaceholder } from "@/lib/tools-api";
 import type { ToolsCatalog } from "@/types/contracts";
 
 export const useToolsCatalogQuery = () => {
@@ -10,7 +10,7 @@ export const useToolsCatalogQuery = () => {
       try {
         return await toolsApi.getCatalog();
       } catch {
-        return toolsPlaceholder;
+        return applyToolsFlags(toolsPlaceholder);
       }
     },
   });
