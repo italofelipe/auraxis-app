@@ -76,6 +76,9 @@
     "ts-jest": "^29.4.6",
     "typescript": "~5.9.2"
   },
+  "engines": {
+    "node": "22.x"
+  },
   "private": true,
   "lint-staged": {
     "**/*.{ts,tsx}": [
