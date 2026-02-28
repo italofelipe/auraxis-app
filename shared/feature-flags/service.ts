@@ -13,6 +13,44 @@ const defaultUnleashCacheTtlMs = 30000;
 let unleashCacheExpireAtMs = 0;
 let unleashCacheSnapshot: Record<string, boolean> = {};
 
+const getKnownEnvValues = (): Record<string, string | undefined> => {
+  return {
+    EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS: process.env.EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS,
+    AURAXIS_UNLEASH_CACHE_TTL_MS: process.env.AURAXIS_UNLEASH_CACHE_TTL_MS,
+    EXPO_PUBLIC_FLAG_PROVIDER: process.env.EXPO_PUBLIC_FLAG_PROVIDER,
+    AURAXIS_FLAG_PROVIDER: process.env.AURAXIS_FLAG_PROVIDER,
+    EXPO_PUBLIC_UNLEASH_APP_NAME: process.env.EXPO_PUBLIC_UNLEASH_APP_NAME,
+    AURAXIS_UNLEASH_APP_NAME: process.env.AURAXIS_UNLEASH_APP_NAME,
+    EXPO_PUBLIC_UNLEASH_ENVIRONMENT: process.env.EXPO_PUBLIC_UNLEASH_ENVIRONMENT,
+    AURAXIS_UNLEASH_ENVIRONMENT: process.env.AURAXIS_UNLEASH_ENVIRONMENT,
+    AURAXIS_RUNTIME_ENV: process.env.AURAXIS_RUNTIME_ENV,
+    EXPO_PUBLIC_UNLEASH_INSTANCE_ID: process.env.EXPO_PUBLIC_UNLEASH_INSTANCE_ID,
+    AURAXIS_UNLEASH_INSTANCE_ID: process.env.AURAXIS_UNLEASH_INSTANCE_ID,
+    EXPO_PUBLIC_UNLEASH_CLIENT_KEY: process.env.EXPO_PUBLIC_UNLEASH_CLIENT_KEY,
+    AURAXIS_UNLEASH_CLIENT_KEY: process.env.AURAXIS_UNLEASH_CLIENT_KEY,
+    AURAXIS_UNLEASH_API_TOKEN: process.env.AURAXIS_UNLEASH_API_TOKEN,
+    EXPO_PUBLIC_UNLEASH_PROXY_URL: process.env.EXPO_PUBLIC_UNLEASH_PROXY_URL,
+    AURAXIS_UNLEASH_URL: process.env.AURAXIS_UNLEASH_URL,
+  };
+};
+
+/**
+ * Resolve variável de ambiente por ordem de precedência.
+ * @param keys Lista ordenada de chaves candidatas.
+ * @param defaultValue Valor padrão quando nenhuma chave está definida.
+ * @returns Valor normalizado (trim).
+ */
+const readRuntimeEnv = (keys: string[], defaultValue = ""): string => {
+  const knownEnvValues = getKnownEnvValues();
+  for (const key of keys) {
+    const rawValue = knownEnvValues[key];
+    if (typeof rawValue === "string" && rawValue.trim().length > 0) {
+      return rawValue.trim();
+    }
+  }
+  return defaultValue;
+};
+
 /**
  * Determina se valor desconhecido e objeto indexavel.
  * @param value Valor de entrada.
@@ -27,7 +65,12 @@ const isObjectRecord = (value: unknown): value is Record<string, unknown> => {
  * @returns TTL em milissegundos.
  */
 const getSafeCacheTtlMs = (): number => {
-  const rawCacheTtlMs = Number(process.env.EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS ?? "30000");
+  const rawCacheTtlMs = Number(
+    readRuntimeEnv(
+      ["EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS", "AURAXIS_UNLEASH_CACHE_TTL_MS"],
+      "30000",
+    ),
+  );
   if (Number.isFinite(rawCacheTtlMs) && rawCacheTtlMs > 0) {
     return Math.trunc(rawCacheTtlMs);
   }
@@ -48,7 +91,10 @@ export const resetProviderCache = (): void => {
  * @returns Modo do provider (`local` ou `unleash`).
  */
 export const getProviderMode = (): "local" | "unleash" => {
-  const providerModeEnv = String(process.env.EXPO_PUBLIC_FLAG_PROVIDER ?? "local")
+  const providerModeEnv = readRuntimeEnv(
+    ["EXPO_PUBLIC_FLAG_PROVIDER", "AURAXIS_FLAG_PROVIDER"],
+    "local",
+  )
     .trim()
     .toLowerCase();
   if (providerModeEnv === "unleash") {
@@ -62,14 +108,30 @@ export const getProviderMode = (): "local" | "unleash" => {
  * @returns Dicionario de headers HTTP.
  */
 const buildUnleashHeaders = (): Record<string, string> => {
-  const unleashAppName = String(process.env.EXPO_PUBLIC_UNLEASH_APP_NAME ?? defaultUnleashAppName).trim();
-  const unleashEnvironment = String(
-    process.env.EXPO_PUBLIC_UNLEASH_ENVIRONMENT ?? defaultUnleashEnvironment,
-  ).trim();
-  const unleashInstanceId = String(
-    process.env.EXPO_PUBLIC_UNLEASH_INSTANCE_ID ?? defaultUnleashInstanceId,
-  ).trim();
-  const unleashClientKey = String(process.env.EXPO_PUBLIC_UNLEASH_CLIENT_KEY ?? "").trim();
+  const unleashAppName = readRuntimeEnv(
+    ["EXPO_PUBLIC_UNLEASH_APP_NAME", "AURAXIS_UNLEASH_APP_NAME"],
+    defaultUnleashAppName,
+  );
+  const unleashEnvironment = readRuntimeEnv(
+    [
+      "EXPO_PUBLIC_UNLEASH_ENVIRONMENT",
+      "AURAXIS_UNLEASH_ENVIRONMENT",
+      "AURAXIS_RUNTIME_ENV",
+    ],
+    defaultUnleashEnvironment,
+  );
+  const unleashInstanceId = readRuntimeEnv(
+    ["EXPO_PUBLIC_UNLEASH_INSTANCE_ID", "AURAXIS_UNLEASH_INSTANCE_ID"],
+    defaultUnleashInstanceId,
+  );
+  const unleashClientKey = readRuntimeEnv(
+    [
+      "EXPO_PUBLIC_UNLEASH_CLIENT_KEY",
+      "AURAXIS_UNLEASH_CLIENT_KEY",
+      "AURAXIS_UNLEASH_API_TOKEN",
+    ],
+    "",
+  );
   const headers: Record<string, string> = {
     Accept: "application/json",
     "UNLEASH-APPNAME": unleashAppName,
@@ -115,7 +177,10 @@ const parseUnleashPayload = (payload: unknown): Record<string, boolean> => {
  * @returns Mapa `flag -> enabled` obtido do provider.
  */
 export const fetchUnleashSnapshot = async (): Promise<Record<string, boolean>> => {
-  const unleashProxyUrl = String(process.env.EXPO_PUBLIC_UNLEASH_PROXY_URL ?? "").trim();
+  const unleashProxyUrl = readRuntimeEnv(
+    ["EXPO_PUBLIC_UNLEASH_PROXY_URL", "AURAXIS_UNLEASH_URL"],
+    "",
+  );
   if (getProviderMode() !== "unleash" || unleashProxyUrl.length === 0) {
     return {};
   }
