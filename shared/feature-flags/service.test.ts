@@ -19,6 +19,10 @@ const resetFeatureFlagTestEnv = (): void => {
   delete process.env.EXPO_PUBLIC_UNLEASH_PROXY_URL;
   delete process.env.EXPO_PUBLIC_UNLEASH_CLIENT_KEY;
   delete process.env.EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS;
+  delete process.env.AURAXIS_FLAG_PROVIDER;
+  delete process.env.AURAXIS_UNLEASH_URL;
+  delete process.env.AURAXIS_UNLEASH_API_TOKEN;
+  delete process.env.AURAXIS_UNLEASH_CACHE_TTL_MS;
   jest.restoreAllMocks();
   resetProviderCache();
 };
@@ -88,6 +92,11 @@ describe("feature flag service - unleash provider", () => {
 
   it("retorna modo unleash quando provider esta configurado", () => {
     process.env.EXPO_PUBLIC_FLAG_PROVIDER = "unleash";
+    expect(getProviderMode()).toBe("unleash");
+  });
+
+  it("retorna modo unleash com fallback canônico AURAXIS_FLAG_PROVIDER", () => {
+    process.env.AURAXIS_FLAG_PROVIDER = "unleash";
     expect(getProviderMode()).toBe("unleash");
   });
 
@@ -187,5 +196,24 @@ describe("feature flag service - unleash provider", () => {
       "app.tools.salary-raise-calculator",
     );
     expect(providerDecision).toBeUndefined();
+  });
+
+  it("usa URL canônica AURAXIS_UNLEASH_URL quando EXPO_PUBLIC_UNLEASH_PROXY_URL estiver ausente", async () => {
+    process.env.AURAXIS_FLAG_PROVIDER = "unleash";
+    process.env.AURAXIS_UNLEASH_URL = "https://flags.local";
+    jest.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        features: [
+          {
+            name: "app.tools.salary-raise-calculator",
+            enabled: true,
+          },
+        ],
+      }),
+    } as unknown as Response);
+
+    const snapshot = await fetchUnleashSnapshot();
+    expect(snapshot["app.tools.salary-raise-calculator"]).toBe(true);
   });
 });

@@ -67,6 +67,18 @@ Variáveis de ambiente suportadas (App):
 - `EXPO_PUBLIC_UNLEASH_ENVIRONMENT` (default `development`)
 - `EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS` (default `30000`)
 
+Fallback canônico suportado (cross-repo):
+
+- `AURAXIS_FLAG_PROVIDER`
+- `AURAXIS_UNLEASH_URL`
+- `AURAXIS_UNLEASH_API_TOKEN` / `AURAXIS_UNLEASH_CLIENT_KEY`
+- `AURAXIS_UNLEASH_ENVIRONMENT` / `AURAXIS_RUNTIME_ENV`
+- `AURAXIS_UNLEASH_CACHE_TTL_MS`
+
+Bootstrap central recomendado:
+
+- `../../../../scripts/bootstrap-feature-flag-provider.sh --environment <env> --format env`
+
 ## PLT4.1 (higiene de flags) — entregue
 
 - Catálogo versionado de flags:

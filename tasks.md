@@ -112,8 +112,8 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
 - [~] **APP14** `chore` — Integrar feature toggle OSS no app
   - Critério: runtime de flags integrado com fallback seguro e provider remoto por ambiente (`unleash`), com primeiro flag (`app.tools.salary-raise-calculator`) controlando feature real do catálogo de ferramentas.
   - Dependência: APP2
-  - Commit: `chore/plt4-runtime-flags-integration`, `chore/plt4-oss-provider-integration`
-  - Risco residual: falta formalizar rotina contínua de remoção de código morto após expiração de flag.
+  - Commit: `chore/plt4-runtime-flags-integration`, `chore/plt4-oss-provider-integration`, `chore/app-plt4-3-provider-bootstrap`
+  - Risco residual: pendente apenas rotina contínua de remoção de código morto após expiração de flag.
 
 - [x] **APP17** `chore` — Automatizar hygiene de feature flags no CI
   - Critério: catálogo versionado de flags com metadados obrigatórios e validação bloqueante no CI/local parity para owner, removeBy e expiração.
@@ -190,6 +190,7 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
 - [x] PLT2 foundation (app): `eas.json` criado com perfis de build/submit e workflow manual de store release (`store-release.yml`) | Data: 2026-02-24
 - [x] PLT5 foundation (app): deploy mínimo via artifact web + build preview opcional no EAS (`deploy-minimum.yml`) | Data: 2026-02-24
 - [x] PLT4.1 (app): catálogo de flags em `config/feature-flags.json` + gate `Feature Flags Hygiene` no CI + validação local em `scripts/run_ci_like_actions_local.sh` | Data: 2026-02-25
+- [x] PLT4.3 (app): runtime de flags passou a aceitar namespace canônico `AURAXIS_*` como fallback de `EXPO_PUBLIC_*` + runbook atualizado para bootstrap central por ambiente | Data: 2026-02-28
 - [x] APP6 avanço: `eas init` concluído com `owner`/`projectId` em `app.json` e `eas build:configure --platform all` validado no ambiente local | Data: 2026-02-25
 - [x] APP18 concluído: fundação administrativa mobile configurada (`react-native-paper` + `zustand` + `@tanstack/react-query` + contratos tipados + cliente HTTP + secure storage) | Data: 2026-02-26
 - [x] APP19 concluído: telas placeholder de login/forgot-password/dashboard/carteira/ferramentas publicadas com validação `zod` + `react-hook-form` e hooks prontos para integração de dados | Data: 2026-02-26
