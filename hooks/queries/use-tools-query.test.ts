@@ -65,7 +65,7 @@ describe("useToolsCatalogQuery", () => {
       ],
     };
     mockGetCatalog.mockRejectedValue(new Error("backend down"));
-    mockApplyToolsFlags.mockReturnValue(flaggedPlaceholder);
+    mockApplyToolsFlags.mockResolvedValue(flaggedPlaceholder);
 
     const query = useToolsCatalogQuery() as unknown as { readonly queryFn: () => Promise<ToolsCatalog> };
     const result = await query.queryFn();
