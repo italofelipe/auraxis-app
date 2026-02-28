@@ -2,6 +2,8 @@
 "use strict";
 
 const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
 const { execSync } = require("node:child_process");
 
 const allowedIds = new Set([
@@ -25,6 +27,24 @@ const runAudit = () => {
 
     const stderr = typeof error.stderr === "string" ? error.stderr : "";
     throw new Error(`npm audit failed without JSON output: ${stderr}`);
+  }
+};
+
+const resolveAuditOutputPath = () => {
+  const configuredPath = process.env.AURAXIS_AUDIT_OUTPUT_PATH;
+  if (typeof configuredPath === "string" && configuredPath.trim().length > 0) {
+    return path.resolve(configuredPath);
+  }
+
+  return path.join(os.tmpdir(), `auraxis-app-audit-${process.pid}.json`);
+};
+
+const persistAuditReport = (rawAudit) => {
+  const outputPath = resolveAuditOutputPath();
+  fs.writeFileSync(outputPath, rawAudit, "utf8");
+
+  if (process.env.AURAXIS_AUDIT_DEBUG === "true") {
+    console.warn(`[audit-gate] raw report written to: ${outputPath}`);
   }
 };
 
@@ -73,7 +93,7 @@ const collectFindings = (audit) => {
 
 const main = () => {
   const rawAudit = runAudit();
-  fs.writeFileSync("audit.json", rawAudit);
+  persistAuditReport(rawAudit);
 
   const audit = parseAudit(rawAudit);
   const findings = collectFindings(audit);

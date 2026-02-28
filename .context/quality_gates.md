@@ -10,6 +10,9 @@
 Execute nesta ordem:
 
 ```bash
+# 0. Paridade de runtime (obrigatorio para evitar drift local/CI)
+nvm use 22
+
 # 1. Lint (ESLint + eslint-config-expo)
 npm run lint
 
@@ -25,6 +28,15 @@ npm run quality-check
 # Paridade CI local (ambiente dockerizado Node 22, igual ao runner Linux):
 npm run ci:local
 ```
+
+Audit gate local sem sujar o workspace:
+
+```bash
+node scripts/ci-audit-gate.js
+```
+
+- O relatório bruto do audit agora é gravado em arquivo temporário do sistema.
+- Para persistir um arquivo para debug manual, use `AURAXIS_AUDIT_OUTPUT_PATH=/caminho/audit.json`.
 
 > Se qualquer gate falhar: **não commitar**. Corrigir o problema primeiro.
 
