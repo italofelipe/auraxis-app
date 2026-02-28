@@ -30,7 +30,7 @@ on:
           - "true"
 
 env:
-  NODE_VERSION: "22"
+  NODE_VERSION: "25"
 
 jobs:
   build-and-submit:

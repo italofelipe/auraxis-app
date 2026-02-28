@@ -20,7 +20,7 @@ on:
     branches: [master, main]
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: '25'
 
 jobs:
   # ── 1. Lint (ESLint) ───────────────────────────────────────────────────
