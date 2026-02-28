@@ -198,3 +198,4 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
 - [x] Governança cross-platform sincronizada: referências obrigatórias ao guideline unificado (`.context/32_frontend_unified_guideline.md`) e ao fluxo de `Feature Contract Pack` adicionadas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-27
 - [x] Contract automation foundation: `contracts:sync` + `contracts:check`, geração tipada OpenAPI (`shared/types/generated/openapi.ts`), baseline de packs e job `Contract Smoke` adicionados ao CI/local parity | Data: 2026-02-27
 - [x] PR governance hardening: template obrigatório de PR adicionado em `.github/pull_request_template.md` com checklist de contrato, validação e guardrails frontend | Data: 2026-02-27
+- [x] Autonomy hardening: `dependency-review.yml` em modo estrito (sem fallback de compatibilidade), tornando Dependency Review bloqueante em todo PR | Data: 2026-02-28
