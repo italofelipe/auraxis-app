@@ -1,7 +1,7 @@
 import type { AxiosInstance } from "axios";
 
 import { httpClient } from "@/lib/http-client";
-import { isFeatureEnabled } from "@/shared/feature-flags";
+import { isFeatureEnabled, resolveProviderDecision } from "@/shared/feature-flags";
 import type { ToolsCatalog } from "@/types/contracts";
 
 interface ToolsApiClient {
@@ -29,7 +29,7 @@ export const createToolsApi = (client: ToolsApiClient) => {
   return {
     getCatalog: async (): Promise<ToolsCatalog> => {
       const response = await client.get<ToolsCatalog>("/tools/catalog");
-      return applyToolsFlags(response.data);
+      return await applyToolsFlags(response.data);
     },
   };
 };
@@ -39,18 +39,21 @@ export const createToolsApi = (client: ToolsApiClient) => {
  * @param catalog Catalogo base vindo do backend ou placeholder.
  * @returns Catalogo com campo `enabled` normalizado por flags locais.
  */
-export const applyToolsFlags = (catalog: ToolsCatalog): ToolsCatalog => {
-  const toolsWithFlags = catalog.tools.map((tool): ToolsCatalog["tools"][number] => {
+export const applyToolsFlags = async (catalog: ToolsCatalog): Promise<ToolsCatalog> => {
+  const toolsWithFlagsPromises = catalog.tools.map(async (tool): Promise<ToolsCatalog["tools"][number]> => {
     if (tool.id !== "raise-calculator") {
       return tool;
     }
 
-    const isRaiseCalculatorEnabled = isFeatureEnabled("app.tools.salary-raise-calculator");
+    const flagKey = "app.tools.salary-raise-calculator";
+    const providerDecision = await resolveProviderDecision(flagKey);
+    const isRaiseCalculatorEnabled = isFeatureEnabled(flagKey, providerDecision);
     return {
       ...tool,
       enabled: isRaiseCalculatorEnabled,
     };
   });
+  const toolsWithFlags = await Promise.all(toolsWithFlagsPromises);
 
   return {
     tools: toolsWithFlags,

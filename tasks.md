@@ -110,10 +110,10 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
   - Risco residual: alinhamento incorreto com pipelines EAS pode gerar versões rejeitadas nas lojas.
 
 - [~] **APP14** `chore` — Integrar feature toggle OSS no app
-  - Critério: runtime de flags integrado com fallback seguro e primeiro flag (`app.tools.salary-raise-calculator`) controlando feature real do catálogo de ferramentas; pendente conexão com provider OSS no bootstrap.
+  - Critério: runtime de flags integrado com fallback seguro e provider remoto por ambiente (`unleash`), com primeiro flag (`app.tools.salary-raise-calculator`) controlando feature real do catálogo de ferramentas.
   - Dependência: APP2
-  - Commit: `chore/plt4-runtime-flags-integration`
-  - Risco residual: falta provider remoto para governança central por ambiente e cleanup automático de código morto após remoção de flags.
+  - Commit: `chore/plt4-runtime-flags-integration`, `chore/plt4-oss-provider-integration`
+  - Risco residual: falta formalizar rotina contínua de remoção de código morto após expiração de flag.
 
 - [x] **APP17** `chore` — Automatizar hygiene de feature flags no CI
   - Critério: catálogo versionado de flags com metadados obrigatórios e validação bloqueante no CI/local parity para owner, removeBy e expiração.

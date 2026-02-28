@@ -10,7 +10,7 @@ export const useToolsCatalogQuery = () => {
       try {
         return await toolsApi.getCatalog();
       } catch {
-        return applyToolsFlags(toolsPlaceholder);
+        return await applyToolsFlags(toolsPlaceholder);
       }
     },
   });

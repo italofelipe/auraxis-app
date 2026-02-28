@@ -48,10 +48,24 @@ Preparar o app para:
 - Provisionar credenciais de assinatura e app records no Google Play / App Store Connect.
 - Popular variáveis e segredos obrigatórios de submit (`EXPO_TOKEN`, `ASC_APP_ID`, etc.).
 
-## Pendências para concluir PLT4
+## PLT4.2 (runtime OSS) — entregue
 
-- Definir provider OSS (Unleash/OpenFeature) e integrar o cliente de flags no bootstrap do app.
-- Estabelecer política de governança de flags (owner, expiração e remoção).
+- Runtime de flags com provider `unleash` + fallback local:
+  - `shared/feature-flags/service.ts`
+- Integração real no catálogo de ferramentas:
+  - `lib/tools-api.ts`
+  - `hooks/queries/use-tools-query.ts`
+- Cache curto para snapshot remoto com fallback resiliente.
+
+Variáveis de ambiente suportadas (App):
+
+- `EXPO_PUBLIC_FLAG_PROVIDER` (`local` | `unleash`, default `local`)
+- `EXPO_PUBLIC_UNLEASH_PROXY_URL` (endpoint base do provider)
+- `EXPO_PUBLIC_UNLEASH_CLIENT_KEY` (token de cliente, opcional)
+- `EXPO_PUBLIC_UNLEASH_APP_NAME` (default `auraxis-app`)
+- `EXPO_PUBLIC_UNLEASH_INSTANCE_ID` (default `auraxis-app`)
+- `EXPO_PUBLIC_UNLEASH_ENVIRONMENT` (default `development`)
+- `EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS` (default `30000`)
 
 ## PLT4.1 (higiene de flags) — entregue
 

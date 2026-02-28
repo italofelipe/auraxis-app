@@ -5,6 +5,165 @@ import type { FeatureFlagCatalog, FeatureFlagDefinition } from "@/shared/feature
 const featureFlagsCatalog: FeatureFlagCatalog = featureFlagsCatalogJson as FeatureFlagCatalog;
 const enabledStatuses = new Set<string>(["active", "released", "enabled"]);
 const overridePrefix = "EXPO_PUBLIC_FLAG_";
+const defaultUnleashAppName = "auraxis-app";
+const defaultUnleashEnvironment = "development";
+const defaultUnleashInstanceId = "auraxis-app";
+const defaultUnleashCacheTtlMs = 30000;
+
+let unleashCacheExpireAtMs = 0;
+let unleashCacheSnapshot: Record<string, boolean> = {};
+
+/**
+ * Determina se valor desconhecido e objeto indexavel.
+ * @param value Valor de entrada.
+ * @returns `true` quando for um objeto valido.
+ */
+const isObjectRecord = (value: unknown): value is Record<string, unknown> => {
+  return typeof value === "object" && value !== null;
+};
+
+/**
+ * Gera fallback seguro para TTL do cache do provider.
+ * @returns TTL em milissegundos.
+ */
+const getSafeCacheTtlMs = (): number => {
+  const rawCacheTtlMs = Number(process.env.EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS ?? "30000");
+  if (Number.isFinite(rawCacheTtlMs) && rawCacheTtlMs > 0) {
+    return Math.trunc(rawCacheTtlMs);
+  }
+  return defaultUnleashCacheTtlMs;
+};
+
+/**
+ * Limpa cache do snapshot remoto para testes e invalidacao manual.
+ * @returns `void`.
+ */
+export const resetProviderCache = (): void => {
+  unleashCacheSnapshot = {};
+  unleashCacheExpireAtMs = 0;
+};
+
+/**
+ * Retorna o modo de provider configurado para runtime.
+ * @returns Modo do provider (`local` ou `unleash`).
+ */
+export const getProviderMode = (): "local" | "unleash" => {
+  const providerModeEnv = String(process.env.EXPO_PUBLIC_FLAG_PROVIDER ?? "local")
+    .trim()
+    .toLowerCase();
+  if (providerModeEnv === "unleash") {
+    return "unleash";
+  }
+  return "local";
+};
+
+/**
+ * Monta headers padrao para consulta ao provider Unleash.
+ * @returns Dicionario de headers HTTP.
+ */
+const buildUnleashHeaders = (): Record<string, string> => {
+  const unleashAppName = String(process.env.EXPO_PUBLIC_UNLEASH_APP_NAME ?? defaultUnleashAppName).trim();
+  const unleashEnvironment = String(
+    process.env.EXPO_PUBLIC_UNLEASH_ENVIRONMENT ?? defaultUnleashEnvironment,
+  ).trim();
+  const unleashInstanceId = String(
+    process.env.EXPO_PUBLIC_UNLEASH_INSTANCE_ID ?? defaultUnleashInstanceId,
+  ).trim();
+  const unleashClientKey = String(process.env.EXPO_PUBLIC_UNLEASH_CLIENT_KEY ?? "").trim();
+  const headers: Record<string, string> = {
+    Accept: "application/json",
+    "UNLEASH-APPNAME": unleashAppName,
+    "UNLEASH-INSTANCEID": unleashInstanceId,
+    "UNLEASH-ENVIRONMENT": unleashEnvironment,
+  };
+
+  if (unleashClientKey.length > 0) {
+    headers.Authorization = unleashClientKey;
+  }
+
+  return headers;
+};
+
+/**
+ * Extrai snapshot de flags do payload do provider Unleash.
+ * @param payload Payload bruto retornado pelo provider.
+ * @returns Mapa `flag -> enabled`.
+ */
+const parseUnleashPayload = (payload: unknown): Record<string, boolean> => {
+  if (!isObjectRecord(payload) || !Array.isArray(payload.features)) {
+    return {};
+  }
+
+  const snapshot: Record<string, boolean> = {};
+  payload.features.forEach((feature: unknown): void => {
+    if (!isObjectRecord(feature)) {
+      return;
+    }
+
+    const name = String(feature.name ?? "").trim();
+    const enabled = feature.enabled;
+    if (name.length > 0 && typeof enabled === "boolean") {
+      snapshot[name] = enabled;
+    }
+  });
+
+  return snapshot;
+};
+
+/**
+ * Consulta snapshot remoto do provider com cache curto em memoria.
+ * @returns Mapa `flag -> enabled` obtido do provider.
+ */
+export const fetchUnleashSnapshot = async (): Promise<Record<string, boolean>> => {
+  const unleashProxyUrl = String(process.env.EXPO_PUBLIC_UNLEASH_PROXY_URL ?? "").trim();
+  if (getProviderMode() !== "unleash" || unleashProxyUrl.length === 0) {
+    return {};
+  }
+
+  const now = Date.now();
+  if (now < unleashCacheExpireAtMs) {
+    return unleashCacheSnapshot;
+  }
+
+  const response = await fetch(`${unleashProxyUrl}/api/client/features`, {
+    method: "GET",
+    headers: buildUnleashHeaders(),
+  });
+
+  if (!response.ok) {
+    return {};
+  }
+
+  const payload = await response.json();
+  const parsedSnapshot = parseUnleashPayload(payload);
+  unleashCacheSnapshot = parsedSnapshot;
+  unleashCacheExpireAtMs = now + getSafeCacheTtlMs();
+  return parsedSnapshot;
+};
+
+/**
+ * Resolve decisao do provider remoto para uma flag.
+ * @param flagKey Chave logica da flag.
+ * @returns Valor booleano do provider quando disponivel.
+ */
+export const resolveProviderDecision = async (
+  flagKey: string,
+): Promise<boolean | undefined> => {
+  if (getProviderMode() !== "unleash") {
+    return undefined;
+  }
+
+  try {
+    const snapshot = await fetchUnleashSnapshot();
+    const providerValue = snapshot[flagKey];
+    if (typeof providerValue === "boolean") {
+      return providerValue;
+    }
+    return undefined;
+  } catch {
+    return undefined;
+  }
+};
 
 /**
  * Normaliza a chave de flag para o padrao de env var.
