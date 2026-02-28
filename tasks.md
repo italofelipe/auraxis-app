@@ -11,6 +11,8 @@
 | `[!]` | Blocked |
 | `[x]` | Done |
 
+Regra operacional: manter somente 1 task em `In Progress` por vez para evitar drift do orquestrador.
+
 **Prioridade:** P0 = bloqueante / P1 = alta / P2 = normal / P3 = baixa
 
 ---
@@ -65,20 +67,20 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
   - Commit: —
   - Risco residual: refresh token não implementado nesta fase — sessão expira e força re-login.
 
-- [~] **APP4** `feat` — Tela de dashboard (listagem de transações e saldo)
+- [ ] **APP4** `feat` — Tela de dashboard (listagem de transações e saldo)
   - Critério: tela inicial exibe saldo atual e lista das últimas 20 transações consumindo `GET /transactions`. Loading state e error state tratados.
   - Critério visual obrigatório: aderência ao blueprint de dashboard em `designs/1920w default.png` conforme `.context/30_design_reference.md`.
   - Dependência: APP3
   - Commit: —
   - Risco residual: paginação não implementada nesta fase.
 
-- [~] **APP10** `chore` — Padronizar UI mobile com React Native Paper customizado
+- [ ] **APP10** `chore` — Padronizar UI mobile com React Native Paper customizado
   - Critério: tema base do Paper configurado com paleta oficial, tipografia (`Playfair Display` + `Raleway`) e grid de 8px.
   - Dependência: APP1
   - Commit: —
   - Risco residual: telas legadas podem conviver temporariamente com componentes não migrados.
 
-- [~] **APP11** `chore` — Adotar TanStack Query para server-state no app
+- [x] **APP11** `chore` — Adotar TanStack Query para server-state no app
   - Critério: `QueryClientProvider` global configurado e primeiro fluxo de integração com API usando `@tanstack/react-query` (cache/retry/invalidation).
   - Dependência: APP2
   - Commit: —
@@ -91,25 +93,25 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
   - Dependência: APP1
   - Commit: `3eaa519`, `884122c`
 
-- [~] **APP6** `chore` — Configurar EAS Build (Expo Application Services)
+- [ ] **APP6** `chore` — Configurar EAS Build (Expo Application Services)
   - Critério: `eas build --platform android --profile preview` gera APK instalável. Perfis `development`, `preview` e `production` configurados em `eas.json`.
   - Dependência: conta EAS ativa
   - Commit: —
   - Status atual (2026-02-25): `eas init` + `eas build:configure --platform all` concluídos; pendente executar build preview completo e validar artifact instalável.
 
-- [~] **APP12** `chore` — Preparar publicação contínua para Play Store/App Store
+- [ ] **APP12** `chore` — Preparar publicação contínua para Play Store/App Store
   - Critério: trilhas/configuração de release prontas (Google Play Internal + TestFlight), com credenciais seguras e checklist de submissão documentado.
   - Dependência: APP6
   - Commit: —
   - Risco residual: aprovação de loja e requisitos legais variam por plataforma/região.
 
-- [~] **APP13** `chore` — Configurar versionamento automático do app
+- [x] **APP13** `chore` — Configurar versionamento automático do app
   - Critério: incremento automático de versão (`version`, `versionCode`, `buildNumber`) e changelog por Conventional Commits, sem ajuste manual.
   - Dependência: APP5
   - Commit: —
   - Risco residual: alinhamento incorreto com pipelines EAS pode gerar versões rejeitadas nas lojas.
 
-- [~] **APP14** `chore` — Integrar feature toggle OSS no app
+- [x] **APP14** `chore` — Integrar feature toggle OSS no app
   - Critério: runtime de flags integrado com fallback seguro e provider remoto por ambiente (`unleash`), com primeiro flag (`app.tools.salary-raise-calculator`) controlando feature real do catálogo de ferramentas.
   - Dependência: APP2
   - Commit: `chore/plt4-runtime-flags-integration`, `chore/plt4-oss-provider-integration`, `chore/app-plt4-3-provider-bootstrap`
@@ -134,7 +136,7 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
   - Commit: a definir (branch `feat/foundation-ui-data-scaffold`)
   - Risco residual: falta aplicar design final e refino de UX quando o pacote visual estiver pronto.
 
-- [~] **APP15** `chore` — Deploy mínimo do frontend mobile (baseline distribuível)
+- [ ] **APP15** `chore` — Deploy mínimo do frontend mobile (baseline distribuível)
   - Critério: build de preview distribuída para teste interno (Android/iOS), com evidência de instalação e execução do fluxo inicial.
   - Dependência: APP12
   - Commit: —
