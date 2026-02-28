@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Run a local gate bundle that mirrors GitHub Actions CI as closely as possible.
 #
-# Default: Dockerized Node 22 environment for parity with ubuntu-latest jobs.
+# Default: Dockerized Node 25 environment for parity with ubuntu-latest jobs.
 # Flags:
 #   --local             Run in current shell environment
 #   --with-expo-bundle  Include expo JS bundle check (requires EXPO_TOKEN)
@@ -107,13 +107,13 @@ run_in_docker() {
     args+=("--with-sonar")
   fi
 
-  echo "[ci-like-local] running in node:22-bookworm container..."
+  echo "[ci-like-local] running in node:25-bookworm container..."
   docker run --rm \
     -v "$ROOT_DIR:/workspace" \
     -w /workspace \
     -e EXPO_TOKEN="${EXPO_TOKEN:-}" \
     -e SONAR_AURAXIS_APP_TOKEN="${SONAR_AURAXIS_APP_TOKEN:-}" \
-    node:22-bookworm \
+    node:25-bookworm \
     bash -lc "bash scripts/run_ci_like_actions_local.sh ${args[*]}"
 
   echo "[ci-like-local] all selected checks passed (docker mode)."

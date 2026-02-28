@@ -11,7 +11,7 @@ Execute nesta ordem:
 
 ```bash
 # 0. Paridade de runtime (obrigatorio para evitar drift local/CI)
-nvm use 22
+nvm use 25
 
 # 1. Lint (ESLint + eslint-config-expo)
 npm run lint
@@ -25,7 +25,7 @@ npm run test:coverage
 # Atalho — tudo de uma vez (obrigatório antes de commitar):
 npm run quality-check
 
-# Paridade CI local (ambiente dockerizado Node 22, igual ao runner Linux):
+# Paridade CI local (ambiente dockerizado Node 25, igual ao runner Linux):
 npm run ci:local
 ```
 
