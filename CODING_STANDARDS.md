@@ -1,7 +1,7 @@
 # CODING_STANDARDS.md — auraxis-app
 
 > Manual canônico de padrões de código para o aplicativo mobile do Auraxis.
-> Stack: React Native 0.81.5 · Expo SDK 54 · TypeScript strict · Expo Router v6 · React Native Paper · TanStack Query
+> Stack: React Native 0.81.5 · Expo SDK 54 · TypeScript strict · Expo Router v6 · Tamagui · TanStack Query
 >
 > Este documento define **como escrever código** neste repo. Não é opcional.
 > Cada seção tem regras (**deve/nunca**) e exemplos práticos.
@@ -55,8 +55,8 @@ Contrato tipado obrigatório (OpenAPI + packs):
 - Paleta oficial: `#262121`, `#ffbe4d`, `#413939`, `#0b0909`, `#ffd180`, `#ffab1a`.
 - Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
 - Grid base: `8px` (layout em múltiplos de 8).
-- Componentes base mobile devem derivar de React Native Paper customizado.
-- Componentes de produto devem usar primariamente React Native Paper; componentes custom só por extensão/composição com wrappers internos.
+- Componentes base mobile devem derivar de **Tamagui** (`Stack`, `Text`, `Button`, `Input`) com tema Auraxis configurado em `config/tamagui-theme.ts`.
+- Componentes de produto devem usar primariamente primitivos Tamagui com `styled()`; customizações por extensão de tema e tokens semânticos — nunca valores literais.
 - É proibido usar valores literais de cor, spacing, radius, shadow, font-size e line-height em telas/componentes. Sempre usar tokens.
 - Tailwind é proibido no app.
 - Server-state deve preferir `@tanstack/react-query` para integração com API.
