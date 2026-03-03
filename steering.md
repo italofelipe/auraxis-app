@@ -40,7 +40,7 @@ Para integração com backend recém-entregue:
 | Formatação | Prettier | ^3.8 |
 | Testes unitários | jest-expo + @testing-library/react-native | ^54.0 / ^13.0 |
 | Testes E2E | Detox (scaffold — requer macOS runner) | — |
-| UI base | React Native Paper | ^5.x |
+| UI base | Tamagui | ^1.x |
 | Estado de servidor | TanStack Query (React) | ^5.x |
 | Análise estática | SonarCloud | — |
 | Secret scan | Gitleaks + TruffleHog | — |
@@ -59,8 +59,8 @@ Para integração com backend recém-entregue:
 - Paleta oficial: `#262121`, `#ffbe4d`, `#413939`, `#0b0909`, `#ffd180`, `#ffab1a`.
 - Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
 - Grid base: `8px` (spacing estrutural em múltiplos de 8).
-- Componentes mobile devem partir de base **React Native Paper** customizada para o tema Auraxis.
-- Componentes novos devem usar prioritariamente React Native Paper; customizações devem ocorrer por extensão/composição e wrappers internos.
+- Componentes mobile devem partir de base **Tamagui** customizada para o tema Auraxis (tokens definidos em `config/tamagui-theme.ts`).
+- Componentes novos devem usar primitivos Tamagui (`Stack`, `Text`, `Button`, `Input`, etc.); customizações via `styled()` com tokens semânticos.
 - É proibido usar valores literais de cor, spacing, radius, shadow, font-size e line-height em telas/componentes. Usar tokens semânticos.
 - **Tailwind não é permitido** neste repositório.
 - Server-state remoto deve preferir `@tanstack/react-query` para cache, retry e invalidação.
@@ -76,7 +76,7 @@ Para integração com backend recém-entregue:
 - **Segurança por padrão** — token em `expo-secure-store`, nunca em `AsyncStorage`.
 - **Testes não são opcionais** — toda lógica nova tem teste antes de merge.
 - **Performance mobile** — bundle Android/iOS ≤ 6 MB (hard limit no CI).
-- **UI consistente por contrato** — React Native Paper custom + tokens oficiais são obrigatórios.
+- **UI consistente por contrato** — Tamagui custom + tokens oficiais são obrigatórios.
 - **Token-first styling** — qualquer estilo visual deve referenciar tokens; valores soltos no código são não conformidade.
 - **Server-state com TanStack Query** — evitar fetch manual distribuído em telas/componentes.
 

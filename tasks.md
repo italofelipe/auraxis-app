@@ -30,7 +30,7 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
    - reproduzir hierarquia/composição do layout de referência (adaptando responsividade mobile sem descaracterizar a estrutura);
    - usar tokens de tema para 100% dos valores visuais (zero cor/spacing/radius hardcoded);
    - aplicar tipografia oficial (`Playfair Display` + `Raleway`) e grid de `8px`;
-   - usar componentes-base do React Native Paper com extensão por tema.
+   - usar primitivos Tamagui (`Stack`, `Text`, `Button`, `Input`) com tema Auraxis via `styled()` e tokens semânticos.
 4. Evidência obrigatória por task de UI:
    - screenshot local comparativa com a referência;
    - registro explícito de fidelidade visual e gaps no handoff/report da task.
@@ -74,11 +74,18 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
   - Commit: —
   - Risco residual: paginação não implementada nesta fase.
 
-- [ ] **APP10** `chore` — Padronizar UI mobile com React Native Paper customizado
-  - Critério: tema base do Paper configurado com paleta oficial, tipografia (`Playfair Display` + `Raleway`) e grid de 8px.
+- [ ] **APP10** `chore` — Adotar Tamagui como UI kit mobile (substituir React Native Paper)
+  - Critério:
+    1. `tamagui`, `@tamagui/core`, `@tamagui/config` e `@tamagui/babel-plugin` instalados.
+    2. `config/tamagui-theme.ts` com tokens Auraxis (`surface`, `brand`, `text`, `status`, `border`) mapeados para `createTokens` + `createTheme`.
+    3. `TamaguiProvider` configurado no root (`components/providers/app-providers.tsx`), substituindo `PaperProvider`.
+    4. `config/paper-theme.ts` e dependência `react-native-paper` removidos do projeto.
+    5. Todas as telas existentes migradas de imports `react-native-paper` para primitivos Tamagui.
+    6. `quality-check` verde (lint + typecheck + testes + policy).
   - Dependência: APP1
   - Commit: —
-  - Risco residual: telas legadas podem conviver temporariamente com componentes não migrados.
+  - Risco residual: Tamagui requer babel plugin; validar compatibilidade com Expo SDK 54 antes de iniciar migração de telas.
+  - Referência de design: `config/tamagui-theme.ts` é a fonte de verdade — zero hex literal no código de produto.
 
 - [x] **APP11** `chore` — Adotar TanStack Query para server-state no app
   - Critério: `QueryClientProvider` global configurado e primeiro fluxo de integração com API usando `@tanstack/react-query` (cache/retry/invalidation).
@@ -186,7 +193,7 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
 - [x] CI parity local: criado `scripts/run_ci_like_actions_local.sh` + `scripts/ci-audit-gate.js`; workflow de audit passou a reutilizar script compartilhado | Data: 2026-02-24
 - [x] Sonar code smell fix: `String#charCodeAt()` substituído por `String#codePointAt()` em normalização de URL | Data: 2026-02-24
 - [x] Sonar coverage fix: escopo de análise (`sonar.sources/inclusions`) alinhado ao baseline coberto no `lcov` para eliminar falso negativo de coverage global no scaffold | Data: 2026-02-24
-- [x] Governança UI atualizada: paleta, tipografia, grid 8px, proibição de Tailwind e baseline de React Native Paper + TanStack Query registradas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-24
+- [x] Governança UI atualizada: paleta, tipografia, grid 8px, proibição de Tailwind e baseline de TanStack Query registradas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-24 | 2026-03-02: UI kit migrado de React Native Paper → Tamagui (APP10 pendente)
 - [x] CI simplification: removido gate sintético `ci-passed`; branch protection passa a exigir checks reais do pipeline | Data: 2026-02-24
 - [x] PLT3 foundation (app): `release-please` configurado com PR/tag/changelog automáticos (`.release-please-*` + workflow) | Data: 2026-02-24
 - [x] PLT2 foundation (app): `eas.json` criado com perfis de build/submit e workflow manual de store release (`store-release.yml`) | Data: 2026-02-24
@@ -194,7 +201,7 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
 - [x] PLT4.1 (app): catálogo de flags em `config/feature-flags.json` + gate `Feature Flags Hygiene` no CI + validação local em `scripts/run_ci_like_actions_local.sh` | Data: 2026-02-25
 - [x] PLT4.3 (app): runtime de flags passou a aceitar namespace canônico `AURAXIS_*` como fallback de `EXPO_PUBLIC_*` + runbook atualizado para bootstrap central por ambiente | Data: 2026-02-28
 - [x] APP6 avanço: `eas init` concluído com `owner`/`projectId` em `app.json` e `eas build:configure --platform all` validado no ambiente local | Data: 2026-02-25
-- [x] APP18 concluído: fundação administrativa mobile configurada (`react-native-paper` + `zustand` + `@tanstack/react-query` + contratos tipados + cliente HTTP + secure storage) | Data: 2026-02-26
+- [x] APP18 concluído: fundação administrativa mobile configurada (`react-native-paper` temporário + `zustand` + `@tanstack/react-query` + contratos tipados + cliente HTTP + secure storage) | Data: 2026-02-26 ⚠️ `react-native-paper` será substituído por Tamagui em APP10
 - [x] APP19 concluído: telas placeholder de login/forgot-password/dashboard/carteira/ferramentas publicadas com validação `zod` + `react-hook-form` e hooks prontos para integração de dados | Data: 2026-02-26
 - [x] Guardrail de governança frontend reforçado: `scripts/check-frontend-governance.cjs` integrado em `quality-check`, lint-staged, CI (`frontend-governance`) e parity local, com enforcement de `shared/*` canônico + token-first styling + TS-only | Data: 2026-02-27
 - [x] Governança cross-platform sincronizada: referências obrigatórias ao guideline unificado (`.context/32_frontend_unified_guideline.md`) e ao fluxo de `Feature Contract Pack` adicionadas em `steering.md` e `CODING_STANDARDS.md` | Data: 2026-02-27

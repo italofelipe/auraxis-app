@@ -548,6 +548,12 @@
         "description": "Retorna histórico diário de evolução da carteira por período, com totais de compra/venda e valor líquido investido acumulado.",
         "parameters": [
           {
+            "description": "Data final (YYYY-MM-DD). Opcional.",
+            "in": "query",
+            "name": "finalDate",
+            "required": false
+          },
+          {
             "description": "Data inicial (YYYY-MM-DD). Opcional.",
             "in": "query",
             "name": "startDate",
@@ -559,12 +565,6 @@
             "name": "X-API-Contract",
             "required": false,
             "type": "string"
-          },
-          {
-            "description": "Data final (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "finalDate",
-            "required": false
           }
         ],
         "responses": {
@@ -589,6 +589,12 @@
         "description": "Retorna histórico diário de evolução da carteira por período, com totais de compra/venda e valor líquido investido acumulado.",
         "parameters": [
           {
+            "description": "Data final (YYYY-MM-DD). Opcional.",
+            "in": "query",
+            "name": "finalDate",
+            "required": false
+          },
+          {
             "description": "Data inicial (YYYY-MM-DD). Opcional.",
             "in": "query",
             "name": "startDate",
@@ -600,12 +606,6 @@
             "name": "X-API-Contract",
             "required": false,
             "type": "string"
-          },
-          {
-            "description": "Data final (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "finalDate",
-            "required": false
           }
         ],
         "responses": {

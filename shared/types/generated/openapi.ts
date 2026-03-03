@@ -1077,10 +1077,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    startDate?: string;
                     /** @description Data final (YYYY-MM-DD). Opcional. */
                     finalDate?: string;
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    startDate?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -1121,10 +1121,10 @@ export interface paths {
         options: {
             parameters: {
                 query?: {
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    startDate?: string;
                     /** @description Data final (YYYY-MM-DD). Opcional. */
                     finalDate?: string;
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    startDate?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
