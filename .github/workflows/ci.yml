@@ -21,6 +21,8 @@ on:
 
 env:
   NODE_VERSION: '25'
+  EXPO_TOKEN_VALUE: ${{ secrets.EXPO_TOKEN }}
+  SONAR_AURAXIS_APP_TOKEN_VALUE: ${{ secrets.SONAR_AURAXIS_APP_TOKEN }}
 
 jobs:
   # ── 1. Lint (ESLint) ───────────────────────────────────────────────────
@@ -127,6 +129,7 @@ jobs:
     name: Expo JS Bundle Check
     runs-on: ubuntu-latest
     needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test, contract-smoke]
+    if: ${{ env.EXPO_TOKEN_VALUE != '' }}
     permissions:
       contents: read
     steps:
@@ -289,6 +292,7 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: [test]
+    if: ${{ env.SONAR_AURAXIS_APP_TOKEN_VALUE != '' }}
     permissions:
       contents: read
     steps:
