@@ -21,8 +21,6 @@ on:
 
 env:
   NODE_VERSION: '25'
-  EXPO_TOKEN_VALUE: ${{ secrets.EXPO_TOKEN }}
-  SONAR_AURAXIS_APP_TOKEN_VALUE: ${{ secrets.SONAR_AURAXIS_APP_TOKEN }}
 
 jobs:
   # ── 1. Lint (ESLint) ───────────────────────────────────────────────────
@@ -129,25 +127,44 @@ jobs:
     name: Expo JS Bundle Check
     runs-on: ubuntu-latest
     needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test, contract-smoke]
-    if: ${{ env.EXPO_TOKEN_VALUE != '' }}
+    outputs:
+      enabled: ${{ steps.capability.outputs.enabled }}
     permissions:
       contents: read
     steps:
+      - name: Check Expo capability
+        id: capability
+        env:
+          EXPO_TOKEN_VALUE: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -n "${EXPO_TOKEN_VALUE:-}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Expo JS bundle skipped: EXPO_TOKEN not available for this run."
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.capability.outputs.enabled == 'true'
       - uses: actions/setup-node@v4
+        if: steps.capability.outputs.enabled == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci --ignore-scripts
+      - if: steps.capability.outputs.enabled == 'true'
+        run: npm ci --ignore-scripts
       - name: Setup Expo
+        if: steps.capability.outputs.enabled == 'true'
         uses: expo/expo-github-action@v8
         with:
           expo-version: latest
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Export JS bundle (Android + iOS)
+        if: steps.capability.outputs.enabled == 'true'
         run: npx expo export --platform all --output-dir dist
         continue-on-error: false
       - name: Upload bundle artifact
+        if: steps.capability.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
         with:
           name: expo-bundle-all
@@ -159,7 +176,7 @@ jobs:
     name: Bundle Size Analysis (Metro)
     runs-on: ubuntu-latest
     needs: [expo-bundle]
-    if: github.event_name == 'pull_request'
+    if: github.event_name == 'pull_request' && needs.expo-bundle.outputs.enabled == 'true'
     permissions:
       contents: read
       issues: write
@@ -292,21 +309,37 @@ jobs:
     name: SonarCloud Analysis
     runs-on: ubuntu-latest
     needs: [test]
-    if: ${{ env.SONAR_AURAXIS_APP_TOKEN_VALUE != '' }}
     permissions:
       contents: read
     steps:
+      - name: Check Sonar capability
+        id: capability
+        env:
+          SONAR_TOKEN_VALUE: ${{ secrets.SONAR_AURAXIS_APP_TOKEN }}
+        run: |
+          if [ -n "${SONAR_TOKEN_VALUE:-}" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::SonarCloud skipped: token not available for this run."
+          fi
+
       - uses: actions/checkout@v4
+        if: steps.capability.outputs.enabled == 'true'
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v4
+        if: steps.capability.outputs.enabled == 'true'
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
-      - run: npm ci --ignore-scripts
+      - if: steps.capability.outputs.enabled == 'true'
+        run: npm ci --ignore-scripts
       - name: Generate coverage for Sonar
+        if: steps.capability.outputs.enabled == 'true'
         run: npm run test:coverage
       - name: SonarCloud Scan
+        if: steps.capability.outputs.enabled == 'true'
         uses: SonarSource/sonarqube-scan-action@fd88b7d7ccbaefd23d8f36f73b59db7a3d246602 # v6.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
