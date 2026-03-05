@@ -80,6 +80,9 @@
     "node": "25.x"
   },
   "private": true,
+  "overrides": {
+    "tar": "7.5.10"
+  },
   "lint-staged": {
     "**/*.{ts,tsx}": [
       "eslint --fix --max-warnings 0 --no-warn-ignored",
