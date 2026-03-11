@@ -1,11 +1,12 @@
 import { useRouter } from "expo-router";
 import { Controller } from "react-hook-form";
-import { StyleSheet, View } from "react-native";
+import { Linking, StyleSheet, View } from "react-native";
 import { Button, Card, HelperText, Text, TextInput } from "react-native-paper";
 
 import { spacing } from "@/config/design-tokens";
 import { useLoginForm } from "@/hooks/forms/use-login-form";
 import { useLoginMutation } from "@/hooks/mutations/use-auth-mutations";
+import { PRIVACY_URL, TERMS_URL } from "@/lib/web-urls";
 
 const styles = StyleSheet.create({
   card: {
@@ -19,6 +20,12 @@ const styles = StyleSheet.create({
   },
   forgotButton: {
     alignSelf: "flex-start",
+  },
+  legalRow: {
+    flexDirection: "row",
+    justifyContent: "center",
+    flexWrap: "wrap",
+    gap: spacing(1),
   },
 });
 
@@ -87,6 +94,20 @@ export default function LoginScreen() {
         </Card.Content>
       </Card>
       <Text variant="bodySmall">Placeholder visual pronto para receber o design final.</Text>
+      <View style={styles.legalRow}>
+        <Button
+          mode="text"
+          compact
+          onPress={() => { void Linking.openURL(TERMS_URL); }}>
+          Termos de Uso
+        </Button>
+        <Button
+          mode="text"
+          compact
+          onPress={() => { void Linking.openURL(PRIVACY_URL); }}>
+          Política de Privacidade
+        </Button>
+      </View>
     </View>
   );
 }
