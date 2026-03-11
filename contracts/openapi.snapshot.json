@@ -177,7 +177,9 @@
             "description": "Serviço saudável"
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       },
       "options": {
         "description": "Endpoint público de liveness para probes de infraestrutura.",
@@ -187,7 +189,9 @@
             "description": "Serviço saudável"
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       }
     },
     "/transactions": {
@@ -418,7 +422,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Lista os investimentos cadastrados na carteira com paginação.",
@@ -462,7 +468,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "post": {
         "description": "Adiciona um novo item à carteira do usuário.\n\nVocê pode informar um valor fixo (como R$1000,00 em poupança) ou um ativo com ticker.\n\nRegras:\n- Se informar o campo 'ticker', o campo 'value' será ignorado.\n- Se não informar 'ticker', é obrigatório informar 'value'.\n- Se informar 'ticker', também é obrigatório informar 'quantity'.\n\nExemplo com valor fixo:\n{'name': 'Poupança', 'value': 1500.00, 'register_date': '2024-07-01', 'should_be_on_wallet': true}\n\nExemplo com ticker:\n{'name': 'Investimento PETR4', 'ticker': 'petr4', 'quantity': 10, 'register_date': '2024-07-01', 'should_be_on_wallet': true}\n\nResposta esperada:\n{'message': 'Ativo cadastrado com sucesso'}",
@@ -486,7 +494,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/valuation": {
@@ -514,7 +524,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna a valorização atual consolidada da carteira do usuário, com cálculo por investimento.",
@@ -540,7 +552,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/valuation/history": {
@@ -583,7 +597,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna histórico diário de evolução da carteira por período, com totais de compra/venda e valor líquido investido acumulado.",
@@ -624,7 +640,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}": {
@@ -665,7 +683,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Atualiza um investimento existente da carteira do usuário.",
@@ -704,7 +724,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "put": {
         "description": "Atualiza um investimento existente da carteira do usuário.",
@@ -743,7 +765,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/history": {
@@ -784,7 +808,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna o histórico de alterações de um investimento, paginado e ordenado.",
@@ -823,7 +849,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations": {
@@ -882,7 +910,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Lista operações de investimento de um item da carteira com paginação.",
@@ -939,7 +969,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "post": {
         "description": "Registra uma operação de investimento (buy/sell) para um item da carteira.",
@@ -981,7 +1013,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/invested-amount": {
@@ -1034,7 +1068,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna o valor investido no dia informado, considerando operações de compra e venda do investimento.",
@@ -1085,7 +1121,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/position": {
@@ -1126,7 +1164,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna posição atual e custo médio do investimento com base nas operações registradas.",
@@ -1165,7 +1205,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/summary": {
@@ -1206,7 +1248,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Resumo agregado das operações de um investimento.",
@@ -1245,7 +1289,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/{operation_id}": {
@@ -1293,7 +1339,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Atualiza operação de investimento existente.",
@@ -1342,7 +1390,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "put": {
         "description": "Atualiza operação de investimento existente.",
@@ -1391,7 +1441,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/valuation": {
@@ -1432,7 +1484,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna a valorização atual de um investimento específico.",
@@ -1471,7 +1525,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     }
   },
