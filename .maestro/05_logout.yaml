@@ -1,0 +1,8 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp
+- runFlow: 01_login.yaml
+- assertVisible: "Dashboard"
+- launchApp:
+    clearState: true
+- assertVisible: "E-mail"
