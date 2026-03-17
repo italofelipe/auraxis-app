@@ -1,0 +1,11 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp:
+    clearState: true
+- assertVisible: "E-mail"
+- tapOn: "E-mail"
+- inputText: "test@auraxis.com.br"
+- tapOn: "Senha"
+- inputText: "TestPass123!"
+- tapOn: "Entrar"
+- assertVisible: "Dashboard"

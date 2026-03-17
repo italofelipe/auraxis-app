@@ -1,0 +1,7 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp
+- runFlow: 01_login.yaml
+- tapOn: "Ferramentas"
+- assertVisible: "Ferramentas"
+- assertVisible: "Fluxos administrativos e utilitarios"

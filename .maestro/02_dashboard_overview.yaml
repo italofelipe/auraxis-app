@@ -1,0 +1,7 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp
+- runFlow: 01_login.yaml
+- assertVisible: "Dashboard"
+- assertVisible: "Saldo geral"
+- assertVisible: "Resumo por mes"
