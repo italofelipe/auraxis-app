@@ -20,3 +20,24 @@ export const typography = {
 export const spacing = (step: number): number => {
   return step * 8;
 };
+
+export const fontSizes = {
+  xs: 12,
+  sm: 13,
+  md: 14,
+  base: 15,
+  lg: 16,
+  xl: 20,
+  "2xl": 24,
+  "3xl": 28,
+  "4xl": 32,
+} as const;
+
+export const radii = {
+  sm: 8,
+  md: 12,
+} as const;
+
+export const borderWidths = {
+  hairline: 1,
+} as const;
