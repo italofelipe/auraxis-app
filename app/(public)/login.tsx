@@ -1,9 +1,16 @@
 import { useRouter } from "expo-router";
 import { Controller } from "react-hook-form";
-import { Linking, StyleSheet, View } from "react-native";
-import { Button, Card, HelperText, Text, TextInput } from "react-native-paper";
+import {
+  ActivityIndicator,
+  Linking,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { spacing } from "@/config/design-tokens";
+import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
 import { useLoginForm } from "@/hooks/forms/use-login-form";
 import { useLoginMutation } from "@/hooks/mutations/use-auth-mutations";
 import { PRIVACY_URL, TERMS_URL } from "@/lib/web-urls";
@@ -12,14 +19,78 @@ const styles = StyleSheet.create({
   card: {
     gap: spacing(2),
   },
+  cardBox: {
+    backgroundColor: colorPalette.white,
+    borderRadius: radii.md,
+    padding: spacing(2),
+    gap: spacing(1),
+    borderWidth: borderWidths.hairline,
+    borderColor: colorPalette.neutral700,
+  },
+  cardTitle: {
+    fontFamily: typography.bodySemiBold,
+    fontSize: fontSizes.lg,
+    color: colorPalette.neutral950,
+  },
+  cardSubtitle: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.sm,
+    color: colorPalette.neutral700,
+  },
   form: {
     gap: spacing(2),
   },
-  helper: {
+  input: {
+    borderWidth: borderWidths.hairline,
+    borderColor: colorPalette.neutral700,
+    borderRadius: radii.sm,
+    paddingHorizontal: spacing(1.5),
+    paddingVertical: spacing(1),
+    fontFamily: typography.body,
+    fontSize: fontSizes.md,
+    color: colorPalette.neutral950,
+    backgroundColor: colorPalette.white,
+  },
+  inputError: {
+    borderColor: colorPalette.danger500,
+  },
+  helperText: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.xs,
+    color: colorPalette.danger500,
     marginTop: -spacing(1),
+  },
+  buttonContained: {
+    backgroundColor: colorPalette.brand500,
+    borderRadius: radii.sm,
+    paddingVertical: spacing(1.5),
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: spacing(1),
+  },
+  buttonText: {
+    fontFamily: typography.bodySemiBold,
+    fontSize: fontSizes.md,
+    color: colorPalette.neutral950,
+  },
+  buttonTextLink: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.md,
+    color: colorPalette.brand600,
+  },
+  buttonTextLinkSmall: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.xs,
+    color: colorPalette.brand600,
   },
   forgotButton: {
     alignSelf: "flex-start",
+  },
+  bodySmall: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.xs,
+    color: colorPalette.neutral700,
   },
   legalRow: {
     flexDirection: "row",
@@ -41,16 +112,17 @@ export default function LoginScreen() {
 
   return (
     <View style={styles.card}>
-      <Card>
-        <Card.Title title="Entrar" subtitle="Acesso a area logada" />
-        <Card.Content style={styles.form}>
+      <View style={styles.cardBox}>
+        <Text style={styles.cardTitle}>Entrar</Text>
+        <Text style={styles.cardSubtitle}>Acesso a area logada</Text>
+        <View style={styles.form}>
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                label="E-mail"
-                mode="outlined"
+                style={[styles.input, formState.errors.email && styles.inputError]}
+                placeholder="E-mail"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={value}
@@ -59,17 +131,17 @@ export default function LoginScreen() {
               />
             )}
           />
-          <HelperText type="error" visible={Boolean(formState.errors.email)} style={styles.helper}>
-            {formState.errors.email?.message}
-          </HelperText>
+          {formState.errors.email ? (
+            <Text style={styles.helperText}>{formState.errors.email.message}</Text>
+          ) : null}
 
           <Controller
             control={control}
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                label="Senha"
-                mode="outlined"
+                style={[styles.input, formState.errors.password && styles.inputError]}
+                placeholder="Senha"
                 secureTextEntry
                 value={value}
                 onBlur={onBlur}
@@ -77,36 +149,35 @@ export default function LoginScreen() {
               />
             )}
           />
-          <HelperText type="error" visible={Boolean(formState.errors.password)} style={styles.helper}>
-            {formState.errors.password?.message}
-          </HelperText>
+          {formState.errors.password ? (
+            <Text style={styles.helperText}>{formState.errors.password.message}</Text>
+          ) : null}
 
-          <Button mode="contained" onPress={() => void onSubmit()} loading={loginMutation.isPending}>
-            Entrar
-          </Button>
+          <TouchableOpacity
+            style={styles.buttonContained}
+            onPress={() => void onSubmit()}
+            disabled={loginMutation.isPending}>
+            {loginMutation.isPending ? (
+              <ActivityIndicator size="small" color={colorPalette.neutral950} />
+            ) : null}
+            <Text style={styles.buttonText}>Entrar</Text>
+          </TouchableOpacity>
 
-          <Button
-            mode="text"
-            onPress={() => router.push("/forgot-password")}
-            style={styles.forgotButton}>
-            Esqueceu sua senha?
-          </Button>
-        </Card.Content>
-      </Card>
-      <Text variant="bodySmall">Placeholder visual pronto para receber o design final.</Text>
+          <TouchableOpacity
+            style={styles.forgotButton}
+            onPress={() => router.push("/forgot-password")}>
+            <Text style={styles.buttonTextLink}>Esqueceu sua senha?</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+      <Text style={styles.bodySmall}>Placeholder visual pronto para receber o design final.</Text>
       <View style={styles.legalRow}>
-        <Button
-          mode="text"
-          compact
-          onPress={() => { void Linking.openURL(TERMS_URL); }}>
-          Termos de Uso
-        </Button>
-        <Button
-          mode="text"
-          compact
-          onPress={() => { void Linking.openURL(PRIVACY_URL); }}>
-          Política de Privacidade
-        </Button>
+        <TouchableOpacity onPress={() => { void Linking.openURL(TERMS_URL); }}>
+          <Text style={styles.buttonTextLinkSmall}>Termos de Uso</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => { void Linking.openURL(PRIVACY_URL); }}>
+          <Text style={styles.buttonTextLinkSmall}>Política de Privacidade</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );

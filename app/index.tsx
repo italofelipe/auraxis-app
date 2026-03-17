@@ -1,5 +1,5 @@
 import { Redirect } from "expo-router";
-import { ActivityIndicator } from "react-native-paper";
+import { ActivityIndicator } from "react-native";
 
 import { ScreenContainer } from "@/components/ui/screen-container";
 import { useSessionStore } from "@/stores/session-store";
@@ -11,7 +11,7 @@ export default function IndexScreen() {
   if (!hydrated) {
     return (
       <ScreenContainer scrollable={false}>
-        <ActivityIndicator animating size="large" />
+        <ActivityIndicator size="large" />
       </ScreenContainer>
     );
   }

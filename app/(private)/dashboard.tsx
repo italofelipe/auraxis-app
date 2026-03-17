@@ -1,10 +1,9 @@
 import { useMemo, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Card, SegmentedButtons, Text } from "react-native-paper";
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ScreenContainer } from "@/components/ui/screen-container";
-import { spacing } from "@/config/design-tokens";
+import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
 import {
   selectMonthlySnapshot,
   useDashboardOverviewQuery,
@@ -25,11 +24,59 @@ const formatMonth = (month: string): string => {
 };
 
 const styles = StyleSheet.create({
+  card: {
+    backgroundColor: colorPalette.white,
+    borderRadius: radii.md,
+    padding: spacing(2),
+    gap: spacing(1),
+    borderWidth: borderWidths.hairline,
+    borderColor: colorPalette.neutral700,
+  },
+  cardTitle: {
+    fontFamily: typography.bodySemiBold,
+    fontSize: fontSizes.lg,
+    color: colorPalette.neutral950,
+  },
+  cardSubtitle: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.sm,
+    color: colorPalette.neutral700,
+  },
+  headlineSmall: {
+    fontFamily: typography.heading,
+    fontSize: fontSizes["2xl"],
+    color: colorPalette.neutral950,
+  },
+  bodyLarge: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.lg,
+    color: colorPalette.neutral900,
+  },
   section: {
     gap: spacing(2),
   },
   values: {
     gap: spacing(1),
+  },
+  segmentedRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing(1),
+  },
+  segmentButton: {
+    paddingHorizontal: spacing(1.5),
+    paddingVertical: spacing(0.5),
+    borderRadius: radii.sm,
+    borderWidth: borderWidths.hairline,
+    borderColor: colorPalette.brand500,
+  },
+  segmentButtonActive: {
+    backgroundColor: colorPalette.brand500,
+  },
+  segmentButtonText: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.sm,
+    color: colorPalette.neutral950,
   },
 });
 
@@ -62,45 +109,55 @@ export default function DashboardScreen() {
 
   return (
     <ScreenContainer>
-      <Card>
-        <Card.Title title="Saldo geral" subtitle="Resumo consolidado" />
-        <Card.Content>
-          {overviewQuery.isPending ? (
-            <LoadingSkeleton height={32} />
-          ) : (
-            <Text variant="headlineSmall">
-              {currencyFormatter.format(overviewQuery.data?.currentBalance ?? 0)}
-            </Text>
-          )}
-        </Card.Content>
-      </Card>
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Saldo geral</Text>
+        <Text style={styles.cardSubtitle}>Resumo consolidado</Text>
+        {overviewQuery.isPending ? (
+          <LoadingSkeleton height={32} />
+        ) : (
+          <Text style={styles.headlineSmall}>
+            {currencyFormatter.format(overviewQuery.data?.currentBalance ?? 0)}
+          </Text>
+        )}
+      </View>
 
-      <Card>
-        <Card.Title title="Resumo por mes" subtitle="Receitas, despesas e saldo" />
-        <Card.Content style={styles.section}>
-          <SegmentedButtons
-            value={selectedMonth}
-            onValueChange={setSelectedMonth}
-            buttons={monthButtons}
-          />
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Resumo por mes</Text>
+        <Text style={styles.cardSubtitle}>Receitas, despesas e saldo</Text>
+        <View style={styles.section}>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.segmentedRow}>
+              {monthButtons.map((btn) => (
+                <TouchableOpacity
+                  key={btn.value}
+                  style={[
+                    styles.segmentButton,
+                    selectedMonth === btn.value && styles.segmentButtonActive,
+                  ]}
+                  onPress={() => setSelectedMonth(btn.value)}>
+                  <Text style={styles.segmentButtonText}>{btn.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
 
           {monthSnapshot ? (
             <View style={styles.values}>
-              <Text variant="bodyLarge">
+              <Text style={styles.bodyLarge}>
                 Receitas: {currencyFormatter.format(monthSnapshot.incomes)}
               </Text>
-              <Text variant="bodyLarge">
+              <Text style={styles.bodyLarge}>
                 Despesas: {currencyFormatter.format(monthSnapshot.expenses)}
               </Text>
-              <Text variant="bodyLarge">
+              <Text style={styles.bodyLarge}>
                 Saldo: {currencyFormatter.format(monthSnapshot.balance)}
               </Text>
             </View>
           ) : (
             <LoadingSkeleton />
           )}
-        </Card.Content>
-      </Card>
+        </View>
+      </View>
     </ScreenContainer>
   );
 }
