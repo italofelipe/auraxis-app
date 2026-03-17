@@ -37,3 +37,6 @@ coverage/
 
 # Design assets (injected at worktree hydration — never commit)
 designs/
+
+# Maestro E2E reports
+.maestro/reports/

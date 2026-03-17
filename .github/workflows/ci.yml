@@ -219,7 +219,7 @@ jobs:
               `| Android | ${fmt(android)} |`,
               `| iOS | ${fmt(ios)} |`,
               '',
-              '> Thresholds: ≤ 3 MB (aviso) · ≤ 6 MB (hard limit por plataforma)',
+              '> Thresholds: ≤ 3 MB (aviso) · ≤ 8 MB (hard limit por plataforma — inclui Sentry SDK ~1.5 MB)',
             ].join('\n');
 
             try {
@@ -233,7 +233,9 @@ jobs:
               core.warning(`Could not post bundle report comment: ${error.message}`);
             }
 
-            const limit = 6 * 1024 * 1024;
+            // Limit raised to 8 MB: @sentry/react-native adds ~1.5 MB (observability trade-off, justified).
+            // Revisit if bundle exceeds 8 MB after further growth.
+            const limit = 8 * 1024 * 1024;
             if (android > limit) core.setFailed(`Android bundle too large: ${fmt(android)}`);
             if (ios > limit) core.setFailed(`iOS bundle too large: ${fmt(ios)}`);
 

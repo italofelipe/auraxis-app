@@ -1,9 +1,15 @@
 import { useRouter } from "expo-router";
 import { Controller } from "react-hook-form";
-import { StyleSheet, View } from "react-native";
-import { Button, Card, HelperText, TextInput } from "react-native-paper";
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-import { spacing } from "@/config/design-tokens";
+import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
 import { useForgotPasswordForm } from "@/hooks/forms/use-forgot-password-form";
 import { useForgotPasswordMutation } from "@/hooks/mutations/use-auth-mutations";
 
@@ -11,11 +17,65 @@ const styles = StyleSheet.create({
   card: {
     gap: spacing(2),
   },
+  cardBox: {
+    backgroundColor: colorPalette.white,
+    borderRadius: radii.md,
+    padding: spacing(2),
+    gap: spacing(1),
+    borderWidth: borderWidths.hairline,
+    borderColor: colorPalette.neutral700,
+  },
+  cardTitle: {
+    fontFamily: typography.bodySemiBold,
+    fontSize: fontSizes.lg,
+    color: colorPalette.neutral950,
+  },
+  cardSubtitle: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.sm,
+    color: colorPalette.neutral700,
+  },
   form: {
     gap: spacing(2),
   },
-  helper: {
+  input: {
+    borderWidth: borderWidths.hairline,
+    borderColor: colorPalette.neutral700,
+    borderRadius: radii.sm,
+    paddingHorizontal: spacing(1.5),
+    paddingVertical: spacing(1),
+    fontFamily: typography.body,
+    fontSize: fontSizes.md,
+    color: colorPalette.neutral950,
+    backgroundColor: colorPalette.white,
+  },
+  inputError: {
+    borderColor: colorPalette.danger500,
+  },
+  helperText: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.xs,
+    color: colorPalette.danger500,
     marginTop: -spacing(1),
+  },
+  buttonContained: {
+    backgroundColor: colorPalette.brand500,
+    borderRadius: radii.sm,
+    paddingVertical: spacing(1.5),
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "center",
+    gap: spacing(1),
+  },
+  buttonText: {
+    fontFamily: typography.bodySemiBold,
+    fontSize: fontSizes.md,
+    color: colorPalette.neutral950,
+  },
+  buttonTextLink: {
+    fontFamily: typography.body,
+    fontSize: fontSizes.md,
+    color: colorPalette.brand600,
   },
 });
 
@@ -30,16 +90,17 @@ export default function ForgotPasswordScreen() {
 
   return (
     <View style={styles.card}>
-      <Card>
-        <Card.Title title="Recuperar senha" subtitle="Envie o link de recuperacao" />
-        <Card.Content style={styles.form}>
+      <View style={styles.cardBox}>
+        <Text style={styles.cardTitle}>Recuperar senha</Text>
+        <Text style={styles.cardSubtitle}>Envie o link de recuperacao</Text>
+        <View style={styles.form}>
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
               <TextInput
-                label="E-mail"
-                mode="outlined"
+                style={[styles.input, formState.errors.email && styles.inputError]}
+                placeholder="E-mail"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={value}
@@ -48,21 +109,25 @@ export default function ForgotPasswordScreen() {
               />
             )}
           />
-          <HelperText type="error" visible={Boolean(formState.errors.email)} style={styles.helper}>
-            {formState.errors.email?.message}
-          </HelperText>
+          {formState.errors.email ? (
+            <Text style={styles.helperText}>{formState.errors.email.message}</Text>
+          ) : null}
 
-          <Button
-            mode="contained"
+          <TouchableOpacity
+            style={styles.buttonContained}
             onPress={() => void onSubmit()}
-            loading={forgotPasswordMutation.isPending}>
-            Enviar
-          </Button>
-          <Button mode="text" onPress={() => router.replace("/login")}>
-            Voltar para login
-          </Button>
-        </Card.Content>
-      </Card>
+            disabled={forgotPasswordMutation.isPending}>
+            {forgotPasswordMutation.isPending ? (
+              <ActivityIndicator size="small" color={colorPalette.neutral950} />
+            ) : null}
+            <Text style={styles.buttonText}>Enviar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => router.replace("/login")}>
+            <Text style={styles.buttonTextLink}>Voltar para login</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
   );
 }
