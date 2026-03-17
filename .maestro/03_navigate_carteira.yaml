@@ -1,0 +1,7 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp
+- runFlow: 01_login.yaml
+- tapOn: "Carteira"
+- assertVisible: "Carteira"
+- assertVisible: "Distribuicao atual"
