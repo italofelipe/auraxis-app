@@ -51,11 +51,11 @@ export default function PrivateLayout() {
         }}
       />
       <Tabs.Screen
-        name="assinatura"
+        name="alertas"
         options={{
-          title: "Assinatura",
+          title: "Alertas",
           tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="crown-outline" color={color} size={size} />
+            <MaterialCommunityIcons name="bell-outline" color={color} size={size} />
           ),
         }}
       />
