@@ -50,6 +50,15 @@ export default function PrivateLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="assinatura"
+        options={{
+          title: "Assinatura",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="crown-outline" color={color} size={size} />
+          ),
+        }}
+      />
     </Tabs>
   );
 }
