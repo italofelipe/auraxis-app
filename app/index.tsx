@@ -1,7 +1,7 @@
 import { Redirect } from "expo-router";
-import { ActivityIndicator } from "react-native";
 
 import { ScreenContainer } from "@/components/ui/screen-container";
+import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 import { useSessionStore } from "@/stores/session-store";
 
 export default function IndexScreen() {
@@ -11,7 +11,11 @@ export default function IndexScreen() {
   if (!hydrated) {
     return (
       <ScreenContainer scrollable={false}>
-        <ActivityIndicator size="large" />
+        <AsyncStateNotice
+          kind="loading"
+          title="Carregando Auraxis"
+          description="Preparando a sua sessao para decidir o melhor proximo passo."
+        />
       </ScreenContainer>
     );
   }

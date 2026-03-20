@@ -1,77 +1,75 @@
-import { StyleSheet, Text, View } from "react-native";
+import type { ReactElement } from "react";
 
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { ScreenContainer } from "@/components/ui/screen-container";
-import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
+import { Paragraph, XStack, YStack } from "tamagui";
+
 import { useToolsCatalogQuery } from "@/hooks/queries/use-tools-query";
+import { AppScreen } from "@/shared/components/app-screen";
+import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colorPalette.white,
-    borderRadius: radii.md,
-    padding: spacing(2),
-    gap: spacing(1),
-    borderWidth: borderWidths.hairline,
-    borderColor: colorPalette.neutral700,
-  },
-  cardTitle: {
-    fontFamily: typography.bodySemiBold,
-    fontSize: fontSizes.lg,
-    color: colorPalette.neutral950,
-  },
-  cardSubtitle: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.sm,
-    color: colorPalette.neutral700,
-  },
-  list: {
-    gap: spacing(2),
-  },
-  toolCard: {
-    gap: spacing(1),
-    padding: spacing(2),
-    borderRadius: spacing(1.5),
-    backgroundColor: colorPalette.brand300,
-  },
-  titleMedium: {
-    fontFamily: typography.bodySemiBold,
-    fontSize: fontSizes.base,
-    color: colorPalette.neutral950,
-  },
-  bodyMedium: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.md,
-    color: colorPalette.neutral900,
-  },
-  labelMedium: {
-    fontFamily: typography.bodyMedium,
-    fontSize: fontSizes.xs,
-    color: colorPalette.neutral700,
-  },
-});
-
-export default function ToolsScreen() {
+/**
+ * Tools catalog screen backed by the shared Tamagui foundations.
+ *
+ * @returns Private tools catalog with canonical async states.
+ */
+export default function ToolsScreen(): ReactElement {
   const toolsCatalogQuery = useToolsCatalogQuery();
+  const tools = toolsCatalogQuery.data?.tools ?? [];
 
   return (
-    <ScreenContainer>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Ferramentas</Text>
-        <Text style={styles.cardSubtitle}>Fluxos administrativos e utilitarios</Text>
-        <View style={styles.list}>
-          {toolsCatalogQuery.isPending ? <LoadingSkeleton height={32} /> : null}
+    <AppScreen>
+      <AppSurfaceCard
+        title="Ferramentas"
+        description="Fluxos administrativos e utilitarios para simular cenarios e ganhar clareza financeira.">
+        {toolsCatalogQuery.isPending ? (
+          <AsyncStateNotice
+            kind="loading"
+            title="Carregando ferramentas"
+            description="Preparando o catalogo com as opcoes disponiveis para o seu plano."
+          />
+        ) : null}
 
-          {(toolsCatalogQuery.data?.tools ?? []).map((tool) => (
-            <View style={styles.toolCard} key={tool.id}>
-              <Text style={styles.titleMedium}>{tool.name}</Text>
-              <Text style={styles.bodyMedium}>{tool.description}</Text>
-              <Text style={styles.labelMedium}>
-                {tool.enabled ? "Disponivel" : "Em planejamento"}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    </ScreenContainer>
+        {toolsCatalogQuery.isError ? (
+          <AsyncStateNotice
+            kind="error"
+            title="Nao foi possivel carregar agora"
+            description="Tente novamente em instantes para visualizar o catalogo mais recente."
+          />
+        ) : null}
+
+        {!toolsCatalogQuery.isPending && !toolsCatalogQuery.isError && tools.length === 0 ? (
+          <AsyncStateNotice
+            kind="empty"
+            title="Nenhuma ferramenta disponivel"
+            description="Novas simulacoes vao aparecer aqui assim que forem liberadas."
+          />
+        ) : null}
+
+        {!toolsCatalogQuery.isPending && !toolsCatalogQuery.isError && tools.length > 0 ? (
+          <YStack gap="$3">
+            {tools.map((tool) => (
+              <AppSurfaceCard
+                key={tool.id}
+                backgroundColor="$surfaceRaised"
+                borderColor={tool.enabled ? "$secondary" : "$borderColor"}
+                title={tool.name}
+                description={tool.description}>
+                <XStack alignItems="center" justifyContent="space-between">
+                  <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+                    {tool.enabled ? "Disponivel agora" : "Em planejamento"}
+                  </Paragraph>
+                  <Paragraph
+                    color={tool.enabled ? "$secondary" : "$muted"}
+                    fontFamily="$body"
+                    fontSize="$2">
+                    {tool.enabled ? "Ativa" : "Bloqueada"}
+                  </Paragraph>
+                </XStack>
+              </AppSurfaceCard>
+            ))}
+          </YStack>
+        ) : null}
+      </AppSurfaceCard>
+    </AppScreen>
   );
 }
