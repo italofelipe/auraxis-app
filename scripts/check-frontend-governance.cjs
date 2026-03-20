@@ -33,6 +33,7 @@ const DISALLOWED_SOURCE_PATTERNS = [
 const STYLE_SCAN_EXTENSIONS = new Set([".ts", ".tsx"]);
 const STYLE_TOKEN_EXCLUDE_PATTERNS = [
   /^config\/design-tokens\.ts$/,
+  /^config\/tamagui-theme\.ts$/,
   /^config\/paper-theme\.ts$/,
   /^constants\/theme\.ts$/,
   /^shared\/theme\/.+/,

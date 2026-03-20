@@ -1,9 +1,25 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactElement } from "react";
 
 import { QueryClientProvider } from "@tanstack/react-query";
+import { TamaguiProvider, Theme } from "tamagui";
 
 import { queryClient } from "@/config/query-client";
+import { tamaguiConfig } from "@/config/tamagui-theme";
 
-export const AppProviders = ({ children }: PropsWithChildren) => {
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+/**
+ * Shared root providers for the mobile application runtime.
+ *
+ * @param props Children to render inside query and Tamagui providers.
+ * @returns Provider tree for the app root.
+ */
+export const AppProviders = ({
+  children,
+}: PropsWithChildren): ReactElement => {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme="auraxis">
+        <Theme name="auraxis">{children}</Theme>
+      </TamaguiProvider>
+    </QueryClientProvider>
+  );
 };
