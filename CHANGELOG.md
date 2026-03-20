@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.2.0](https://github.com/italofelipe/auraxis-app/compare/v1.1.0...v1.2.0) (2026-03-20)
+
+
+### Features
+
+* **app:** add tamagui runtime foundation ([#178](https://github.com/italofelipe/auraxis-app/issues/178)) ([7724c16](https://github.com/italofelipe/auraxis-app/commit/7724c16988e3a791ca301102008d9d8da28e208a))
+* **tools:** add installment vs cash mobile flow ([#179](https://github.com/italofelipe/auraxis-app/issues/179)) ([de98e83](https://github.com/italofelipe/auraxis-app/commit/de98e832e733464be922725eb0f8af3e50087fd3))
+
+
+### Bug Fixes
+
+* **ci:** let release please trigger release pr checks ([#174](https://github.com/italofelipe/auraxis-app/issues/174)) ([6a52325](https://github.com/italofelipe/auraxis-app/commit/6a5232551743c2c78c53291f629e77639f9e5106))
+
 ## [1.1.0](https://github.com/italofelipe/auraxis-app/compare/v1.0.0...v1.1.0) (2026-03-19)
 
 
