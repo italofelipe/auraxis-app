@@ -3,7 +3,7 @@ import { render } from "@testing-library/react-native";
 import { AppProviders } from "@/components/providers/app-providers";
 import { useSessionStore } from "@/stores/session-store";
 
-import IndexScreen from "./index";
+import IndexScreen from "@/app/index";
 
 interface MockSessionState {
   readonly accessToken: string | null

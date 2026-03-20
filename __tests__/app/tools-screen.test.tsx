@@ -2,10 +2,9 @@ import { render } from "@testing-library/react-native";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import { AppProviders } from "@/components/providers/app-providers";
+import ToolsScreen from "@/app/(private)/ferramentas";
 import { useToolsCatalogQuery } from "@/hooks/queries/use-tools-query";
 import type { ToolsCatalog } from "@/types/contracts";
-
-import ToolsScreen from "./ferramentas";
 
 jest.mock("@/hooks/queries/use-tools-query", () => ({
   useToolsCatalogQuery: jest.fn(),
