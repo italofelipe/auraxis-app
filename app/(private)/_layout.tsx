@@ -50,6 +50,12 @@ export default function PrivateLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="installment-vs-cash"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

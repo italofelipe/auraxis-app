@@ -11,6 +11,12 @@ interface ToolsApiClient {
 export const toolsPlaceholder: ToolsCatalog = {
   tools: [
     {
+      id: "installment-vs-cash",
+      name: "Parcelado vs a vista",
+      description: "Compare desconto, parcelas e custo de oportunidade.",
+      enabled: true,
+    },
+    {
       id: "raise-calculator",
       name: "Pedir aumento",
       description: "Calculo de inflacao + ganho real desejado.",
