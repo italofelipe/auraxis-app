@@ -10,6 +10,12 @@ jest.mock("@/hooks/queries/use-tools-query", () => ({
   useToolsCatalogQuery: jest.fn(),
 }));
 
+jest.mock("expo-router", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+  }),
+}));
+
 const mockedUseToolsCatalogQuery = jest.mocked(useToolsCatalogQuery);
 
 const buildToolsCatalogQuery = (

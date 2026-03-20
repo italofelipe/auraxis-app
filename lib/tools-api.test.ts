@@ -46,8 +46,8 @@ describe("tools api", () => {
     const catalog: ToolsCatalog = {
       tools: [
         {
-          id: "bill-forecast",
-          name: "Simulador de contas",
+          id: "installment-vs-cash",
+          name: "Parcelado vs a vista",
           description: "Descricao",
           enabled: true,
         },
