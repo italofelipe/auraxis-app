@@ -51,6 +51,15 @@ export default function PrivateLayout() {
         }}
       />
       <Tabs.Screen
+        name="alertas"
+        options={{
+          title: "Alertas",
+          tabBarIcon: ({ color, size }) => (
+            <MaterialCommunityIcons name="bell-outline" color={color} size={size} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="installment-vs-cash"
         options={{
           href: null,

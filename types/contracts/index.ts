@@ -7,7 +7,10 @@ export type {
 export type { DashboardOverview, MonthlySnapshot } from "./dashboard";
 export type { WalletAsset, WalletSummary } from "./wallet";
 export type { ToolDefinition, ToolsCatalog } from "./tools";
-export type { FeatureKey } from "./entitlement";
+export type { Alert, AlertPreference, AlertSeverity, AlertsResponse } from "./alert";
+export type { Subscription, SubscriptionStatus } from "./subscription";
+export type { EntitlementCheck, EntitlementCheckResponse, FeatureKey } from "./entitlement";
+export type { Simulation, SaveSimulationPayload } from "./simulation";
 export type {
   CreateInstallmentVsCashGoalPayload,
   CreateInstallmentVsCashPlannedExpensePayload,

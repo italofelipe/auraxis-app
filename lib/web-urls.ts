@@ -12,3 +12,9 @@ export const TERMS_URL = `${WEB_BASE_URL}/termos` as const;
 
 /** Canonical URL for the Privacy Policy page. */
 export const PRIVACY_URL = `${WEB_BASE_URL}/privacidade` as const;
+
+/** Canonical URL for the subscription plans page. */
+export const PLANS_URL = `${WEB_BASE_URL}/planos` as const;
+
+/** Canonical URL for managing an existing subscription. */
+export const MANAGE_SUBSCRIPTION_URL = `${WEB_BASE_URL}/conta/assinatura` as const;
