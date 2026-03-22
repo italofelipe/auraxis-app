@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/italofelipe/auraxis-app/compare/v1.2.0...v1.3.0) (2026-03-22)
+
+
+### Features
+
+* **alerts:** add alert list and preferences screens ([#168](https://github.com/italofelipe/auraxis-app/issues/168)) ([2284951](https://github.com/italofelipe/auraxis-app/commit/22849510c6ce631b31b3e015b77eb3ca1731d394))
+
 ## [1.2.0](https://github.com/italofelipe/auraxis-app/compare/v1.1.0...v1.2.0) (2026-03-20)
 
 
