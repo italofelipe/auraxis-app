@@ -8,3 +8,9 @@ export type FeatureKey =
 export interface EntitlementCheck {
   readonly has_access: boolean;
 }
+
+export interface EntitlementCheckResponse {
+  readonly active?: boolean;
+  readonly has_access?: boolean;
+  readonly feature_key?: string;
+}

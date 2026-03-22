@@ -29,6 +29,16 @@ Preparar o app para:
 - Merge em `main/master` dispara `Release Please`.
 - PR de release é aberto/atualizado automaticamente.
 - Merge do PR publica tag/release.
+- Secret obrigatório no repositório: `RELEASE_PLEASE_TOKEN`.
+- O workflow de release deve usar esse token dedicado, e não `GITHUB_TOKEN`, para que o PR de release continue disparando o CI normal do repositório.
+- Sem `RELEASE_PLEASE_TOKEN`, o workflow deve falhar cedo com erro explícito, evitando criar PR de release preso sem checks.
+
+#### Incidente conhecido e remediação
+
+- Sintoma: PR de release criado, mas sem statuses/checks no head commit.
+- Causa provável: branch/PR gerados com `GITHUB_TOKEN` e bloqueados pela proteção anti-recursão do GitHub Actions.
+- Mitigação imediata: push manual na branch do release PR para disparar o CI.
+- Correção durável: manter `RELEASE_PLEASE_TOKEN` configurado e validado no workflow `release-please.yml`.
 
 ### Deploy mínimo do app
 

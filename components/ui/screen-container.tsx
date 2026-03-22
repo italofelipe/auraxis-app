@@ -1,41 +1,24 @@
-import type { PropsWithChildren } from "react";
+import type { PropsWithChildren, ReactElement } from "react";
 
-import { ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-
-import { spacing } from "@/config/design-tokens";
+import { AppScreen } from "@/shared/components/app-screen";
 
 interface ScreenContainerProps extends PropsWithChildren {
-  readonly scrollable?: boolean;
+  readonly scrollable?: boolean
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: spacing(2),
-    paddingVertical: spacing(2),
-    gap: spacing(2),
-  },
-});
-
+/**
+ * Legacy compatibility wrapper around the canonical Tamagui screen primitive.
+ *
+ * @param props Screen composition props.
+ * @returns Shared screen container backed by AppScreen.
+ */
 export const ScreenContainer = ({
   children,
   scrollable = true,
-}: ScreenContainerProps) => {
-  if (!scrollable) {
-    return (
-      <SafeAreaView style={styles.safeArea}>
-        <View style={styles.content}>{children}</View>
-      </SafeAreaView>
-    );
-  }
-
+}: ScreenContainerProps): ReactElement => {
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.content}>{children}</ScrollView>
-    </SafeAreaView>
+    <AppScreen scrollable={scrollable}>
+      {children}
+    </AppScreen>
   );
 };

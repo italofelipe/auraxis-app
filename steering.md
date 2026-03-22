@@ -40,7 +40,7 @@ Para integração com backend recém-entregue:
 | Formatação | Prettier | ^3.8 |
 | Testes unitários | jest-expo + @testing-library/react-native | ^54.0 / ^13.0 |
 | Testes E2E | Detox (scaffold — requer macOS runner) | — |
-| UI base | React Native Paper (transicional) | ^5.15 |
+| UI base | Tamagui | ^1.x |
 | UI target | Tamagui | ^1.x |
 | Estado de servidor | TanStack Query (React) | ^5.x |
 | Análise estática | SonarCloud | — |
@@ -60,8 +60,8 @@ Para integração com backend recém-entregue:
 - Paleta oficial: `#262121`, `#ffbe4d`, `#413939`, `#0b0909`, `#ffd180`, `#ffab1a`.
 - Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
 - Grid base: `8px` (spacing estrutural em múltiplos de 8).
-- O runtime atual ainda usa **React Native Paper** customizado com tokens Auraxis.
-- A direção alvo continua sendo **Tamagui**; qualquer abstração nova deve evitar acoplamento que dificulte a migração do APP10.
+- O runtime oficial usa **Tamagui** como fundação única de UI do app.
+- Qualquer abstração nova deve nascer sobre `config/tamagui-theme.ts` e `components/providers/app-providers.tsx`.
 - Componentes novos devem priorizar wrappers e tokens compartilhados para manter a troca de UI kit reversível.
 - É proibido usar valores literais de cor, spacing, radius, shadow, font-size e line-height em telas/componentes. Usar tokens semânticos.
 - **Tailwind não é permitido** neste repositório.
