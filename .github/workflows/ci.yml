@@ -157,7 +157,7 @@ jobs:
         if: steps.capability.outputs.enabled == 'true'
         uses: expo/expo-github-action@v8
         with:
-          expo-version: latest
+          eas-version: 16.13.0
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Export JS bundle (Android + iOS)
         if: steps.capability.outputs.enabled == 'true'
