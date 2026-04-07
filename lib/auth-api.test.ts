@@ -1,19 +1,21 @@
 import { createAuthApi } from "@/lib/auth-api";
 
 describe("auth api", () => {
-  it("usa o endpoint canônico de recuperação de senha", async () => {
-    const post = jest.fn().mockResolvedValue({
-      data: {
-        message: "Email sent",
-      },
+  it("normaliza a resposta de recuperação de senha", async () => {
+    const forgotPassword = jest.fn().mockResolvedValue({
+      accepted: true,
+      message: "Email sent",
     });
 
-    const authApi = createAuthApi({ post });
+    const authApi = createAuthApi({
+      login: jest.fn(),
+      forgotPassword,
+    });
     const response = await authApi.forgotPassword({
       email: "user@auraxis.com",
     });
 
-    expect(post).toHaveBeenCalledWith("/auth/password/forgot", {
+    expect(forgotPassword).toHaveBeenCalledWith({
       email: "user@auraxis.com",
     });
     expect(response).toEqual({

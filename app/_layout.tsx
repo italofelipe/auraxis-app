@@ -14,7 +14,6 @@ import { useFonts } from "expo-font";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { AppProviders } from "@/components/providers/app-providers";
-import { useSessionBootstrap } from "@/hooks/use-session-bootstrap";
 import { initSentry } from "@/app/services/sentry";
 
 // Initialize Sentry as early as possible
@@ -28,8 +27,6 @@ function RootLayout() {
     Raleway_500Medium,
     Raleway_600SemiBold,
   });
-
-  useSessionBootstrap();
 
   if (!fontsLoaded) {
     return null;
