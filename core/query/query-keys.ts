@@ -1,0 +1,33 @@
+export const queryKeys = {
+  bootstrap: {
+    root: ["bootstrap"] as const,
+    user: () => ["bootstrap", "user"] as const,
+  },
+  dashboard: {
+    root: ["dashboard"] as const,
+    overview: () => ["dashboard", "overview"] as const,
+  },
+  goals: {
+    root: ["goals"] as const,
+    list: () => ["goals", "list"] as const,
+  },
+  alerts: {
+    root: ["alerts"] as const,
+    list: () => ["alerts", "list"] as const,
+    preferences: () => ["alerts", "preferences"] as const,
+  },
+  subscription: {
+    root: ["subscription"] as const,
+    me: () => ["subscription", "me"] as const,
+    plans: () => ["subscription", "plans"] as const,
+  },
+  wallet: {
+    root: ["wallet"] as const,
+    summary: () => ["wallet", "summary"] as const,
+  },
+  observability: {
+    root: ["observability"] as const,
+    snapshot: () => ["observability", "snapshot"] as const,
+    metrics: () => ["observability", "metrics"] as const,
+  },
+} as const;

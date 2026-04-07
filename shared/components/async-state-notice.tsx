@@ -1,6 +1,9 @@
 import type { ReactElement } from "react";
 
-import { Paragraph, Spinner, YStack } from "tamagui";
+import { Paragraph, Spinner } from "tamagui";
+
+import { AppHeading } from "@/shared/components/app-heading";
+import { AppStack } from "@/shared/components/app-stack";
 
 export interface AsyncStateNoticeProps {
   readonly kind: "loading" | "error" | "empty"
@@ -20,7 +23,7 @@ export function AsyncStateNotice({
   description,
 }: AsyncStateNoticeProps): ReactElement {
   return (
-    <YStack
+    <AppStack
       alignItems="center"
       justifyContent="center"
       gap="$2"
@@ -31,14 +34,17 @@ export function AsyncStateNotice({
       borderWidth={1}
       borderRadius="$2">
       {kind === "loading" ? <Spinner color="$secondary" size="large" /> : null}
-      <Paragraph color={kind === "error" ? "$danger" : "$color"} fontFamily="$heading" fontSize="$5">
+      <AppHeading
+        level={3}
+        color={kind === "error" ? "$danger" : "$color"}
+        fontSize="$5">
         {title}
-      </Paragraph>
+      </AppHeading>
       {description ? (
         <Paragraph color="$muted" fontFamily="$body" fontSize="$3" textAlign="center">
           {description}
         </Paragraph>
       ) : null}
-    </YStack>
+    </AppStack>
   );
 }

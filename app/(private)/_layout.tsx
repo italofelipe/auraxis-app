@@ -2,18 +2,18 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 
 import { colorPalette } from "@/config/design-tokens";
-import { useSessionStore } from "@/stores/session-store";
+import { privateTabDefinitions } from "@/core/navigation/routes";
+import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 
 export default function PrivateLayout() {
-  const hydrated = useSessionStore((state) => state.hydrated);
-  const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
+  const { ready, redirectTo } = usePrivateRouteGuard();
 
-  if (!hydrated) {
+  if (!ready) {
     return null;
   }
 
-  if (!isAuthenticated) {
-    return <Redirect href="/login" />;
+  if (redirectTo) {
+    return <Redirect href={redirectTo} />;
   }
 
   return (
@@ -23,42 +23,22 @@ export default function PrivateLayout() {
         tabBarActiveTintColor: colorPalette.brand600,
         tabBarInactiveTintColor: colorPalette.neutral700,
       }}>
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: "Dashboard",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="view-dashboard-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="carteira"
-        options={{
-          title: "Carteira",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="wallet-outline" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="ferramentas"
-        options={{
-          title: "Ferramentas",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="tools" color={color} size={size} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="alertas"
-        options={{
-          title: "Alertas",
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="bell-outline" color={color} size={size} />
-          ),
-        }}
-      />
+      {privateTabDefinitions.map((tab) => {
+        return (
+          <Tabs.Screen
+            key={tab.name}
+            name={tab.name}
+            options={{
+              title: tab.title,
+              tabBarIcon: ({ color, size }) => {
+                return (
+                  <MaterialCommunityIcons name={tab.icon} color={color} size={size} />
+                );
+              },
+            }}
+          />
+        );
+      })}
       <Tabs.Screen
         name="installment-vs-cash"
         options={{

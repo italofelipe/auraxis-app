@@ -1,4 +1,5 @@
 import { createApiQuery } from "@/core/query/create-api-query";
+import { queryKeys } from "@/core/query/query-keys";
 import type {
   UserBootstrap,
   UserBootstrapQuery,
@@ -9,7 +10,7 @@ export const useUserBootstrapQuery = (
   query: UserBootstrapQuery = {},
 ) => {
   return createApiQuery<UserBootstrap>(
-    ["user", "bootstrap", query],
+    [...queryKeys.bootstrap.user(), query],
     () => bootstrapService.getBootstrap(query),
   );
 };

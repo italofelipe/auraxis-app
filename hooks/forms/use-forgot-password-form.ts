@@ -1,14 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-
 import {
   forgotPasswordSchema,
   type ForgotPasswordFormValues,
-} from "@/schemas/auth";
+} from "@/features/auth/validators";
+import { useAppForm } from "@/shared/forms/use-app-form";
 
 export const useForgotPasswordForm = () => {
-  return useForm<ForgotPasswordFormValues>({
-    resolver: zodResolver(forgotPasswordSchema),
+  return useAppForm<ForgotPasswordFormValues>(forgotPasswordSchema, {
     defaultValues: {
       email: "",
     },

@@ -6,6 +6,7 @@ import type {
   WalletCollection,
   WalletListQuery,
 } from "@/features/wallet/contracts";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
 
 interface WalletPayload {
   readonly items: {
@@ -54,7 +55,7 @@ export const createWalletService = (client: AxiosInstance) => {
     listEntries: async (
       query: WalletListQuery = {},
     ): Promise<WalletCollection> => {
-      const response = await client.get("/wallet", {
+      const response = await client.get(apiContractMap.walletSummary.path, {
         params: {
           page: query.page,
           per_page: query.perPage,

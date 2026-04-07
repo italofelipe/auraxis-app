@@ -8,6 +8,7 @@ import type {
   AlertPreferenceRecord,
   AlertPreferenceUpdate,
 } from "@/features/alerts/contracts";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
 
 interface AlertPayload {
   readonly id: string;
@@ -58,7 +59,7 @@ const mapPreference = (payload: PreferencePayload): AlertPreferenceRecord => {
 export const createAlertsService = (client: AxiosInstance) => {
   return {
     listAlerts: async (unreadOnly = false): Promise<AlertListResponse> => {
-      const response = await client.get("/alerts", {
+      const response = await client.get(apiContractMap.alertsList.path, {
         params: {
           unread_only: unreadOnly,
         },
@@ -72,7 +73,7 @@ export const createAlertsService = (client: AxiosInstance) => {
       };
     },
     getPreferences: async (): Promise<AlertPreferenceListResponse> => {
-      const response = await client.get("/alerts/preferences");
+      const response = await client.get(apiContractMap.alertPreferences.path);
       const payload = unwrapEnvelopeData<{
         readonly preferences: PreferencePayload[];
       }>(response.data);
@@ -91,11 +92,14 @@ export const createAlertsService = (client: AxiosInstance) => {
       category: string,
       command: AlertPreferenceUpdate,
     ): Promise<AlertPreferenceRecord> => {
-      const response = await client.put(`/alerts/preferences/${category}`, {
+      const response = await client.put(
+        apiContractMap.updateAlertPreference.path.replace("{category}", category),
+        {
         enabled: command.enabled,
         channels: command.channels,
         global_opt_out: command.globalOptOut,
-      });
+        },
+      );
 
       const payload = unwrapEnvelopeData<{ readonly preference: PreferencePayload }>(
         response.data,
