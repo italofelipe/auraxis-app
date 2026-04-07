@@ -1,12 +1,12 @@
 import type { PropsWithChildren, ReactElement } from "react";
 
 import { useAccessibilityPreferences } from "@/core/shell/use-accessibility-preferences";
-import { useSessionBootstrap } from "@/core/session/use-session-bootstrap";
+import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
 
 export const RuntimeProvider = ({
   children,
 }: PropsWithChildren): ReactElement => {
-  useSessionBootstrap();
   useAccessibilityPreferences();
+  useRuntimeLifecycle();
   return <>{children}</>;
 };

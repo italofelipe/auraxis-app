@@ -26,6 +26,16 @@ export type PrivateAppRoute =
   (typeof appRoutes.private)[keyof typeof appRoutes.private];
 export type AppRoute = typeof appRoutes.root | PublicAppRoute | PrivateAppRoute;
 
+export type AppRouteAccess = "root" | "public" | "private";
+
+export interface AppRouteDefinition {
+  readonly key: string;
+  readonly path: AppRoute;
+  readonly access: AppRouteAccess;
+  readonly tabVisible: boolean;
+  readonly supportsHostedCheckoutReturn: boolean;
+}
+
 export interface PrivateTabDefinition {
   readonly name: "dashboard" | "carteira" | "ferramentas" | "alertas";
   readonly href: PrivateAppRoute;
@@ -59,3 +69,89 @@ export const privateTabDefinitions: readonly PrivateTabDefinition[] = [
     icon: "bell-outline",
   },
 ] as const;
+
+export const appRouteRegistry: readonly AppRouteDefinition[] = [
+  {
+    key: "root",
+    path: appRoutes.root,
+    access: "root",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "login",
+    path: appRoutes.public.login,
+    access: "public",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "forgotPassword",
+    path: appRoutes.public.forgotPassword,
+    access: "public",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "dashboard",
+    path: appRoutes.private.dashboard,
+    access: "private",
+    tabVisible: true,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "wallet",
+    path: appRoutes.private.wallet,
+    access: "private",
+    tabVisible: true,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "tools",
+    path: appRoutes.private.tools,
+    access: "private",
+    tabVisible: true,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "alerts",
+    path: appRoutes.private.alerts,
+    access: "private",
+    tabVisible: true,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "subscription",
+    path: appRoutes.private.subscription,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: true,
+  },
+  {
+    key: "installmentVsCash",
+    path: appRoutes.private.installmentVsCash,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+] as const;
+
+const privateRouteSet = new Set<PrivateAppRoute>(
+  appRouteRegistry
+    .filter((route) => route.access === "private")
+    .map((route) => route.path as PrivateAppRoute),
+);
+
+const publicRouteSet = new Set<PublicAppRoute>(
+  appRouteRegistry
+    .filter((route) => route.access === "public")
+    .map((route) => route.path as PublicAppRoute),
+);
+
+export const isPrivateAppRoute = (route: string): route is PrivateAppRoute => {
+  return privateRouteSet.has(route as PrivateAppRoute);
+};
+
+export const isPublicAppRoute = (route: string): route is PublicAppRoute => {
+  return publicRouteSet.has(route as PublicAppRoute);
+};

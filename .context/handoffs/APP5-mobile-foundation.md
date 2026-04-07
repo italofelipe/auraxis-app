@@ -128,3 +128,34 @@
   - `npm run policy:check`
   - `npm run contracts:check`
   - busca explícita pelos literais reportados pelo Gitleaks (`rg`) retornando vazio em `contracts/openapi.snapshot.json` e `shared/types/generated/openapi.ts`
+
+---
+
+## Update - APP FND-02
+
+### O que foi feito
+- consolidei o startup do app para hidratar sessão junto com fontes, Sentry e `SplashScreen` em [`core/shell/use-app-startup.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/shell/use-app-startup.ts);
+- deixei o bootstrap de sessão idempotente no store em [`core/session/session-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/session/session-store.ts), reduzindo risco de drift entre runtime e telas;
+- expandi o shell store com estado operacional de lifecycle e retorno de checkout em [`core/shell/app-shell-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/shell/app-shell-store.ts);
+- fechei a trilha canônica de deep links e retorno de checkout em [`core/navigation/deep-linking.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/navigation/deep-linking.ts), apoiada pelos novos env/runtime keys em [`shared/config/runtime.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/config/runtime.ts);
+- adicionei a orquestração de lifecycle e revalidação de runtime em:
+  - [`core/shell/runtime-revalidation.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/shell/runtime-revalidation.ts)
+  - [`core/shell/use-runtime-lifecycle.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/shell/use-runtime-lifecycle.ts)
+  - [`core/providers/runtime-provider.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/providers/runtime-provider.tsx)
+- criei a fundação do checkout hospedado mobile/web em [`features/subscription/services/hosted-checkout-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/features/subscription/services/hosted-checkout-service.ts);
+- endureci o gate local para runtime novo incluindo cobertura explícita em [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/jest.config.js), para que esse tipo de drift falhe localmente antes do CI.
+
+### O que foi validado
+- `npm run typecheck`
+- `npx jest core/navigation/deep-linking.test.ts core/shell/runtime-revalidation.base.test.ts core/shell/runtime-revalidation.errors.test.ts core/shell/use-app-startup.test.tsx core/shell/use-runtime-lifecycle.base.test.tsx core/shell/use-runtime-lifecycle.edge.test.tsx features/subscription/services/hosted-checkout-service.test.ts --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o scaffold de retorno de checkout ainda não está consumido por views; neste bloco ficou pronta só a fundação de runtime, store e serviço;
+- as telas atuais ainda usam parte da arquitetura antiga de layout/composição, então a consolidação visual/estrutural continua no próximo bloco;
+- o app ainda precisa fechar deep links funcionais de produto e navegação externa por rota real quando as primeiras telas forem migradas para o caminho canônico.
+
+### Proximo passo
+- seguir para `APP FND-03`, fechando primitives, composição visual, async states e wrappers reutilizáveis para deixar `.tsx` apenas como view;
+- depois avançar para `APP FND-04`, completando os domínios que ainda faltam antes da primeira feature entregue.
