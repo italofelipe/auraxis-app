@@ -10,3 +10,5 @@ export interface GoalRecord {
 export interface GoalListResponse {
   readonly goals: GoalRecord[];
 }
+
+export type GoalSummary = GoalRecord;

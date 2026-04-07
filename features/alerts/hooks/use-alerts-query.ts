@@ -1,4 +1,5 @@
 import { createApiQuery } from "@/core/query/create-api-query";
+import { queryKeys } from "@/core/query/query-keys";
 import type {
   AlertListResponse,
   AlertPreferenceListResponse,
@@ -7,14 +8,14 @@ import { alertsService } from "@/features/alerts/services/alerts-service";
 
 export const useAlertsQuery = (unreadOnly = false) => {
   return createApiQuery<AlertListResponse>(
-    ["alerts", unreadOnly],
+    [...queryKeys.alerts.list(), unreadOnly],
     () => alertsService.listAlerts(unreadOnly),
   );
 };
 
 export const useAlertPreferencesQuery = () => {
   return createApiQuery<AlertPreferenceListResponse>(
-    ["alerts", "preferences"],
+    queryKeys.alerts.preferences(),
     () => alertsService.getPreferences(),
   );
 };

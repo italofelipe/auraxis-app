@@ -32,3 +32,7 @@ export interface AlertPreferenceUpdate {
   readonly channels: string[];
   readonly globalOptOut: boolean;
 }
+
+export type AlertItem = AlertRecord;
+export type AlertPreference = AlertPreferenceRecord;
+export type UpdateAlertPreferenceCommand = AlertPreferenceUpdate;

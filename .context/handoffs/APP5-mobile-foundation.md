@@ -30,6 +30,16 @@
   - [`lib/auth-api.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/lib/auth-api.ts)
   - [`hooks/mutations/use-auth-mutations.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/mutations/use-auth-mutations.ts)
 - alinhei o contexto do app com a nova arquitetura em [`architecture.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/.context/architecture.md).
+- completei a segunda camada da fundação com:
+  - guards e registro tipado de rotas em [`core/navigation/routes.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/navigation/routes.ts), [`core/navigation/route-guards.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/navigation/route-guards.ts) e [`core/navigation/use-route-guards.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/navigation/use-route-guards.ts);
+  - app shell store e bootstrap de startup/acessibilidade em [`core/shell/app-shell-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/shell/app-shell-store.ts), [`core/shell/use-app-startup.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/shell/use-app-startup.ts) e [`core/shell/use-accessibility-preferences.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/shell/use-accessibility-preferences.ts);
+  - query keys canônicas em [`core/query/query-keys.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/query/query-keys.ts);
+  - mapa tipado de contratos API em [`shared/contracts/api-contract-map.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/contracts/api-contract-map.ts), além de conectar os services a essa fonte única de paths;
+  - base de tema semântico, motion tokens e hooks de animação em [`shared/theme/index.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/theme/index.ts), [`shared/theme/motion.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/theme/motion.ts) e [`shared/animations`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/animations);
+  - base reutilizável de formulários/validação em [`shared/forms/use-app-form.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/forms/use-app-form.ts), [`shared/forms/api-form-errors.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/forms/api-form-errors.ts), [`features/auth/validators.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/features/auth/validators.ts) e [`features/subscription/validators.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/features/subscription/validators.ts);
+  - primitives reutilizáveis extras em [`shared/components/app-heading.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/components/app-heading.tsx), [`shared/components/app-badge.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/components/app-badge.tsx), [`shared/components/app-stack.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/components/app-stack.tsx) e [`shared/components/app-form-message.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/components/app-form-message.tsx);
+  - test providers desacoplados do runtime real em [`shared/testing/test-providers.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/testing/test-providers.tsx);
+  - layouts `Expo Router` refatorados para manter `.tsx` mais finos e mover decisão de sessão/redirect para hooks.
 
 ## O que foi validado
 - `npm run typecheck`
@@ -37,6 +47,8 @@
 - `npm run policy:check`
 - `npm run contracts:check`
 - `npx jest core/http/http-client.test.ts shared/mocks/api/router.test.ts lib/auth-api.test.ts __tests__/app/index-screen.test.tsx --runInBand`
+- `npx jest core/navigation/route-guards.test.ts core/shell/use-app-startup.test.tsx shared/contracts/api-contract-map.test.ts shared/forms/api-form-errors.test.ts shared/forms/use-app-form.test.tsx shared/theme/motion.test.ts features/auth/validators.test.ts features/subscription/validators.test.ts shared/components/app-badge.test.tsx shared/components/app-heading.test.tsx components/providers/app-providers.test.tsx __tests__/app/index-screen.test.tsx --runInBand`
+- `npm run quality-check`
 - `git diff --check`
 
 ## Riscos pendentes
@@ -44,8 +56,9 @@
 - existem telas e hooks legados que ainda consomem `lib/*` e contratos simplificados; a camada de compatibilidade segura esse bloco, mas a migração real para `features/*` ainda precisa acontecer;
 - os mocks cobrem os fluxos-base do MVP1, mas ainda não representam todos os endpoints de `transactions`, `shared-entries` e `fiscal`;
 - o app continua com `node 25.x`, o que não é a escolha mais conservadora para estabilidade da esteira.
+- vários screens atuais ainda usam estilos/raw components herdados do scaffold inicial; a fundação nova está pronta, mas a limpeza visual/estrutural das views virá no próximo slice.
 
 ## Proximo passo
-- começar a migrar as telas públicas e privadas para consumir os hooks de `features/*`, sem colocar regra de negócio em `.tsx`;
 - sincronizar o baseline de contratos OpenAPI do app com o estado mais recente da `auraxis-api`;
-- abrir o próximo slice do app para `auth + bootstrap + plans/paywall` com base nessa fundação.
+- abrir o próximo slice do app para `auth + bootstrap + plans/paywall`, agora já sobre `route guards`, `apiContractMap`, `queryKeys`, `theme/motion` e `shared/forms`;
+- usar `shared/testing/test-providers.tsx` como base para os testes das próximas telas e hooks visuais.

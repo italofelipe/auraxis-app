@@ -8,3 +8,5 @@ export interface ObservabilitySnapshot {
 export interface PrometheusMetricsExport {
   readonly payload: string;
 }
+
+export type ObservabilityMetricsSnapshot = PrometheusMetricsExport;

@@ -1,14 +1,13 @@
 import { Redirect } from "expo-router";
 
 import { ScreenContainer } from "@/components/ui/screen-container";
+import { useRootRouteGuard } from "@/core/navigation/use-route-guards";
 import { AsyncStateNotice } from "@/shared/components/async-state-notice";
-import { useSessionStore } from "@/stores/session-store";
 
 export default function IndexScreen() {
-  const hydrated = useSessionStore((state) => state.hydrated);
-  const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
+  const { ready, redirectTo } = useRootRouteGuard();
 
-  if (!hydrated) {
+  if (!ready) {
     return (
       <ScreenContainer scrollable={false}>
         <AsyncStateNotice
@@ -20,9 +19,9 @@ export default function IndexScreen() {
     );
   }
 
-  if (isAuthenticated) {
-    return <Redirect href="/dashboard" />;
+  if (redirectTo) {
+    return <Redirect href={redirectTo} />;
   }
 
-  return <Redirect href="/login" />;
+  return null;
 }

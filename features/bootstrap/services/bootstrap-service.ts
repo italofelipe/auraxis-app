@@ -6,6 +6,7 @@ import type {
   UserBootstrap,
   UserBootstrapQuery,
 } from "@/features/bootstrap/contracts";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
 
 interface BootstrapPayload {
   readonly user: {
@@ -134,7 +135,7 @@ export const createBootstrapService = (client: AxiosInstance) => {
     getBootstrap: async (
       query: UserBootstrapQuery = {},
     ): Promise<UserBootstrap> => {
-      const response = await client.get("/user/bootstrap", {
+      const response = await client.get(apiContractMap.userBootstrap.path, {
         params: {
           transactions_limit: query.transactionsLimit,
         },

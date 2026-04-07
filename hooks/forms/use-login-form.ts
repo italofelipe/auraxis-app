@@ -1,11 +1,11 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-
-import { loginSchema, type LoginFormValues } from "@/schemas/auth";
+import {
+  loginSchema,
+  type LoginFormValues,
+} from "@/features/auth/validators";
+import { useAppForm } from "@/shared/forms/use-app-form";
 
 export const useLoginForm = () => {
-  return useForm<LoginFormValues>({
-    resolver: zodResolver(loginSchema),
+  return useAppForm<LoginFormValues>(loginSchema, {
     defaultValues: {
       email: "",
       password: "",

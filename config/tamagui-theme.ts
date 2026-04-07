@@ -1,6 +1,11 @@
 import { createFont, createTamagui, createTokens } from "tamagui";
 
-import { colorPalette, fontSizes, radii, spacing } from "@/config/design-tokens";
+import {
+  fontSizes,
+  semanticColors,
+  semanticRadii,
+  semanticSpacing,
+} from "@/shared/theme";
 
 const bodyFont = createFont({
   family: "Raleway_400Regular",
@@ -67,29 +72,29 @@ const headingFont = createFont({
 
 const tokens = createTokens({
   color: {
-    surfaceBase: colorPalette.neutral950,
-    surfaceCard: colorPalette.neutral900,
-    surfaceRaised: colorPalette.neutral700,
-    brandPrimary: colorPalette.brand600,
-    brandSecondary: colorPalette.brand500,
-    brandHighlight: colorPalette.brand300,
-    textPrimary: colorPalette.white,
-    textSecondary: colorPalette.brand300,
-    textMuted: "#bcb3b3",
-    borderMuted: colorPalette.neutral700,
-    success: "#4ade80",
-    danger: colorPalette.danger500,
+    surfaceBase: semanticColors.background,
+    surfaceCard: semanticColors.surface,
+    surfaceRaised: semanticColors.surfaceRaised,
+    brandPrimary: semanticColors.primary,
+    brandSecondary: semanticColors.secondary,
+    brandHighlight: semanticColors.mutedForeground,
+    textPrimary: semanticColors.foreground,
+    textSecondary: semanticColors.mutedForeground,
+    textMuted: semanticColors.subduedForeground,
+    borderMuted: semanticColors.border,
+    success: semanticColors.success,
+    danger: semanticColors.danger,
   },
   space: {
     0: 0,
-    1: spacing(0.5),
-    2: spacing(1),
-    3: spacing(1.5),
-    4: spacing(2),
-    5: spacing(3),
-    6: spacing(4),
-    7: spacing(5),
-    8: spacing(6),
+    1: semanticSpacing.xxs,
+    2: semanticSpacing.xs,
+    3: semanticSpacing.sm,
+    4: semanticSpacing.md,
+    5: semanticSpacing.lg,
+    6: semanticSpacing.xl,
+    7: semanticSpacing["2xl"],
+    8: semanticSpacing["3xl"],
   },
   size: {
     0: 0,
@@ -104,10 +109,10 @@ const tokens = createTokens({
   },
   radius: {
     0: 0,
-    1: radii.sm,
-    2: radii.md,
-    3: 16,
-    4: 20,
+    1: semanticRadii.sm,
+    2: semanticRadii.md,
+    3: semanticRadii.lg,
+    4: semanticRadii.xl,
   },
   zIndex: {
     0: 0,

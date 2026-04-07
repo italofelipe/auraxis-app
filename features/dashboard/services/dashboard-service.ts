@@ -7,6 +7,7 @@ import type {
   DashboardOverviewFilters,
   DashboardTrends,
 } from "@/features/dashboard/contracts";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
 
 interface DashboardOverviewPayload {
   readonly month: string;
@@ -73,7 +74,7 @@ export const createDashboardService = (client: AxiosInstance) => {
     getOverview: async (
       filters: DashboardOverviewFilters,
     ): Promise<DashboardOverview> => {
-      const response = await client.get("/dashboard/overview", {
+      const response = await client.get(apiContractMap.dashboardOverview.path, {
         params: {
           month: filters.month,
         },

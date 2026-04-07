@@ -1,4 +1,5 @@
 import { createApiQuery } from "@/core/query/create-api-query";
+import { queryKeys } from "@/core/query/query-keys";
 import type {
   WalletCollection,
   WalletListQuery,
@@ -7,7 +8,7 @@ import { walletService } from "@/features/wallet/services/wallet-service";
 
 export const useWalletEntriesQuery = (query: WalletListQuery = {}) => {
   return createApiQuery<WalletCollection>(
-    ["wallet", "entries", query],
+    [...queryKeys.wallet.root, "entries", query],
     () => walletService.listEntries(query),
   );
 };

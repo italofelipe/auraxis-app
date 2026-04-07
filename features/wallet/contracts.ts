@@ -24,3 +24,5 @@ export interface WalletListQuery {
   readonly page?: number;
   readonly perPage?: number;
 }
+
+export type WalletSummary = WalletCollection;

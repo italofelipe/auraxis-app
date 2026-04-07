@@ -24,9 +24,9 @@ auraxis-app/
     (public)/    # Grupo de rotas públicas (login, registro)
     _layout.tsx  # Root layout
   components/    # Componentes React Native reutilizáveis
-  core/          # Runtime transversal: http, query, session, providers
+  core/          # Runtime transversal: http, query, navigation, session, shell, providers
   features/      # Domínios do app: auth, bootstrap, subscription, etc.
-  shared/        # Config, mocks, contratos e utilidades compartilhadas
+  shared/        # Config, mocks, contratos, forms, theme, testing e utilidades compartilhadas
   constants/     # Constantes, temas, cores
   hooks/         # Custom hooks (ex: useAuth, useTransactions)
   lib/           # Camada de compatibilidade temporária com o scaffold legado
@@ -44,7 +44,7 @@ auraxis-app/
 Telas (app/)
   → Hooks de feature (features/*/hooks)
     → Services de feature (features/*/services)
-      → Core HTTP/Query/Session (core/)
+      → Core HTTP/Query/Navigation/Session (core/)
         → auraxis-api (fonte única de verdade)
 ```
 
@@ -55,24 +55,31 @@ Telas (app/)
 - Telas (`app/`) devem conter apenas lógica de view e composição.
 - Nenhuma chamada HTTP direta em componentes — sempre via hook ou service.
 - `lib/` e `hooks/` legados existem apenas como camada de compatibilidade temporária.
+- Testes de UI/feature devem preferir `shared/testing/test-providers.tsx` para evitar acoplamento desnecessário com bootstrap de runtime.
 
 ## Decisões de arquitetura
 
 | Decisão | Escolha | Motivo |
 |:--------|:--------|:-------|
 | Navegação | Expo Router (file-based) | Padrão Expo SDK 54, convenção clara |
+| Guards de rota | `core/navigation/*` | Centraliza redirects e evita regra de sessão espalhada em `.tsx` |
 | Storage sensível | expo-secure-store | Keychain (iOS) / Keystore (Android) |
 | HTTP | Axios | Interceptors, timeout, mock adapter e compatibilidade com o web |
 | Auth tokens | expo-secure-store | Nunca AsyncStorage sem criptografia |
 | Tipagem | strict: true | Sem `any`, inferência máxima |
 | Organização | `core` + `features` + `shared` | Isolar runtime transversal e manter views finas |
 | Mocks | adapter central de API | Permite scaffold rápido do app sem depender sempre do backend |
+| Contratos de API | `shared/contracts/api-contract-map.ts` | Fonte tipada única de path/method/request/response para o app |
+| Query keys | `core/query/query-keys.ts` | Evita drift de cache key e melhora invalidação futura |
+| Tema e motion | `shared/theme/*` + `shared/animations/*` | Unifica tokens semânticos, animações e acessibilidade |
+| Formulários | `shared/forms/use-app-form.ts` + validators por feature | Reuso com Zod/RHF sem duplicar resolver/config |
 
 ## Contratos com auraxis-api
 
 - Consumir apenas endpoints documentados em `auraxis-api/schema.graphql` ou OpenAPI spec.
 - Não criar lógica de negócio no mobile — apenas apresentação e orchestração de chamadas.
 - Versionar chamadas de API — não assumir contrato estável sem versão.
+- Toda integração nova deve preferir `apiContractMap` + services de feature antes de criar string solta de endpoint.
 
 ## Plataformas suportadas
 

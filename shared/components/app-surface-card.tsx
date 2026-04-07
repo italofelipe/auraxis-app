@@ -3,6 +3,7 @@ import type { ComponentProps, ReactElement, ReactNode } from "react";
 import { Paragraph, YStack, styled } from "tamagui";
 
 import { borderWidths } from "@/config/design-tokens";
+import { AppHeading } from "@/shared/components/app-heading";
 
 const SurfaceFrame = styled(YStack, {
   backgroundColor: "$surfaceCard",
@@ -34,9 +35,9 @@ export function AppSurfaceCard({
   return (
     <SurfaceFrame {...rest}>
       {title ? (
-        <Paragraph color="$color" fontFamily="$heading" fontSize="$6">
+        <AppHeading level={3} fontSize="$6">
           {title}
-        </Paragraph>
+        </AppHeading>
       ) : null}
       {description ? (
         <Paragraph color="$muted" fontFamily="$body" fontSize="$3">

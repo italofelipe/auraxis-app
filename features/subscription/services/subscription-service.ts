@@ -8,6 +8,7 @@ import type {
   CreateCheckoutCommand,
   SubscriptionState,
 } from "@/features/subscription/contracts";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
 
 interface BillingPlanPayload {
   readonly slug: string;
@@ -96,14 +97,14 @@ const mapCheckout = (payload: CheckoutPayload): CheckoutSession => {
 export const createSubscriptionService = (client: AxiosInstance) => {
   return {
     listPlans: async (): Promise<BillingPlan[]> => {
-      const response = await client.get("/subscriptions/plans");
+      const response = await client.get(apiContractMap.subscriptionPlans.path);
       const payload = unwrapEnvelopeData<{ readonly plans: BillingPlanPayload[] }>(
         response.data,
       );
       return payload.plans.map(mapPlan);
     },
     getSubscription: async (): Promise<SubscriptionState> => {
-      const response = await client.get("/subscriptions/me");
+      const response = await client.get(apiContractMap.subscriptionMe.path);
       const payload = unwrapEnvelopeData<{
         readonly subscription: SubscriptionPayload;
       }>(response.data);
@@ -112,7 +113,7 @@ export const createSubscriptionService = (client: AxiosInstance) => {
     createCheckout: async (
       command: CreateCheckoutCommand,
     ): Promise<CheckoutSession> => {
-      const response = await client.post("/subscriptions/checkout", {
+      const response = await client.post(apiContractMap.subscriptionCheckout.path, {
         plan_slug: command.planSlug,
         billing_cycle: command.billingCycle,
       });
@@ -120,7 +121,7 @@ export const createSubscriptionService = (client: AxiosInstance) => {
       return mapCheckout(unwrapEnvelopeData<CheckoutPayload>(response.data));
     },
     cancelSubscription: async (): Promise<SubscriptionState> => {
-      const response = await client.post("/subscriptions/cancel");
+      const response = await client.post(apiContractMap.subscriptionCancel.path);
       const payload = unwrapEnvelopeData<{
         readonly subscription: SubscriptionPayload;
       }>(response.data);

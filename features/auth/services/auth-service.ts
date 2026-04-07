@@ -11,6 +11,7 @@ import type {
   RegisterCommand,
   ResetPasswordCommand,
 } from "@/features/auth/contracts";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
 
 interface LoginPayload {
   readonly token: string;
@@ -79,7 +80,7 @@ const mapLoginPayload = (payload: LoginPayload): AuthSession => {
 export const createAuthService = (client: AxiosInstance) => {
   return {
     login: async (command: LoginCommand): Promise<AuthSession> => {
-      const response = await client.post("/auth/login", {
+      const response = await client.post(apiContractMap.authLogin.path, {
         email: command.email,
         password: command.password,
         captcha_token: command.captchaToken,
@@ -89,7 +90,7 @@ export const createAuthService = (client: AxiosInstance) => {
     },
     register: async (command: RegisterCommand): Promise<AuthActionResult> => {
       const response = await client.post(
-        "/auth/register",
+        apiContractMap.authRegister.path,
         buildRegisterPayload(command),
       );
       return {
@@ -101,12 +102,12 @@ export const createAuthService = (client: AxiosInstance) => {
       };
     },
     logout: async (): Promise<void> => {
-      await client.post("/auth/logout");
+      await client.post(apiContractMap.authLogout.path);
     },
     forgotPassword: async (
       command: ForgotPasswordCommand,
     ): Promise<AuthActionResult> => {
-      const response = await client.post("/auth/password/forgot", {
+      const response = await client.post(apiContractMap.authForgotPassword.path, {
         email: command.email,
       });
 
@@ -118,7 +119,7 @@ export const createAuthService = (client: AxiosInstance) => {
     resetPassword: async (
       command: ResetPasswordCommand,
     ): Promise<AuthActionResult> => {
-      const response = await client.post("/auth/password/reset", {
+      const response = await client.post(apiContractMap.authResetPassword.path, {
         token: command.token,
         password: command.password,
       });
@@ -134,7 +135,7 @@ export const createAuthService = (client: AxiosInstance) => {
     confirmEmail: async (
       command: ConfirmEmailCommand,
     ): Promise<AuthActionResult> => {
-      const response = await client.post("/auth/email/confirm", {
+      const response = await client.post(apiContractMap.authConfirmEmail.path, {
         token: command.token,
       });
 
@@ -147,7 +148,7 @@ export const createAuthService = (client: AxiosInstance) => {
       };
     },
     resendConfirmationEmail: async (): Promise<AuthActionResult> => {
-      const response = await client.post("/auth/email/resend");
+      const response = await client.post(apiContractMap.authResendEmail.path);
       return {
         accepted: true,
         message: resolveActionMessage(

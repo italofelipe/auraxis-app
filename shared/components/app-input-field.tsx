@@ -1,8 +1,9 @@
 import type { ComponentProps, ReactElement } from "react";
 
-import { Input, Label, Paragraph, YStack, styled } from "tamagui";
+import { Input, Label, YStack, styled } from "tamagui";
 
 import { borderWidths } from "@/config/design-tokens";
+import { AppFormMessage } from "@/shared/components/app-form-message";
 
 const FieldInput = styled(Input, {
   backgroundColor: "$surfaceRaised",
@@ -36,22 +37,16 @@ export function AppInputField({
   errorText,
   ...rest
 }: AppInputFieldProps): ReactElement {
+  const resolvedHint = errorText ?? helperText;
+  const hintTone = errorText ? "danger" : "muted";
+
   return (
     <YStack gap="$2">
       <Label htmlFor={id} color="$color" fontFamily="$body" fontSize="$3">
         {label}
       </Label>
       <FieldInput id={id} {...rest} />
-      {errorText ? (
-        <Paragraph color="$danger" fontFamily="$body" fontSize="$2">
-          {errorText}
-        </Paragraph>
-      ) : null}
-      {!errorText && helperText ? (
-        <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-          {helperText}
-        </Paragraph>
-      ) : null}
+      {resolvedHint ? <AppFormMessage tone={hintTone} text={resolvedHint} /> : null}
     </YStack>
   );
 }

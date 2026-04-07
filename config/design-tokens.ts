@@ -41,3 +41,15 @@ export const radii = {
 export const borderWidths = {
   hairline: 1,
 } as const;
+
+export const motionDurations = {
+  instant: 0,
+  fast: 120,
+  normal: 180,
+  slow: 260,
+} as const;
+
+export const motionScales = {
+  pressIn: 0.98,
+  pressOut: 1,
+} as const;

@@ -1,17 +1,16 @@
 import { Redirect, Stack } from "expo-router";
 
-import { useSessionStore } from "@/stores/session-store";
+import { usePublicRouteGuard } from "@/core/navigation/use-route-guards";
 
 export default function PublicLayout() {
-  const hydrated = useSessionStore((state) => state.hydrated);
-  const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
+  const { ready, redirectTo } = usePublicRouteGuard();
 
-  if (!hydrated) {
+  if (!ready) {
     return null;
   }
 
-  if (isAuthenticated) {
-    return <Redirect href="/dashboard" />;
+  if (redirectTo) {
+    return <Redirect href={redirectTo} />;
   }
 
   return <Stack screenOptions={{ headerShown: false }} />;
