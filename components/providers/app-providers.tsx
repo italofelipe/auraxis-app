@@ -3,7 +3,8 @@ import type { PropsWithChildren, ReactElement } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { TamaguiProvider, Theme } from "tamagui";
 
-import { queryClient } from "@/config/query-client";
+import { RuntimeProvider } from "@/core/providers/runtime-provider";
+import { queryClient } from "@/core/query/query-client";
 import { tamaguiConfig } from "@/config/tamagui-theme";
 
 /**
@@ -17,9 +18,11 @@ export const AppProviders = ({
 }: PropsWithChildren): ReactElement => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme="auraxis">
-        <Theme name="auraxis">{children}</Theme>
-      </TamaguiProvider>
+      <RuntimeProvider>
+        <TamaguiProvider config={tamaguiConfig} defaultTheme="auraxis">
+          <Theme name="auraxis">{children}</Theme>
+        </TamaguiProvider>
+      </RuntimeProvider>
     </QueryClientProvider>
   );
 };

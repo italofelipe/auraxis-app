@@ -1,6 +1,4 @@
-import type { AxiosInstance } from "axios";
-
-import { httpClient } from "@/lib/http-client";
+import { authService } from "@/features/auth/services/auth-service";
 import type {
   ForgotPasswordRequest,
   ForgotPasswordResponse,
@@ -8,48 +6,33 @@ import type {
   LoginResponse,
 } from "@/types/contracts";
 
-interface AuthApiClient {
-  readonly post: AxiosInstance["post"];
+interface AuthApiService {
+  readonly login: typeof authService.login;
+  readonly forgotPassword: typeof authService.forgotPassword;
 }
 
-interface ForgotPasswordLegacyResponse {
-  readonly message: string;
-}
-
-type ForgotPasswordWireResponse =
-  | ForgotPasswordResponse
-  | ForgotPasswordLegacyResponse;
-
-/**
- * Normaliza a resposta de recuperação de senha para o contrato usado pelo app.
- * @param payload Payload legado ou já normalizado.
- * @returns Resposta compatível com o contrato mobile.
- */
-const normalizeForgotPasswordResponse = (
-  payload: ForgotPasswordWireResponse,
-): ForgotPasswordResponse => {
-  return {
-    accepted: "accepted" in payload ? payload.accepted : true,
-    message: payload.message,
-  };
-};
-
-export const createAuthApi = (client: AuthApiClient) => {
+export const createAuthApi = (service: AuthApiService = authService) => {
   return {
     login: async (payload: LoginRequest): Promise<LoginResponse> => {
-      const response = await client.post<LoginResponse>("/auth/login", payload);
-      return response.data;
+      const session = await service.login(payload);
+      return {
+        accessToken: session.accessToken,
+        user: {
+          email: session.user.email,
+          displayName: session.user.name,
+        },
+      };
     },
     forgotPassword: async (
       payload: ForgotPasswordRequest,
     ): Promise<ForgotPasswordResponse> => {
-      const response = await client.post<ForgotPasswordWireResponse>(
-        "/auth/password/forgot",
-        payload,
-      );
-      return normalizeForgotPasswordResponse(response.data);
+      const result = await service.forgotPassword(payload);
+      return {
+        accepted: result.accepted,
+        message: result.message,
+      };
     },
   };
 };
 
-export const authApi = createAuthApi(httpClient);
+export const authApi = createAuthApi();

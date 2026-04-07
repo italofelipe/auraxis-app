@@ -7,11 +7,32 @@ import IndexScreen from "@/app/index";
 
 interface MockSessionState {
   readonly accessToken: string | null
+  readonly refreshToken: string | null
+  readonly user: {
+    readonly id: string | null
+    readonly name: string | null
+    readonly email: string
+    readonly emailConfirmed: boolean
+  } | null
   readonly userEmail: string | null
   readonly hydrated: boolean
   readonly isAuthenticated: boolean
   readonly bootstrapSession: () => Promise<void>
-  readonly signIn: (accessToken: string, userEmail: string) => Promise<void>
+  readonly signIn: (
+    accessTokenOrSession: string | {
+      readonly accessToken: string
+      readonly refreshToken: string | null
+      readonly user: {
+        readonly id: string | null
+        readonly name: string | null
+        readonly email: string
+        readonly emailConfirmed: boolean
+      }
+    },
+    userEmail?: string,
+  ) => Promise<void>
+  readonly setSession: (session: unknown) => Promise<void>
+  readonly updateUser: (user: unknown) => void
   readonly signOut: () => Promise<void>
 }
 
@@ -44,11 +65,15 @@ describe("IndexScreen", () => {
   it("renderiza o estado de carregamento enquanto a sessao hidrata", () => {
     mockSessionState({
       accessToken: null,
+      refreshToken: null,
+      user: null,
       userEmail: null,
       hydrated: false,
       isAuthenticated: false,
       bootstrapSession: async () => undefined,
       signIn: async () => undefined,
+      setSession: async () => undefined,
+      updateUser: () => undefined,
       signOut: async () => undefined,
     });
 
@@ -65,11 +90,20 @@ describe("IndexScreen", () => {
   it("redireciona para dashboard quando a sessao estiver autenticada", () => {
     mockSessionState({
       accessToken: "token",
+      refreshToken: null,
+      user: {
+        id: "user-id",
+        name: "User",
+        email: "user@auraxis.com.br",
+        emailConfirmed: true,
+      },
       userEmail: "user@auraxis.com.br",
       hydrated: true,
       isAuthenticated: true,
       bootstrapSession: async () => undefined,
       signIn: async () => undefined,
+      setSession: async () => undefined,
+      updateUser: () => undefined,
       signOut: async () => undefined,
     });
 
@@ -81,11 +115,15 @@ describe("IndexScreen", () => {
   it("redireciona para login quando a sessao nao estiver autenticada", () => {
     mockSessionState({
       accessToken: null,
+      refreshToken: null,
+      user: null,
       userEmail: null,
       hydrated: true,
       isAuthenticated: false,
       bootstrapSession: async () => undefined,
       signIn: async () => undefined,
+      setSession: async () => undefined,
+      updateUser: () => undefined,
       signOut: async () => undefined,
     });
 
