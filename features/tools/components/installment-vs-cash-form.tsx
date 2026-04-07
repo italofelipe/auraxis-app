@@ -1,9 +1,10 @@
 import type { ReactElement } from "react";
 
-import { Paragraph, Switch, XStack, YStack } from "tamagui";
+import { Paragraph, XStack, YStack } from "tamagui";
 
 import { AppButton } from "@/shared/components/app-button";
 import { AppInputField } from "@/shared/components/app-input-field";
+import { AppToggleRow } from "@/shared/components/app-toggle-row";
 import type { OpportunityRateType } from "@/features/tools/contracts";
 import type {
   InstallmentDelayPreset,
@@ -144,19 +145,12 @@ function FeesToggleField({
   readonly onChange: (value: boolean) => void;
 }): ReactElement {
   return (
-    <YStack gap="$2">
-      <XStack alignItems="center" justifyContent="space-between">
-        <Paragraph color="$color" fontFamily="$body" fontSize="$3">
-          Incluir custos extras?
-        </Paragraph>
-        <Switch checked={enabled} onCheckedChange={(value) => onChange(Boolean(value))}>
-          <Switch.Thumb />
-        </Switch>
-      </XStack>
-      <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-        Ative se houver tarifas, entrada ou custos iniciais que mudem a conta.
-      </Paragraph>
-    </YStack>
+    <AppToggleRow
+      label="Incluir custos extras?"
+      description="Ative se houver tarifas, entrada ou custos iniciais que mudem a conta."
+      checked={enabled}
+      onCheckedChange={onChange}
+    />
   );
 }
 

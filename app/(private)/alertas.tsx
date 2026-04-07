@@ -1,10 +1,11 @@
-import { Paragraph, Switch, XStack, YStack } from "tamagui";
+import { XStack, YStack } from "tamagui";
 
 import {
   type AlertsTabKey,
   useAlertsScreenController,
 } from "@/features/alerts/hooks/use-alerts-screen-controller";
-import { AppBadge } from "@/shared/components/app-badge";
+import { AlertPreferenceRow } from "@/features/alerts/components/alert-preference-row";
+import { AlertRecordCard } from "@/features/alerts/components/alert-record-card";
 import { AppButton } from "@/shared/components/app-button";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -53,38 +54,13 @@ function AlertsFeedPanel({
   return (
     <YStack gap="$3">
       {controller.alertsQuery.data.alerts.map((alert) => {
-        const isRead = alert.status === "read";
-
         return (
-          <AppSurfaceCard
+          <AlertRecordCard
             key={alert.id}
-            backgroundColor="$surfaceRaised"
-            title={alert.category.replace(/_/gu, " ")}
-            description={
-              alert.entityType
-                ? `Evento relacionado a ${alert.entityType}.`
-                : "Nova atualizacao operacional disponivel."
-            }>
-            <YStack gap="$3">
-              <AppBadge tone={isRead ? "default" : "primary"}>
-                {isRead ? "lido" : "novo"}
-              </AppBadge>
-              <XStack gap="$2" flexWrap="wrap">
-                {!isRead ? (
-                  <AppButton
-                    tone="secondary"
-                    onPress={() => controller.markReadMutation.mutate(alert.id)}>
-                    Marcar lido
-                  </AppButton>
-                ) : null}
-                <AppButton
-                  tone="secondary"
-                  onPress={() => controller.deleteAlertMutation.mutate(alert.id)}>
-                  Excluir
-                </AppButton>
-              </XStack>
-            </YStack>
-          </AppSurfaceCard>
+            alert={alert}
+            onMarkRead={(alertId) => controller.markReadMutation.mutate(alertId)}
+            onDelete={(alertId) => controller.deleteAlertMutation.mutate(alertId)}
+          />
         );
       })}
     </YStack>
@@ -129,33 +105,20 @@ function AlertsPreferencesPanel({
   return (
     <YStack gap="$3">
       {controller.preferencesQuery.data.preferences.map((preference) => (
-        <XStack
+        <AlertPreferenceRow
           key={preference.id}
-          alignItems="center"
-          justifyContent="space-between"
-          gap="$3">
-          <YStack gap="$1" flex={1}>
-            <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-              {preference.category}
-            </Paragraph>
-            <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-              Canal principal: email
-            </Paragraph>
-          </YStack>
-          <Switch
-            checked={preference.enabled}
-            onCheckedChange={(value) => {
-              controller.updatePreferenceMutation.mutate({
-                category: preference.category,
-                payload: {
-                  enabled: Boolean(value),
-                  channels: ["email"],
-                },
-              });
-            }}>
-            <Switch.Thumb />
-          </Switch>
-        </XStack>
+          preference={preference}
+          onToggle={({ category, enabled, globalOptOut }) => {
+            controller.updatePreferenceMutation.mutate({
+              category,
+              payload: {
+                enabled,
+                channels: ["email"],
+                globalOptOut,
+              },
+            });
+          }}
+        />
       ))}
     </YStack>
   );

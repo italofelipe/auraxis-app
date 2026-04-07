@@ -75,6 +75,17 @@ const DISALLOWED_STYLE_LITERALS = [
     pattern: /\b(?:color|backgroundColor|borderColor)\s*:\s*['"]#[0-9a-fA-F]{3,8}['"]\b/,
   },
 ];
+const LEGACY_PRODUCT_IMPORT_PATTERNS = [
+  {
+    rule: "legacy product component import",
+    pattern:
+      /from\s+["']@\/components\/(?:alert-item|alert-preference-item|alerts-list|paywall-gate|subscription-badge|upgrade-cta|ui\/loading-skeleton|ui\/screen-container)["']/,
+  },
+  {
+    rule: "legacy feature-access hook import",
+    pattern: /from\s+["']@\/hooks\/use-feature-access["']/,
+  },
+];
 
 function walkDirectoryRecursively(rootDirectory) {
   const visitedFiles = [];
@@ -188,6 +199,33 @@ function checkDisallowedStyleLiterals(errors, rootDirectory) {
   }
 }
 
+function checkLegacyProductImports(errors, rootDirectory) {
+  for (const productDirectory of PRODUCT_DIRECTORIES) {
+    const absoluteProductDirectory = path.resolve(rootDirectory, productDirectory);
+    const files = walkDirectoryRecursively(absoluteProductDirectory);
+
+    for (const absoluteFilePath of files) {
+      const relativePath = toUnixRelativePath(absoluteFilePath, rootDirectory);
+      const extension = path.extname(relativePath);
+
+      if (!STYLE_SCAN_EXTENSIONS.has(extension)) {
+        continue;
+      }
+
+      const fileContent = fs.readFileSync(absoluteFilePath, "utf8");
+      const fileLines = fileContent.split("\n");
+
+      fileLines.forEach((lineContent, lineIndex) => {
+        for (const importRule of LEGACY_PRODUCT_IMPORT_PATTERNS) {
+          if (importRule.pattern.test(lineContent)) {
+            errors.push(`${importRule.rule}: ${relativePath}:${lineIndex + 1}`);
+          }
+        }
+      });
+    }
+  }
+}
+
 function main() {
   const rootDirectory = process.cwd();
   const errors = [];
@@ -195,6 +233,7 @@ function main() {
   assertRequiredSharedDirectoriesExist(errors, rootDirectory);
   checkDisallowedSourceExtensions(errors, rootDirectory);
   checkDisallowedStyleLiterals(errors, rootDirectory);
+  checkLegacyProductImports(errors, rootDirectory);
 
   if (errors.length > 0) {
     process.stderr.write("[frontend-governance] FAILED\n");
