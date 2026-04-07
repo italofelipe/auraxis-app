@@ -1,9 +1,8 @@
 import type { ReactElement } from "react";
 
-import { useRouter } from "expo-router";
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { useToolsCatalogQuery } from "@/hooks/queries/use-tools-query";
+import { useToolsScreenController } from "@/features/tools/hooks/use-tools-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -15,15 +14,9 @@ import { AsyncStateNotice } from "@/shared/components/async-state-notice";
  * @returns Private tools catalog with canonical async states.
  */
 export default function ToolsScreen(): ReactElement {
-  const router = useRouter();
-  const toolsCatalogQuery = useToolsCatalogQuery();
+  const controller = useToolsScreenController();
+  const toolsCatalogQuery = controller.toolsCatalogQuery;
   const tools = toolsCatalogQuery.data?.tools ?? [];
-
-  const openTool = (toolId: string): void => {
-    if (toolId === "installment-vs-cash") {
-      void router.push("/installment-vs-cash");
-    }
-  };
 
   return (
     <AppScreen>
@@ -77,7 +70,9 @@ export default function ToolsScreen(): ReactElement {
                 {tool.enabled ? (
                   <AppButton
                     tone="secondary"
-                    onPress={() => openTool(tool.id)}>
+                    onPress={() => {
+                      void controller.handleOpenTool(tool.id);
+                    }}>
                     Abrir simulador
                   </AppButton>
                 ) : null}

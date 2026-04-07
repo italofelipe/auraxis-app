@@ -1,4 +1,4 @@
-import { useInstallmentVsCashHistoryQuery } from "@/hooks/queries/use-installment-vs-cash-history-query";
+import { useInstallmentVsCashHistoryQuery } from "@/features/tools/hooks/use-installment-vs-cash-history-query";
 
 const mockUseQuery = jest.fn();
 const mockListSaved = jest.fn();
@@ -7,8 +7,8 @@ jest.mock("@tanstack/react-query", () => ({
   useQuery: (...args: readonly unknown[]) => mockUseQuery(...args),
 }));
 
-jest.mock("@/lib/installment-vs-cash-api", () => ({
-  installmentVsCashApi: {
+jest.mock("@/features/tools/services/installment-vs-cash-service", () => ({
+  installmentVsCashService: {
     listSaved: (...args: readonly unknown[]) => mockListSaved(...args),
   },
 }));

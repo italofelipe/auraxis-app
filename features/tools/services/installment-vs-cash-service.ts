@@ -1,6 +1,6 @@
 import type { AxiosInstance } from "axios";
 
-import { httpClient } from "@/lib/http-client";
+import { httpClient } from "@/core/http/http-client";
 import type {
   CreateGoalFromInstallmentVsCashDto,
   CreateGoalFromInstallmentVsCashResponseDto,
@@ -28,7 +28,7 @@ import type {
   InstallmentVsCashScheduleItemDto,
 } from "@/types/contracts/installment-vs-cash";
 
-interface InstallmentVsCashApiClient {
+interface InstallmentVsCashServiceClient {
   readonly get: AxiosInstance["get"];
   readonly post: AxiosInstance["post"];
 }
@@ -230,8 +230,8 @@ const mapPlannedExpenseBridgeResponse = (
   simulation: mapSavedSimulation(dto.simulation),
 });
 
-export const createInstallmentVsCashApi = (
-  client: InstallmentVsCashApiClient,
+export const createInstallmentVsCashService = (
+  client: InstallmentVsCashServiceClient,
 ) => {
   return {
     calculate: async (
@@ -247,7 +247,7 @@ export const createInstallmentVsCashApi = (
       payload: InstallmentVsCashCalculationRequestDto,
     ): Promise<InstallmentVsCashSavedCalculation> => {
       const response = await client.post<InstallmentVsCashSaveResponseDto>(
-        "/simulations/installment-vs-cash/save",
+        "/simulations/installment-vs-cash",
         payload,
       );
       return {
@@ -295,4 +295,4 @@ export const createInstallmentVsCashApi = (
   };
 };
 
-export const installmentVsCashApi = createInstallmentVsCashApi(httpClient);
+export const installmentVsCashService = createInstallmentVsCashService(httpClient);

@@ -6,10 +6,7 @@ const path = require("node:path");
 const ROOT = process.cwd();
 const APP_DIRECTORY = path.resolve(ROOT, "app");
 const ROUTE_FILE_PATTERN = /\.tsx$/;
-const TEMPORARY_ALLOWLIST = new Set([
-  "app/(private)/ferramentas.tsx",
-  "app/(private)/installment-vs-cash.tsx",
-]);
+const TEMPORARY_ALLOWLIST = new Set();
 const LEGACY_IMPORT_PATTERN =
   /from\s+["']@\/(?:components|hooks|lib|stores)\//;
 

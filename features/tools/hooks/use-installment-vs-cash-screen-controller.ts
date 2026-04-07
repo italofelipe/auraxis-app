@@ -1,6 +1,7 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
 import { Alert } from "react-native";
+import { useRouter } from "expo-router";
 
 import {
   useCreateGoalFromInstallmentVsCashMutation,
@@ -9,10 +10,10 @@ import {
   useSaveInstallmentVsCashMutation,
   type GoalVariables,
   type PlannedExpenseVariables,
-} from "@/hooks/mutations/use-installment-vs-cash-mutations";
-import { useEntitlementCheckQuery } from "@/hooks/queries/use-entitlement-check-query";
-import { useInstallmentVsCashHistoryQuery } from "@/hooks/queries/use-installment-vs-cash-history-query";
-import { useSessionStore } from "@/stores/session-store";
+} from "@/features/tools/hooks/use-installment-vs-cash-mutations";
+import { useEntitlementCheckQuery } from "@/features/entitlements/hooks/use-entitlement-check-query";
+import { useInstallmentVsCashHistoryQuery } from "@/features/tools/hooks/use-installment-vs-cash-history-query";
+import { useSessionStore } from "@/core/session/session-store";
 import {
   createDefaultInstallmentVsCashFormDraft,
   getSuggestedSelectedOption,
@@ -32,7 +33,7 @@ import type {
   InstallmentVsCashSavedSimulation,
   OpportunityRateType,
   SelectedPaymentOption,
-} from "@/types/contracts/installment-vs-cash";
+} from "@/features/tools/contracts";
 
 type TextFieldName =
   | "scenarioLabel"
@@ -392,14 +393,21 @@ export interface InstallmentVsCashController {
   readonly setOpportunityRateType: (value: OpportunityRateType) => void;
   readonly setFeesEnabled: (value: boolean) => void;
   readonly setSelectedOption: (value: SelectedPaymentOption) => void;
+  readonly handleGoBack: () => void;
   readonly handleCalculate: () => Promise<void>;
   readonly handleSave: () => Promise<void>;
   readonly handleCreateGoal: () => Promise<void>;
   readonly handleCreatePlannedExpense: () => Promise<void>;
 }
 
-export const useInstallmentVsCashController =
+/**
+ * Creates the canonical controller for the installment-vs-cash route.
+ *
+ * @returns View bindings for the full simulation flow and its planning actions.
+ */
+export const useInstallmentVsCashScreenController =
 (): InstallmentVsCashController => {
+  const router = useRouter();
   const isAuthenticated = useSessionStore((state) => state.isAuthenticated);
   const {
     draft,
@@ -431,8 +439,8 @@ export const useInstallmentVsCashController =
   const { ensureSavedSimulation, setSavedSimulation } = useSavedSimulationState(
     calculation,
     draft,
-      saveMutation,
-    );
+    saveMutation,
+  );
 
   const {
     handleCalculate,
@@ -476,6 +484,9 @@ export const useInstallmentVsCashController =
     setOpportunityRateType,
     setFeesEnabled,
     setSelectedOption,
+    handleGoBack: () => {
+      router.back();
+    },
     handleCalculate,
     handleSave,
     handleCreateGoal,

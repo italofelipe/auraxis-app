@@ -201,3 +201,37 @@
 ### Proximo passo
 - seguir no `FND-03A` migrando `tools` e `installment-vs-cash` para `features/*`;
 - depois avançar para `FND-03B`, consolidando primitives e wrappers visuais até `app/` ficar apenas com composição de tela.
+
+---
+
+## Update - APP FND-03A (completion)
+
+### O que foi feito
+- concluí a migração do domínio `tools` para a arquitetura canônica em [`features/tools`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools), incluindo:
+  - services em [`services/tools-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/services/tools-service.ts) e [`services/installment-vs-cash-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/services/installment-vs-cash-service.ts);
+  - queries/mutations/controllers em [`hooks/use-tools-catalog-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/hooks/use-tools-catalog-query.ts), [`hooks/use-tools-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/hooks/use-tools-screen-controller.ts), [`hooks/use-installment-vs-cash-history-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/hooks/use-installment-vs-cash-history-query.ts), [`hooks/use-installment-vs-cash-mutations.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/hooks/use-installment-vs-cash-mutations.ts) e [`hooks/use-installment-vs-cash-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/hooks/use-installment-vs-cash-screen-controller.ts);
+  - componentes de domínio em [`components/installment-vs-cash-form.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/components/installment-vs-cash-form.tsx), [`components/installment-vs-cash-history-list.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/components/installment-vs-cash-history-list.tsx) e [`components/installment-vs-cash-result-card.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/tools/components/installment-vs-cash-result-card.tsx);
+- movi a checagem de entitlement usada por `tools` para a trilha canônica em [`features/entitlements/hooks/use-entitlement-check-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/entitlements/hooks/use-entitlement-check-query.ts);
+- migrei as duas últimas rotas que ainda dependiam do legado:
+  - [`app/(private)/ferramentas.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(private)/ferramentas.tsx)
+  - [`app/(private)/installment-vs-cash.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(private)/installment-vs-cash.tsx)
+- removi o allowlist do guardrail em [`scripts/check-app-route-boundaries.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/scripts/check-app-route-boundaries.cjs), então agora qualquer import de `components/`, `hooks/`, `lib/` ou `stores/` dentro de `app/` quebra localmente antes do CI;
+- eliminei os arquivos legados do domínio antigo (`components/tools/*`, `hooks/use-installment-vs-cash-controller.ts`, `hooks/queries/use-tools-query.ts`, `hooks/queries/use-installment-vs-cash-history-query.ts`, `hooks/mutations/use-installment-vs-cash-mutations.ts`, `lib/tools-api.ts`, `lib/installment-vs-cash-api.ts`) e atualizei os testes/cobertura para a nova topologia.
+
+### O que foi validado
+- `node scripts/check-app-route-boundaries.cjs`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run policy:check`
+- `npx jest features/tools/components/installment-vs-cash-components.test.tsx __tests__/app/tools-screen.test.tsx __tests__/app/installment-vs-cash-screen.test.tsx features/tools/hooks/use-tools-catalog-query.test.ts features/tools/hooks/use-installment-vs-cash-history-query.test.ts features/tools/services/tools-service.test.ts features/tools/services/installment-vs-cash-service.test.ts --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o legado ainda existe em outras superfícies fora de `app/`, especialmente componentes utilitários e hooks antigos que não são mais importados pelas rotas, mas continuam no repo e precisarão ser reconciliados ao longo do programa de fundação;
+- `installment-vs-cash` ainda carrega bastante lógica dentro do controller, agora no lugar certo, mas esse controller continua grande e deve ser decomposto no `FND-03C`;
+- o domínio `tools` ainda usa strings de endpoint internas em seus services; isso será absorvido na trilha de catálogo/coverage de contratos do `FND-04B`.
+
+### Proximo passo
+- abrir `APP FND-03B` para consolidar primitives, forms e wrappers visuais até o app inteiro depender só de blocos reutilizáveis canônicos;
+- em seguida entrar no `APP FND-03C` para fatiar controllers grandes, especialmente `installment-vs-cash`, e subir a cobertura da lógica de orquestração no mesmo padrão da fundação.

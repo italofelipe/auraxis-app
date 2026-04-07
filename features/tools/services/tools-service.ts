@@ -1,10 +1,10 @@
 import type { AxiosInstance } from "axios";
 
-import { httpClient } from "@/lib/http-client";
+import { httpClient } from "@/core/http/http-client";
 import { isFeatureEnabled, resolveProviderDecision } from "@/shared/feature-flags";
-import type { ToolsCatalog } from "@/types/contracts";
+import type { ToolsCatalog } from "@/features/tools/contracts";
 
-interface ToolsApiClient {
+interface ToolsServiceClient {
   readonly get: AxiosInstance["get"];
 }
 
@@ -31,7 +31,7 @@ export const toolsPlaceholder: ToolsCatalog = {
   ],
 };
 
-export const createToolsApi = (client: ToolsApiClient) => {
+export const createToolsService = (client: ToolsServiceClient) => {
   return {
     getCatalog: async (): Promise<ToolsCatalog> => {
       const response = await client.get<ToolsCatalog>("/tools/catalog");
@@ -66,4 +66,4 @@ export const applyToolsFlags = async (catalog: ToolsCatalog): Promise<ToolsCatal
   };
 };
 
-export const toolsApi = createToolsApi(httpClient);
+export const toolsService = createToolsService(httpClient);

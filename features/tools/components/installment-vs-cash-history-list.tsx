@@ -4,8 +4,8 @@ import { Paragraph, YStack } from "tamagui";
 
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { formatCurrency, formatShortDate } from "@/shared/utils/formatters";
+import type { InstallmentVsCashSavedSimulation } from "@/features/tools/contracts";
 import { getRecommendationLabel } from "@/shared/validators/installment-vs-cash";
-import type { InstallmentVsCashSavedSimulation } from "@/types/contracts";
 
 export interface InstallmentVsCashHistoryListProps {
   readonly items: readonly InstallmentVsCashSavedSimulation[];

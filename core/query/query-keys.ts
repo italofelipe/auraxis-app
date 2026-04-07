@@ -35,4 +35,9 @@ export const queryKeys = {
     snapshot: () => ["observability", "snapshot"] as const,
     metrics: () => ["observability", "metrics"] as const,
   },
+  tools: {
+    root: ["tools"] as const,
+    catalog: () => ["tools", "catalog"] as const,
+    simulationHistory: (toolId: string) => ["simulations", toolId] as const,
+  },
 } as const;
