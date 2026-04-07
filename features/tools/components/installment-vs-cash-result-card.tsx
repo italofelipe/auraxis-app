@@ -9,11 +9,11 @@ import {
   formatPercent,
   formatShortDate,
 } from "@/shared/utils/formatters";
-import { getRecommendationLabel } from "@/shared/validators/installment-vs-cash";
 import type {
   InstallmentVsCashCalculation,
   SelectedPaymentOption,
-} from "@/types/contracts/installment-vs-cash";
+} from "@/features/tools/contracts";
+import { getRecommendationLabel } from "@/shared/validators/installment-vs-cash";
 
 export interface InstallmentVsCashResultCardProps {
   readonly calculation: InstallmentVsCashCalculation;

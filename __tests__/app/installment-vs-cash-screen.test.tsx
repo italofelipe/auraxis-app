@@ -1,26 +1,19 @@
 import { render } from "@testing-library/react-native";
-import { AppProviders } from "@/components/providers/app-providers";
 import InstallmentVsCashScreen from "@/app/(private)/installment-vs-cash";
-import { useInstallmentVsCashController } from "@/hooks/use-installment-vs-cash-controller";
+import { AppProviders } from "@/core/providers/app-providers";
+import { useInstallmentVsCashScreenController } from "@/features/tools/hooks/use-installment-vs-cash-screen-controller";
 import type {
   InstallmentVsCashCalculation,
   InstallmentVsCashSavedSimulation,
-} from "@/types/contracts";
+} from "@/features/tools/contracts";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 
-jest.mock("expo-router", () => ({
-  useRouter: () => ({
-    back: jest.fn(),
-    push: jest.fn(),
-  }),
+jest.mock("@/features/tools/hooks/use-installment-vs-cash-screen-controller", () => ({
+  useInstallmentVsCashScreenController: jest.fn(),
 }));
 
-jest.mock("@/hooks/use-installment-vs-cash-controller", () => ({
-  useInstallmentVsCashController: jest.fn(),
-}));
-
-const mockedUseInstallmentVsCashController = jest.mocked(
-  useInstallmentVsCashController,
+const mockedUseInstallmentVsCashScreenController = jest.mocked(
+  useInstallmentVsCashScreenController,
 );
 
 const buildCalculation = (): InstallmentVsCashCalculation => ({
@@ -131,8 +124,8 @@ const buildQuery = <TData,>(
 } as unknown as UseQueryResult<TData, Error>);
 
 const buildController = (
-  overrides: Partial<ReturnType<typeof useInstallmentVsCashController>> = {},
-): ReturnType<typeof useInstallmentVsCashController> => ({
+  overrides: Partial<ReturnType<typeof useInstallmentVsCashScreenController>> = {},
+): ReturnType<typeof useInstallmentVsCashScreenController> => ({
   draft: {
     scenarioLabel: "",
     cashPrice: "",
@@ -157,18 +150,22 @@ const buildController = (
     ...buildMutation(),
     isPending: false,
     isError: false,
-  } as ReturnType<typeof useInstallmentVsCashController>["calculateMutation"],
-  saveMutation: buildMutation() as ReturnType<typeof useInstallmentVsCashController>["saveMutation"],
+  } as ReturnType<typeof useInstallmentVsCashScreenController>["calculateMutation"],
+  saveMutation:
+    buildMutation() as ReturnType<
+      typeof useInstallmentVsCashScreenController
+    >["saveMutation"],
   createGoalMutation:
-    buildMutation() as ReturnType<typeof useInstallmentVsCashController>["createGoalMutation"],
+    buildMutation() as ReturnType<typeof useInstallmentVsCashScreenController>["createGoalMutation"],
   createPlannedExpenseMutation:
-    buildMutation() as ReturnType<typeof useInstallmentVsCashController>["createPlannedExpenseMutation"],
+    buildMutation() as ReturnType<typeof useInstallmentVsCashScreenController>["createPlannedExpenseMutation"],
   setTextField: jest.fn(),
   setInstallmentMode: jest.fn(),
   setDelayPreset: jest.fn(),
   setOpportunityRateType: jest.fn(),
   setFeesEnabled: jest.fn(),
   setSelectedOption: jest.fn(),
+  handleGoBack: jest.fn(),
   handleCalculate: jest.fn().mockResolvedValue(undefined),
   handleSave: jest.fn().mockResolvedValue(undefined),
   handleCreateGoal: jest.fn().mockResolvedValue(undefined),
@@ -178,7 +175,7 @@ const buildController = (
 
 describe("InstallmentVsCashScreen", () => {
   beforeEach(() => {
-    mockedUseInstallmentVsCashController.mockReturnValue(buildController());
+    mockedUseInstallmentVsCashScreenController.mockReturnValue(buildController());
   });
 
   afterEach(() => {
@@ -197,13 +194,13 @@ describe("InstallmentVsCashScreen", () => {
   });
 
   it("renderiza o estado de loading do calculo", () => {
-    mockedUseInstallmentVsCashController.mockReturnValue(
+    mockedUseInstallmentVsCashScreenController.mockReturnValue(
       buildController({
         calculateMutation: {
           ...buildMutation(),
           isPending: true,
           isError: false,
-        } as ReturnType<typeof useInstallmentVsCashController>["calculateMutation"],
+        } as ReturnType<typeof useInstallmentVsCashScreenController>["calculateMutation"],
       }),
     );
 
@@ -217,13 +214,13 @@ describe("InstallmentVsCashScreen", () => {
   });
 
   it("renderiza o estado de erro do calculo", () => {
-    mockedUseInstallmentVsCashController.mockReturnValue(
+    mockedUseInstallmentVsCashScreenController.mockReturnValue(
       buildController({
         calculateMutation: {
           ...buildMutation(),
           isPending: false,
           isError: true,
-        } as ReturnType<typeof useInstallmentVsCashController>["calculateMutation"],
+        } as ReturnType<typeof useInstallmentVsCashScreenController>["calculateMutation"],
       }),
     );
 
@@ -237,7 +234,7 @@ describe("InstallmentVsCashScreen", () => {
   });
 
   it("renderiza resultado e historico quando disponiveis", () => {
-    mockedUseInstallmentVsCashController.mockReturnValue(
+    mockedUseInstallmentVsCashScreenController.mockReturnValue(
       buildController({
         calculation: buildCalculation(),
         historyQuery: buildQuery<readonly InstallmentVsCashSavedSimulation[]>([

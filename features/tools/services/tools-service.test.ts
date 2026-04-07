@@ -1,6 +1,8 @@
-import type { ToolsCatalog } from "@/types/contracts";
-
-import { applyToolsFlags, createToolsApi } from "@/lib/tools-api";
+import type { ToolsCatalog } from "@/features/tools/contracts";
+import {
+  applyToolsFlags,
+  createToolsService,
+} from "@/features/tools/services/tools-service";
 
 const mockIsFeatureEnabled = jest.fn();
 const mockResolveProviderDecision = jest.fn();
@@ -33,8 +35,8 @@ describe("tools api", () => {
       },
     });
 
-    const toolsApi = createToolsApi({ get });
-    const response = await toolsApi.getCatalog();
+    const toolsService = createToolsService({ get });
+    const response = await toolsService.getCatalog();
 
     expect(get).toHaveBeenCalledWith("/tools/catalog");
     expect(response.tools[0]?.enabled).toBe(true);

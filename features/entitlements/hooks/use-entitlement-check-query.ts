@@ -4,6 +4,13 @@ import { queryKeys } from "@/core/query/query-keys";
 import { entitlementsService } from "@/features/entitlements/services/entitlements-service";
 import type { FeatureKey } from "@/types/contracts/entitlement";
 
+/**
+ * Resolves whether the authenticated user has access to a premium feature.
+ *
+ * @param featureKey Entitlement key published by the API.
+ * @param enabled Allows callers to disable the query when the session is absent.
+ * @returns Query result normalized to a boolean access flag.
+ */
 export const useEntitlementCheckQuery = (
   featureKey: FeatureKey,
   enabled = true,

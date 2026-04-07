@@ -1,16 +1,15 @@
 import { type ReactElement } from "react";
 
-import { useRouter } from "expo-router";
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { AppScreen } from "@/shared/components/app-screen";
-import { AppButton } from "@/shared/components/app-button";
-import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { AsyncStateNotice } from "@/shared/components/async-state-notice";
-import { InstallmentVsCashForm } from "@/components/tools/installment-vs-cash-form";
-import { InstallmentVsCashHistoryList } from "@/components/tools/installment-vs-cash-history-list";
-import { InstallmentVsCashResultCard } from "@/components/tools/installment-vs-cash-result-card";
-import { useInstallmentVsCashController } from "@/hooks/use-installment-vs-cash-controller";
+import { AppButton } from "@/shared/components/app-button";
+import { AppScreen } from "@/shared/components/app-screen";
+import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { InstallmentVsCashForm } from "@/features/tools/components/installment-vs-cash-form";
+import { InstallmentVsCashHistoryList } from "@/features/tools/components/installment-vs-cash-history-list";
+import { InstallmentVsCashResultCard } from "@/features/tools/components/installment-vs-cash-result-card";
+import { useInstallmentVsCashScreenController } from "@/features/tools/hooks/use-installment-vs-cash-screen-controller";
 
 function InstallmentVsCashHeader({
   onBack,
@@ -36,12 +35,11 @@ function InstallmentVsCashHeader({
 }
 
 export default function InstallmentVsCashScreen(): ReactElement {
-  const router = useRouter();
-  const controller = useInstallmentVsCashController();
+  const controller = useInstallmentVsCashScreenController();
 
   return (
     <AppScreen testID="installment-vs-cash-screen">
-      <InstallmentVsCashHeader onBack={() => router.back()} />
+      <InstallmentVsCashHeader onBack={controller.handleGoBack} />
 
       <AppSurfaceCard
         title="Simule sua compra"

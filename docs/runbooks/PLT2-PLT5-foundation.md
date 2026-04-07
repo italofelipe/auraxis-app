@@ -63,8 +63,8 @@ Preparar o app para:
 - Runtime de flags com provider `unleash` + fallback local:
   - `shared/feature-flags/service.ts`
 - Integração real no catálogo de ferramentas:
-  - `lib/tools-api.ts`
-  - `hooks/queries/use-tools-query.ts`
+  - `features/tools/services/tools-service.ts`
+  - `features/tools/hooks/use-tools-catalog-query.ts`
 - Cache curto para snapshot remoto com fallback resiliente.
 
 Variáveis de ambiente suportadas (App):

@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { installmentVsCashApi } from "@/lib/installment-vs-cash-api";
+import { queryKeys } from "@/core/query/query-keys";
+import { installmentVsCashService } from "@/features/tools/services/installment-vs-cash-service";
 import { INSTALLMENT_VS_CASH_TOOL_ID } from "@/shared/validators/installment-vs-cash";
 import type {
   CreateInstallmentVsCashGoalPayload,
@@ -10,7 +11,7 @@ import type {
   InstallmentVsCashGoalBridgeResponse,
   InstallmentVsCashPlannedExpenseBridgeResponse,
   InstallmentVsCashSavedCalculation,
-} from "@/types/contracts/installment-vs-cash";
+} from "@/features/tools/contracts";
 
 interface GoalVariables {
   readonly simulationId: string;
@@ -30,7 +31,7 @@ export const useInstallmentVsCashCalculationMutation = () => {
     Error,
     InstallmentVsCashCalculationRequestDto
   >({
-    mutationFn: installmentVsCashApi.calculate,
+    mutationFn: installmentVsCashService.calculate,
   });
 };
 
@@ -42,11 +43,9 @@ export const useSaveInstallmentVsCashMutation = () => {
     Error,
     InstallmentVsCashCalculationRequestDto
   >({
-    mutationFn: installmentVsCashApi.save,
+    mutationFn: installmentVsCashService.save,
     onSuccess: async (): Promise<void> => {
-      await queryClient.invalidateQueries({
-        queryKey: ["simulations", INSTALLMENT_VS_CASH_TOOL_ID],
-      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tools.simulationHistory(INSTALLMENT_VS_CASH_TOOL_ID) });
     },
   });
 };
@@ -60,12 +59,10 @@ export const useCreateGoalFromInstallmentVsCashMutation = () => {
     GoalVariables
   >({
     mutationFn: ({ simulationId, payload }: GoalVariables) => {
-      return installmentVsCashApi.createGoalFromSimulation(simulationId, payload);
+      return installmentVsCashService.createGoalFromSimulation(simulationId, payload);
     },
     onSuccess: async (): Promise<void> => {
-      await queryClient.invalidateQueries({
-        queryKey: ["simulations", INSTALLMENT_VS_CASH_TOOL_ID],
-      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tools.simulationHistory(INSTALLMENT_VS_CASH_TOOL_ID) });
     },
   });
 };
@@ -79,15 +76,13 @@ export const useCreatePlannedExpenseFromInstallmentVsCashMutation = () => {
     PlannedExpenseVariables
   >({
     mutationFn: ({ simulationId, payload }: PlannedExpenseVariables) => {
-      return installmentVsCashApi.createPlannedExpenseFromSimulation(
+      return installmentVsCashService.createPlannedExpenseFromSimulation(
         simulationId,
         payload,
       );
     },
     onSuccess: async (): Promise<void> => {
-      await queryClient.invalidateQueries({
-        queryKey: ["simulations", INSTALLMENT_VS_CASH_TOOL_ID],
-      });
+      await queryClient.invalidateQueries({ queryKey: queryKeys.tools.simulationHistory(INSTALLMENT_VS_CASH_TOOL_ID) });
     },
   });
 };

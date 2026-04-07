@@ -1,109 +1,89 @@
-import { Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { Paragraph, XStack, YStack } from "tamagui";
 
-import { SubscriptionBadge } from "@/components/subscription-badge";
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { ScreenContainer } from "@/components/ui/screen-container";
-import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
-import { useSubscriptionQuery } from "@/hooks/queries/use-subscription-query";
-import { MANAGE_SUBSCRIPTION_URL } from "@/shared/config/web-urls";
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colorPalette.white,
-    borderRadius: radii.md,
-    padding: spacing(2),
-    gap: spacing(2),
-    borderWidth: borderWidths.hairline,
-    borderColor: colorPalette.neutral700,
-  },
-  title: {
-    fontFamily: typography.headingSemiBold,
-    fontSize: fontSizes["2xl"],
-    color: colorPalette.neutral950,
-  },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: spacing(1),
-  },
-  label: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.sm,
-    color: colorPalette.neutral700,
-  },
-  value: {
-    fontFamily: typography.bodySemiBold,
-    fontSize: fontSizes.base,
-    color: colorPalette.neutral950,
-  },
-  button: {
-    borderRadius: radii.sm,
-    paddingHorizontal: spacing(3),
-    paddingVertical: spacing(1.5),
-    backgroundColor: colorPalette.brand600,
-    alignItems: "center",
-  },
-  buttonLabel: {
-    fontFamily: typography.bodySemiBold,
-    fontSize: fontSizes.base,
-    color: colorPalette.neutral950,
-  },
-});
+import { useSubscriptionScreenController } from "@/features/subscription/hooks/use-subscription-screen-controller";
+import { AppBadge } from "@/shared/components/app-badge";
+import { AppButton } from "@/shared/components/app-button";
+import { AppScreen } from "@/shared/components/app-screen";
+import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 
 export default function AssinaturaScreen() {
-  const { data: subscription, isPending } = useSubscriptionQuery();
-
-  const handleManageSubscription = async () => {
-    await Linking.openURL(MANAGE_SUBSCRIPTION_URL);
-  };
+  const controller = useSubscriptionScreenController();
+  const subscription = controller.subscriptionQuery.data;
 
   return (
-    <ScreenContainer>
-      <View style={styles.card}>
-        <Text style={styles.title}>Assinatura</Text>
+    <AppScreen>
+      <AppSurfaceCard title="Assinatura" description="Estado atual do billing do MVP1.">
+        {controller.subscriptionQuery.isPending ? (
+          <AsyncStateNotice
+            kind="loading"
+            title="Carregando assinatura"
+            description="Conferindo plano, status e ciclo vigente."
+          />
+        ) : controller.subscriptionQuery.isError ? (
+          <AsyncStateNotice
+            kind="error"
+            title="Nao foi possivel carregar a assinatura"
+            description="Tente novamente em instantes."
+          />
+        ) : subscription ? (
+          <YStack gap="$3">
+            <XStack alignItems="center" gap="$2">
+              <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+                Plano:
+              </Paragraph>
+              <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+                {subscription.offerCode ?? subscription.planCode}
+              </Paragraph>
+            </XStack>
 
-        {isPending ? <LoadingSkeleton height={spacing(4)} /> : null}
+            <XStack alignItems="center" gap="$2">
+              <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+                Status:
+              </Paragraph>
+              <AppBadge tone={subscription.status === "past_due" ? "danger" : "primary"}>
+                {subscription.status}
+              </AppBadge>
+            </XStack>
 
-        {subscription !== null && subscription !== undefined ? (
-          <>
-            <View style={styles.row}>
-              <Text style={styles.label}>Plano:</Text>
-              <Text style={styles.value}>{subscription.plan_slug}</Text>
-            </View>
-
-            <View style={styles.row}>
-              <Text style={styles.label}>Status:</Text>
-              <SubscriptionBadge status={subscription.status} />
-            </View>
-
-            {subscription.current_period_end !== null && subscription.current_period_end !== undefined ? (
-              <View style={styles.row}>
-                <Text style={styles.label}>Validade:</Text>
-                <Text style={styles.value}>
-                  {new Date(subscription.current_period_end).toLocaleDateString("pt-BR")}
-                </Text>
-              </View>
+            {subscription.currentPeriodEnd ? (
+              <XStack alignItems="center" gap="$2">
+                <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+                  Validade:
+                </Paragraph>
+                <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+                  {new Date(subscription.currentPeriodEnd).toLocaleDateString("pt-BR")}
+                </Paragraph>
+              </XStack>
             ) : null}
 
-            {subscription.trial_ends_at !== null && subscription.trial_ends_at !== undefined ? (
-              <View style={styles.row}>
-                <Text style={styles.label}>Trial até:</Text>
-                <Text style={styles.value}>
-                  {new Date(subscription.trial_ends_at).toLocaleDateString("pt-BR")}
-                </Text>
-              </View>
+            {subscription.trialEndsAt ? (
+              <XStack alignItems="center" gap="$2">
+                <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+                  Trial ate:
+                </Paragraph>
+                <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+                  {new Date(subscription.trialEndsAt).toLocaleDateString("pt-BR")}
+                </Paragraph>
+              </XStack>
             ) : null}
 
-            <Pressable
-              style={styles.button}
-              onPress={handleManageSubscription}
-              testID="manage-subscription-button"
-            >
-              <Text style={styles.buttonLabel}>Gerenciar assinatura</Text>
-            </Pressable>
-          </>
-        ) : null}
-      </View>
-    </ScreenContainer>
+            <AppButton
+              onPress={() => {
+                void controller.handleManageSubscription();
+              }}
+              testID="manage-subscription-button">
+              Gerenciar assinatura
+            </AppButton>
+          </YStack>
+        ) : (
+          <AsyncStateNotice
+            kind="empty"
+            title="Nenhuma assinatura encontrada"
+            description="Quando existir um plano ativo, ele aparecera aqui."
+          />
+        )}
+      </AppSurfaceCard>
+    </AppScreen>
   );
 }

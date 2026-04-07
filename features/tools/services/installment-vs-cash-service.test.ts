@@ -1,6 +1,6 @@
 import {
-  createInstallmentVsCashApi,
-} from "@/lib/installment-vs-cash-api";
+  createInstallmentVsCashService,
+} from "@/features/tools/services/installment-vs-cash-service";
 import type {
   InstallmentVsCashCalculationResponseDto,
   InstallmentVsCashHistoryResponseDto,
@@ -81,7 +81,7 @@ describe("installment-vs-cash api calculation", () => {
       },
     };
     const post = jest.fn().mockResolvedValue({ data: calculationDto });
-    const api = createInstallmentVsCashApi({ get: jest.fn(), post });
+    const api = createInstallmentVsCashService({ get: jest.fn(), post });
 
     const response = await api.calculate({
       cash_price: "1000.00",
@@ -138,7 +138,7 @@ describe("installment-vs-cash api persistence", () => {
 
     const post = jest.fn().mockResolvedValue({ data: saveDto });
     const get = jest.fn().mockResolvedValue({ data: historyDto });
-    const api = createInstallmentVsCashApi({ get, post });
+    const api = createInstallmentVsCashService({ get, post });
 
     const saveResponse = await api.save({
       cash_price: "1000.00",
@@ -229,7 +229,7 @@ describe("installment-vs-cash api bridges", () => {
         },
       });
 
-    const api = createInstallmentVsCashApi({ get: jest.fn(), post });
+    const api = createInstallmentVsCashService({ get: jest.fn(), post });
     const goal = await api.createGoalFromSimulation("sim-1", {
       title: "Compra planejada",
       selectedOption: "cash",

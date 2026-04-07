@@ -4,13 +4,13 @@ import { Paragraph, Switch, XStack, YStack } from "tamagui";
 
 import { AppButton } from "@/shared/components/app-button";
 import { AppInputField } from "@/shared/components/app-input-field";
+import type { OpportunityRateType } from "@/features/tools/contracts";
 import type {
   InstallmentDelayPreset,
   InstallmentInputMode,
   InstallmentVsCashFormDraft,
   InstallmentVsCashFormErrors,
 } from "@/shared/validators/installment-vs-cash";
-import type { OpportunityRateType } from "@/types/contracts";
 
 type TextFieldName =
   | "scenarioLabel"

@@ -1,6 +1,5 @@
-import type { ToolsCatalog } from "@/types/contracts";
-
-import { useToolsCatalogQuery } from "@/hooks/queries/use-tools-query";
+import type { ToolsCatalog } from "@/features/tools/contracts";
+import { useToolsCatalogQuery } from "@/features/tools/hooks/use-tools-catalog-query";
 
 const mockUseQuery = jest.fn();
 const mockGetCatalog = jest.fn();
@@ -10,8 +9,8 @@ jest.mock("@tanstack/react-query", () => ({
   useQuery: (...args: readonly unknown[]) => mockUseQuery(...args),
 }));
 
-jest.mock("@/lib/tools-api", () => ({
-  toolsApi: {
+jest.mock("@/features/tools/services/tools-service", () => ({
+  toolsService: {
     getCatalog: (...args: readonly unknown[]) => mockGetCatalog(...args),
   },
   toolsPlaceholder: {
