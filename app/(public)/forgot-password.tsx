@@ -1,133 +1,56 @@
-import { useRouter } from "expo-router";
 import { Controller } from "react-hook-form";
-import {
-  ActivityIndicator,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { YStack } from "tamagui";
 
-import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
-import { useForgotPasswordForm } from "@/hooks/forms/use-forgot-password-form";
-import { useForgotPasswordMutation } from "@/hooks/mutations/use-auth-mutations";
-
-const styles = StyleSheet.create({
-  card: {
-    gap: spacing(2),
-  },
-  cardBox: {
-    backgroundColor: colorPalette.white,
-    borderRadius: radii.md,
-    padding: spacing(2),
-    gap: spacing(1),
-    borderWidth: borderWidths.hairline,
-    borderColor: colorPalette.neutral700,
-  },
-  cardTitle: {
-    fontFamily: typography.bodySemiBold,
-    fontSize: fontSizes.lg,
-    color: colorPalette.neutral950,
-  },
-  cardSubtitle: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.sm,
-    color: colorPalette.neutral700,
-  },
-  form: {
-    gap: spacing(2),
-  },
-  input: {
-    borderWidth: borderWidths.hairline,
-    borderColor: colorPalette.neutral700,
-    borderRadius: radii.sm,
-    paddingHorizontal: spacing(1.5),
-    paddingVertical: spacing(1),
-    fontFamily: typography.body,
-    fontSize: fontSizes.md,
-    color: colorPalette.neutral950,
-    backgroundColor: colorPalette.white,
-  },
-  inputError: {
-    borderColor: colorPalette.danger500,
-  },
-  helperText: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.xs,
-    color: colorPalette.danger500,
-    marginTop: -spacing(1),
-  },
-  buttonContained: {
-    backgroundColor: colorPalette.brand500,
-    borderRadius: radii.sm,
-    paddingVertical: spacing(1.5),
-    alignItems: "center",
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: spacing(1),
-  },
-  buttonText: {
-    fontFamily: typography.bodySemiBold,
-    fontSize: fontSizes.md,
-    color: colorPalette.neutral950,
-  },
-  buttonTextLink: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.md,
-    color: colorPalette.brand600,
-  },
-});
+import { useForgotPasswordScreenController } from "@/features/auth/hooks/use-forgot-password-screen-controller";
+import { AppButton } from "@/shared/components/app-button";
+import { AppInputField } from "@/shared/components/app-input-field";
+import { AppScreen } from "@/shared/components/app-screen";
+import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
 export default function ForgotPasswordScreen() {
-  const router = useRouter();
-  const forgotPasswordMutation = useForgotPasswordMutation();
-  const { control, handleSubmit, formState } = useForgotPasswordForm();
-
-  const onSubmit = handleSubmit(async (values) => {
-    await forgotPasswordMutation.mutateAsync(values);
-  });
+  const controller = useForgotPasswordScreenController();
+  const {
+    control,
+    formState: { errors },
+  } = controller.form;
 
   return (
-    <View style={styles.card}>
-      <View style={styles.cardBox}>
-        <Text style={styles.cardTitle}>Recuperar senha</Text>
-        <Text style={styles.cardSubtitle}>Envie o link de recuperacao</Text>
-        <View style={styles.form}>
+    <AppScreen>
+      <AppSurfaceCard
+        title="Recuperar senha"
+        description="Envie o link de recuperacao usando o fluxo canonico de auth.">
+        <YStack gap="$4">
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                style={[styles.input, formState.errors.email && styles.inputError]}
+              <AppInputField
+                id="forgot-password-email"
+                label="E-mail"
                 placeholder="E-mail"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
+                errorText={errors.email?.message}
               />
             )}
           />
-          {formState.errors.email ? (
-            <Text style={styles.helperText}>{formState.errors.email.message}</Text>
-          ) : null}
 
-          <TouchableOpacity
-            style={styles.buttonContained}
-            onPress={() => void onSubmit()}
-            disabled={forgotPasswordMutation.isPending}>
-            {forgotPasswordMutation.isPending ? (
-              <ActivityIndicator size="small" color={colorPalette.neutral950} />
-            ) : null}
-            <Text style={styles.buttonText}>Enviar</Text>
-          </TouchableOpacity>
+          <AppButton
+            onPress={() => {
+              void controller.handleSubmit();
+            }}
+            disabled={controller.isSubmitting}>
+            {controller.isSubmitting ? "Enviando..." : "Enviar"}
+          </AppButton>
 
-          <TouchableOpacity onPress={() => router.replace("/login")}>
-            <Text style={styles.buttonTextLink}>Voltar para login</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+          <AppButton tone="secondary" onPress={controller.handleBackToLogin}>
+            Voltar para login
+          </AppButton>
+        </YStack>
+      </AppSurfaceCard>
+    </AppScreen>
   );
 }

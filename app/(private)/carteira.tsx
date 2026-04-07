@@ -1,80 +1,59 @@
-import { StyleSheet, Text, View } from "react-native";
+import { Paragraph, XStack, YStack } from "tamagui";
 
-import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
-import { ScreenContainer } from "@/components/ui/screen-container";
-import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
-import { useWalletSummaryQuery } from "@/hooks/queries/use-wallet-query";
-
-const currencyFormatter = new Intl.NumberFormat("pt-BR", {
-  style: "currency",
-  currency: "BRL",
-});
-
-const styles = StyleSheet.create({
-  card: {
-    backgroundColor: colorPalette.white,
-    borderRadius: radii.md,
-    padding: spacing(2),
-    gap: spacing(1),
-    borderWidth: borderWidths.hairline,
-    borderColor: colorPalette.neutral700,
-  },
-  cardTitle: {
-    fontFamily: typography.bodySemiBold,
-    fontSize: fontSizes.lg,
-    color: colorPalette.neutral950,
-  },
-  cardSubtitle: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.sm,
-    color: colorPalette.neutral700,
-  },
-  headlineSmall: {
-    fontFamily: typography.heading,
-    fontSize: fontSizes["2xl"],
-    color: colorPalette.neutral950,
-  },
-  bodyText: {
-    fontFamily: typography.body,
-    fontSize: fontSizes.md,
-    color: colorPalette.neutral900,
-  },
-  list: {
-    gap: spacing(1),
-  },
-  row: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-});
+import { useWalletScreenController } from "@/features/wallet/hooks/use-wallet-screen-controller";
+import { AppScreen } from "@/shared/components/app-screen";
+import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AsyncStateNotice } from "@/shared/components/async-state-notice";
+import { formatCurrency, formatPercent } from "@/shared/utils/formatters";
 
 export default function WalletScreen() {
-  const walletSummaryQuery = useWalletSummaryQuery();
+  const controller = useWalletScreenController();
 
   return (
-    <ScreenContainer>
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Carteira</Text>
-        <Text style={styles.cardSubtitle}>Distribuicao atual</Text>
-        <View style={styles.list}>
-          {walletSummaryQuery.isPending ? (
-            <LoadingSkeleton height={32} />
-          ) : (
-            <Text style={styles.headlineSmall}>
-              Total: {currencyFormatter.format(walletSummaryQuery.data?.total ?? 0)}
-            </Text>
-          )}
+    <AppScreen>
+      <AppSurfaceCard title="Carteira" description="Distribuicao atual do patrimonio.">
+        {controller.walletQuery.isPending ? (
+          <AsyncStateNotice
+            kind="loading"
+            title="Carregando carteira"
+            description="Buscando os ativos registrados para o usuario."
+          />
+        ) : controller.walletQuery.isError ? (
+          <AsyncStateNotice
+            kind="error"
+            title="Nao foi possivel carregar a carteira"
+            description="Tente novamente em instantes."
+          />
+        ) : (
+          <YStack gap="$3">
+            <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
+              Total: {formatCurrency(controller.total)}
+            </Paragraph>
 
-          {(walletSummaryQuery.data?.assets ?? []).map((asset) => (
-            <View style={styles.row} key={asset.id}>
-              <Text style={styles.bodyText}>{asset.name}</Text>
-              <Text style={styles.bodyText}>{currencyFormatter.format(asset.amount)}</Text>
-              <Text style={styles.bodyText}>{asset.allocation}%</Text>
-            </View>
-          ))}
-        </View>
-      </View>
-    </ScreenContainer>
+            {controller.assets.length === 0 ? (
+              <AsyncStateNotice
+                kind="empty"
+                title="Nenhum ativo encontrado"
+                description="Os ativos adicionados vao aparecer aqui."
+              />
+            ) : (
+              controller.assets.map((asset) => (
+                <XStack key={asset.id} justifyContent="space-between" gap="$3">
+                  <Paragraph color="$color" fontFamily="$body" fontSize="$4" flex={1}>
+                    {asset.name}
+                  </Paragraph>
+                  <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+                    {formatCurrency(asset.amount)}
+                  </Paragraph>
+                  <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+                    {formatPercent(asset.allocation)}
+                  </Paragraph>
+                </XStack>
+              ))
+            )}
+          </YStack>
+        )}
+      </AppSurfaceCard>
+    </AppScreen>
   );
 }

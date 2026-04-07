@@ -18,7 +18,7 @@
     "contracts:sync": "node scripts/contracts-sync.cjs",
     "contracts:sync:api-local": "node scripts/contracts-sync-local-api.cjs",
     "contracts:check": "node scripts/contracts-check.cjs",
-    "policy:check": "node scripts/check-frontend-governance.cjs && node scripts/check-api-contract-governance.cjs && node scripts/check-openapi-secret-hygiene.cjs",
+    "policy:check": "node scripts/check-frontend-governance.cjs && node scripts/check-api-contract-governance.cjs && node scripts/check-app-route-boundaries.cjs && node scripts/check-openapi-secret-hygiene.cjs",
     "quality-check": "npm run lint && npm run typecheck && npm run policy:check && npm run contracts:check && npm run test:coverage",
     "test:watch": "jest --watchAll",
     "ci:local": "bash scripts/run_ci_like_actions_local.sh",
@@ -93,6 +93,7 @@
       "eslint --fix --max-warnings 0 --no-warn-ignored",
       "node scripts/check-frontend-governance.cjs",
       "node scripts/check-api-contract-governance.cjs",
+      "node scripts/check-app-route-boundaries.cjs",
       "node scripts/check-openapi-secret-hygiene.cjs"
     ],
     "**/*.json": [

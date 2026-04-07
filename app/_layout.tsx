@@ -4,7 +4,7 @@ import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
-import { AppProviders } from "@/components/providers/app-providers";
+import { AppProviders } from "@/core/providers/app-providers";
 import { useAppStartup } from "@/core/shell/use-app-startup";
 
 function RootLayout() {

@@ -159,3 +159,45 @@
 ### Proximo passo
 - seguir para `APP FND-03`, fechando primitives, composição visual, async states e wrappers reutilizáveis para deixar `.tsx` apenas como view;
 - depois avançar para `APP FND-04`, completando os domínios que ainda faltam antes da primeira feature entregue.
+
+---
+
+## Update - APP FND-03A
+
+### O que foi feito
+- movi o provider raiz canônico para [`core/providers/app-providers.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/core/providers/app-providers.tsx), deixando [`components/providers/app-providers.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/components/providers/app-providers.tsx) apenas como compatibilidade temporária;
+- atualizei [`app/_layout.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/_layout.tsx) e [`app/index.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/index.tsx) para dependerem só da trilha canônica do runtime;
+- criei controllers de tela em `features/*/hooks` para os fluxos já migrados:
+  - [`use-login-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/auth/hooks/use-login-screen-controller.ts)
+  - [`use-forgot-password-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/auth/hooks/use-forgot-password-screen-controller.ts)
+  - [`use-dashboard-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/dashboard/hooks/use-dashboard-screen-controller.ts)
+  - [`use-subscription-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/subscription/hooks/use-subscription-screen-controller.ts)
+  - [`use-wallet-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/wallet/hooks/use-wallet-screen-controller.ts)
+  - [`use-alerts-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/alerts/hooks/use-alerts-screen-controller.ts)
+- levei as mutations de alertas para a trilha canônica em [`use-alerts-mutations.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/features/alerts/hooks/use-alerts-mutations.ts);
+- migrei as rotas abaixo para dependerem só de `features/*`, `core/*` e `shared/*`, removendo consumo direto de `hooks/*` legados:
+  - [`app/(public)/login.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(public)/login.tsx)
+  - [`app/(public)/forgot-password.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(public)/forgot-password.tsx)
+  - [`app/(private)/dashboard.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(private)/dashboard.tsx)
+  - [`app/(private)/assinatura.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(private)/assinatura.tsx)
+  - [`app/(private)/carteira.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(private)/carteira.tsx)
+  - [`app/(private)/alertas.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/app/(private)/alertas.tsx)
+- adicionei o guardrail local [`scripts/check-app-route-boundaries.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/scripts/check-app-route-boundaries.cjs) e o liguei ao `policy:check`/`lint-staged`, para falhar cedo se `app/` voltar a importar `components/`, `hooks/`, `lib/` ou `stores/` legados.
+
+### O que foi validado
+- `node scripts/check-app-route-boundaries.cjs`
+- `npm run typecheck`
+- `npm run policy:check`
+- `npm run lint`
+- `npx jest components/providers/app-providers.test.tsx __tests__/app/tools-screen.test.tsx __tests__/app/installment-vs-cash-screen.test.tsx --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- `app/(private)/ferramentas.tsx` e `app/(private)/installment-vs-cash.tsx` ainda estão na allowlist temporária do guardrail porque continuam dependendo da trilha antiga de `tools`;
+- `components/`, `hooks/`, `lib/` e `stores/` ainda existem como camada de compatibilidade em outras superfícies, então o legado ainda não foi removido do repo por completo;
+- a próxima etapa precisa atacar `tools/installment-vs-cash` e depois consolidar primitives/wrappers para diminuir ainda mais o uso de componentes herdados.
+
+### Proximo passo
+- seguir no `FND-03A` migrando `tools` e `installment-vs-cash` para `features/*`;
+- depois avançar para `FND-03B`, consolidando primitives e wrappers visuais até `app/` ficar apenas com composição de tela.
