@@ -433,6 +433,25 @@ const handleBootstrapRoute: MockRouteHandler = (context) => {
   return ok(serializeBootstrapResponse(limit));
 };
 
+const handleEntitlementRoutes: MockRouteHandler = (context) => {
+  if (context.method !== "GET" || context.pathname !== "/entitlements/check") {
+    return null;
+  }
+
+  const featureKey = context.query.get("feature_key") ?? "";
+  const activeFeatures = new Set([
+    "advanced_simulations",
+    "export_pdf",
+    "shared_entries",
+    "wallet_read",
+  ]);
+
+  return ok({
+    feature_key: featureKey,
+    active: activeFeatures.has(featureKey),
+  });
+};
+
 const handleSubscriptionRoutes: MockRouteHandler = (context) => {
   if (context.method === "GET" && context.pathname === "/subscriptions/plans") {
     return ok(serializeSubscriptionPlans());
@@ -564,6 +583,7 @@ const routeHandlers: MockRouteHandler[] = [
   handleHealthRoute,
   handleAuthRoutes,
   handleBootstrapRoute,
+  handleEntitlementRoutes,
   handleSubscriptionRoutes,
   handleDashboardRoutes,
   handleWalletRoute,

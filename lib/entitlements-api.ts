@@ -10,11 +10,11 @@ interface EntitlementsApiClient {
 const normalizeEntitlementCheck = (
   payload: EntitlementCheckResponse,
 ): boolean => {
-  if (typeof payload.has_access === "boolean") {
-    return payload.has_access;
+  if ("active" in payload) {
+    return payload.active === true;
   }
 
-  return payload.active === true;
+  return payload.has_access === true;
 };
 
 export const createEntitlementsApi = (client: EntitlementsApiClient) => {

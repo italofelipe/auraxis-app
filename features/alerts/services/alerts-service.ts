@@ -83,10 +83,14 @@ export const createAlertsService = (client: AxiosInstance) => {
       };
     },
     markRead: async (alertId: string): Promise<void> => {
-      await client.post(`/alerts/${alertId}/read`);
+      await client.post(
+        apiContractMap.alertsMarkRead.path.replace("{alertId}", alertId),
+      );
     },
     deleteAlert: async (alertId: string): Promise<void> => {
-      await client.delete(`/alerts/${alertId}`);
+      await client.delete(
+        apiContractMap.alertsDelete.path.replace("{alertId}", alertId),
+      );
     },
     updatePreference: async (
       category: string,
@@ -95,9 +99,9 @@ export const createAlertsService = (client: AxiosInstance) => {
       const response = await client.put(
         apiContractMap.updateAlertPreference.path.replace("{category}", category),
         {
-        enabled: command.enabled,
-        channels: command.channels,
-        global_opt_out: command.globalOptOut,
+          enabled: command.enabled,
+          channels: command.channels,
+          global_opt_out: command.globalOptOut,
         },
       );
 

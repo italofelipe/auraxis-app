@@ -11,10 +11,13 @@ module.exports = {
   '**/*.{ts,tsx}': [
     'eslint --fix --max-warnings 0 --no-warn-ignored',
     'node scripts/check-frontend-governance.cjs',
+    'node scripts/check-api-contract-governance.cjs',
+    'node scripts/check-openapi-secret-hygiene.cjs',
   ],
 
   // JSON — formatação
   '**/*.json': [
     'prettier --write',
+    'node scripts/check-openapi-secret-hygiene.cjs',
   ],
 }

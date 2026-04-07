@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { entitlementsApi } from "@/lib/entitlements-api";
+import { queryKeys } from "@/core/query/query-keys";
+import { entitlementsService } from "@/features/entitlements/services/entitlements-service";
 import type { FeatureKey } from "@/types/contracts/entitlement";
 
 export const useEntitlementCheckQuery = (
@@ -8,10 +9,11 @@ export const useEntitlementCheckQuery = (
   enabled = true,
 ) => {
   return useQuery<boolean>({
-    queryKey: ["entitlements", featureKey],
+    queryKey: queryKeys.entitlements.access(featureKey),
     enabled,
     queryFn: async (): Promise<boolean> => {
-      return entitlementsApi.checkEntitlement(featureKey);
+      const entitlement = await entitlementsService.checkEntitlement({ featureKey });
+      return entitlement.active;
     },
   });
 };

@@ -17,6 +17,10 @@ const {
   sha256,
   validateRestEndpointsAgainstOpenApi,
 } = require("./contracts.utils.cjs");
+const {
+  findUnsafeGeneratedTypeExamples,
+  findUnsafeOpenApiExamples,
+} = require("./openapi-secret-hygiene.cjs");
 
 const ensureFileExists = (filePath) => {
   if (!fs.existsSync(filePath)) {
@@ -92,6 +96,29 @@ const run = async () => {
 
   const openApiDocument = readJsonFile(OPENAPI_SNAPSHOT_PATH);
   const baselinePayload = readJsonFile(CONTRACT_BASELINE_PATH);
+  const openApiSecretFindings = findUnsafeOpenApiExamples(openApiDocument);
+  const generatedTypesText = fs.readFileSync(GENERATED_TYPES_PATH, "utf8");
+  const generatedTypeSecretFindings = findUnsafeGeneratedTypeExamples(
+    generatedTypesText,
+  );
+
+  if (openApiSecretFindings.length > 0 || generatedTypeSecretFindings.length > 0) {
+    process.stderr.write("[contracts:check] FAILED\n");
+    for (const finding of openApiSecretFindings.slice(0, 20)) {
+      process.stderr.write(
+        ` - unsafe OpenAPI example at ${finding.path}: ${JSON.stringify(finding.original)}\n`,
+      );
+    }
+    for (const finding of generatedTypeSecretFindings.slice(0, 20)) {
+      process.stderr.write(
+        ` - unsafe generated example (${finding.label}) at index ${finding.index}\n`,
+      );
+    }
+    process.stderr.write(
+      " - sanitize examples and rerun `npm run contracts:sync`.\n",
+    );
+    process.exit(1);
+  }
 
   const skipRemoteCheck =
     String(process.env.AURAXIS_SKIP_REMOTE_CONTRACT_CHECK ?? "").toLowerCase()

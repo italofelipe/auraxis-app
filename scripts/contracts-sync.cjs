@@ -19,6 +19,7 @@ const {
   readOpenApiFromSource,
   writeJsonFile,
 } = require("./contracts.utils.cjs");
+const { sanitizeOpenApiDocument } = require("./openapi-secret-hygiene.cjs");
 
 const run = async () => {
   const localOpenApiSourcePath = process.env.AURAXIS_OPENAPI_LOCAL_FILE ?? "";
@@ -26,8 +27,9 @@ const run = async () => {
     OPENAPI_SNAPSHOT_URL,
     localOpenApiSourcePath,
   );
+  const sanitizedOpenApiDocument = sanitizeOpenApiDocument(openApiDocument);
 
-  writeJsonFile(OPENAPI_SNAPSHOT_PATH, openApiDocument);
+  writeJsonFile(OPENAPI_SNAPSHOT_PATH, sanitizedOpenApiDocument);
 
   const remotePacks = await listRemoteContractPacks(CONTRACTS_API_URL);
   const baselinePayload = computeContractBaseline(

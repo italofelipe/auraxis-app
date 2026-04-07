@@ -85,7 +85,7 @@ export const createDashboardService = (client: AxiosInstance) => {
       );
     },
     getTrends: async (months = 6): Promise<DashboardTrends> => {
-      const response = await client.get("/dashboard/trends", {
+      const response = await client.get(apiContractMap.dashboardTrends.path, {
         params: {
           months,
         },

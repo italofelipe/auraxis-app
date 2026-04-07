@@ -1,16 +1,15 @@
-export type FeatureKey =
-  | "basic_simulations"
-  | "advanced_simulations"
-  | "export_pdf"
-  | "shared_entries"
-  | "wallet_read";
+import type {
+  EntitlementCheckQuery,
+  EntitlementCheckResult,
+  FeatureKey,
+} from "@/features/entitlements/contracts";
+
+export type { EntitlementCheckQuery, FeatureKey };
 
 export interface EntitlementCheck {
   readonly has_access: boolean;
 }
 
-export interface EntitlementCheckResponse {
-  readonly active?: boolean;
-  readonly has_access?: boolean;
-  readonly feature_key?: string;
-}
+export type EntitlementCheckResponse =
+  | EntitlementCheckResult
+  | EntitlementCheck;

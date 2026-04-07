@@ -1,3 +1,9 @@
+echo "🛡 Running policy checks before push..."
+npm run policy:check
+
+echo "🔗 Running contract checks before push..."
+npm run contracts:check
+
 echo "🔍 Running TypeScript check before push..."
 npx tsc --noEmit
 

@@ -16,6 +16,11 @@ export const queryKeys = {
     list: () => ["alerts", "list"] as const,
     preferences: () => ["alerts", "preferences"] as const,
   },
+  entitlements: {
+    root: ["entitlements"] as const,
+    check: (featureKey: string) => ["entitlements", "check", featureKey] as const,
+    access: (featureKey: string) => ["entitlements", "access", featureKey] as const,
+  },
   subscription: {
     root: ["subscription"] as const,
     me: () => ["subscription", "me"] as const,
