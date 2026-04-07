@@ -7,6 +7,8 @@ export interface AppRuntimeConfig {
   readonly apiMode: ApiMode;
   readonly apiContractVersion: string;
   readonly requestTimeoutMs: number;
+  readonly appScheme: string;
+  readonly checkoutReturnPath: string;
   readonly observabilityExportEnabled: boolean;
   readonly observabilityExportToken: string | null;
   readonly mockLatencyMs: number;
@@ -16,6 +18,8 @@ const DEFAULT_API_BASE_URL = "http://localhost:5000";
 const DEFAULT_API_CONTRACT_VERSION = "v2";
 const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
 const DEFAULT_MOCK_LATENCY_MS = 150;
+const DEFAULT_APP_SCHEME = "auraxisapp";
+const DEFAULT_CHECKOUT_RETURN_PATH = "/assinatura";
 
 const expoExtra = (Constants.expoConfig?.extra ?? {}) as Record<string, unknown>;
 
@@ -24,6 +28,8 @@ type RuntimeEnvKey =
   | "EXPO_PUBLIC_API_MODE"
   | "EXPO_PUBLIC_API_CONTRACT_VERSION"
   | "EXPO_PUBLIC_API_TIMEOUT_MS"
+  | "EXPO_PUBLIC_APP_SCHEME"
+  | "EXPO_PUBLIC_CHECKOUT_RETURN_PATH"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN"
   | "EXPO_PUBLIC_API_MOCK_LATENCY_MS";
@@ -38,6 +44,10 @@ const readExpoEnv = (envKey: RuntimeEnvKey): string | undefined => {
       return process.env.EXPO_PUBLIC_API_CONTRACT_VERSION;
     case "EXPO_PUBLIC_API_TIMEOUT_MS":
       return process.env.EXPO_PUBLIC_API_TIMEOUT_MS;
+    case "EXPO_PUBLIC_APP_SCHEME":
+      return process.env.EXPO_PUBLIC_APP_SCHEME;
+    case "EXPO_PUBLIC_CHECKOUT_RETURN_PATH":
+      return process.env.EXPO_PUBLIC_CHECKOUT_RETURN_PATH;
     case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED":
       return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED;
     case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN":
@@ -128,6 +138,16 @@ export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
     "EXPO_PUBLIC_API_TIMEOUT_MS",
     "apiTimeoutMs",
     DEFAULT_REQUEST_TIMEOUT_MS,
+  ),
+  appScheme: readString(
+    "EXPO_PUBLIC_APP_SCHEME",
+    "appScheme",
+    DEFAULT_APP_SCHEME,
+  ),
+  checkoutReturnPath: readString(
+    "EXPO_PUBLIC_CHECKOUT_RETURN_PATH",
+    "checkoutReturnPath",
+    DEFAULT_CHECKOUT_RETURN_PATH,
   ),
   observabilityExportEnabled: readBoolean(
     "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED",

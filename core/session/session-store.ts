@@ -73,11 +73,25 @@ const toState = (session: StoredSession | null): Partial<SessionState> => {
   };
 };
 
+let bootstrapSessionPromise: Promise<void> | null = null;
+
 export const useSessionStore = create<SessionState>((set, get) => ({
   ...unauthenticatedState,
   bootstrapSession: async (): Promise<void> => {
-    const storedSession = await loadStoredSession();
-    set(toState(storedSession));
+    if (get().hydrated) {
+      return;
+    }
+
+    if (!bootstrapSessionPromise) {
+      bootstrapSessionPromise = (async (): Promise<void> => {
+        const storedSession = await loadStoredSession();
+        set(toState(storedSession));
+      })().finally(() => {
+        bootstrapSessionPromise = null;
+      });
+    }
+
+    await bootstrapSessionPromise;
   },
   signIn: async (
     session: StoredSession | string,

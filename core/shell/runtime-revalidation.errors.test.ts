@@ -1,0 +1,106 @@
+import type { QueryClient } from "@tanstack/react-query";
+
+import { ApiError } from "@/core/http/api-error";
+import { queryKeys } from "@/core/query/query-keys";
+import { createRuntimeRevalidationService } from "@/core/shell/runtime-revalidation";
+import { useSessionStore } from "@/core/session/session-store";
+
+const createQueryClientMock = (): QueryClient => {
+  return {
+    fetchQuery: jest.fn(),
+    invalidateQueries: jest.fn(),
+    removeQueries: jest.fn(),
+  } as unknown as QueryClient;
+};
+
+const setAuthenticatedSession = (): void => {
+  useSessionStore.setState({
+    accessToken: "token",
+    refreshToken: "refresh",
+    user: {
+      id: "user-1",
+      name: "Italo",
+      email: "italo@auraxis.dev",
+      emailConfirmed: true,
+    },
+    userEmail: "italo@auraxis.dev",
+    hydrated: true,
+    isAuthenticated: true,
+  });
+};
+
+describe("runtime revalidation service - error handling", () => {
+  it("derruba a sessao quando a revalidacao encontra erro de autorizacao", async () => {
+    setAuthenticatedSession();
+
+    const queryClient = createQueryClientMock();
+    const signOut = jest.fn().mockResolvedValue(undefined);
+    const setEntitlementsVersion = jest.fn();
+    const recordForegroundSync = jest.fn();
+
+    (queryClient.fetchQuery as jest.Mock).mockRejectedValue(
+      new ApiError({
+        message: "Sessao expirada.",
+        status: 401,
+      }),
+    );
+
+    const service = createRuntimeRevalidationService({
+      queryClient,
+      bootstrapService: {
+        getBootstrap: jest.fn(),
+      },
+      subscriptionService: {
+        getSubscription: jest.fn(),
+      },
+      signOut,
+      setEntitlementsVersion,
+      recordForegroundSync,
+    });
+
+    const result = await service.revalidate("checkout-return");
+
+    expect(result).toEqual({
+      revalidated: false,
+      signedOut: true,
+      entitlementsVersion: null,
+    });
+    expect(signOut).toHaveBeenCalledTimes(1);
+    expect(setEntitlementsVersion).toHaveBeenCalledWith(null);
+    expect(queryClient.removeQueries).toHaveBeenCalledWith({
+      queryKey: queryKeys.bootstrap.root,
+    });
+    expect(queryClient.removeQueries).toHaveBeenCalledWith({
+      queryKey: queryKeys.subscription.root,
+    });
+    expect(queryClient.removeQueries).toHaveBeenCalledWith({
+      queryKey: queryKeys.entitlements.root,
+    });
+  });
+
+  it("propaga erros que nao sao de autorizacao", async () => {
+    setAuthenticatedSession();
+
+    const queryClient = createQueryClientMock();
+    const service = createRuntimeRevalidationService({
+      queryClient,
+      bootstrapService: {
+        getBootstrap: jest.fn(),
+      },
+      subscriptionService: {
+        getSubscription: jest.fn(),
+      },
+      signOut: jest.fn().mockResolvedValue(undefined),
+      setEntitlementsVersion: jest.fn(),
+      recordForegroundSync: jest.fn(),
+    });
+
+    (queryClient.fetchQuery as jest.Mock).mockRejectedValue(
+      new Error("Gateway timeout"),
+    );
+
+    await expect(service.revalidate("foreground")).rejects.toThrow(
+      "Gateway timeout",
+    );
+  });
+});
