@@ -62,3 +62,69 @@
 - sincronizar o baseline de contratos OpenAPI do app com o estado mais recente da `auraxis-api`;
 - abrir o próximo slice do app para `auth + bootstrap + plans/paywall`, agora já sobre `route guards`, `apiContractMap`, `queryKeys`, `theme/motion` e `shared/forms`;
 - usar `shared/testing/test-providers.tsx` como base para os testes das próximas telas e hooks visuais.
+
+---
+
+## Update - APP FND-01
+
+### O que foi feito
+- sincronizei o snapshot OpenAPI do app com a `auraxis-api` local via [`scripts/contracts-sync-local-api.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/scripts/contracts-sync-local-api.cjs), atualizando:
+  - [`contracts/openapi.snapshot.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/contracts/openapi.snapshot.json)
+  - [`shared/types/generated/openapi.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/types/generated/openapi.ts)
+- ampliei o catálogo e o mapa canônico de contratos em:
+  - [`shared/contracts/api-endpoint-catalog.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/contracts/api-endpoint-catalog.ts)
+  - [`shared/contracts/api-contract-map.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/contracts/api-contract-map.ts)
+- adicionei o domínio canônico de `entitlements` em [`features/entitlements`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/features/entitlements) e conectei query keys em [`core/query/query-keys.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/core/query/query-keys.ts);
+- removi consumo ativo de rotas soltas ou libs legadas dos fluxos já em uso, migrando para services/contratos canônicos em:
+  - [`features/dashboard/services/dashboard-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/features/dashboard/services/dashboard-service.ts)
+  - [`features/alerts/services/alerts-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/features/alerts/services/alerts-service.ts)
+  - [`hooks/queries/use-alerts-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/queries/use-alerts-query.ts)
+  - [`hooks/queries/use-alert-preferences-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/queries/use-alert-preferences-query.ts)
+  - [`hooks/queries/use-dashboard-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/queries/use-dashboard-query.ts)
+  - [`hooks/queries/use-entitlement-check-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/queries/use-entitlement-check-query.ts)
+  - [`hooks/queries/use-entitlement-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/queries/use-entitlement-query.ts)
+  - [`hooks/queries/use-subscription-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/queries/use-subscription-query.ts)
+  - [`hooks/queries/use-wallet-query.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/queries/use-wallet-query.ts)
+  - [`hooks/mutations/use-delete-alert-mutation.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/mutations/use-delete-alert-mutation.ts)
+  - [`hooks/mutations/use-mark-read-mutation.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/mutations/use-mark-read-mutation.ts)
+  - [`hooks/mutations/use-update-preference-mutation.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/hooks/mutations/use-update-preference-mutation.ts)
+- movi a configuração de URLs web para a trilha compartilhada em [`shared/config/web-urls.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/config/web-urls.ts), mantendo [`lib/web-urls.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/lib/web-urls.ts) só como compatibilidade;
+- adicionei guardrails para falhar cedo localmente:
+  - [`scripts/check-api-contract-governance.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/scripts/check-api-contract-governance.cjs) bloqueia imports ativos de `@/lib/*-api` e strings soltas de endpoint;
+  - [`package.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/package.json) agora acopla esse check ao `policy:check` e ao `lint-staged`;
+- alinhei a compatibilidade de `entitlements` para suportar shape moderno e legado em:
+  - [`types/contracts/entitlement.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/types/contracts/entitlement.ts)
+  - [`lib/entitlements-api.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/lib/entitlements-api.ts)
+
+### O que foi validado
+- `npm run contracts:sync:api-local`
+- `npm run policy:check`
+- `npm run contracts:check`
+- `npm run typecheck`
+- `npx jest shared/contracts/api-contract-map.test.ts hooks/queries/use-alerts-query.spec.ts hooks/queries/use-subscription-query.spec.ts lib/web-urls.test.ts lib/entitlements-api.test.ts --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o backend ainda não publica todas as rotas de `alerts` e `subscriptions` no snapshot OpenAPI, então o app mantém uma lista explícita de gaps conhecidos em [`shared/contracts/api-contract-map.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/contracts/api-contract-map.test.ts);
+- a camada legada `lib/`, `hooks/` e `stores/` ainda existe, mas agora ficou restrita a compatibilidade. A remoção total entra no próximo bloco;
+- ainda faltam scaffolds canônicos para `transactions`, `shared-entries`, `fiscal`, `profile` e `questionnaire`.
+
+### Proximo passo
+- seguir para `APP FND-02`, fechando shell, sessão, lifecycle, deep links e retorno de checkout;
+- manter o guardrail de contratos ativo para que qualquer novo consumo da API já nasça tipado e preso ao catálogo canônico.
+
+### Addendum - Gitleaks / contract hygiene
+- o PR `#210` revelou um atrito estrutural no CI: exemplos realistas demais de `token`, `refresh_token`, JWT e `X-Request-ID` dentro do snapshot OpenAPI estavam acionando `Gitleaks`;
+- a correção foi feita na raiz do fluxo de contratos:
+  - [`scripts/openapi-secret-hygiene.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/scripts/openapi-secret-hygiene.cjs) sanitiza exemplos sensíveis antes do snapshot ser versionado;
+  - [`scripts/check-openapi-secret-hygiene.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/scripts/check-openapi-secret-hygiene.cjs) falha cedo localmente quando o snapshot ou os tipos gerados carregam exemplos que parecem segredo;
+  - [`scripts/contracts-sync.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/scripts/contracts-sync.cjs) agora escreve apenas o snapshot já sanitizado;
+  - [`scripts/contracts-check.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/scripts/contracts-check.cjs) valida essa higiene como parte do fluxo de contratos;
+  - [`lint-staged.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/lint-staged.config.js) e [`.husky/pre-push`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/.husky/pre-push) foram endurecidos para executar esse guardrail antes do CI.
+- validação do fix:
+  - `npm run contracts:sync:api-local`
+  - `node scripts/check-openapi-secret-hygiene.cjs`
+  - `npm run policy:check`
+  - `npm run contracts:check`
+  - busca explícita pelos literais reportados pelo Gitleaks (`rg`) retornando vazio em `contracts/openapi.snapshot.json` e `shared/types/generated/openapi.ts`

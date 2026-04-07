@@ -4,6 +4,240 @@
  */
 
 export interface paths {
+    "/auth/email/confirm": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Confirmar conta
+         * @description Confirma a conta do usuario a partir do token enviado por email.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    /**
+                     * @description Token de confirmacao recebido por email.
+                     * @example {
+                     *       "token": "example-token"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_auth_schema_ConfirmEmailSchema"];
+                };
+            };
+            responses: {
+                /** @description Email confirmado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "Email confirmed successfully."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido, expirado ou payload inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Invalid or expired email confirmation token.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno ao confirmar email */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Email confirmation failed",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/email/resend": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Reenviar confirmacao de conta
+         * @description Reenvia o email de confirmacao do usuario autenticado. Requer token JWT valido no header Authorization. A resposta e neutra para evitar enumeracao de contas.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Solicitação recebida com resposta neutra */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "If an account exists for this email, confirmation instructions were sent."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token JWT ausente ou inválido */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Missing or invalid authorization token",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno ao reenviar confirmacao */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Email confirmation resend failed",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -13,27 +247,218 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Autenticar usuário
+         * @description Autentica o usuário e devolve um token JWT.
+         *
+         *     Headers:
+         *     - `X-API-Contract`: opcional; `v2` padroniza o envelope.
+         *
+         *     Payload:
+         *     - `email` é o identificador obrigatório e canônico de login
+         *     - `password` é obrigatório
+         *
+         *     Sessão:
+         *     - um login bem-sucedido atualiza o `current_jti` do usuário e revoga a sessão JWT anterior
+         *
+         *     Resposta:
+         *     - `data.token`: JWT para chamadas autenticadas
+         *     - `data.user`: dados básicos do usuário autenticado
+         */
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
-            responses: never;
+            requestBody: {
+                content: {
+                    /**
+                     * @description Credenciais para login. `email` é o único identificador aceito para autenticação.
+                     * @example {
+                     *       "email": "italo@auraxis.com.br",
+                     *       "password": "MinhaSenha@123"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_auth_schema_AuthSchema"];
+                };
+            };
+            responses: {
+                /** @description Login realizado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "token": "jwt-example-token",
+                         *         "user": {
+                         *           "email": "italo@auraxis.com.br",
+                         *           "id": "4b2ef64b-b35d-4ea2-a6f2-4ef3cfb295f1",
+                         *           "name": "Italo Chagas"
+                         *         }
+                         *       },
+                         *       "message": "Login successful"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Credenciais ausentes ou payload inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Missing credentials",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Credenciais inválidas */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Invalid credentials",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Muitas tentativas de login */
+                429: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "TOO_MANY_ATTEMPTS",
+                         *       "details": {
+                         *         "retry_after_seconds": 300
+                         *       },
+                         *       "message": "Too many login attempts. Try again later.",
+                         *       "status_code": 429
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno ao efetuar login */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Login failed",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Serviço de autenticação temporariamente indisponível */
+                503: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "AUTH_BACKEND_UNAVAILABLE",
+                         *       "message": "Authentication temporarily unavailable. Try again later.",
+                         *       "status_code": 503
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -47,27 +472,55 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Revogar sessão atual
+         * @description Revoga o JWT atual do usuário autenticado.
+         *
+         *     Depois dessa chamada, o token utilizado deixa de ser aceito nas rotas protegidas.
+         */
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Logout realizado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "Logout successful"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+            };
         };
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -81,27 +534,141 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Solicitar recuperação de senha
+         * @description Solicita recuperação de senha por link. A resposta é sempre neutra para evitar enumeração de contas.
+         */
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
-            responses: never;
+            requestBody: {
+                content: {
+                    /**
+                     * @description Email da conta que deseja recuperar acesso.
+                     * @example {
+                     *       "email": "italo@auraxis.com.br"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_auth_schema_ForgotPasswordSchema"];
+                };
+            };
+            responses: {
+                /** @description Solicitação recebida com resposta neutra */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "If an account exists for this email, recovery instructions were sent."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Dados inválidos",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno ao solicitar recuperação */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Password reset request failed",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Serviço de autenticação temporariamente indisponível */
+                503: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "AUTH_BACKEND_UNAVAILABLE",
+                         *       "message": "Authentication temporarily unavailable. Try again later.",
+                         *       "status_code": 503
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -115,27 +682,239 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Redefinir senha
+         * @description Redefine a senha de um usuário a partir de um token de recuperação.
+         */
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
-            responses: never;
+            requestBody: {
+                content: {
+                    /**
+                     * @description Token de recuperação e nova senha válida.
+                     * @example {
+                     *       "new_password": "NovaSenha@123",
+                     *       "token": "example-token"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_auth_schema_ResetPasswordSchema"];
+                };
+            };
+            responses: {
+                /** @description Senha redefinida com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "Password updated successfully"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido, expirado ou payload inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Token inválido ou expirado",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno ao redefinir senha */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Password reset failed",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         delete?: never;
-        options: {
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/refresh": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Renovar access token
+         * @description Emite um novo par de tokens (access + refresh) usando um refresh token válido.
+         *
+         *     Rotation:
+         *     - Cada uso invalida o refresh token anterior (replay attack prevention).
+         *     - O novo refresh token tem TTL de 7 dias a partir da emissão.
+         *
+         *     Headers:
+         *     - `Authorization: Bearer <refresh_token>` (obrigatório)
+         *     - `X-API-Contract`: opcional; `v2` padroniza o envelope.
+         */
+        post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Tokens renovados com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "refresh_token": "refresh-token-example",
+                         *         "token": "example-token"
+                         *       },
+                         *       "message": "Token refreshed"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Refresh token inválido, expirado ou já utilizado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "TOKEN_INVALID",
+                         *       "message": "Token invalid or already used",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Muitas requisições de renovação */
+                429: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "RATE_LIMIT_EXCEEDED",
+                         *       "message": "Too many requests",
+                         *       "status_code": 429
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
+        delete?: never;
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -149,6 +928,543 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /**
+         * Registrar usuário
+         * @description Cria uma nova conta no sistema.
+         *
+         *     Payload:
+         *     - `name`, `email` e `password` são obrigatórios
+         *     - `investor_profile` é opcional no onboarding inicial
+         *
+         *     Dependendo da política de segurança, conflitos de email podem ser neutralizados com uma resposta de aceite para evitar enumeração.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    /**
+                     * @description Dados necessários para criação da conta.
+                     * @example {
+                     *       "email": "italo@auraxis.com.br",
+                     *       "investor_profile": "conservador",
+                     *       "name": "Italo Chagas",
+                     *       "password": "MinhaSenha@123"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_user_schemas_UserRegistrationSchema"];
+                };
+            };
+            responses: {
+                /** @description Usuário criado com sucesso */
+                201: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "user": {
+                         *           "email": "italo@auraxis.com.br",
+                         *           "id": "4b2ef64b-b35d-4ea2-a6f2-4ef3cfb295f1",
+                         *           "name": "Italo Chagas"
+                         *         }
+                         *       },
+                         *       "message": "User created successfully"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Erro de validação",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Email já registrado */
+                409: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "CONFLICT",
+                         *       "message": "Email já registrado",
+                         *       "status_code": 409
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno do servidor */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Failed to create user",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Obter overview mensal do dashboard
+         * @description Contrato canônico do dashboard financeiro do MVP1. Use esta rota para visão agregada mensal; `/transactions/dashboard` permanece apenas como compatibilidade transitória.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /**
+                     * @description Mês de referência no formato YYYY-MM
+                     * @example 2026-03
+                     */
+                    month: string;
+                };
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Overview do dashboard */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "counts": {
+                         *           "expense_transactions": 10,
+                         *           "income_transactions": 4,
+                         *           "status": {
+                         *             "paid": 9,
+                         *             "pending": 5
+                         *           },
+                         *           "total_transactions": 14
+                         *         },
+                         *         "month": "2026-03",
+                         *         "top_categories": {
+                         *           "expense": [
+                         *             {
+                         *               "category_name": "Moradia",
+                         *               "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *               "total_amount": 1800,
+                         *               "transactions_count": 3
+                         *             }
+                         *           ],
+                         *           "income": [
+                         *             {
+                         *               "category_name": "Receitas",
+                         *               "tag_id": null,
+                         *               "total_amount": 5000,
+                         *               "transactions_count": 4
+                         *             }
+                         *           ]
+                         *         },
+                         *         "totals": {
+                         *           "balance": 1800,
+                         *           "expense_total": 3200,
+                         *           "income_total": 5000
+                         *         }
+                         *       },
+                         *       "message": "Overview do dashboard calculado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetro inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Parâmetro 'month' inválido. Use o formato YYYY-MM.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao calcular overview do dashboard",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/trends": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Tendências mensais do dashboard
+         * @description Retorna a série histórica de receitas, despesas e saldo para os últimos N meses (apenas transações pagas).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /**
+                     * @description Número de meses a incluir (1–24, padrão 6)
+                     * @example 6
+                     */
+                    months?: string;
+                };
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Série de tendências mensais */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "months": 6,
+                         *         "series": [
+                         *           {
+                         *             "balance": 1800,
+                         *             "expenses": 3200,
+                         *             "income": 5000,
+                         *             "month": "2026-04"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Tendências calculadas com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Parâmetro inválido */
+                422: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "O parâmetro 'months' deve ser um inteiro entre 1 e 24.",
+                         *       "status_code": 422
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao calcular tendências do dashboard",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/entitlements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Lista os entitlements do usuário autenticado. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Lista de entitlements */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/entitlements/admin": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Concede um entitlement a um usuário. Requer role 'admin'. */
         post: {
             parameters: {
                 query?: never;
@@ -157,19 +1473,132 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Entitlement concedido */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Acesso negado — requer role admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
         delete?: never;
-        options: {
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/entitlements/admin/{entitlement_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Revoga um entitlement pelo seu UUID. Requer role 'admin'. */
+        delete: {
             parameters: {
                 query?: never;
+                header?: never;
+                path: {
+                    entitlement_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Entitlement revogado */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Acesso negado — requer role admin */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Entitlement não encontrado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/entitlements/check": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Verifica se o usuário autenticado possui um entitlement ativo para a feature especificada. Parâmetro obrigatório: ?feature_key=xxx */
+        get: {
+            parameters: {
+                query: {
+                    feature_key: string;
+                };
                 header?: never;
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Resultado da verificação */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Parâmetro feature_key ausente */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -226,6 +1655,7 @@ export interface paths {
         };
         get?: never;
         put?: never;
+        /** @description Executa simulação de meta sem persistência (what-if), retornando projeção e recomendações acionáveis. */
         post: {
             parameters: {
                 query?: never;
@@ -234,19 +1664,32 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Simulação calculada com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -258,6 +1701,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Retorna uma meta específica do usuário autenticado. */
         get: {
             parameters: {
                 query?: never;
@@ -268,8 +1712,38 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Meta encontrada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
+        /** @description Alias legado para atualização de metas. Use `PATCH /goals/{goal_id}` como contrato canônico para update parcial. */
         put: {
             parameters: {
                 query?: never;
@@ -280,9 +1754,66 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Meta atualizada via compatibilidade legada */
+                200: {
+                    headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /goals/{goal_id}
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example PATCH
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
         post?: never;
+        /** @description Remove uma meta específica do usuário autenticado. */
         delete: {
             parameters: {
                 query?: never;
@@ -293,9 +1824,41 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Meta removida */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
-        options: {
+        options?: never;
+        head?: never;
+        /** @description Atualiza parcialmente uma meta específica do usuário autenticado. */
+        patch: {
             parameters: {
                 query?: never;
                 header?: never;
@@ -305,10 +1868,44 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Meta atualizada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/goals/{goal_id}/plan": {
@@ -318,6 +1915,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /** @description Calcula o plano da meta considerando renda, despesas e capacidade de aporte do usuário. */
         get: {
             parameters: {
                 query?: never;
@@ -328,23 +1926,41 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Planejamento calculado com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    goal_id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -401,15 +2017,254 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/transactions": {
+    "/ops/metrics": {
         parameters: {
             query?: never;
             header?: never;
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        put: {
+        /** @description Exporta métricas em formato texto compatível com scrape simples. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Payload Prometheus text exposition */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Chave inválida ou ausente */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Export desabilitado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        /** @description Exporta métricas em formato texto compatível com scrape simples. */
+        options: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Payload Prometheus text exposition */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Chave inválida ou ausente */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Export desabilitado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ops/observability": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Exporta snapshot JSON de métricas internas para collector externo. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Snapshot JSON de observabilidade */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Chave inválida ou ausente */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Export desabilitado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        /** @description Exporta snapshot JSON de métricas internas para collector externo. */
+        options: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Snapshot JSON de observabilidade */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Chave inválida ou ausente */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Export desabilitado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/readiness": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Readiness probe: verifica se DB e Redis estão acessíveis. Retorna 200 quando tudo está ok, 503 quando alguma dependência falhou. Protegido por bearer token (READINESS_TOKEN) quando configurado. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Todas as dependências saudáveis */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token de autorização ausente ou inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Uma ou mais dependências indisponíveis */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        /** @description Readiness probe: verifica se DB e Redis estão acessíveis. Retorna 200 quando tudo está ok, 503 quando alguma dependência falhou. Protegido por bearer token (READINESS_TOKEN) quando configurado. */
+        options: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Todas as dependências saudáveis */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token de autorização ausente ou inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Uma ou mais dependências indisponíveis */
+                503: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
             parameters: {
                 query?: never;
                 header?: never;
@@ -419,6 +2274,7 @@ export interface paths {
             requestBody?: never;
             responses: never;
         };
+        put?: never;
         post: {
             parameters: {
                 query?: never;
@@ -429,16 +2285,7 @@ export interface paths {
             requestBody?: never;
             responses: never;
         };
-        delete: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        delete?: never;
         options: {
             parameters: {
                 query?: never;
@@ -449,6 +2296,693 @@ export interface paths {
             requestBody?: never;
             responses: never;
         };
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/installment-vs-cash": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Recalcula e persiste uma simulação parcelado vs à vista no subdomínio canônico de `simulations`. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Simulação salva com sucesso */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/installment-vs-cash/calculate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Executa a simulação pública de parcelado vs à vista, retornando comparativo, cronograma e recomendação. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Simulação calculada com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/installment-vs-cash/save": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Alias legado do salvamento parcelado vs à vista. Use `POST /simulations/installment-vs-cash` como contrato canônico. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Simulação salva com sucesso via alias legado */
+                201: {
+                    headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /simulations/installment-vs-cash
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example POST
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/{simulation_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retorna uma simulação específica do usuário autenticado. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    simulation_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Simulação encontrada */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Simulação não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** @description Remove uma simulação específica do usuário autenticado. */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    simulation_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Simulação removida */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Simulação não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/{simulation_id}/goal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Converte uma simulação salva em meta de compra. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    simulation_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Meta criada a partir da simulação */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Entitlement necessário */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Simulação não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/{simulation_id}/planned-expense": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Converte uma simulação salva em despesa planejada. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    simulation_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Despesa planejada criada a partir da simulação */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Entitlement necessário */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Simulação não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transactions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar transações
+         * @description Lista canônica de transações ativas com filtros, ordenação e paginação.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Lista de transações */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "items": [
+                         *           {
+                         *             "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *             "amount": "150.00",
+                         *             "bank_name": null,
+                         *             "created_at": "2026-03-01T10:00:00+00:00",
+                         *             "credit_card_id": null,
+                         *             "currency": "BRL",
+                         *             "description": "Fatura mensal de energia",
+                         *             "due_date": "2026-03-10",
+                         *             "end_date": null,
+                         *             "external_id": null,
+                         *             "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *             "installment_count": null,
+                         *             "installment_group_id": null,
+                         *             "is_installment": false,
+                         *             "is_recurring": false,
+                         *             "observation": "Pagar antes do dia 10",
+                         *             "paid_at": null,
+                         *             "source": "manual",
+                         *             "start_date": null,
+                         *             "status": "pending",
+                         *             "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *             "title": "Conta de luz",
+                         *             "type": "expense",
+                         *             "updated_at": "2026-03-01T10:00:00+00:00"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Lista de transações retornada com sucesso",
+                         *       "meta": {
+                         *         "pagination": {
+                         *           "page": 1,
+                         *           "pages": 2,
+                         *           "per_page": 10,
+                         *           "total": 14
+                         *         }
+                         *       }
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao listar transações",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Criar transação
+         * @description Cria uma nova transação financeira.
+         *
+         *     Aceita receitas e despesas, com suporte a recorrência e parcelamento.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    /**
+                     * @description Payload de criação da transação.
+                     * @example {
+                     *       "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                     *       "amount": "150.00",
+                     *       "description": "Fatura mensal de energia",
+                     *       "due_date": "2026-03-10",
+                     *       "observation": "Pagar antes do dia 10",
+                     *       "status": "pending",
+                     *       "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                     *       "title": "Conta de luz",
+                     *       "type": "expense"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["TransactionCreate"];
+                };
+            };
+            responses: {
+                /** @description Transação criada com sucesso */
+                201: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transaction": {
+                         *           "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *           "amount": "150.00",
+                         *           "bank_name": null,
+                         *           "created_at": "2026-03-01T10:00:00+00:00",
+                         *           "credit_card_id": null,
+                         *           "currency": "BRL",
+                         *           "description": "Fatura mensal de energia",
+                         *           "due_date": "2026-03-10",
+                         *           "end_date": null,
+                         *           "external_id": null,
+                         *           "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *           "installment_count": null,
+                         *           "installment_group_id": null,
+                         *           "is_installment": false,
+                         *           "is_recurring": false,
+                         *           "observation": "Pagar antes do dia 10",
+                         *           "paid_at": null,
+                         *           "source": "manual",
+                         *           "start_date": null,
+                         *           "status": "pending",
+                         *           "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *           "title": "Conta de luz",
+                         *           "type": "expense",
+                         *           "updated_at": "2026-03-01T10:00:00+00:00"
+                         *         }
+                         *       },
+                         *       "message": "Transação criada com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Erro de validação",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao criar transação",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -460,29 +2994,169 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Obter dashboard mensal legado de transações
+         * @description Compatibilidade transitória para o dashboard mensal. Prefira `GET /dashboard/overview`.
+         */
         get: {
             parameters: {
-                query?: never;
-                header?: never;
+                query?: {
+                    /**
+                     * @description Mês de referência no formato YYYY-MM
+                     * @example 2026-03
+                     */
+                    month?: string;
+                };
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Dashboard mensal legado */
+                200: {
+                    headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /dashboard/overview
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example GET
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "balance": 1800,
+                         *         "counts": {
+                         *           "expense_transactions": 10,
+                         *           "income_transactions": 4,
+                         *           "total_transactions": 14
+                         *         },
+                         *         "expense_total": 3200,
+                         *         "income_total": 5000,
+                         *         "month": "2026-03"
+                         *       },
+                         *       "message": "Dashboard mensal retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetro inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Parâmetro 'month' inválido. Use o formato YYYY-MM.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao calcular dashboard mensal",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -494,29 +3168,136 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Listar transações deletadas
+         * @description Lista a lixeira de transações deletadas do usuário.
+         */
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Lista de transações deletadas */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "items": [
+                         *           {
+                         *             "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *             "amount": "150.00",
+                         *             "bank_name": null,
+                         *             "created_at": "2026-03-01T10:00:00+00:00",
+                         *             "credit_card_id": null,
+                         *             "currency": "BRL",
+                         *             "description": "Fatura mensal de energia",
+                         *             "due_date": "2026-03-10",
+                         *             "end_date": null,
+                         *             "external_id": null,
+                         *             "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *             "installment_count": null,
+                         *             "installment_group_id": null,
+                         *             "is_installment": false,
+                         *             "is_recurring": false,
+                         *             "observation": "Pagar antes do dia 10",
+                         *             "paid_at": null,
+                         *             "source": "manual",
+                         *             "start_date": null,
+                         *             "status": "pending",
+                         *             "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *             "title": "Conta de luz",
+                         *             "type": "expense",
+                         *             "updated_at": "2026-03-01T10:00:00+00:00"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Lista de transações deletadas"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao listar transações deletadas",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -528,29 +3309,175 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Listar vencimentos por período
+         * @description Lista vencimentos (receitas + despesas) por período com paginação, contadores e ordenação por vencimento.
+         */
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Lista de vencimentos */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "counts": {
+                         *           "expense_transactions": 10,
+                         *           "income_transactions": 4,
+                         *           "total_transactions": 14
+                         *         },
+                         *         "items": [
+                         *           {
+                         *             "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *             "amount": "150.00",
+                         *             "bank_name": null,
+                         *             "created_at": "2026-03-01T10:00:00+00:00",
+                         *             "credit_card_id": null,
+                         *             "currency": "BRL",
+                         *             "description": "Fatura mensal de energia",
+                         *             "due_date": "2026-03-10",
+                         *             "end_date": null,
+                         *             "external_id": null,
+                         *             "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *             "installment_count": null,
+                         *             "installment_group_id": null,
+                         *             "is_installment": false,
+                         *             "is_recurring": false,
+                         *             "observation": "Pagar antes do dia 10",
+                         *             "paid_at": null,
+                         *             "source": "manual",
+                         *             "start_date": null,
+                         *             "status": "pending",
+                         *             "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *             "title": "Conta de luz",
+                         *             "type": "expense",
+                         *             "updated_at": "2026-03-01T10:00:00+00:00"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Lista de vencimentos retornada com sucesso",
+                         *       "meta": {
+                         *         "pagination": {
+                         *           "page": 1,
+                         *           "pages": 2,
+                         *           "per_page": 10,
+                         *           "total": 14
+                         *         }
+                         *       }
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Parâmetros de período inválidos.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao listar vencimentos",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -562,29 +3489,195 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Listar despesas por período (compatibilidade)
+         * @description Compatibilidade transitória para despesas por período. Prefira `GET /transactions?type=expense&start_date=...&end_date=...`.
+         */
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Lista de despesas */
+                200: {
+                    headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /transactions
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example GET
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "counts": {
+                         *           "expense_transactions": 10,
+                         *           "income_transactions": 4,
+                         *           "total_transactions": 14
+                         *         },
+                         *         "expenses": [
+                         *           {
+                         *             "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *             "amount": "150.00",
+                         *             "bank_name": null,
+                         *             "created_at": "2026-03-01T10:00:00+00:00",
+                         *             "credit_card_id": null,
+                         *             "currency": "BRL",
+                         *             "description": "Fatura mensal de energia",
+                         *             "due_date": "2026-03-10",
+                         *             "end_date": null,
+                         *             "external_id": null,
+                         *             "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *             "installment_count": null,
+                         *             "installment_group_id": null,
+                         *             "is_installment": false,
+                         *             "is_recurring": false,
+                         *             "observation": "Pagar antes do dia 10",
+                         *             "paid_at": null,
+                         *             "source": "manual",
+                         *             "start_date": null,
+                         *             "status": "pending",
+                         *             "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *             "title": "Conta de luz",
+                         *             "type": "expense",
+                         *             "updated_at": "2026-03-01T10:00:00+00:00"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Lista de despesas por período",
+                         *       "meta": {
+                         *         "pagination": {
+                         *           "page": 1,
+                         *           "pages": 2,
+                         *           "per_page": 10,
+                         *           "total": 14
+                         *         }
+                         *       }
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Parâmetros de período inválidos.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao listar despesas por período",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -596,29 +3689,164 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Listar transações (compatibilidade /transactions/list)
+         * @description Compatibilidade transitória para listagem de transações ativas. Prefira `GET /transactions`.
+         */
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Lista de transações (compatibilidade transitória) */
+                200: {
+                    headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /transactions
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example GET
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "items": [
+                         *           {
+                         *             "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *             "amount": "150.00",
+                         *             "bank_name": null,
+                         *             "created_at": "2026-03-01T10:00:00+00:00",
+                         *             "credit_card_id": null,
+                         *             "currency": "BRL",
+                         *             "description": "Fatura mensal de energia",
+                         *             "due_date": "2026-03-10",
+                         *             "end_date": null,
+                         *             "external_id": null,
+                         *             "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *             "installment_count": null,
+                         *             "installment_group_id": null,
+                         *             "is_installment": false,
+                         *             "is_recurring": false,
+                         *             "observation": "Pagar antes do dia 10",
+                         *             "paid_at": null,
+                         *             "source": "manual",
+                         *             "start_date": null,
+                         *             "status": "pending",
+                         *             "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *             "title": "Conta de luz",
+                         *             "type": "expense",
+                         *             "updated_at": "2026-03-01T10:00:00+00:00"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Lista de transações retornada com sucesso",
+                         *       "meta": {
+                         *         "pagination": {
+                         *           "page": 1,
+                         *           "pages": 2,
+                         *           "per_page": 10,
+                         *           "total": 14
+                         *         }
+                         *       }
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao listar transações",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -634,30 +3862,163 @@ export interface paths {
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path: {
-                    transaction_id: string;
-                };
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
+        /**
+         * Restaurar transação deletada
+         * @description Restaura uma transação deletada logicamente.
+         */
         patch: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path: {
+                    /**
+                     * @description ID da transação
+                     * @example cfef66a6-a148-49db-a72f-cc63b6080cf8
+                     */
                     transaction_id: string;
                 };
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Transação restaurada */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transaction": {
+                         *           "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *           "amount": "150.00",
+                         *           "bank_name": null,
+                         *           "created_at": "2026-03-01T10:00:00+00:00",
+                         *           "credit_card_id": null,
+                         *           "currency": "BRL",
+                         *           "description": "Fatura mensal de energia",
+                         *           "due_date": "2026-03-10",
+                         *           "end_date": null,
+                         *           "external_id": null,
+                         *           "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *           "installment_count": null,
+                         *           "installment_group_id": null,
+                         *           "is_installment": false,
+                         *           "is_recurring": false,
+                         *           "observation": "Pagar antes do dia 10",
+                         *           "paid_at": null,
+                         *           "source": "manual",
+                         *           "start_date": null,
+                         *           "status": "pending",
+                         *           "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *           "title": "Conta de luz",
+                         *           "type": "expense",
+                         *           "updated_at": "2026-03-01T10:00:00+00:00"
+                         *         }
+                         *       },
+                         *       "message": "Transação restaurada com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Transação não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Transação não encontrada",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao restaurar transação",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         trace?: never;
     };
@@ -668,29 +4029,178 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Obter resumo mensal de transações
+         * @description Resumo mensal de receitas, despesas e itens paginados por mês.
+         */
         get: {
             parameters: {
-                query?: never;
-                header?: never;
+                query?: {
+                    /**
+                     * @description Mês de referência no formato YYYY-MM
+                     * @example 2026-03
+                     */
+                    month?: string;
+                };
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Resumo mensal */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "expense_total": 3200,
+                         *         "income_total": 5000,
+                         *         "month": "2026-03",
+                         *         "transactions": [
+                         *           {
+                         *             "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *             "amount": "150.00",
+                         *             "bank_name": null,
+                         *             "created_at": "2026-03-01T10:00:00+00:00",
+                         *             "credit_card_id": null,
+                         *             "currency": "BRL",
+                         *             "description": "Fatura mensal de energia",
+                         *             "due_date": "2026-03-10",
+                         *             "end_date": null,
+                         *             "external_id": null,
+                         *             "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *             "installment_count": null,
+                         *             "installment_group_id": null,
+                         *             "is_installment": false,
+                         *             "is_recurring": false,
+                         *             "observation": "Pagar antes do dia 10",
+                         *             "paid_at": null,
+                         *             "source": "manual",
+                         *             "start_date": null,
+                         *             "status": "pending",
+                         *             "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *             "title": "Conta de luz",
+                         *             "type": "expense",
+                         *             "updated_at": "2026-03-01T10:00:00+00:00"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Resumo mensal retornado com sucesso",
+                         *       "meta": {
+                         *         "pagination": {
+                         *           "page": 1,
+                         *           "per_page": 10,
+                         *           "total": 14
+                         *         }
+                         *       }
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetro inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Parâmetro 'month' inválido. Use o formato YYYY-MM.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao calcular resumo mensal",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         put?: never;
         post?: never;
         delete?: never;
-        options: {
-            parameters: {
-                query?: never;
-                header?: never;
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: never;
-        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -702,46 +4212,806 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /**
+         * Obter detalhe de transação
+         * @description Retorna o detalhe canônico de uma transação do usuário.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path: {
+                    /**
+                     * @description ID da transação
+                     * @example cfef66a6-a148-49db-a72f-cc63b6080cf8
+                     */
+                    transaction_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Detalhe da transação */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transaction": {
+                         *           "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *           "amount": "150.00",
+                         *           "bank_name": null,
+                         *           "created_at": "2026-03-01T10:00:00+00:00",
+                         *           "credit_card_id": null,
+                         *           "currency": "BRL",
+                         *           "description": "Fatura mensal de energia",
+                         *           "due_date": "2026-03-10",
+                         *           "end_date": null,
+                         *           "external_id": null,
+                         *           "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *           "installment_count": null,
+                         *           "installment_group_id": null,
+                         *           "is_installment": false,
+                         *           "is_recurring": false,
+                         *           "observation": "Pagar antes do dia 10",
+                         *           "paid_at": null,
+                         *           "source": "manual",
+                         *           "start_date": null,
+                         *           "status": "pending",
+                         *           "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *           "title": "Conta de luz",
+                         *           "type": "expense",
+                         *           "updated_at": "2026-03-01T10:00:00+00:00"
+                         *         }
+                         *       },
+                         *       "message": "Detalhe da transação retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "FORBIDDEN",
+                         *       "message": "Sem permissão",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Transação não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Transação não encontrada",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao carregar transação",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        /**
+         * Atualizar transação (compatibilidade PUT)
+         * @description Compatibilidade transitória para update parcial. Prefira `PATCH /transactions/{transaction_id}`.
+         */
         put: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path: {
+                    /**
+                     * @description ID da transação
+                     * @example cfef66a6-a148-49db-a72f-cc63b6080cf8
+                     */
                     transaction_id: string;
                 };
                 cookie?: never;
             };
-            requestBody?: never;
-            responses: never;
+            requestBody: {
+                content: {
+                    /**
+                     * @description Campos parciais a serem atualizados.
+                     * @example {
+                     *       "paid_at": "2026-03-10T12:00:00+00:00",
+                     *       "status": "paid"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["TransactionCreate_7d3b606eab"];
+                };
+            };
+            responses: {
+                /** @description Transação atualizada (compatibilidade transitória) */
+                200: {
+                    headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /transactions/{transaction_id}
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example PATCH
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transaction": {
+                         *           "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *           "amount": "150.00",
+                         *           "bank_name": null,
+                         *           "created_at": "2026-03-01T10:00:00+00:00",
+                         *           "credit_card_id": null,
+                         *           "currency": "BRL",
+                         *           "description": "Fatura mensal de energia",
+                         *           "due_date": "2026-03-10",
+                         *           "end_date": null,
+                         *           "external_id": null,
+                         *           "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *           "installment_count": null,
+                         *           "installment_group_id": null,
+                         *           "is_installment": false,
+                         *           "is_recurring": false,
+                         *           "observation": "Pagar antes do dia 10",
+                         *           "paid_at": null,
+                         *           "source": "manual",
+                         *           "start_date": null,
+                         *           "status": "paid",
+                         *           "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *           "title": "Conta de luz",
+                         *           "type": "expense",
+                         *           "updated_at": "2026-03-01T10:00:00+00:00"
+                         *         }
+                         *       },
+                         *       "message": "Transação atualizada com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Erro de validação",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "FORBIDDEN",
+                         *       "message": "Sem permissão",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Transação não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Transação não encontrada",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao atualizar transação",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         post?: never;
+        /**
+         * Remover transação logicamente
+         * @description Realiza soft delete de uma transação do usuário autenticado.
+         */
         delete: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path: {
+                    /**
+                     * @description ID da transação
+                     * @example cfef66a6-a148-49db-a72f-cc63b6080cf8
+                     */
                     transaction_id: string;
                 };
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Transação deletada */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transaction_id": "cfef66a6-a148-49db-a72f-cc63b6080cf8"
+                         *       },
+                         *       "message": "Transação deletada com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "FORBIDDEN",
+                         *       "message": "Sem permissão",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Transação não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Transação não encontrada",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao deletar transação",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
-        options: {
+        options?: never;
+        head?: never;
+        /**
+         * Atualizar transação parcialmente
+         * @description Atualiza parcialmente uma transação existente. Este é o contrato canônico de update do MVP1.
+         */
+        patch: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path: {
+                    /**
+                     * @description ID da transação
+                     * @example cfef66a6-a148-49db-a72f-cc63b6080cf8
+                     */
                     transaction_id: string;
                 };
                 cookie?: never;
             };
-            requestBody?: never;
-            responses: never;
+            requestBody: {
+                content: {
+                    /**
+                     * @description Campos parciais a serem atualizados.
+                     * @example {
+                     *       "paid_at": "2026-03-10T12:00:00+00:00",
+                     *       "status": "paid"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["TransactionCreate_7d3b606eab"];
+                };
+            };
+            responses: {
+                /** @description Transação atualizada */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transaction": {
+                         *           "account_id": "2d16ea71-b7ae-4da7-adc4-e93e54cd52cb",
+                         *           "amount": "150.00",
+                         *           "bank_name": null,
+                         *           "created_at": "2026-03-01T10:00:00+00:00",
+                         *           "credit_card_id": null,
+                         *           "currency": "BRL",
+                         *           "description": "Fatura mensal de energia",
+                         *           "due_date": "2026-03-10",
+                         *           "end_date": null,
+                         *           "external_id": null,
+                         *           "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *           "installment_count": null,
+                         *           "installment_group_id": null,
+                         *           "is_installment": false,
+                         *           "is_recurring": false,
+                         *           "observation": "Pagar antes do dia 10",
+                         *           "paid_at": null,
+                         *           "source": "manual",
+                         *           "start_date": null,
+                         *           "status": "paid",
+                         *           "tag_id": "73c3b094-60bf-45d5-8e32-0f673b2ab4a2",
+                         *           "title": "Conta de luz",
+                         *           "type": "expense",
+                         *           "updated_at": "2026-03-01T10:00:00+00:00"
+                         *         }
+                         *       },
+                         *       "message": "Transação atualizada com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Erro de validação",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "FORBIDDEN",
+                         *       "message": "Sem permissão",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Transação não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Transação não encontrada",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao atualizar transação",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/transactions/{transaction_id}/force": {
@@ -754,30 +5024,319 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
+        /**
+         * Remover transação permanentemente
+         * @description Remove permanentemente uma transação já deletada logicamente.
+         */
         delete: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path: {
+                    /**
+                     * @description ID da transação
+                     * @example cfef66a6-a148-49db-a72f-cc63b6080cf8
+                     */
                     transaction_id: string;
                 };
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Transação removida permanentemente */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transaction_id": "cfef66a6-a148-49db-a72f-cc63b6080cf8"
+                         *       },
+                         *       "message": "Transação removida permanentemente"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Transação não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Transação não encontrada",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao remover transação",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
-        options: {
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/bootstrap": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Obter bootstrap da home do usuário
+         * @description Retorna o bootstrap explícito da home do usuário autenticado.
+         *
+         *     Ownership:
+         *     - `/user/me` (`v3`) = contexto autenticado canônico
+         *     - `/transactions` = coleção e filtros completos
+         *     - `/wallet` = coleção canônica de carteira
+         *     - `/user/bootstrap` = agregado leve para reduzir round-trips na home
+         *
+         *     O bootstrap não substitui endpoints canônicos de coleção e expõe apenas previews recentes de transações e carteira.
+         */
+        get: {
             parameters: {
                 query?: never;
-                header?: never;
-                path: {
-                    transaction_id: string;
+                header?: {
+                    /**
+                     * @description Opcional. Recomendado enviar `v2` ou `v3` para o envelope padronizado.
+                     * @example v3
+                     */
+                    "X-API-Contract"?: string;
                 };
+                path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Bootstrap retornado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "transactions_preview": {
+                         *           "has_more": false,
+                         *           "items": [
+                         *             {
+                         *               "amount": "150.00",
+                         *               "id": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+                         *               "status": "pending",
+                         *               "title": "Conta de luz",
+                         *               "type": "expense"
+                         *             }
+                         *           ],
+                         *           "limit": 5,
+                         *           "returned_items": 1
+                         *         },
+                         *         "user": {
+                         *           "financial_profile": {
+                         *             "initial_investment": 200,
+                         *             "investment_goal_date": "2026-12-31",
+                         *             "monthly_expenses": 500,
+                         *             "monthly_income_net": 1000,
+                         *             "monthly_investment": 100,
+                         *             "net_worth": 2000
+                         *           },
+                         *           "identity": {
+                         *             "email": "italo@email.com",
+                         *             "id": "4b2ef64b-b35d-4ea2-a6f2-4ef3cfb295f1",
+                         *             "name": "Italo"
+                         *           },
+                         *           "investor_profile": {
+                         *             "declared": "conservador",
+                         *             "financial_objectives": "crescer",
+                         *             "quiz_score": 8,
+                         *             "suggested": "moderado",
+                         *             "taxonomy_version": "2026.1"
+                         *           },
+                         *           "product_context": {
+                         *             "entitlements_version": 3
+                         *           },
+                         *           "profile": {
+                         *             "birth_date": "1990-01-01",
+                         *             "gender": "outro",
+                         *             "occupation": "Founder",
+                         *             "state_uf": "SP"
+                         *           }
+                         *         },
+                         *         "wallet": {
+                         *           "has_more": true,
+                         *           "items": [
+                         *             {
+                         *               "asset_class": "cash",
+                         *               "id": "wallet-1",
+                         *               "name": "Caixa",
+                         *               "quantity": 1,
+                         *               "value": 100
+                         *             }
+                         *           ],
+                         *           "limit": 5,
+                         *           "returned_items": 1,
+                         *           "total": 8
+                         *         }
+                         *       },
+                         *       "message": "Bootstrap do usuário retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Parâmetros do bootstrap inválidos.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token inválido ou expirado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -789,29 +5348,255 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Obter contexto do usuário autenticado
+         * @description Retorna o contexto do usuário autenticado.
+         *
+         *     Uso recomendado:
+         *     - `X-API-Contract: v3` para o contrato canônico e leve
+         *     - `/user/bootstrap` para agregado da home
+         *     - `/transactions` para coleção paginada e filtros
+         *
+         *     Legado:
+         *     - `v1`/`v2` ainda aceitam paginação e filtros de coleção
+         *     - respostas legadas enviam headers de deprecação e sunset
+         */
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. `v2` mantém o shape legado padronizado; `v3` publica o contrato canônico sem coleções.
+                     * @example v3
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Contexto autenticado retornado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "user": {
+                         *           "financial_profile": {
+                         *             "initial_investment": 200,
+                         *             "investment_goal_date": "2026-12-31",
+                         *             "monthly_expenses": 500,
+                         *             "monthly_income_net": 1000,
+                         *             "monthly_investment": 100,
+                         *             "net_worth": 2000
+                         *           },
+                         *           "identity": {
+                         *             "email": "italo@auraxis.com.br",
+                         *             "id": "4b2ef64b-b35d-4ea2-a6f2-4ef3cfb295f1",
+                         *             "name": "Italo Chagas"
+                         *           },
+                         *           "investor_profile": {
+                         *             "declared": "conservador",
+                         *             "financial_objectives": "crescer",
+                         *             "quiz_score": 8,
+                         *             "suggested": "moderado",
+                         *             "taxonomy_version": "2026.1"
+                         *           },
+                         *           "product_context": {
+                         *             "entitlements_version": 3
+                         *           },
+                         *           "profile": {
+                         *             "birth_date": "1990-01-01",
+                         *             "gender": "outro",
+                         *             "occupation": "Founder",
+                         *             "state_uf": "SP"
+                         *           }
+                         *         }
+                         *       },
+                         *       "message": "Contexto autenticado retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido, expirado ou revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
         put?: never;
         post?: never;
-        delete?: never;
-        options: {
+        /**
+         * Excluir conta do usuário (LGPD)
+         * @description Anonimiza permanentemente todos os dados pessoais do usuário autenticado (soft-delete LGPD). Requer confirmação de senha.
+         *
+         *     Após a exclusão:
+         *     - Todos os campos de PII são anonimizados
+         *     - O JWT é revogado (sessão encerrada)
+         *     - O usuário não consegue mais fazer login
+         *
+         *     Esta ação é irreversível.
+         */
+        delete: {
             parameters: {
                 query?: never;
                 header?: never;
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
-            responses: never;
+            requestBody: {
+                content: {
+                    /**
+                     * @description Senha atual do usuário para confirmar a exclusão.
+                     * @example {
+                     *       "password": "MinhaSenha@123"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_user_schemas_DeleteAccountSchema"];
+                };
+            };
+            responses: {
+                /** @description Conta excluída com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "Account deleted."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido ou expirado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Senha incorreta */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INVALID_CREDENTIALS",
+                         *       "message": "Invalid credentials.",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Campo 'password' ausente ou inválido */
+                422: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Validation error",
+                         *       "status_code": 422
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -823,29 +5608,590 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
+        /**
+         * Obter perfil reduzido do usuário
+         * @description Retorna o perfil reduzido do usuário autenticado (sem transações e sem carteira).
+         */
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Perfil retornado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "user": {
+                         *           "email": "italo@auraxis.com.br",
+                         *           "id": "4b2ef64b-b35d-4ea2-a6f2-4ef3cfb295f1",
+                         *           "investor_profile": "conservador",
+                         *           "monthly_income_net": "5000.00",
+                         *           "name": "Italo Chagas"
+                         *         }
+                         *       },
+                         *       "message": "Perfil retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Usuário não encontrado */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Usuário não encontrado",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
+        /**
+         * Atualizar perfil do usuário
+         * @description Atualiza o perfil do usuário autenticado.
+         *
+         *     Campos aceitos:
+         *     - gender: 'masculino', 'feminino', 'outro'
+         *     - birth_date: 'YYYY-MM-DD'
+         *     - monthly_income, net_worth, monthly_expenses, initial_investment,
+         *       monthly_investment: decimal
+         *     - investment_goal_date: 'YYYY-MM-DD'
+         *     - investor_profile: 'conservador', 'explorador', 'entusiasta'
+         *
+         *     Exemplo de request:
+         *     {
+         *       'gender': 'masculino',
+         *       'birth_date': '1990-05-15',
+         *       'monthly_income': '5000.00',
+         *       'net_worth': '100000.00',
+         *       'monthly_expenses': '2000.00',
+         *       'initial_investment': '10000.00',
+         *       'monthly_investment': '500.00',
+         *       'investment_goal_date': '2025-12-31',
+         *       'investor_profile': 'conservador'
+         *     }
+         *
+         *     Exemplo de resposta:
+         *     { 'message': 'Perfil atualizado com sucesso', 'data': { ...dados do usuário... } }
+         */
         put: {
             parameters: {
                 query?: never;
-                header?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    /**
+                     * @description Campos parciais do perfil financeiro e investidor.
+                     * @example {
+                     *       "birth_date": "1990-05-15",
+                     *       "gender": "masculino",
+                     *       "investor_profile": "conservador",
+                     *       "monthly_expenses": "2000.00",
+                     *       "monthly_income_net": "5000.00",
+                     *       "net_worth": "100000.00",
+                     *       "occupation": "Founder",
+                     *       "state_uf": "SP"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_user_schemas_UserProfileSchema"];
+                };
+            };
+            responses: {
+                /** @description Perfil atualizado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "user": {
+                         *           "id": "4b2ef64b-b35d-4ea2-a6f2-4ef3cfb295f1",
+                         *           "investor_profile": "conservador",
+                         *           "monthly_expenses": "2000.00",
+                         *           "monthly_income_net": "5000.00"
+                         *         }
+                         *       },
+                         *       "message": "Perfil atualizado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Erro de validação",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Usuário não encontrado */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Usuário não encontrado",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro ao atualizar perfil */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao atualizar perfil",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/profile/questionnaire": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar questionário de perfil de investidor
+         * @description Retorna as 5 perguntas do questionário de perfil de investidor.
+         *
+         *     Cada pergunta contém 3 opções com pontuações de 1 a 3.
+         *     Envie os pontos via POST para receber o perfil sugerido.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
                 path?: never;
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Lista de perguntas retornada com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "questions": [
+                         *           {
+                         *             "options": [
+                         *               {
+                         *                 "points": 1,
+                         *                 "text": "Preservar capital"
+                         *               },
+                         *               {
+                         *                 "points": 2,
+                         *                 "text": "Crescer com equilíbrio"
+                         *               },
+                         *               {
+                         *                 "points": 3,
+                         *                 "text": "Maximizar retorno"
+                         *               }
+                         *             ],
+                         *             "question": "Qual é o seu principal objetivo ao investir?"
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Questionário retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido, expirado ou revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
         };
-        post?: never;
+        put?: never;
+        /**
+         * Responder questionário de perfil de investidor
+         * @description Submete as respostas do questionário e classifica o perfil de investidor.
+         *
+         *     Envie exatamente 5 respostas, cada uma com os pontos da opção escolhida (1–3).
+         *
+         *     Perfis possíveis:
+         *     - **conservador** — score ≤ 7
+         *     - **explorador**  — score de 8 a 11
+         *     - **entusiasta**  — score ≥ 12
+         *
+         *     O resultado é persistido no perfil do usuário autenticado.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    /**
+                     * @description Lista de 5 respostas, cada uma entre 1 e 3 pontos.
+                     * @example {
+                     *       "answers": [
+                     *         1,
+                     *         2,
+                     *         2,
+                     *         3,
+                     *         1
+                     *       ]
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_user_schemas_QuestionnaireAnswerSchema"];
+                };
+            };
+            responses: {
+                /** @description Perfil sugerido calculado e persistido */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "score": 9,
+                         *         "suggested_profile": "explorador"
+                         *       },
+                         *       "message": "Perfil sugerido calculado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Número de respostas inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INVALID_ANSWER_COUNT",
+                         *       "message": "O questionário exige exatamente 5 respostas.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token inválido, expirado ou revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Payload inválido */
+                422: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "details": {
+                         *         "answers": [
+                         *           "Missing data for required field."
+                         *         ]
+                         *       },
+                         *       "message": "Dados inválidos",
+                         *       "status_code": 422
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
         delete?: never;
-        options: {
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/user/simulate-salary-increase": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Simula o aumento salarial e recomposição da inflação. */
+        post: {
             parameters: {
                 query?: never;
                 header?: never;
@@ -853,8 +6199,32 @@ export interface paths {
                 cookie?: never;
             };
             requestBody?: never;
-            responses: never;
+            responses: {
+                /** @description Simulação realizada com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Erro de validação */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido ou expirado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
         };
+        delete?: never;
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -1077,9 +6447,19 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
                     finalDate?: string;
                     /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
+                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    end_date?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `start_date`.
+                     */
                     startDate?: string;
                 };
                 header?: {
@@ -1094,6 +6474,26 @@ export interface paths {
                 /** @description Histórico retornado com sucesso */
                 200: {
                     headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Mensagem adicional de deprecação enviada em runtime.
+                         * @example 299 - "Query params startDate/finalDate are deprecated; use start_date/end_date"
+                         */
+                        Warning?: string;
+                        /**
+                         * @description Campo recomendado para a migração do payload.
+                         * @example start_date,end_date
+                         */
+                        "X-Auraxis-Successor-Field"?: string;
                         [name: string]: unknown;
                     };
                     content?: never;
@@ -1121,9 +6521,19 @@ export interface paths {
         options: {
             parameters: {
                 query?: {
-                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
                     finalDate?: string;
                     /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
+                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    end_date?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `start_date`.
+                     */
                     startDate?: string;
                 };
                 header?: {
@@ -1138,6 +6548,26 @@ export interface paths {
                 /** @description Histórico retornado com sucesso */
                 200: {
                     headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Mensagem adicional de deprecação enviada em runtime.
+                         * @example 299 - "Query params startDate/finalDate are deprecated; use start_date/end_date"
+                         */
+                        Warning?: string;
+                        /**
+                         * @description Campo recomendado para a migração do payload.
+                         * @example start_date,end_date
+                         */
+                        "X-Auraxis-Successor-Field"?: string;
                         [name: string]: unknown;
                     };
                     content?: never;
@@ -1169,8 +6599,53 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
-        /** @description Atualiza um investimento existente da carteira do usuário. */
+        /** @description Retorna o detalhe canônico de um investimento específico da carteira do usuário autenticado. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description Opcional. Envie 'v2' para o contrato padronizado. */
+                    "X-API-Contract"?: string;
+                };
+                path: {
+                    /** @description ID do investimento */
+                    investment_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Investimento retornado com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Investimento não encontrado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        /** @description Compatibilidade transitória para atualização parcial de investimento. Use `PATCH /wallet/{investment_id}` como método canônico. */
         put: {
             parameters: {
                 query?: never;
@@ -1189,6 +6664,26 @@ export interface paths {
                 /** @description Investimento atualizado com sucesso */
                 200: {
                     headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /wallet/{investment_id}
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example PATCH
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
                         [name: string]: unknown;
                     };
                     content?: never;
@@ -1263,8 +6758,75 @@ export interface paths {
                 };
             };
         };
-        /** @description Atualiza um investimento existente da carteira do usuário. */
+        /** @description Compatibilidade transitória para atualização parcial de investimento. Use `PATCH /wallet/{investment_id}` como método canônico. */
         options: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description Opcional. Envie 'v2' para o contrato padronizado. */
+                    "X-API-Contract"?: string;
+                };
+                path: {
+                    /** @description ID do investimento */
+                    investment_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Investimento atualizado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Indica que a superfície atual está em deprecação.
+                         * @example true
+                         */
+                        Deprecation?: string;
+                        /**
+                         * @description Data prevista para remoção da superfície legada.
+                         * @example Tue, 30 Jun 2026 23:59:59 GMT
+                         */
+                        Sunset?: string;
+                        /**
+                         * @description Endpoint sucessor recomendado.
+                         * @example /wallet/{investment_id}
+                         */
+                        "X-Auraxis-Successor-Endpoint"?: string;
+                        /**
+                         * @description Método HTTP recomendado para a superfície sucessora.
+                         * @example PATCH
+                         */
+                        "X-Auraxis-Successor-Method"?: string;
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Investimento não encontrado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        head?: never;
+        /** @description Atualiza parcialmente um investimento existente da carteira do usuário. Este é o método canônico para alterações parciais. */
+        patch: {
             parameters: {
                 query?: never;
                 header?: {
@@ -1309,8 +6871,6 @@ export interface paths {
                 };
             };
         };
-        head?: never;
-        patch?: never;
         trace?: never;
     };
     "/wallet/{investment_id}/history": {
@@ -1936,10 +7496,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID da operação */
-                    operation_id: string;
                     /** @description ID do investimento */
                     investment_id: string;
+                    /** @description ID da operação */
+                    operation_id: string;
                 };
                 cookie?: never;
             };
@@ -1992,10 +7552,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID da operação */
-                    operation_id: string;
                     /** @description ID do investimento */
                     investment_id: string;
+                    /** @description ID da operação */
+                    operation_id: string;
                 };
                 cookie?: never;
             };
@@ -2040,10 +7600,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID da operação */
-                    operation_id: string;
                     /** @description ID do investimento */
                     investment_id: string;
+                    /** @description ID da operação */
+                    operation_id: string;
                 };
                 cookie?: never;
             };
@@ -2199,7 +7759,560 @@ export interface paths {
 }
 export type webhooks = Record<string, never>;
 export interface components {
-    schemas: never;
+    schemas: {
+        InstallmentVsCashCalculation: {
+            cash_price: number;
+            /** @default false */
+            fees_enabled: boolean;
+            /** @default 0.00 */
+            fees_upfront: number;
+            /** @default 30 */
+            first_payment_delay_days: number;
+            inflation_rate_annual: number;
+            /** @default null */
+            installment_amount: number | null;
+            installment_count: number;
+            /** @default null */
+            installment_total: number | null;
+            /** @default null */
+            opportunity_rate_annual: number | null;
+            /**
+             * @default manual
+             * @enum {string}
+             */
+            opportunity_rate_type: "manual" | "product_default" | "inflation_only";
+            /** @default null */
+            scenario_label: string | null;
+        };
+        InstallmentVsCashGoalBridge: {
+            /** @default planned_purchase */
+            category: string | null;
+            /** @default 0.00 */
+            current_amount: number;
+            /** @default null */
+            description: string | null;
+            /** @default 3 */
+            priority: number;
+            /** @enum {string} */
+            selected_option: "cash" | "installment";
+            /**
+             * Format: date
+             * @default null
+             */
+            target_date: string | null;
+            title: string;
+        };
+        InstallmentVsCashPlannedExpenseBridge: {
+            /**
+             * Format: uuid
+             * @default null
+             */
+            account_id: string | null;
+            /**
+             * Format: uuid
+             * @default null
+             */
+            credit_card_id: string | null;
+            /** @default BRL */
+            currency: string;
+            /** @default null */
+            description: string | null;
+            /**
+             * Format: date
+             * @default null
+             */
+            due_date: string | null;
+            /**
+             * Format: date
+             * @default null
+             */
+            first_due_date: string | null;
+            /** @default null */
+            observation: string | null;
+            /** @enum {string} */
+            selected_option: "cash" | "installment";
+            /**
+             * @default pending
+             * @enum {string}
+             */
+            status: "pending" | "paid" | "cancelled" | "postponed" | "overdue";
+            /**
+             * Format: uuid
+             * @default null
+             */
+            tag_id: string | null;
+            title: string;
+            /**
+             * Format: date
+             * @default null
+             */
+            upfront_due_date: string | null;
+        };
+        InstallmentVsCashSave: {
+            cash_price: number;
+            /** @default false */
+            fees_enabled: boolean;
+            /** @default 0.00 */
+            fees_upfront: number;
+            /** @default 30 */
+            first_payment_delay_days: number;
+            inflation_rate_annual: number;
+            /** @default null */
+            installment_amount: number | null;
+            installment_count: number;
+            /** @default null */
+            installment_total: number | null;
+            /** @default null */
+            opportunity_rate_annual: number | null;
+            /**
+             * @default manual
+             * @enum {string}
+             */
+            opportunity_rate_type: "manual" | "product_default" | "inflation_only";
+            /** @default null */
+            scenario_label: string | null;
+        };
+        TransactionCreate: {
+            /**
+             * Format: uuid
+             * @description ID da conta bancária associada
+             */
+            account_id?: string | null;
+            /**
+             * @description Valor da transação
+             * @example 150.50
+             */
+            amount: number;
+            /**
+             * Format: date-time
+             * @description Data de criação da transação
+             */
+            readonly created_at?: string;
+            /**
+             * Format: uuid
+             * @description ID do cartão de crédito associado
+             */
+            credit_card_id?: string | null;
+            /**
+             * @description Código da moeda (ISO 4217)
+             * @example BRL
+             */
+            currency?: string;
+            /**
+             * @description Descrição detalhada da transação
+             * @default null
+             * @example Conta de energia elétrica do mês de janeiro
+             */
+            description: string | null;
+            /**
+             * Format: date
+             * @description Data de vencimento da transação
+             * @example 2024-02-15
+             */
+            due_date: string;
+            /**
+             * Format: date
+             * @description Data de fim (para transações recorrentes)
+             * @default null
+             * @example 2024-12-31
+             */
+            end_date: string | null;
+            /**
+             * Format: uuid
+             * @description ID único da transação (gerado automaticamente)
+             */
+            readonly id?: string;
+            /**
+             * @description Número de parcelas (apenas se is_installment=True)
+             * @example 12
+             */
+            installment_count?: number;
+            /**
+             * Format: uuid
+             * @description ID do grupo de parcelas (gerado automaticamente)
+             */
+            readonly installment_group_id?: string;
+            /**
+             * @description Indica se a transação é parcelada
+             * @example false
+             */
+            is_installment?: boolean;
+            /**
+             * @description Indica se a transação é recorrente
+             * @example false
+             */
+            is_recurring?: boolean;
+            /**
+             * @description Observações adicionais sobre a transação
+             * @default null
+             * @example Pagar até o dia 10 para evitar multa
+             */
+            observation: string | null;
+            /**
+             * Format: date-time
+             * @description Data e hora do pagamento
+             * @example 2024-02-10T14:30:00Z
+             */
+            paid_at?: string | null;
+            /**
+             * Format: date
+             * @description Data de início (para transações recorrentes)
+             * @default null
+             * @example 2024-01-01
+             */
+            start_date: string | null;
+            /**
+             * @description Status atual da transação
+             * @example pending
+             * @enum {string}
+             */
+            status?: "paid" | "pending" | "cancelled" | "postponed" | "overdue";
+            /**
+             * Format: uuid
+             * @description ID da tag associada à transação
+             */
+            tag_id?: string | null;
+            /**
+             * @description Título da transação
+             * @example Pagamento da conta de luz
+             */
+            title: string;
+            /**
+             * @description Tipo da transação: receita ou despesa
+             * @example expense
+             * @enum {string}
+             */
+            type: "income" | "expense";
+            /**
+             * Format: date-time
+             * @description Data da última atualização
+             */
+            readonly updated_at?: string;
+            /**
+             * Format: uuid
+             * @description ID do usuário proprietário da transação
+             */
+            readonly user_id?: string;
+        };
+        TransactionCreate_7d3b606eab: {
+            /**
+             * Format: uuid
+             * @description ID da conta bancária associada
+             */
+            account_id?: string | null;
+            /**
+             * @description Valor da transação
+             * @example 150.50
+             */
+            amount?: number;
+            /**
+             * Format: date-time
+             * @description Data de criação da transação
+             */
+            readonly created_at?: string;
+            /**
+             * Format: uuid
+             * @description ID do cartão de crédito associado
+             */
+            credit_card_id?: string | null;
+            /**
+             * @description Código da moeda (ISO 4217)
+             * @example BRL
+             */
+            currency?: string;
+            /**
+             * @description Descrição detalhada da transação
+             * @default null
+             * @example Conta de energia elétrica do mês de janeiro
+             */
+            description: string | null;
+            /**
+             * Format: date
+             * @description Data de vencimento da transação
+             * @example 2024-02-15
+             */
+            due_date?: string;
+            /**
+             * Format: date
+             * @description Data de fim (para transações recorrentes)
+             * @default null
+             * @example 2024-12-31
+             */
+            end_date: string | null;
+            /**
+             * Format: uuid
+             * @description ID único da transação (gerado automaticamente)
+             */
+            readonly id?: string;
+            /**
+             * @description Número de parcelas (apenas se is_installment=True)
+             * @example 12
+             */
+            installment_count?: number;
+            /**
+             * Format: uuid
+             * @description ID do grupo de parcelas (gerado automaticamente)
+             */
+            readonly installment_group_id?: string;
+            /**
+             * @description Indica se a transação é parcelada
+             * @example false
+             */
+            is_installment?: boolean;
+            /**
+             * @description Indica se a transação é recorrente
+             * @example false
+             */
+            is_recurring?: boolean;
+            /**
+             * @description Observações adicionais sobre a transação
+             * @default null
+             * @example Pagar até o dia 10 para evitar multa
+             */
+            observation: string | null;
+            /**
+             * Format: date-time
+             * @description Data e hora do pagamento
+             * @example 2024-02-10T14:30:00Z
+             */
+            paid_at?: string | null;
+            /**
+             * Format: date
+             * @description Data de início (para transações recorrentes)
+             * @default null
+             * @example 2024-01-01
+             */
+            start_date: string | null;
+            /**
+             * @description Status atual da transação
+             * @example pending
+             * @enum {string}
+             */
+            status?: "paid" | "pending" | "cancelled" | "postponed" | "overdue";
+            /**
+             * Format: uuid
+             * @description ID da tag associada à transação
+             */
+            tag_id?: string | null;
+            /**
+             * @description Título da transação
+             * @example Pagamento da conta de luz
+             */
+            title?: string;
+            /**
+             * @description Tipo da transação: receita ou despesa
+             * @example expense
+             * @enum {string}
+             */
+            type?: "income" | "expense";
+            /**
+             * Format: date-time
+             * @description Data da última atualização
+             */
+            readonly updated_at?: string;
+            /**
+             * Format: uuid
+             * @description ID do usuário proprietário da transação
+             */
+            readonly user_id?: string;
+        };
+        app_schemas_auth_schema_AuthSchema: {
+            /**
+             * @description Token Cloudflare Turnstile obtido pelo cliente. Obrigatório quando CAPTCHA está habilitado no servidor.
+             * @default null
+             * @example captcha-token-example
+             */
+            captcha_token: string | null;
+            /**
+             * Format: email
+             * @description Endereço de email do usuário (identificador canônico)
+             * @example joao.silva@email.com
+             */
+            email: string;
+            /**
+             * @description Senha do usuário
+             * @example minhasenha123
+             */
+            password: string;
+        };
+        app_schemas_auth_schema_ConfirmEmailSchema: {
+            /**
+             * @description Token de confirmacao recebido por email
+             * @example example-token
+             */
+            token: string;
+        };
+        app_schemas_auth_schema_ForgotPasswordSchema: {
+            /**
+             * Format: email
+             * @description Email da conta que deseja recuperar acesso
+             * @example joao.silva@email.com
+             */
+            email: string;
+        };
+        app_schemas_auth_schema_ResetPasswordSchema: {
+            /**
+             * @description Nova senha (mínimo 10 caracteres, com maiúscula, número e símbolo)
+             * @example NovaSenha@123
+             */
+            new_password: string;
+            /**
+             * @description Token de recuperação recebido por email
+             * @example example-token
+             */
+            token: string;
+        };
+        app_schemas_user_schemas_DeleteAccountSchema: {
+            /**
+             * @description Senha atual do usuário para confirmar a exclusão da conta
+             * @example MinhaSenha@123
+             */
+            password: string;
+        };
+        app_schemas_user_schemas_QuestionnaireAnswerSchema: {
+            /** @description Lista de 5 respostas — pontos da opção escolhida em cada pergunta (1–3). */
+            answers: number[];
+        };
+        app_schemas_user_schemas_SalaryIncreaseSimulationRequestSchema: {
+            /**
+             * Format: date
+             * @description Data base do salário atual
+             * @example 2022-01-01
+             */
+            base_date: string;
+            /**
+             * @description Salário base atual
+             * @example 5000.00
+             */
+            base_salary: number;
+            /**
+             * @description Descontos aplicáveis
+             * @example 500.00
+             */
+            discounts: number;
+            /**
+             * @description Aumento real desejado (%)
+             * @example 5.00
+             */
+            target_real_increase: number;
+        };
+        app_schemas_user_schemas_UserProfileSchema: {
+            /**
+             * Format: date
+             * @description Data de nascimento
+             * @example 1990-05-15
+             */
+            birth_date?: string;
+            /**
+             * @description Objetivos financeiros do usuário
+             * @example Aposentar cedo
+             */
+            financial_objectives?: string;
+            /**
+             * @description Gênero do usuário
+             * @example masculino
+             * @enum {string}
+             */
+            gender?: "masculino" | "feminino" | "outro";
+            /**
+             * @description Investimento inicial disponível
+             * @example 10000.00
+             */
+            initial_investment?: number;
+            /**
+             * Format: date
+             * @description Data meta para atingir objetivo de investimento
+             * @example 2030-12-31
+             */
+            investment_goal_date?: string;
+            /**
+             * @description Perfil do investidor
+             * @example conservador
+             * @enum {string}
+             */
+            investor_profile?: "conservador" | "explorador" | "entusiasta";
+            /**
+             * @description Perfil de investidor sugerido
+             * @example explorador
+             */
+            investor_profile_suggested?: string | null;
+            /**
+             * @description Gastos mensais totais
+             * @example 3000.00
+             */
+            monthly_expenses?: number;
+            /**
+             * @description Renda mensal em reais
+             * @example 5000.00
+             */
+            monthly_income?: number;
+            /**
+             * @description Renda líquida mensal em reais
+             * @example 5000.00
+             */
+            monthly_income_net?: number;
+            /**
+             * @description Valor mensal para investimentos
+             * @example 1000.00
+             */
+            monthly_investment?: number;
+            /**
+             * @description Patrimônio líquido atual
+             * @example 50000.00
+             */
+            net_worth?: number;
+            /**
+             * @description Profissão do usuário
+             * @example Engenheiro de Software
+             */
+            occupation?: string;
+            /**
+             * @description Pontuação do quiz de perfil
+             * @example 85
+             */
+            profile_quiz_score?: number | null;
+            /**
+             * @description Estado (UF) do usuário
+             * @example SP
+             */
+            state_uf?: string;
+            /**
+             * @description Versão da taxonomia
+             * @example v1.0
+             */
+            taxonomy_version?: string | null;
+        };
+        app_schemas_user_schemas_UserRegistrationSchema: {
+            /**
+             * @description Token Cloudflare Turnstile obtido pelo cliente. Obrigatório quando CAPTCHA está habilitado no servidor.
+             * @default null
+             * @example captcha-token-example
+             */
+            captcha_token: string | null;
+            /**
+             * Format: email
+             * @description Endereço de email único do usuário
+             * @example joao.silva@email.com
+             */
+            email: string;
+            /**
+             * @description Perfil do investidor auto declarado
+             * @example conservador
+             * @enum {string|null}
+             */
+            investor_profile?: "conservador" | "explorador" | "entusiasta" | null;
+            /**
+             * @description Nome completo do usuário
+             * @example João Silva
+             */
+            name: string;
+            /**
+             * @description Senha do usuário (mínimo 10 caracteres, contendo ao menos uma letra maiúscula, um número e um símbolo)
+             * @example MinhaSenha@123
+             */
+            password: string;
+        };
+    };
     responses: never;
     parameters: never;
     requestBodies: never;

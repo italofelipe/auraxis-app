@@ -11,7 +11,14 @@ import type {
   UserBootstrap,
   UserBootstrapQuery,
 } from "@/features/bootstrap/contracts";
-import type { DashboardOverview } from "@/features/dashboard/contracts";
+import type {
+  DashboardOverview,
+  DashboardTrends,
+} from "@/features/dashboard/contracts";
+import type {
+  EntitlementCheckQuery,
+  EntitlementCheckResult,
+} from "@/features/entitlements/contracts";
 import type { GoalListResponse } from "@/features/goals/contracts";
 import type {
   ObservabilityMetricsSnapshot,
@@ -145,6 +152,16 @@ export const apiContractMap = {
     path: "/dashboard/overview",
     authRequired: true,
   }),
+  dashboardTrends: defineApiContract<
+    "GET",
+    "/dashboard/trends",
+    never,
+    DashboardTrends
+  >({
+    method: "GET",
+    path: "/dashboard/trends",
+    authRequired: true,
+  }),
   goalsList: defineApiContract<"GET", "/goals", never, GoalListResponse>({
     method: "GET",
     path: "/goals",
@@ -158,6 +175,26 @@ export const apiContractMap = {
   alertsList: defineApiContract<"GET", "/alerts", never, AlertListResponse>({
     method: "GET",
     path: "/alerts",
+    authRequired: true,
+  }),
+  alertsMarkRead: defineApiContract<
+    "POST",
+    "/alerts/{alertId}/read",
+    never,
+    void
+  >({
+    method: "POST",
+    path: "/alerts/{alertId}/read",
+    authRequired: true,
+  }),
+  alertsDelete: defineApiContract<
+    "DELETE",
+    "/alerts/{alertId}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/alerts/{alertId}",
     authRequired: true,
   }),
   alertPreferences: defineApiContract<
@@ -178,6 +215,17 @@ export const apiContractMap = {
   >({
     method: "PUT",
     path: "/alerts/preferences/{category}",
+    authRequired: true,
+  }),
+  entitlementsCheck: defineApiContract<
+    "GET",
+    "/entitlements/check",
+    never,
+    EntitlementCheckResult,
+    EntitlementCheckQuery
+  >({
+    method: "GET",
+    path: "/entitlements/check",
     authRequired: true,
   }),
   subscriptionPlans: defineApiContract<

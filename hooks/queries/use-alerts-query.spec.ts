@@ -3,15 +3,15 @@ import type { AlertsResponse } from "@/types/contracts";
 import { useAlertsQuery } from "@/hooks/queries/use-alerts-query";
 
 const mockUseQuery = jest.fn();
-const mockGetAlerts = jest.fn();
+const mockListAlerts = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
   useQuery: (...args: readonly unknown[]) => mockUseQuery(...args),
 }));
 
-jest.mock("@/lib/alerts-api", () => ({
-  alertsApi: {
-    getAlerts: (...args: readonly unknown[]) => mockGetAlerts(...args),
+jest.mock("@/features/alerts/services/alerts-service", () => ({
+  alertsService: {
+    listAlerts: (...args: readonly unknown[]) => mockListAlerts(...args),
   },
 }));
 
@@ -25,7 +25,7 @@ describe("useAlertsQuery", () => {
 
   it("propagates error when backend fails", async () => {
     const expectedError = new Error("backend unavailable");
-    mockGetAlerts.mockRejectedValue(expectedError);
+    mockListAlerts.mockRejectedValue(expectedError);
 
     const query = useAlertsQuery() as unknown as {
       readonly queryFn: () => Promise<AlertsResponse>;

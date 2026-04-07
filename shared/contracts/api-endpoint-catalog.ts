@@ -67,10 +67,13 @@ export const apiEndpointCatalog = {
   ],
   alerts: [
     "GET /alerts",
-    "POST /alerts/{alert_id}/read",
-    "DELETE /alerts/{alert_id}",
+    "POST /alerts/{alertId}/read",
+    "DELETE /alerts/{alertId}",
     "GET /alerts/preferences",
     "PUT /alerts/preferences/{category}",
+  ],
+  entitlements: [
+    "GET /entitlements/check",
   ],
   subscriptions: [
     "GET /subscriptions/plans",

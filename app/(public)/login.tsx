@@ -13,7 +13,7 @@ import {
 import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
 import { useLoginForm } from "@/hooks/forms/use-login-form";
 import { useLoginMutation } from "@/hooks/mutations/use-auth-mutations";
-import { PRIVACY_URL, TERMS_URL } from "@/lib/web-urls";
+import { PRIVACY_URL, TERMS_URL } from "@/shared/config/web-urls";
 
 const styles = StyleSheet.create({
   card: {

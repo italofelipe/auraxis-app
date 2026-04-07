@@ -5,7 +5,7 @@ import { LoadingSkeleton } from "@/components/ui/loading-skeleton";
 import { ScreenContainer } from "@/components/ui/screen-container";
 import { borderWidths, colorPalette, fontSizes, radii, spacing, typography } from "@/config/design-tokens";
 import { useSubscriptionQuery } from "@/hooks/queries/use-subscription-query";
-import { MANAGE_SUBSCRIPTION_URL } from "@/lib/web-urls";
+import { MANAGE_SUBSCRIPTION_URL } from "@/shared/config/web-urls";
 
 const styles = StyleSheet.create({
   card: {
