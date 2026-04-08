@@ -5,6 +5,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { initSentry } from "@/app/services/sentry";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useSessionStore } from "@/core/session/session-store";
+import { appLogger } from "@/core/telemetry/app-logger";
 import {
   resetAppStartupRuntimeForTests,
   useAppStartup,
@@ -16,6 +17,12 @@ jest.mock("expo-font", () => ({
 
 jest.mock("@/app/services/sentry", () => ({
   initSentry: jest.fn(),
+}));
+
+jest.mock("@/core/telemetry/app-logger", () => ({
+  appLogger: {
+    info: jest.fn(),
+  },
 }));
 
 jest.mock("expo-splash-screen", () => ({
@@ -67,6 +74,14 @@ describe("useAppStartup", () => {
       expect(useAppShellStore.getState().fontsReady).toBe(true);
       expect(useAppShellStore.getState().startupReady).toBe(true);
       expect(initSentry).toHaveBeenCalled();
+      expect(appLogger.info).toHaveBeenCalledWith({
+        domain: "startup",
+        event: "startup.ready",
+        context: {
+          fontsLoaded: true,
+          hydrated: true,
+        },
+      });
       expect(bootstrapSession).toHaveBeenCalledTimes(1);
       expect(SplashScreen.preventAutoHideAsync).toHaveBeenCalled();
       expect(SplashScreen.hideAsync).toHaveBeenCalled();

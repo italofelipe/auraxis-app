@@ -238,6 +238,74 @@
 - endureci o gate local do app para esse recorte, incluindo os arquivos novos no [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/jest.config.js), de forma que coverage baixa dos domínios novos falhe localmente antes do CI;
 - adicionei cobertura de services/hooks para todos os domínios novos, incluindo casos de fallback, paginação, envelopes de mutação e invalidação de cache.
 
+---
+
+## Update - APP FND-05B (completion)
+
+### O que foi feito
+- consolidei a trilha canônica de telemetria cliente em [`core/telemetry`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/telemetry), com:
+  - logger redigido em [`app-logger.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/telemetry/app-logger.ts);
+  - sanitização centralizada em [`sanitization.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/telemetry/sanitization.ts);
+  - breadcrumbs de navegação em [`use-navigation-telemetry.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/telemetry/use-navigation-telemetry.ts);
+- endureci a integração com Sentry em [`app/services/sentry.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/app/services/sentry.ts), garantindo:
+  - `breadcrumb` e `captureException` só quando o runtime estiver ativo;
+  - redaction de `Authorization`, `Cookie`, `X-Observability-Key` e URLs com `token`;
+  - silêncio em Jest para evitar ruído falso de runtime;
+- instrumentei o ciclo do app e do runtime em:
+  - [`core/shell/use-app-startup.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/shell/use-app-startup.ts)
+  - [`core/shell/use-runtime-lifecycle.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/shell/use-runtime-lifecycle.ts)
+  - [`core/providers/runtime-provider.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/providers/runtime-provider.tsx)
+- instrumentei o cliente HTTP em [`core/http/http-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/http/http-client.ts), com:
+  - logs de início, sucesso e falha de request;
+  - sanitização de paths/query params sensíveis;
+  - invalidação de sessão acompanhada de contexto estruturado;
+- alinhei a governança local para falhar cedo antes do CI:
+  - baseline de coverage em [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/jest.config.js);
+  - baseline do Sonar em [`sonar-project.properties`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/sonar-project.properties);
+  - mock canônico do Sentry em [`__mocks__/sentryReactNativeMock.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/__mocks__/sentryReactNativeMock.ts) para estabilizar a suíte inteira;
+- ampliei a cobertura de observabilidade em:
+  - [`core/telemetry/app-logger.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/telemetry/app-logger.test.ts)
+  - [`core/telemetry/sanitization.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/telemetry/sanitization.test.ts)
+  - [`core/telemetry/use-navigation-telemetry.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/telemetry/use-navigation-telemetry.test.tsx)
+  - [`__tests__/services/sentry.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/__tests__/services/sentry.test.ts)
+  - [`core/http/http-client.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/http/http-client.test.ts)
+  - [`core/shell/use-app-startup.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/shell/use-app-startup.test.tsx)
+  - [`core/shell/use-runtime-lifecycle.base.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-05b-client-observability/core/shell/use-runtime-lifecycle.base.test.tsx)
+
+### O que foi validado
+- `npx jest core/telemetry/app-logger.test.ts core/telemetry/sanitization.test.ts core/telemetry/use-navigation-telemetry.test.tsx __tests__/services/sentry.test.ts core/http/http-client.test.ts core/shell/use-app-startup.test.tsx core/shell/use-runtime-lifecycle.base.test.tsx --runInBand`
+- `npx jest features/fiscal/services/fiscal-service.test.ts features/shared-entries/services/shared-entries-service.test.ts features/transactions/services/transactions-service.test.ts features/tools/services/installment-vs-cash-service.test.ts features/user-profile/services/user-profile-service.test.ts core/shell/use-runtime-lifecycle.edge.test.tsx features/questionnaire/services/questionnaire-service.test.ts --runInBand`
+- `npm run policy:check`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- a telemetria cliente agora está forte o suficiente para erros, breadcrumbs e lifecycle, mas ainda falta a camada de reachability/degraded mode do `FND-05C`;
+- `app/(private)/ferramentas.tsx` e `app/(private)/installment-vs-cash.tsx` seguem fora da baseline de coverage, então o próximo endurecimento de performance/view deve continuar aumentando a cobertura dessas telas;
+- o runtime ainda depende apenas de Sentry e do snapshot `/ops/*`; não há analytics comportamental nem release health mais avançado, o que é aceitável para o budget atual, mas precisa continuar deliberado.
+
+### Feedback rápido
+1. O que funcionou bem
+   - a arquitetura nova absorveu observabilidade transversal sem reintroduzir legado;
+   - o desenho `core/telemetry` + adapter em `app/services/sentry.ts` ficou simples e previsível.
+2. O que deu errado
+   - o SDK do Sentry escapou para a suíte global e quebrou o Jest por ESM;
+   - a cobertura global de branches ficou abaixo do threshold até testarmos os novos ramos de logger/sanitização.
+3. O que manter
+   - falhar cedo com `policy:check`, `typecheck` e suítes direcionadas antes do `quality-check`;
+   - espelhar `collectCoverageFrom` no Sonar para evitar drift de cobertura.
+4. O que mudar no próximo bloco
+   - começar `FND-05C` já com testes direcionados de reachability/degraded state e fallback operacional;
+   - tratar logs/observabilidade como parte do runtime, não como detalhe opcional.
+5. Riscos imediatos
+   - sem `FND-05C`, o app ainda observa bem falhas, mas não reage de forma explícita a rede ruim/offline.
+
+### Proximo passo
+- seguir para `APP FND-05C`, fechando reachability, degraded states, retry policy por domínio e fallback operacional de checkout/navegação;
+- manter `FND-00` aberto até `FND-05C`, `FND-06A` e `FND-06B` concluírem a fundação antes da primeira feature real.
+
 ### O que foi validado
 - `npm run typecheck`
 - `npx jest features/transactions/services/transactions-service.test.ts features/transactions/hooks/use-transactions-query.test.ts features/user-profile/services/user-profile-service.test.ts features/user-profile/hooks/use-user-profile-query.test.ts features/questionnaire/services/questionnaire-service.test.ts features/questionnaire/hooks/use-questionnaire-query.test.ts features/shared-entries/services/shared-entries-service.test.ts features/shared-entries/hooks/use-shared-entries-query.test.ts features/fiscal/services/fiscal-service.test.ts features/fiscal/hooks/use-fiscal-query.test.ts --runInBand`

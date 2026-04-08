@@ -1,6 +1,12 @@
 import * as Sentry from "@sentry/react-native";
 
-import { initSentry, sanitizeSentryEvent } from "@/app/services/sentry";
+import {
+  captureSentryException,
+  initSentry,
+  recordSentryBreadcrumb,
+  resetSentryRuntimeForTests,
+  sanitizeSentryEvent,
+} from "@/app/services/sentry";
 
 const expoConfigMock = {
   extra: {} as Record<string, unknown>,
@@ -14,15 +20,20 @@ jest.mock("expo-constants", () => ({
 }));
 
 jest.mock("@sentry/react-native", () => ({
+  addBreadcrumb: jest.fn(),
+  captureException: jest.fn(),
   init: jest.fn(),
   wrap: jest.fn((component) => component),
 }));
 
+const mockAddBreadcrumb = Sentry.addBreadcrumb as jest.Mock;
+const mockCaptureException = Sentry.captureException as jest.Mock;
 const mockSentryInit = Sentry.init as jest.Mock;
 
 describe("initSentry", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    resetSentryRuntimeForTests();
     expoConfigMock.extra = {};
   });
 
@@ -97,5 +108,62 @@ describe("initSentry", () => {
       "X-Observability-Key": "<redacted>",
       Cookie: "<redacted>",
     });
+  });
+
+  it("nao registra breadcrumb quando o sentry ainda nao foi inicializado", () => {
+    recordSentryBreadcrumb({
+      category: "runtime",
+      message: "runtime.started",
+      level: "info",
+      data: {
+        token: "secret",
+      },
+    });
+
+    expect(mockAddBreadcrumb).not.toHaveBeenCalled();
+  });
+
+  it("registra breadcrumb sanitizado quando o sentry esta ativo", () => {
+    expoConfigMock.extra = {
+      sentryDsn: "https://test-dsn@o0.ingest.sentry.io/0",
+      appEnv: "production",
+    };
+    initSentry();
+
+    recordSentryBreadcrumb({
+      category: "network",
+      message: "network.request_failed",
+      level: "warn",
+      data: {
+        accessToken: "secret-token",
+        url: "auraxisapp://assinatura?token=checkout-secret",
+      },
+    });
+
+    expect(mockAddBreadcrumb).toHaveBeenCalledWith({
+      category: "network",
+      message: "network.request_failed",
+      level: "warning",
+      data: {
+        accessToken: "<redacted>",
+        url: "auraxisapp://assinatura?token=%3Credacted%3E",
+      },
+    });
+  });
+
+  it("captura excecao somente quando o sentry esta ativo", () => {
+    captureSentryException(new Error("noop"));
+    expect(mockCaptureException).not.toHaveBeenCalled();
+
+    expoConfigMock.extra = {
+      sentryDsn: "https://test-dsn@o0.ingest.sentry.io/0",
+      appEnv: "production",
+    };
+    initSentry();
+
+    const error = new Error("boom");
+    captureSentryException(error);
+
+    expect(mockCaptureException).toHaveBeenCalledWith(error);
   });
 });
