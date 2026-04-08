@@ -240,6 +240,47 @@
 
 ---
 
+## Update - APP FND-06A (completion)
+
+### O que foi feito
+- refatorei a infraestrutura canônica de `QueryClient` em [`core/query/query-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/core/query/query-client.ts), introduzindo:
+  - `createAppQueryClient()` para runtime;
+  - modo de teste sem retry e sem timers de garbage collection;
+- expus a factory no compat layer em [`config/query-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/config/query-client.ts);
+- criei a base de teste isolada em:
+  - [`shared/testing/test-query-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/shared/testing/test-query-client.ts)
+  - [`shared/testing/test-providers.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/shared/testing/test-providers.tsx)
+- fiz `TestProviders` instanciar `QueryClient` próprio por render e limpar o cache no unmount;
+- adicionei `createTestHookWrapper()` e migrei os testes de lifecycle para essa trilha canônica em:
+  - [`core/shell/use-runtime-lifecycle.base.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/core/shell/use-runtime-lifecycle.base.test.tsx)
+  - [`core/shell/use-runtime-lifecycle.edge.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/core/shell/use-runtime-lifecycle.edge.test.tsx)
+- endureci o setup global do Jest em [`jest.setup.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/jest.setup.ts) com:
+  - `cleanup()` após cada teste;
+  - `jest.useRealTimers()` após cada teste;
+  - limpeza/restauração global de mocks;
+- subi cobertura nova para a infraestrutura de testes em:
+  - [`core/query/query-client.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/core/query/query-client.test.ts)
+  - [`shared/testing/test-providers.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/shared/testing/test-providers.test.tsx)
+- alinhei [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/jest.config.js) e [`sonar-project.properties`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/sonar-project.properties) para incluir essa fundação no baseline governado.
+
+### O que foi validado
+- `npx jest core/query/query-client.test.ts shared/testing/test-providers.test.tsx core/shell/use-runtime-lifecycle.base.test.tsx core/shell/use-runtime-lifecycle.edge.test.tsx components/providers/app-providers.test.tsx --runInBand`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run policy:check`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o warning residual de worker forçado a encerrar não reapareceu no `quality-check` deste bloco, mas ainda vale monitorar o CI para confirmar que o comportamento também ficou estável no runner do GitHub;
+- `AppProviders` de runtime continua usando o `queryClient` singleton de produção, o que é correto para o app; qualquer uso em testes deve continuar preferindo `TestProviders` e wrappers canônicos;
+- o próximo bloco (`FND-06B`) ainda precisa atacar `Node LTS`, budget de bundle/release e readiness operacional final do app.
+
+### Proximo passo
+- seguir para `APP FND-06B`, consolidando `Node LTS`, performance/release-readiness e os últimos guardrails antes da primeira feature real.
+
+---
+
 ## Update - APP FND-05C (completion)
 
 ### O que foi feito

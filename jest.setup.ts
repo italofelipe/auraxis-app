@@ -3,6 +3,8 @@
  * Executado após o framework Jest ser inicializado, antes de cada suite de testes.
  */
 
+import { cleanup } from "@testing-library/react-native";
+
 // Estende matchers do Jest com matchers específicos para React Native
 // Ex: expect(element).toBeVisible(), expect(element).toHaveText('...')
 import '@testing-library/jest-native/extend-expect'
@@ -38,10 +40,9 @@ jest.mock('expo-constants', () => ({
   },
 }))
 
-// Silencia logs desnecessários durante testes
-beforeAll(() => {
-  const originalWarn = console.warn.bind(console)
+const originalWarn = console.warn.bind(console)
 
+beforeEach(() => {
   jest.spyOn(console, 'warn').mockImplementation((...args) => {
     const [msg] = args
 
@@ -51,6 +52,9 @@ beforeAll(() => {
   })
 })
 
-afterAll(() => {
+afterEach(() => {
+  cleanup()
+  jest.useRealTimers()
+  jest.clearAllMocks()
   jest.restoreAllMocks()
 })
