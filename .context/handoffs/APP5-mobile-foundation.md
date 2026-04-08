@@ -408,3 +408,50 @@
 - validação adicional executada:
   - `node scripts/check-sonar-config-governance.cjs`
   - `npm run policy:check`
+
+---
+
+## Update - APP FND-05A
+
+### O que foi feito
+- endureci a política de sessão do app com metadados explícitos de autenticação e expiração em [`core/session/types.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/session/types.ts), [`core/session/session-policy.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/session/session-policy.ts), [`core/session/session-storage.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/session/session-storage.ts) e [`core/session/session-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/session/session-store.ts), incluindo:
+  - `authenticatedAt` e `expiresAt`;
+  - razões canônicas de invalidação (`manual`, `expired`, `unauthorized`, `forbidden`, `bootstrap-invalid`);
+  - bootstrap com migração canônica do legado e invalidação determinística de payload inválido/expirado;
+  - marcação de sessão validada sem resetar autenticação;
+- endureci o runtime HTTP em [`core/http/api-error.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/http/api-error.ts) e [`core/http/http-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/http/http-client.ts):
+  - erro Axios sem `response` agora gera payload sanitizado, sem vazar config/headers;
+  - request interceptor invalida sessão expirada localmente antes de sair para a rede;
+  - response interceptor derruba sessão apenas em `401/403` autenticado, com reason canônica;
+  - `/ops/*` passou a usar `observabilityExportPublicKey`, deixando claro que essa superfície é pública e não segredo real;
+- sanitizei URLs e superfícies sensíveis de deep link/runtime em [`core/navigation/deep-linking.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/navigation/deep-linking.ts) e [`core/shell/use-runtime-lifecycle.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/shell/use-runtime-lifecycle.ts), removendo exposição de `token`, `checkout_token`, `access_token` e `refresh_token` de URLs armazenadas em memória e do retorno de checkout;
+- alinhei a revalidação de runtime em [`core/shell/runtime-revalidation.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/shell/runtime-revalidation.ts) para marcar sessões validadas e invalidá-las com razão correta;
+- endureci a sanitização do Sentry em [`app/services/sentry.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/app/services/sentry.ts), redigindo:
+  - `user.email`;
+  - `user.ip_address`;
+  - `Authorization`, `Cookie` e `X-Observability-Key`;
+  - URLs com query sensível;
+- explicitei a configuração pública de runtime em [`shared/config/runtime.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/shared/config/runtime.ts), com `sessionExpiryLeewayMs` e `observabilityExportPublicKey`;
+- subi cobertura adicional e gates locais para esse recorte com:
+  - [`core/session/session-policy.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/session/session-policy.test.ts)
+  - [`core/session/session-storage.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/session/session-storage.test.ts)
+  - [`core/session/session-store.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/session/session-store.test.ts)
+  - [`core/http/api-error.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/http/api-error.test.ts)
+  - ampliação de [`core/http/http-client.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/http/http-client.test.ts), [`core/navigation/deep-linking.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/navigation/deep-linking.test.ts), [`core/shell/runtime-revalidation.base.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/shell/runtime-revalidation.base.test.ts), [`core/shell/runtime-revalidation.errors.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/shell/runtime-revalidation.errors.test.ts), [`core/shell/use-runtime-lifecycle.base.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/core/shell/use-runtime-lifecycle.base.test.tsx) e [`__tests__/services/sentry.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/__tests__/services/sentry.test.ts);
+- atualizei [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/jest.config.js) e [`sonar-project.properties`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05a-auth-runtime-hardening/sonar-project.properties) para refletir a nova baseline coberta.
+
+### O que foi validado
+- `npx jest core/session/session-policy.test.ts core/session/session-store.test.ts core/http/http-client.test.ts core/navigation/deep-linking.test.ts core/shell/runtime-revalidation.base.test.ts core/shell/runtime-revalidation.errors.test.ts core/shell/use-runtime-lifecycle.base.test.tsx __tests__/services/sentry.test.ts --runInBand`
+- `npx jest core/session/session-storage.test.ts core/session/session-store.test.ts core/http/api-error.test.ts core/http/http-client.test.ts --runInBand`
+- `npm run typecheck`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o app ainda não possui política de refresh token/renovação ativa; este bloco endureceu invalidação, expiração local e sanitização, mas não introduziu refresh flow;
+- o token público de observabilidade continua necessariamente público (`EXPO_PUBLIC_*`), então essa superfície deve seguir tratada como chave de baixa confiança e protegida por escopo/allowlist no backend;
+- os testes de Sentry continuam emitindo `console.warn` quando o DSN está ausente em ambiente de teste; não quebra o gate, mas vale silenciar no próximo bloco de DX/observabilidade.
+
+### Proximo passo
+- seguir para `APP FND-05B`, criando logger cliente canônico, breadcrumbs e telemetria mínima de navegação/network/erro;
+- em seguida entrar em `APP FND-05C` para degraded states, offline/reachability, retry policy e confiabilidade operacional do runtime mobile.

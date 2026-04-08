@@ -2,7 +2,9 @@ import type { QueryClient } from "@tanstack/react-query";
 
 import { ApiError } from "@/core/http/api-error";
 import { queryKeys } from "@/core/query/query-keys";
+import { resolveSessionInvalidationReason } from "@/core/session/session-policy";
 import { useSessionStore } from "@/core/session/session-store";
+import type { SessionInvalidationReason } from "@/core/session/types";
 import type { UserBootstrap } from "@/features/bootstrap/contracts";
 import type { createBootstrapService } from "@/features/bootstrap/services/bootstrap-service";
 import type { SubscriptionState } from "@/features/subscription/contracts";
@@ -26,9 +28,10 @@ interface RuntimeRevalidationDependencies {
     ReturnType<typeof createSubscriptionService>,
     "getSubscription"
   >;
-  readonly signOut: () => Promise<void>;
+  readonly signOut: (reason?: SessionInvalidationReason) => Promise<void>;
   readonly setEntitlementsVersion: (value: number | null) => void;
   readonly recordForegroundSync: (timestamp: string) => void;
+  readonly markSessionValidated: (timestamp: string) => void;
 }
 
 const isAuthenticationFailure = (error: unknown): error is ApiError => {
@@ -90,6 +93,7 @@ const createSuccessResult = (
 ): RuntimeRevalidationResult => {
   dependencies.setEntitlementsVersion(entitlementsVersion);
   dependencies.recordForegroundSync(refreshedAt);
+  dependencies.markSessionValidated(refreshedAt);
   void dependencies.queryClient.invalidateQueries({
     queryKey: queryKeys.entitlements.root,
   });
@@ -104,8 +108,11 @@ const createSuccessResult = (
 const createAuthenticationFailureResult = async (
   dependencies: RuntimeRevalidationDependencies,
   refreshedAt: string,
+  error: ApiError,
 ): Promise<RuntimeRevalidationResult> => {
-  await dependencies.signOut();
+  await dependencies.signOut(
+    resolveSessionInvalidationReason(error.status) ?? "unauthorized",
+  );
   dependencies.setEntitlementsVersion(null);
   dependencies.recordForegroundSync(refreshedAt);
   clearAuthenticatedRuntimeCache(dependencies.queryClient);
@@ -146,7 +153,11 @@ export const createRuntimeRevalidationService = (
           throw error;
         }
 
-        return createAuthenticationFailureResult(dependencies, refreshedAt);
+        return createAuthenticationFailureResult(
+          dependencies,
+          refreshedAt,
+          error,
+        );
       }
     },
   };

@@ -28,7 +28,6 @@ export interface CheckoutReturnIntent {
   readonly provider: string | null;
   readonly planSlug: string | null;
   readonly externalReference: string | null;
-  readonly checkoutToken: string | null;
 }
 
 export type AppLinkIntent = RouteLinkIntent | CheckoutReturnIntent;
@@ -72,6 +71,29 @@ const readQueryValue = (
 ): QueryValue => {
   const value = searchParams.get(key);
   return typeof value === "string" && value.length > 0 ? value : null;
+};
+
+const SENSITIVE_QUERY_KEYS = new Set([
+  "token",
+  "checkout_token",
+  "access_token",
+  "refresh_token",
+]);
+
+export const sanitizeAppUrl = (rawUrl: string): string => {
+  try {
+    const url = new URL(rawUrl);
+
+    for (const key of SENSITIVE_QUERY_KEYS) {
+      if (url.searchParams.has(key)) {
+        url.searchParams.set(key, "<redacted>");
+      }
+    }
+
+    return url.toString();
+  } catch {
+    return rawUrl;
+  }
 };
 
 const normalizeCheckoutStatus = (
@@ -118,7 +140,7 @@ const buildCheckoutReturnIntent = (
   return {
     kind: "checkout-return",
     href,
-    rawUrl,
+    rawUrl: sanitizeAppUrl(rawUrl),
     status: normalizeCheckoutStatus(rawStatus),
     provider: readQueryValue(searchParams, "provider"),
     planSlug:
@@ -127,9 +149,6 @@ const buildCheckoutReturnIntent = (
     externalReference:
       readQueryValue(searchParams, "external_reference") ??
       readQueryValue(searchParams, "reference"),
-    checkoutToken:
-      readQueryValue(searchParams, "token") ??
-      readQueryValue(searchParams, "checkout_token"),
   };
 };
 
@@ -142,7 +161,7 @@ export const parseAppUrl = (rawUrl: string): AppLinkIntent | null => {
       return {
         kind: "route",
         href: appRoutes.root,
-        rawUrl,
+        rawUrl: sanitizeAppUrl(rawUrl),
       };
     }
 
@@ -154,7 +173,7 @@ export const parseAppUrl = (rawUrl: string): AppLinkIntent | null => {
       return {
         kind: "route",
         href: path,
-        rawUrl,
+        rawUrl: sanitizeAppUrl(rawUrl),
       };
     }
 

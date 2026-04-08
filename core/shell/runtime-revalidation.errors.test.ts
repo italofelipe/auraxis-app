@@ -56,6 +56,7 @@ describe("runtime revalidation service - error handling", () => {
       signOut,
       setEntitlementsVersion,
       recordForegroundSync,
+      markSessionValidated: jest.fn(),
     });
 
     const result = await service.revalidate("checkout-return");
@@ -93,6 +94,7 @@ describe("runtime revalidation service - error handling", () => {
       signOut: jest.fn().mockResolvedValue(undefined),
       setEntitlementsVersion: jest.fn(),
       recordForegroundSync: jest.fn(),
+      markSessionValidated: jest.fn(),
     });
 
     (queryClient.fetchQuery as jest.Mock).mockRejectedValue(

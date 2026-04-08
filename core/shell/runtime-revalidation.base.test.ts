@@ -51,6 +51,7 @@ const createService = (queryClient: QueryClient) => {
     signOut: jest.fn().mockResolvedValue(undefined),
     setEntitlementsVersion: jest.fn(),
     recordForegroundSync: jest.fn(),
+    markSessionValidated: jest.fn(),
   });
 };
 

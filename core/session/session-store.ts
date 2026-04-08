@@ -5,24 +5,40 @@ import {
   loadStoredSession,
   persistStoredSession,
 } from "@/core/session/session-storage";
-import type { SessionUser, StoredSession } from "@/core/session/types";
+import {
+  isStoredSessionExpired,
+  withSessionMetadata,
+} from "@/core/session/session-policy";
+import type {
+  SessionSeed,
+  SessionInvalidationReason,
+  SessionUser,
+  StoredSession,
+} from "@/core/session/types";
 
 interface SessionState {
   readonly accessToken: string | null;
   readonly refreshToken: string | null;
   readonly user: SessionUser | null;
   readonly userEmail: string | null;
+  readonly authenticatedAt: string | null;
+  readonly expiresAt: string | null;
+  readonly authFailureReason: SessionInvalidationReason | null;
+  readonly lastValidatedAt: string | null;
+  readonly lastInvalidatedAt: string | null;
   readonly hydrated: boolean;
   readonly isAuthenticated: boolean;
   bootstrapSession: () => Promise<void>;
   signIn: (
-    session: StoredSession | string,
+    session: SessionSeed | StoredSession | string,
     userEmail?: string,
     userName?: string,
   ) => Promise<void>;
   setSession: (session: StoredSession | null) => Promise<void>;
   updateUser: (user: SessionUser) => void;
-  signOut: () => Promise<void>;
+  markSessionValidated: (timestamp: string) => void;
+  invalidateSession: (reason: SessionInvalidationReason) => Promise<void>;
+  signOut: (reason?: SessionInvalidationReason) => Promise<void>;
 }
 
 const unauthenticatedState = {
@@ -30,17 +46,28 @@ const unauthenticatedState = {
   refreshToken: null,
   user: null,
   userEmail: null,
+  authenticatedAt: null,
+  expiresAt: null,
+  authFailureReason: null,
+  lastValidatedAt: null,
+  lastInvalidatedAt: null,
   hydrated: false,
   isAuthenticated: false,
 } as const;
 
 const toStoredSession = (
-  session: StoredSession | string,
+  session: SessionSeed | StoredSession | string,
   userEmail?: string,
   userName?: string,
 ): StoredSession => {
   if (typeof session !== "string") {
-    return session;
+    return {
+      accessToken: session.accessToken,
+      refreshToken: session.refreshToken,
+      user: session.user,
+      authenticatedAt: session.authenticatedAt ?? null,
+      expiresAt: session.expiresAt ?? null,
+    };
   }
 
   return {
@@ -52,6 +79,8 @@ const toStoredSession = (
       email: userEmail ?? "",
       emailConfirmed: false,
     },
+    authenticatedAt: null,
+    expiresAt: null,
   };
 };
 
@@ -68,8 +97,22 @@ const toState = (session: StoredSession | null): Partial<SessionState> => {
     refreshToken: session.refreshToken,
     user: session.user,
     userEmail: session.user.email,
+    authenticatedAt: session.authenticatedAt,
+    expiresAt: session.expiresAt,
+    authFailureReason: null,
     hydrated: true,
     isAuthenticated: true,
+  };
+};
+
+const createInvalidatedState = (
+  reason: SessionInvalidationReason,
+  timestamp: string,
+): Partial<SessionState> => {
+  return {
+    ...toState(null),
+    authFailureReason: reason,
+    lastInvalidatedAt: timestamp,
   };
 };
 
@@ -84,8 +127,30 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
     if (!bootstrapSessionPromise) {
       bootstrapSessionPromise = (async (): Promise<void> => {
-        const storedSession = await loadStoredSession();
-        set(toState(storedSession));
+        const loadedSession = await loadStoredSession();
+
+        if (loadedSession.source === "legacy" && loadedSession.session) {
+          await persistStoredSession(loadedSession.session);
+        }
+
+        if (
+          loadedSession.session &&
+          isStoredSessionExpired(loadedSession.session)
+        ) {
+          await clearStoredSession();
+          set(createInvalidatedState("expired", new Date().toISOString()));
+          return;
+        }
+
+        if (!loadedSession.session && loadedSession.invalidStoredPayload) {
+          await clearStoredSession();
+          set(
+            createInvalidatedState("bootstrap-invalid", new Date().toISOString()),
+          );
+          return;
+        }
+
+        set(toState(loadedSession.session));
       })().finally(() => {
         bootstrapSessionPromise = null;
       });
@@ -94,11 +159,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     await bootstrapSessionPromise;
   },
   signIn: async (
-    session: StoredSession | string,
+    session: SessionSeed | StoredSession | string,
     userEmail?: string,
     userName?: string,
   ): Promise<void> => {
-    const nextSession = toStoredSession(session, userEmail, userName);
+    const nextSession = withSessionMetadata(
+      toStoredSession(session, userEmail, userName),
+    );
     await persistStoredSession(nextSession);
     set(toState(nextSession));
   },
@@ -109,8 +176,9 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       return;
     }
 
-    await persistStoredSession(session);
-    set(toState(session));
+    const nextSession = withSessionMetadata(session);
+    await persistStoredSession(nextSession);
+    set(toState(nextSession));
   },
   updateUser: (user: SessionUser): void => {
     const state = get();
@@ -122,6 +190,8 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       accessToken: state.accessToken,
       refreshToken: state.refreshToken,
       user,
+      authenticatedAt: state.authenticatedAt,
+      expiresAt: state.expiresAt,
     };
 
     void persistStoredSession(nextSession);
@@ -130,8 +200,18 @@ export const useSessionStore = create<SessionState>((set, get) => ({
       userEmail: user.email,
     });
   },
-  signOut: async (): Promise<void> => {
+  markSessionValidated: (timestamp: string): void => {
+    set({
+      lastValidatedAt: timestamp,
+      authFailureReason: null,
+    });
+  },
+  invalidateSession: async (reason: SessionInvalidationReason): Promise<void> => {
+    const timestamp = new Date().toISOString();
     await clearStoredSession();
-    set(toState(null));
+    set(createInvalidatedState(reason, timestamp));
+  },
+  signOut: async (reason: SessionInvalidationReason = "manual"): Promise<void> => {
+    await get().invalidateSession(reason);
   },
 }));

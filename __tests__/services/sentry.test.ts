@@ -1,6 +1,17 @@
 import * as Sentry from "@sentry/react-native";
 
-import { initSentry } from "@/app/services/sentry";
+import { initSentry, sanitizeSentryEvent } from "@/app/services/sentry";
+
+const expoConfigMock = {
+  extra: {} as Record<string, unknown>,
+};
+
+jest.mock("expo-constants", () => ({
+  __esModule: true,
+  default: {
+    expoConfig: expoConfigMock,
+  },
+}));
 
 jest.mock("@sentry/react-native", () => ({
   init: jest.fn(),
@@ -12,60 +23,33 @@ const mockSentryInit = Sentry.init as jest.Mock;
 describe("initSentry", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    expoConfigMock.extra = {};
   });
 
   it("does nothing when DSN is empty", () => {
-    jest.mock("expo-constants", () => ({
-      default: {
-        expoConfig: {
-          extra: {
-            sentryDsn: "",
-            appEnv: "development",
-          },
-        },
-      },
-    }));
+    expoConfigMock.extra = {
+      sentryDsn: "",
+      appEnv: "development",
+    };
 
     expect(() => initSentry()).not.toThrow();
     expect(mockSentryInit).not.toHaveBeenCalled();
   });
 
   it("does nothing when DSN is undefined", () => {
-    jest.mock("expo-constants", () => ({
-      default: {
-        expoConfig: {
-          extra: {},
-        },
-      },
-    }));
+    expoConfigMock.extra = {};
 
     expect(() => initSentry()).not.toThrow();
     expect(mockSentryInit).not.toHaveBeenCalled();
   });
 
   it("calls Sentry.init when DSN is present", () => {
-    jest.doMock("expo-constants", () => ({
-      default: {
-        expoConfig: {
-          extra: {
-            sentryDsn: "https://test-dsn@o0.ingest.sentry.io/0",
-            appEnv: "production",
-          },
-        },
-      },
-    }));
+    expoConfigMock.extra = {
+      sentryDsn: "https://test-dsn@o0.ingest.sentry.io/0",
+      appEnv: "production",
+    };
 
-    // Re-import to pick up the new mock
-    jest.resetModules();
-
-    // Directly test Sentry.init with an explicit DSN
-    Sentry.init({
-      dsn: "https://test-dsn@o0.ingest.sentry.io/0",
-      environment: "production",
-      enabled: false,
-      tracesSampleRate: 0.2,
-      sendDefaultPii: false,
-    });
+    initSentry();
 
     expect(mockSentryInit).toHaveBeenCalledTimes(1);
     expect(mockSentryInit).toHaveBeenCalledWith(
@@ -86,5 +70,32 @@ describe("initSentry", () => {
     expect(consoleErrorSpy).not.toHaveBeenCalled();
 
     consoleErrorSpy.mockRestore();
+  });
+
+  it("redacts sensitive values before enviar eventos ao Sentry", () => {
+    const event = sanitizeSentryEvent({
+      user: {
+        email: "italo@auraxis.dev",
+        ip_address: "127.0.0.1",
+      },
+      request: {
+        url: "auraxisapp://assinatura?token=secret&status=paid",
+        headers: {
+          Authorization: "Bearer token",
+          "X-Observability-Key": "public-key",
+          Cookie: "session=abc",
+        },
+      },
+    } as unknown as Sentry.Event);
+
+    expect(event.user).toEqual({});
+    expect(event.request?.url).toBe(
+      "auraxisapp://assinatura?token=%3Credacted%3E&status=paid",
+    );
+    expect(event.request?.headers).toEqual({
+      Authorization: "<redacted>",
+      "X-Observability-Key": "<redacted>",
+      Cookie: "<redacted>",
+    });
   });
 });
