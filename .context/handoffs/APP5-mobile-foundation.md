@@ -279,3 +279,50 @@
 ### Proximo passo
 - seguir para `APP FND-03C`, extraindo controladores de screen e removendo a lógica restante de view para que `.tsx` virem somente composição;
 - depois abrir `APP FND-04A`, completando o scaffold dos domínios canônicos restantes do MVP1 antes da primeira feature real.
+
+---
+
+## Update - APP FND-03C
+
+### O que foi feito
+- extraí as rotas restantes para telas canônicas em `features/*/screens`, deixando `app/` apenas como ponto de entrada e composição mínima:
+  - [`features/auth/screens/login-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/auth/screens/login-screen.tsx)
+  - [`features/auth/screens/forgot-password-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/auth/screens/forgot-password-screen.tsx)
+  - [`features/dashboard/screens/dashboard-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/dashboard/screens/dashboard-screen.tsx)
+  - [`features/wallet/screens/wallet-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/wallet/screens/wallet-screen.tsx)
+  - [`features/subscription/screens/subscription-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/subscription/screens/subscription-screen.tsx)
+  - [`features/alerts/screens/alerts-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/alerts/screens/alerts-screen.tsx)
+  - [`features/tools/screens/tools-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/screens/tools-screen.tsx)
+  - [`features/tools/screens/installment-vs-cash-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/screens/installment-vs-cash-screen.tsx)
+- transformei as rotas abaixo em reexports finos da camada de `features`, consolidando o boundary de `app/`:
+  - [`app/(public)/login.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(public)/login.tsx)
+  - [`app/(public)/forgot-password.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(public)/forgot-password.tsx)
+  - [`app/(private)/dashboard.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(private)/dashboard.tsx)
+  - [`app/(private)/carteira.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(private)/carteira.tsx)
+  - [`app/(private)/alertas.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(private)/alertas.tsx)
+  - [`app/(private)/assinatura.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(private)/assinatura.tsx)
+  - [`app/(private)/ferramentas.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(private)/ferramentas.tsx)
+  - [`app/(private)/installment-vs-cash.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/app/(private)/installment-vs-cash.tsx)
+- fatiei o hotspot de `installment-vs-cash` em módulos menores e testáveis:
+  - [`features/tools/hooks/installment-vs-cash/flow-helpers.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/hooks/installment-vs-cash/flow-helpers.ts)
+  - [`features/tools/hooks/installment-vs-cash/use-installment-vs-cash-draft-state.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/hooks/installment-vs-cash/use-installment-vs-cash-draft-state.ts)
+  - [`features/tools/hooks/installment-vs-cash/use-saved-simulation-state.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/hooks/installment-vs-cash/use-saved-simulation-state.ts)
+  - [`features/tools/hooks/installment-vs-cash/installment-vs-cash-actions.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/hooks/installment-vs-cash/installment-vs-cash-actions.ts)
+- ajustei [`features/tools/hooks/use-installment-vs-cash-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/hooks/use-installment-vs-cash-screen-controller.ts) para consumir esses módulos e reduzir o acoplamento interno do fluxo;
+- corrigi um bug real revelado pelos novos testes: `ensureSavedSimulation()` podia disparar duas mutações consecutivas antes de um rerender. O hook [`use-saved-simulation-state.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03c-screen-controllers/features/tools/hooks/installment-vs-cash/use-saved-simulation-state.ts) agora usa `savedSimulationRef` e `pendingSaveRef` para garantir idempotência durante saves em voo;
+- subi cobertura específica para as novas telas canônicas e para os módulos extraídos de `installment-vs-cash`.
+
+### O que foi validado
+- `npm run typecheck`
+- `npx jest __tests__/app/login-screen.test.tsx __tests__/app/forgot-password-screen.test.tsx __tests__/app/dashboard-screen.test.tsx __tests__/app/wallet-screen.test.tsx __tests__/app/subscription-screen.test.tsx __tests__/app/alerts-screen.test.tsx features/tools/hooks/installment-vs-cash/flow-helpers.test.ts features/tools/hooks/installment-vs-cash/use-installment-vs-cash-draft-state.test.tsx features/tools/hooks/installment-vs-cash/use-saved-simulation-state.test.tsx features/tools/hooks/installment-vs-cash/installment-vs-cash-actions.test.ts features/tools/hooks/use-installment-vs-cash-screen-controller.test.tsx --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- a suíte fechou verde, mas o Jest ainda reportou um worker forçado a encerrar ao final do `test:coverage`; isso não quebrou o gate, porém vale investigar no próximo bloco para eliminar qualquer teardown imperfeito;
+- `app/` agora ficou estruturalmente fino, mas ainda faltam os próximos endurecimentos de primitives adicionais e dos domínios restantes antes de liberar features novas;
+- o domínio `installment-vs-cash` está bem mais modular, porém ainda merece mais simplificação depois que `FND-04` trouxer o mapa completo dos demais domínios e contratos.
+
+### Proximo passo
+- seguir para `APP FND-04A`, completando os domínios canônicos que faltam (`transactions`, `shared-entries`, `fiscal`, `user-profile`, `questionnaire` e alinhamento final de `tools`);
+- depois entrar no bloco de endurecimento operacional (`FND-05`), com segurança, logging, observabilidade e confiabilidade de runtime.

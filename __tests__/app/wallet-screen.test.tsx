@@ -1,0 +1,82 @@
+import { render } from "@testing-library/react-native";
+import type { UseQueryResult } from "@tanstack/react-query";
+
+import WalletScreen from "@/app/(private)/carteira";
+import { AppProviders } from "@/core/providers/app-providers";
+import { useWalletScreenController } from "@/features/wallet/hooks/use-wallet-screen-controller";
+
+jest.mock("@/features/wallet/hooks/use-wallet-screen-controller", () => ({
+  useWalletScreenController: jest.fn(),
+}));
+
+const mockedUseWalletScreenController = jest.mocked(useWalletScreenController);
+
+const buildQuery = <TData,>(
+  overrides: Partial<UseQueryResult<TData, Error>>,
+): UseQueryResult<TData, Error> =>
+  ({
+    data: undefined,
+    error: null,
+    failureCount: 0,
+    failureReason: null,
+    fetchStatus: "idle",
+    isError: false,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: false,
+    isInitialLoading: false,
+    isLoading: false,
+    isLoadingError: false,
+    isPaused: false,
+    isPending: false,
+    isPlaceholderData: false,
+    isRefetchError: false,
+    isRefetching: false,
+    isStale: false,
+    isSuccess: true,
+    refetch: jest.fn(),
+    status: "success",
+    dataUpdatedAt: 0,
+    errorUpdatedAt: 0,
+    isEnabled: true,
+    promise: Promise.resolve(undefined),
+    ...overrides,
+  }) as UseQueryResult<TData, Error>;
+
+describe("WalletScreen", () => {
+  afterEach(() => {
+    mockedUseWalletScreenController.mockReset();
+  });
+
+  it("renderiza o resumo da carteira e os ativos da composicao canônica", () => {
+    mockedUseWalletScreenController.mockReturnValue({
+      walletQuery: buildQuery({
+        data: {
+          total: 25000,
+          items: [],
+          returnedItems: 0,
+          limit: 50,
+          hasMore: false,
+        },
+      }) as ReturnType<typeof useWalletScreenController>["walletQuery"],
+      total: 25000,
+      assets: [
+        {
+          id: "asset-1",
+          name: "Tesouro Selic",
+          amount: 15000,
+          allocation: 60,
+        },
+      ],
+    });
+
+    const { getByText } = render(
+      <AppProviders>
+        <WalletScreen />
+      </AppProviders>,
+    );
+
+    expect(getByText("Carteira")).toBeTruthy();
+    expect(getByText("Tesouro Selic")).toBeTruthy();
+  });
+});
