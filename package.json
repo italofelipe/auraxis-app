@@ -31,7 +31,7 @@
     "@expo-google-fonts/raleway": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
     "@hookform/resolvers": "^5.2.2",
-    "@react-navigation/bottom-tabs": "^7.15.6",
+    "@react-navigation/bottom-tabs": "^7.15.9",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@sentry/react-native": "^8.4.0",
@@ -44,7 +44,7 @@
     "expo-image": "~3.0.11",
     "expo-linking": "~8.0.11",
     "expo-router": "~6.0.23",
-    "expo-secure-store": "^55.0.9",
+    "expo-secure-store": "^55.0.12",
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "expo-symbols": "~1.0.8",
@@ -79,7 +79,7 @@
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.1",
     "react-test-renderer": "19.1.5",
-    "ts-jest": "^29.4.6",
+    "ts-jest": "^29.4.9",
     "typescript": "~5.9.2"
   },
   "engines": {
