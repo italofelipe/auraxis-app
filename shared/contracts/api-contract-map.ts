@@ -79,6 +79,17 @@ import type {
   UpdateUserProfileCommand,
   UserProfile,
 } from "@/features/user-profile/contracts";
+import type {
+  CreateGoalFromInstallmentVsCashDto,
+  CreateGoalFromInstallmentVsCashResponseDto,
+  CreatePlannedExpenseFromInstallmentVsCashDto,
+  CreatePlannedExpenseFromInstallmentVsCashResponseDto,
+  InstallmentVsCashCalculationRequestDto,
+  InstallmentVsCashCalculationResponseDto,
+  InstallmentVsCashHistoryQuery,
+  InstallmentVsCashHistoryResponseDto,
+  InstallmentVsCashSaveResponseDto,
+} from "@/features/tools/contracts";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -537,6 +548,57 @@ export const apiContractMap = {
   >({
     method: "POST",
     path: "/fiscal/fiscal-documents",
+    authRequired: true,
+  }),
+  installmentVsCashCalculate: defineApiContract<
+    "POST",
+    "/simulations/installment-vs-cash/calculate",
+    InstallmentVsCashCalculationRequestDto,
+    InstallmentVsCashCalculationResponseDto
+  >({
+    method: "POST",
+    path: "/simulations/installment-vs-cash/calculate",
+    authRequired: true,
+  }),
+  installmentVsCashSave: defineApiContract<
+    "POST",
+    "/simulations/installment-vs-cash",
+    InstallmentVsCashCalculationRequestDto,
+    InstallmentVsCashSaveResponseDto
+  >({
+    method: "POST",
+    path: "/simulations/installment-vs-cash",
+    authRequired: true,
+  }),
+  installmentVsCashHistory: defineApiContract<
+    "GET",
+    "/simulations",
+    never,
+    InstallmentVsCashHistoryResponseDto,
+    InstallmentVsCashHistoryQuery
+  >({
+    method: "GET",
+    path: "/simulations",
+    authRequired: true,
+  }),
+  installmentVsCashGoalBridge: defineApiContract<
+    "POST",
+    "/simulations/{simulation_id}/goal",
+    CreateGoalFromInstallmentVsCashDto,
+    CreateGoalFromInstallmentVsCashResponseDto
+  >({
+    method: "POST",
+    path: "/simulations/{simulation_id}/goal",
+    authRequired: true,
+  }),
+  installmentVsCashPlannedExpenseBridge: defineApiContract<
+    "POST",
+    "/simulations/{simulation_id}/planned-expense",
+    CreatePlannedExpenseFromInstallmentVsCashDto,
+    CreatePlannedExpenseFromInstallmentVsCashResponseDto
+  >({
+    method: "POST",
+    path: "/simulations/{simulation_id}/planned-expense",
     authRequired: true,
   }),
   subscriptionPlans: defineApiContract<

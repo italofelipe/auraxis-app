@@ -21,6 +21,9 @@ const {
   findUnsafeGeneratedTypeExamples,
   findUnsafeOpenApiExamples,
 } = require("./openapi-secret-hygiene.cjs");
+const {
+  validateAppContractCatalog,
+} = require("./app-contract-catalog-check.cjs");
 
 const ensureFileExists = (filePath) => {
   if (!fs.existsSync(filePath)) {
@@ -137,7 +140,20 @@ const run = async () => {
     openApiDocument,
     remotePacks,
   );
-  const allErrors = [...baselineErrors, ...openApiErrors];
+  const appContractCatalogResult = validateAppContractCatalog();
+  const allErrors = [
+    ...baselineErrors,
+    ...openApiErrors,
+    ...appContractCatalogResult.missingFromCatalog.map((signature) => {
+      return `[app] endpoint catalog missing ${signature}`;
+    }),
+    ...appContractCatalogResult.missingFromOpenApi.map((signature) => {
+      return `[app] OpenAPI missing contract signature ${signature}`;
+    }),
+    ...appContractCatalogResult.staleKnownGaps.map((signature) => {
+      return `[app] stale known OpenAPI gap ${signature}`;
+    }),
+  ];
 
   if (allErrors.length > 0) {
     process.stderr.write("[contracts:check] FAILED\n");

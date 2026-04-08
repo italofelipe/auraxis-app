@@ -1,12 +1,5 @@
-import type { AxiosInstance } from "axios";
-
-import { httpClient } from "@/core/http/http-client";
 import { isFeatureEnabled, resolveProviderDecision } from "@/shared/feature-flags";
 import type { ToolsCatalog } from "@/features/tools/contracts";
-
-interface ToolsServiceClient {
-  readonly get: AxiosInstance["get"];
-}
 
 export const toolsPlaceholder: ToolsCatalog = {
   tools: [
@@ -31,18 +24,12 @@ export const toolsPlaceholder: ToolsCatalog = {
   ],
 };
 
-export const createToolsService = (client: ToolsServiceClient) => {
-  return {
-    getCatalog: async (): Promise<ToolsCatalog> => {
-      const response = await client.get<ToolsCatalog>("/tools/catalog");
-      return await applyToolsFlags(response.data);
-    },
-  };
-};
-
 /**
- * Aplica overrides de feature flags no catalogo de ferramentas.
- * @param catalog Catalogo base vindo do backend ou placeholder.
+ * Aplica overrides de feature flags no catalogo de ferramentas local.
+ * Enquanto a API nao expor um catalogo canônico, o app usa este baseline
+ * tipado para evitar drift com endpoints inexistentes.
+ *
+ * @param catalog Catalogo base local.
  * @returns Catalogo com campo `enabled` normalizado por flags locais.
  */
 export const applyToolsFlags = async (catalog: ToolsCatalog): Promise<ToolsCatalog> => {
@@ -66,4 +53,12 @@ export const applyToolsFlags = async (catalog: ToolsCatalog): Promise<ToolsCatal
   };
 };
 
-export const toolsService = createToolsService(httpClient);
+export const createToolsService = () => {
+  return {
+    getCatalog: async (): Promise<ToolsCatalog> => {
+      return await applyToolsFlags(toolsPlaceholder);
+    },
+  };
+};
+
+export const toolsService = createToolsService();

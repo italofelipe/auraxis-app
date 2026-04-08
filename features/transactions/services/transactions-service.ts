@@ -13,6 +13,7 @@ import type {
   UpdateTransactionCommand,
 } from "@/features/transactions/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
+import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-path";
 
 interface TransactionPayload {
   readonly id: string;
@@ -234,10 +235,9 @@ export const createTransactionsService = (client: AxiosInstance) => {
     },
     getTransaction: async (transactionId: string): Promise<TransactionRecord> => {
       const response = await client.get(
-        apiContractMap.transactionDetail.path.replace(
-          "{transaction_id}",
-          transactionId,
-        ),
+        resolveApiContractPath(apiContractMap.transactionDetail.path, {
+          transaction_id: transactionId,
+        }),
       );
       const payload = unwrapEnvelopeData<{ readonly transaction: TransactionPayload }>(
         response.data,
@@ -258,20 +258,18 @@ export const createTransactionsService = (client: AxiosInstance) => {
       command: UpdateTransactionCommand,
     ): Promise<TransactionRecord> => {
       const response = await client.put(
-        apiContractMap.transactionUpdate.path.replace(
-          "{transaction_id}",
-          transactionId,
-        ),
+        resolveApiContractPath(apiContractMap.transactionUpdate.path, {
+          transaction_id: transactionId,
+        }),
         buildTransactionPayload(command),
       );
       return extractTransactionFromMutation(response.data);
     },
     deleteTransaction: async (transactionId: string): Promise<void> => {
       await client.delete(
-        apiContractMap.transactionDelete.path.replace(
-          "{transaction_id}",
-          transactionId,
-        ),
+        resolveApiContractPath(apiContractMap.transactionDelete.path, {
+          transaction_id: transactionId,
+        }),
       );
     },
     getSummary: async (

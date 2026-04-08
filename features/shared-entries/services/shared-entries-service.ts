@@ -11,6 +11,7 @@ import type {
   SharedInvitationRecord,
 } from "@/features/shared-entries/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
+import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-path";
 
 interface SharedEntryPayload {
   readonly id: string;
@@ -112,10 +113,9 @@ export const createSharedEntriesService = (client: AxiosInstance) => {
     },
     deleteSharedEntry: async (sharedEntryId: string): Promise<SharedEntryRecord> => {
       const response = await client.delete(
-        apiContractMap.sharedEntriesDelete.path.replace(
-          "{sharedEntryId}",
+        resolveApiContractPath(apiContractMap.sharedEntriesDelete.path, {
           sharedEntryId,
-        ),
+        }),
       );
       const payload = unwrapEnvelopeData<{ readonly shared_entry: SharedEntryPayload }>(
         response.data,
@@ -149,7 +149,9 @@ export const createSharedEntriesService = (client: AxiosInstance) => {
     },
     acceptInvitation: async (token: string): Promise<SharedInvitationRecord> => {
       const response = await client.post(
-        apiContractMap.sharedInvitationsAccept.path.replace("{token}", token),
+        resolveApiContractPath(apiContractMap.sharedInvitationsAccept.path, {
+          token,
+        }),
       );
       const payload = unwrapEnvelopeData<{ readonly invitation: SharedInvitationPayload }>(
         response.data,
@@ -160,10 +162,9 @@ export const createSharedEntriesService = (client: AxiosInstance) => {
       invitationId: string,
     ): Promise<SharedInvitationRecord> => {
       const response = await client.delete(
-        apiContractMap.sharedInvitationsDelete.path.replace(
-          "{invitationId}",
+        resolveApiContractPath(apiContractMap.sharedInvitationsDelete.path, {
           invitationId,
-        ),
+        }),
       );
       const payload = unwrapEnvelopeData<{ readonly invitation: SharedInvitationPayload }>(
         response.data,

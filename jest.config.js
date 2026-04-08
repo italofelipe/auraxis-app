@@ -38,7 +38,6 @@ const config = {
   // Cobertura
   // APP9 baseline: cobertura inicial em fluxo crítico de tema/renderização.
   collectCoverageFrom: [
-    "lib/api.ts",
     "features/tools/services/tools-service.ts",
     "features/tools/hooks/use-tools-catalog-query.ts",
     "app/index.tsx",
@@ -84,7 +83,6 @@ const config = {
     "features/user-profile/services/user-profile-service.ts",
     "features/user-profile/hooks/use-user-profile-query.ts",
     "features/user-profile/hooks/use-user-profile-mutations.ts",
-    "lib/entitlements-api.ts",
     "app/(private)/installment-vs-cash.tsx",
     "components/themed-text.tsx",
     "components/themed-view.tsx",

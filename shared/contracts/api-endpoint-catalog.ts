@@ -96,6 +96,13 @@ export const apiEndpointCatalog = {
     "GET /fiscal/fiscal-documents",
     "POST /fiscal/fiscal-documents",
   ],
+  simulations: [
+    "GET /simulations",
+    "POST /simulations/installment-vs-cash",
+    "POST /simulations/installment-vs-cash/calculate",
+    "POST /simulations/{simulation_id}/goal",
+    "POST /simulations/{simulation_id}/planned-expense",
+  ],
   subscriptions: [
     "GET /subscriptions/plans",
     "GET /subscriptions/me",

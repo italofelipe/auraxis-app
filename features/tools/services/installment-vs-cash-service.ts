@@ -1,6 +1,8 @@
 import type { AxiosInstance } from "axios";
 
 import { httpClient } from "@/core/http/http-client";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
+import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-path";
 import type {
   CreateGoalFromInstallmentVsCashDto,
   CreateGoalFromInstallmentVsCashResponseDto,
@@ -238,7 +240,7 @@ export const createInstallmentVsCashService = (
       payload: InstallmentVsCashCalculationRequestDto,
     ): Promise<InstallmentVsCashCalculation> => {
       const response = await client.post<InstallmentVsCashCalculationResponseDto>(
-        "/simulations/installment-vs-cash/calculate",
+        apiContractMap.installmentVsCashCalculate.path,
         payload,
       );
       return mapCalculation(response.data);
@@ -247,7 +249,7 @@ export const createInstallmentVsCashService = (
       payload: InstallmentVsCashCalculationRequestDto,
     ): Promise<InstallmentVsCashSavedCalculation> => {
       const response = await client.post<InstallmentVsCashSaveResponseDto>(
-        "/simulations/installment-vs-cash",
+        apiContractMap.installmentVsCashSave.path,
         payload,
       );
       return {
@@ -260,7 +262,7 @@ export const createInstallmentVsCashService = (
       perPage = 10,
     ): Promise<readonly InstallmentVsCashSavedSimulation[]> => {
       const response = await client.get<InstallmentVsCashHistoryResponseDto>(
-        "/simulations",
+        apiContractMap.installmentVsCashHistory.path,
         {
           params: {
             page,
@@ -276,7 +278,9 @@ export const createInstallmentVsCashService = (
     ): Promise<InstallmentVsCashGoalBridgeResponse> => {
       const response =
         await client.post<CreateGoalFromInstallmentVsCashResponseDto>(
-          `/simulations/${simulationId}/goal`,
+          resolveApiContractPath(apiContractMap.installmentVsCashGoalBridge.path, {
+            simulation_id: simulationId,
+          }),
           createGoalBody(payload),
         );
       return mapGoalBridgeResponse(response.data);
@@ -287,7 +291,12 @@ export const createInstallmentVsCashService = (
     ): Promise<InstallmentVsCashPlannedExpenseBridgeResponse> => {
       const response =
         await client.post<CreatePlannedExpenseFromInstallmentVsCashResponseDto>(
-          `/simulations/${simulationId}/planned-expense`,
+          resolveApiContractPath(
+            apiContractMap.installmentVsCashPlannedExpenseBridge.path,
+            {
+              simulation_id: simulationId,
+            },
+          ),
           createPlannedExpenseBody(payload),
         );
       return mapPlannedExpenseBridgeResponse(response.data);

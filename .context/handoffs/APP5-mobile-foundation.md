@@ -361,3 +361,50 @@
 ### Proximo passo
 - seguir para `APP FND-04A`, completando os domínios canônicos que faltam (`transactions`, `shared-entries`, `fiscal`, `user-profile`, `questionnaire` e alinhamento final de `tools`);
 - depois entrar no bloco de endurecimento operacional (`FND-05`), com segurança, logging, observabilidade e confiabilidade de runtime.
+
+---
+
+## Update - APP FND-04B
+
+### O que foi feito
+- fechei a fonte canônica de contratos do app para os fluxos ainda fora do catálogo central, adicionando ao [`shared/contracts/api-contract-map.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/shared/contracts/api-contract-map.ts) e ao [`shared/contracts/api-endpoint-catalog.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/shared/contracts/api-endpoint-catalog.ts) os endpoints canônicos de `simulations/installment-vs-cash`;
+- removi o consumo remoto inexistente de `tools/catalog` e passei o catálogo de ferramentas a usar baseline local governado por flags em [`features/tools/services/tools-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/features/tools/services/tools-service.ts), eliminando um endpoint sem contrato real na API;
+- introduzi resolução tipada de paths parametrizados em [`shared/contracts/resolve-api-contract-path.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/shared/contracts/resolve-api-contract-path.ts) e alinhei os services de `alerts`, `shared-entries`, `transactions`, `fiscal` e `installment-vs-cash` para usar esse helper em vez de `string.replace()` solto;
+- removi a trilha morta de adapters `lib/*`, deixando o app sem caminho paralelo de consumo de API fora de `core/` + `features/`;
+- criei o guardrail [`scripts/app-contract-catalog-check.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/scripts/app-contract-catalog-check.cjs) e o liguei ao [`scripts/contracts-check.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/scripts/contracts-check.cjs), de forma que `contracts:check` agora valida:
+  - contratos consumidos pelo app presentes no catálogo;
+  - contratos consumidos pelo app presentes no OpenAPI ou explicitados como gap conhecido;
+  - ausência de gaps conhecidos obsoletos;
+- externalizei os gaps conhecidos do snapshot em [`contracts/known-openapi-gaps.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/contracts/known-openapi-gaps.json), compartilhando a mesma fonte entre o check estrutural e o teste [`shared/contracts/api-contract-map.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/shared/contracts/api-contract-map.test.ts);
+- sincronizei o snapshot OpenAPI do app com a `auraxis-api` local via `AURAXIS_API_REPO_ROOT=/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-api npm run contracts:sync:api-local`, atualizando:
+  - [`contracts/openapi.snapshot.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/contracts/openapi.snapshot.json)
+  - [`shared/types/generated/openapi.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/shared/types/generated/openapi.ts)
+  - [`contracts/feature-contract-baseline.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/contracts/feature-contract-baseline.json)
+- removi o legado da cobertura do Jest em [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/jest.config.js) para que o gate reflita só a arquitetura canônica ativa.
+
+### O que foi validado
+- `node scripts/app-contract-catalog-check.cjs`
+- `node scripts/check-api-contract-governance.cjs`
+- `npx jest features/tools/services/tools-service.test.ts features/tools/services/installment-vs-cash-service.test.ts shared/contracts/api-contract-map.test.ts --runInBand`
+- `npm run typecheck`
+- `AURAXIS_API_REPO_ROOT=/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-api npm run contracts:sync:api-local`
+- `npm run policy:check`
+- `npm run contracts:check`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o snapshot OpenAPI do app agora está alinhado à API local mais recente, o que gerou um diff grande em [`contracts/openapi.snapshot.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/contracts/openapi.snapshot.json); isso melhora a governança, mas aumenta o tamanho deste PR;
+- os gaps explícitos em [`contracts/known-openapi-gaps.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/contracts/known-openapi-gaps.json) continuam dependendo de evolução no backend para desaparecerem de fato;
+- o modo mock do app ainda não cobre todos os domínios scaffoldados do MVP1; o enforcement de contrato está correto, mas a cobertura de runtime mock ainda merece um slice dedicado.
+
+### Proximo passo
+- seguir para `APP FND-05A`, endurecendo sessão, expiração/refresh e política de auth do runtime mobile;
+- em seguida atacar `FND-05B/FND-05C` com logging, observabilidade cliente, degraded states e confiabilidade operacional antes de liberar a primeira feature real.
+
+### Follow-up de CI
+- alinhei [`sonar-project.properties`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/sonar-project.properties) com a baseline real do Jest, trocando `sonar.sources=lib,components,hooks` por `sonar.sources=.` e restringindo o escopo via `sonar.inclusions` aos mesmos arquivos versionados em `collectCoverageFrom`;
+- adicionei o guardrail [`scripts/check-sonar-config-governance.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/scripts/check-sonar-config-governance.cjs) e o liguei ao [`package.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/package.json), para que drift entre Sonar e Jest passe a falhar no `policy:check` antes do GitHub Actions;
+- validação adicional executada:
+  - `node scripts/check-sonar-config-governance.cjs`
+  - `npm run policy:check`

@@ -1,0 +1,30 @@
+{
+  "openApiMissing": [
+    "GET /alerts",
+    "POST /alerts/{alertId}/read",
+    "DELETE /alerts/{alertId}",
+    "GET /alerts/preferences",
+    "PUT /alerts/preferences/{category}",
+    "GET /subscriptions/plans",
+    "GET /subscriptions/me",
+    "POST /subscriptions/checkout",
+    "POST /subscriptions/cancel",
+    "GET /shared-entries/by-me",
+    "GET /shared-entries/with-me",
+    "POST /shared-entries",
+    "DELETE /shared-entries/{sharedEntryId}",
+    "GET /shared-entries/invitations",
+    "POST /shared-entries/invitations",
+    "POST /shared-entries/invitations/{token}/accept",
+    "DELETE /shared-entries/invitations/{invitationId}",
+    "POST /fiscal/csv/upload",
+    "POST /fiscal/csv/confirm",
+    "GET /fiscal/receivables",
+    "POST /fiscal/receivables",
+    "PATCH /fiscal/receivables/{entryId}/receive",
+    "DELETE /fiscal/receivables/{entryId}",
+    "GET /fiscal/receivables/summary",
+    "GET /fiscal/fiscal-documents",
+    "POST /fiscal/fiscal-documents"
+  ]
+}
