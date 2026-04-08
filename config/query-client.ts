@@ -1,1 +1,1 @@
-export { queryClient } from "@/core/query/query-client";
+export { createAppQueryClient, queryClient } from "@/core/query/query-client";

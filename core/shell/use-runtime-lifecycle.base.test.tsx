@@ -1,6 +1,3 @@
-import type { PropsWithChildren, ReactElement } from "react";
-
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { renderHook, waitFor } from "@testing-library/react-native";
 import * as Linking from "expo-linking";
 import { AppState, type AppStateStatus } from "react-native";
@@ -10,6 +7,7 @@ import { reachabilityService } from "@/core/shell/reachability-service";
 import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
 import { useSessionStore } from "@/core/session/session-store";
 import { appLogger } from "@/core/telemetry/app-logger";
+import { createTestHookWrapper } from "@/shared/testing/test-providers";
 
 const mockRevalidate = jest.fn().mockResolvedValue({
   revalidated: true,
@@ -42,23 +40,6 @@ jest.mock("@/core/telemetry/app-logger", () => ({
     error: jest.fn(),
   },
 }));
-
-const createWrapper = (): ((
-  props: PropsWithChildren,
-) => ReactElement) => {
-  const queryClient = new QueryClient();
-
-  const TestHookWrapper = ({
-    children,
-  }: PropsWithChildren): ReactElement => {
-    return (
-      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
-    );
-  };
-
-  TestHookWrapper.displayName = "TestHookWrapper";
-  return TestHookWrapper;
-};
 
 const createLinkingSubscription = (): ReturnType<
   typeof Linking.addEventListener
@@ -137,7 +118,7 @@ describe("useRuntimeLifecycle - core flow", () => {
     );
 
     renderHook(() => useRuntimeLifecycle(), {
-      wrapper: createWrapper(),
+      wrapper: createTestHookWrapper(),
     });
 
     await waitFor(() => {
@@ -166,7 +147,7 @@ describe("useRuntimeLifecycle - core flow", () => {
     );
 
     renderHook(() => useRuntimeLifecycle(), {
-      wrapper: createWrapper(),
+      wrapper: createTestHookWrapper(),
     });
 
     await waitFor(() => {
@@ -204,7 +185,7 @@ describe("useRuntimeLifecycle - core flow", () => {
     );
 
     renderHook(() => useRuntimeLifecycle(), {
-      wrapper: createWrapper(),
+      wrapper: createTestHookWrapper(),
     });
 
     appStateListener?.("active");
