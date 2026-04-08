@@ -2,7 +2,7 @@
 
 > Documento canônico de governança técnica para o aplicativo mobile do Auraxis.
 > Vinculante para todos os agentes e desenvolvedores.
-> Atualizado: 2026-02-27
+> Atualizado: 2026-04-08
 
 ---
 
@@ -31,7 +31,8 @@ Para integração com backend recém-entregue:
 
 | Camada | Tecnologia | Versão |
 |:-------|:-----------|:-------|
-| Plataforma | React Native | 0.81.5 |
+| Plataforma | React Native | 0.81.6 |
+| Toolchain | Node.js | 24 LTS |
 | SDK | Expo SDK | ~54.0 |
 | Navegação | Expo Router v6 | ~6.0 |
 | Linguagem | TypeScript strict | ~5.9 |
@@ -40,8 +41,8 @@ Para integração com backend recém-entregue:
 | Formatação | Prettier | ^3.8 |
 | Testes unitários | jest-expo + @testing-library/react-native | ^54.0 / ^13.0 |
 | Testes E2E | Detox (scaffold — requer macOS runner) | — |
-| UI base | Tamagui | ^1.x |
-| UI target | Tamagui | ^1.x |
+| UI base | Tamagui | ^2.0.0-rc |
+| UI target | Tamagui | ^2.0.0-rc |
 | Estado de servidor | TanStack Query (React) | ^5.x |
 | Análise estática | SonarCloud | — |
 | Secret scan | Gitleaks + TruffleHog | — |

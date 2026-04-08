@@ -10,6 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "bundleIdentifier": "com.sensoriumit.auraxis",
       "buildNumber": "1"
     },
     "android": {
