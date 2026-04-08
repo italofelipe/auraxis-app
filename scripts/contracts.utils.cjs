@@ -6,6 +6,14 @@ const path = require("node:path");
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN ?? "";
 
+const createHttpRequestError = (url, status) => {
+  const error = new Error(`request failed: ${url} (${status})`);
+  error.name = "HttpRequestError";
+  error.status = status;
+  error.url = url;
+  return error;
+};
+
 const buildHeaders = () => {
   const headers = {
     Accept: "application/vnd.github+json",
@@ -42,7 +50,7 @@ const fetchText = async (url) => {
   });
 
   if (!response.ok) {
-    throw new Error(`request failed: ${url} (${response.status})`);
+    throw createHttpRequestError(url, response.status);
   }
 
   return response.text();
@@ -78,7 +86,7 @@ const listRemoteContractPacks = async (contractsApiUrl) => {
   }
 
   if (!response.ok) {
-    throw new Error(`request failed: ${contractsApiUrl} (${response.status})`);
+    throw createHttpRequestError(contractsApiUrl, response.status);
   }
 
   const payload = await response.json();
@@ -187,6 +195,7 @@ const validateRestEndpointsAgainstOpenApi = (openApiDocument, packs) => {
 
 module.exports = {
   computeContractBaseline,
+  createHttpRequestError,
   ensureParentDirectory,
   fetchJson,
   listRemoteContractPacks,
