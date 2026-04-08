@@ -37,6 +37,48 @@ import type {
   AlertPreferenceRecord,
   UpdateAlertPreferenceCommand,
 } from "@/features/alerts/contracts";
+import type {
+  CsvConfirmCommand,
+  CsvConfirmResponse,
+  CsvPreviewCommand,
+  CsvPreviewResponse,
+  CreateFiscalDocumentCommand,
+  CreateReceivableCommand,
+  FiscalDocumentListQuery,
+  FiscalDocumentListResponse,
+  FiscalDocumentRecord,
+  MarkReceivableReceivedCommand,
+  ReceivableListQuery,
+  ReceivableListResponse,
+  ReceivableRecord,
+  RevenueSummary,
+} from "@/features/fiscal/contracts";
+import type {
+  QuestionnaireCollection,
+  QuestionnaireResult,
+  SubmitQuestionnaireCommand,
+} from "@/features/questionnaire/contracts";
+import type {
+  CreateSharedEntryCommand,
+  CreateSharedInvitationCommand,
+  SharedEntryListResponse,
+  SharedEntryRecord,
+  SharedInvitationListResponse,
+  SharedInvitationRecord,
+} from "@/features/shared-entries/contracts";
+import type {
+  CreateTransactionCommand,
+  TransactionCollection,
+  TransactionListQuery,
+  TransactionRecord,
+  TransactionSummary,
+  TransactionSummaryQuery,
+  UpdateTransactionCommand,
+} from "@/features/transactions/contracts";
+import type {
+  UpdateUserProfileCommand,
+  UserProfile,
+} from "@/features/user-profile/contracts";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -142,6 +184,41 @@ export const apiContractMap = {
     path: "/user/bootstrap",
     authRequired: true,
   }),
+  userProfileGet: defineApiContract<"GET", "/user/profile", never, UserProfile>({
+    method: "GET",
+    path: "/user/profile",
+    authRequired: true,
+  }),
+  userProfileUpdate: defineApiContract<
+    "PUT",
+    "/user/profile",
+    UpdateUserProfileCommand,
+    UserProfile
+  >({
+    method: "PUT",
+    path: "/user/profile",
+    authRequired: true,
+  }),
+  userQuestionnaireGet: defineApiContract<
+    "GET",
+    "/user/profile/questionnaire",
+    never,
+    QuestionnaireCollection
+  >({
+    method: "GET",
+    path: "/user/profile/questionnaire",
+    authRequired: true,
+  }),
+  userQuestionnaireSubmit: defineApiContract<
+    "POST",
+    "/user/profile/questionnaire",
+    SubmitQuestionnaireCommand,
+    QuestionnaireResult
+  >({
+    method: "POST",
+    path: "/user/profile/questionnaire",
+    authRequired: true,
+  }),
   dashboardOverview: defineApiContract<
     "GET",
     "/dashboard/overview",
@@ -160,6 +237,68 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/dashboard/trends",
+    authRequired: true,
+  }),
+  transactionsList: defineApiContract<
+    "GET",
+    "/transactions",
+    never,
+    TransactionCollection,
+    TransactionListQuery
+  >({
+    method: "GET",
+    path: "/transactions",
+    authRequired: true,
+  }),
+  transactionsCreate: defineApiContract<
+    "POST",
+    "/transactions",
+    CreateTransactionCommand,
+    TransactionRecord
+  >({
+    method: "POST",
+    path: "/transactions",
+    authRequired: true,
+  }),
+  transactionDetail: defineApiContract<
+    "GET",
+    "/transactions/{transaction_id}",
+    never,
+    TransactionRecord
+  >({
+    method: "GET",
+    path: "/transactions/{transaction_id}",
+    authRequired: true,
+  }),
+  transactionUpdate: defineApiContract<
+    "PUT",
+    "/transactions/{transaction_id}",
+    UpdateTransactionCommand,
+    TransactionRecord
+  >({
+    method: "PUT",
+    path: "/transactions/{transaction_id}",
+    authRequired: true,
+  }),
+  transactionDelete: defineApiContract<
+    "DELETE",
+    "/transactions/{transaction_id}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/transactions/{transaction_id}",
+    authRequired: true,
+  }),
+  transactionsSummary: defineApiContract<
+    "GET",
+    "/transactions/summary",
+    never,
+    TransactionSummary,
+    TransactionSummaryQuery
+  >({
+    method: "GET",
+    path: "/transactions/summary",
     authRequired: true,
   }),
   goalsList: defineApiContract<"GET", "/goals", never, GoalListResponse>({
@@ -207,6 +346,86 @@ export const apiContractMap = {
     path: "/alerts/preferences",
     authRequired: true,
   }),
+  sharedEntriesByMe: defineApiContract<
+    "GET",
+    "/shared-entries/by-me",
+    never,
+    SharedEntryListResponse
+  >({
+    method: "GET",
+    path: "/shared-entries/by-me",
+    authRequired: true,
+  }),
+  sharedEntriesWithMe: defineApiContract<
+    "GET",
+    "/shared-entries/with-me",
+    never,
+    SharedEntryListResponse
+  >({
+    method: "GET",
+    path: "/shared-entries/with-me",
+    authRequired: true,
+  }),
+  sharedEntriesCreate: defineApiContract<
+    "POST",
+    "/shared-entries",
+    CreateSharedEntryCommand,
+    SharedEntryRecord
+  >({
+    method: "POST",
+    path: "/shared-entries",
+    authRequired: true,
+  }),
+  sharedEntriesDelete: defineApiContract<
+    "DELETE",
+    "/shared-entries/{sharedEntryId}",
+    never,
+    SharedEntryRecord
+  >({
+    method: "DELETE",
+    path: "/shared-entries/{sharedEntryId}",
+    authRequired: true,
+  }),
+  sharedInvitationsList: defineApiContract<
+    "GET",
+    "/shared-entries/invitations",
+    never,
+    SharedInvitationListResponse
+  >({
+    method: "GET",
+    path: "/shared-entries/invitations",
+    authRequired: true,
+  }),
+  sharedInvitationsCreate: defineApiContract<
+    "POST",
+    "/shared-entries/invitations",
+    CreateSharedInvitationCommand,
+    SharedInvitationRecord
+  >({
+    method: "POST",
+    path: "/shared-entries/invitations",
+    authRequired: true,
+  }),
+  sharedInvitationsAccept: defineApiContract<
+    "POST",
+    "/shared-entries/invitations/{token}/accept",
+    never,
+    SharedInvitationRecord
+  >({
+    method: "POST",
+    path: "/shared-entries/invitations/{token}/accept",
+    authRequired: true,
+  }),
+  sharedInvitationsDelete: defineApiContract<
+    "DELETE",
+    "/shared-entries/invitations/{invitationId}",
+    never,
+    SharedInvitationRecord
+  >({
+    method: "DELETE",
+    path: "/shared-entries/invitations/{invitationId}",
+    authRequired: true,
+  }),
   updateAlertPreference: defineApiContract<
     "PUT",
     "/alerts/preferences/{category}",
@@ -226,6 +445,98 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/entitlements/check",
+    authRequired: true,
+  }),
+  fiscalCsvPreview: defineApiContract<
+    "POST",
+    "/fiscal/csv/upload",
+    CsvPreviewCommand,
+    CsvPreviewResponse
+  >({
+    method: "POST",
+    path: "/fiscal/csv/upload",
+    authRequired: true,
+  }),
+  fiscalCsvConfirm: defineApiContract<
+    "POST",
+    "/fiscal/csv/confirm",
+    CsvConfirmCommand,
+    CsvConfirmResponse
+  >({
+    method: "POST",
+    path: "/fiscal/csv/confirm",
+    authRequired: true,
+  }),
+  fiscalReceivablesList: defineApiContract<
+    "GET",
+    "/fiscal/receivables",
+    never,
+    ReceivableListResponse,
+    ReceivableListQuery
+  >({
+    method: "GET",
+    path: "/fiscal/receivables",
+    authRequired: true,
+  }),
+  fiscalReceivablesCreate: defineApiContract<
+    "POST",
+    "/fiscal/receivables",
+    CreateReceivableCommand,
+    ReceivableRecord
+  >({
+    method: "POST",
+    path: "/fiscal/receivables",
+    authRequired: true,
+  }),
+  fiscalReceivablesReceive: defineApiContract<
+    "PATCH",
+    "/fiscal/receivables/{entryId}/receive",
+    MarkReceivableReceivedCommand,
+    ReceivableRecord
+  >({
+    method: "PATCH",
+    path: "/fiscal/receivables/{entryId}/receive",
+    authRequired: true,
+  }),
+  fiscalReceivablesDelete: defineApiContract<
+    "DELETE",
+    "/fiscal/receivables/{entryId}",
+    never,
+    ReceivableRecord
+  >({
+    method: "DELETE",
+    path: "/fiscal/receivables/{entryId}",
+    authRequired: true,
+  }),
+  fiscalReceivablesSummary: defineApiContract<
+    "GET",
+    "/fiscal/receivables/summary",
+    never,
+    RevenueSummary
+  >({
+    method: "GET",
+    path: "/fiscal/receivables/summary",
+    authRequired: true,
+  }),
+  fiscalDocumentsList: defineApiContract<
+    "GET",
+    "/fiscal/fiscal-documents",
+    never,
+    FiscalDocumentListResponse,
+    FiscalDocumentListQuery
+  >({
+    method: "GET",
+    path: "/fiscal/fiscal-documents",
+    authRequired: true,
+  }),
+  fiscalDocumentsCreate: defineApiContract<
+    "POST",
+    "/fiscal/fiscal-documents",
+    CreateFiscalDocumentCommand,
+    FiscalDocumentRecord
+  >({
+    method: "POST",
+    path: "/fiscal/fiscal-documents",
     authRequired: true,
   }),
   subscriptionPlans: defineApiContract<

@@ -5,6 +5,7 @@ export type {
   InstallmentVsCashCalculation,
   InstallmentVsCashCalculationRequestDto,
   InstallmentVsCashGoalBridgeResponse,
+  InstallmentVsCashHistoryResponseDto as InstallmentVsCashHistoryResponse,
   InstallmentVsCashPlannedExpenseBridgeResponse,
   InstallmentVsCashSavedCalculation,
   InstallmentVsCashSavedSimulation,
