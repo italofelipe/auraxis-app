@@ -9,6 +9,7 @@ import type {
   AlertPreferenceUpdate,
 } from "@/features/alerts/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
+import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-path";
 
 interface AlertPayload {
   readonly id: string;
@@ -84,12 +85,12 @@ export const createAlertsService = (client: AxiosInstance) => {
     },
     markRead: async (alertId: string): Promise<void> => {
       await client.post(
-        apiContractMap.alertsMarkRead.path.replace("{alertId}", alertId),
+        resolveApiContractPath(apiContractMap.alertsMarkRead.path, { alertId }),
       );
     },
     deleteAlert: async (alertId: string): Promise<void> => {
       await client.delete(
-        apiContractMap.alertsDelete.path.replace("{alertId}", alertId),
+        resolveApiContractPath(apiContractMap.alertsDelete.path, { alertId }),
       );
     },
     updatePreference: async (
@@ -97,7 +98,9 @@ export const createAlertsService = (client: AxiosInstance) => {
       command: AlertPreferenceUpdate,
     ): Promise<AlertPreferenceRecord> => {
       const response = await client.put(
-        apiContractMap.updateAlertPreference.path.replace("{category}", category),
+        resolveApiContractPath(apiContractMap.updateAlertPreference.path, {
+          category,
+        }),
         {
           enabled: command.enabled,
           channels: command.channels,

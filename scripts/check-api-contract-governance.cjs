@@ -4,15 +4,28 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const ROOT = process.cwd();
-const SCAN_DIRECTORIES = ["app", "components", "features", "hooks", "shared"];
+const SCAN_DIRECTORIES = [
+  "app",
+  "components",
+  "core",
+  "features",
+  "hooks",
+  "lib",
+  "shared",
+  "stores",
+];
 const API_CALL_LITERAL_PATTERN =
-  /\.(?:get|post|put|patch|delete)\s*(?:<[^>]+>)?\(\s*["']\/(?:auth|dashboard|subscriptions|ops|wallet|goals|alerts|shared-entries|shared_entries|fiscal|transactions|user|entitlements)\b/;
+  /\.(?:get|post|put|patch|delete)\s*(?:<[^>]+>)?\(\s*["'`](?:\/)(?:auth|dashboard|subscriptions|ops|wallet|goals|alerts|shared-entries|shared_entries|fiscal|transactions|user|entitlements|simulations|tools)\b/;
 const LEGACY_API_IMPORT_PATTERN =
   /from\s+["']@\/lib\/(?:auth|dashboard|wallet|alerts|subscription|entitlement|entitlements)-api["']/;
 const EXCLUDED_FILE_PATTERNS = [
   /^shared\/contracts\/api-contract-map\.ts$/,
+  /^shared\/contracts\/resolve-api-contract-path\.ts$/,
   /^shared\/contracts\/api-endpoint-catalog\.ts$/,
   /^shared\/mocks\/api\/router\.ts$/,
+  /^lib\/api\.ts$/,
+  /^lib\/secure-storage\.ts$/,
+  /^lib\/web-urls\.ts$/,
   /^.+\.(test|spec)\.(ts|tsx)$/,
 ];
 

@@ -19,6 +19,7 @@ import type {
   RevenueSummary,
 } from "@/features/fiscal/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
+import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-path";
 
 interface ReceivablePayload {
   readonly id: string;
@@ -155,10 +156,9 @@ export const createFiscalService = (client: AxiosInstance) => {
       command: MarkReceivableReceivedCommand,
     ): Promise<ReceivableRecord> => {
       const response = await client.patch(
-        apiContractMap.fiscalReceivablesReceive.path.replace(
-          "{entryId}",
-          receivableId,
-        ),
+        resolveApiContractPath(apiContractMap.fiscalReceivablesReceive.path, {
+          entryId: receivableId,
+        }),
         {
           received_date: command.receivedDate,
           received_amount: command.receivedAmount,
@@ -171,10 +171,9 @@ export const createFiscalService = (client: AxiosInstance) => {
     },
     deleteReceivable: async (receivableId: string): Promise<ReceivableRecord> => {
       const response = await client.delete(
-        apiContractMap.fiscalReceivablesDelete.path.replace(
-          "{entryId}",
-          receivableId,
-        ),
+        resolveApiContractPath(apiContractMap.fiscalReceivablesDelete.path, {
+          entryId: receivableId,
+        }),
       );
       const payload = unwrapEnvelopeData<{ readonly receivable: ReceivablePayload }>(
         response.data,

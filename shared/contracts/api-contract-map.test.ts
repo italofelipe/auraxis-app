@@ -7,34 +7,16 @@ import {
 } from "@/shared/contracts/api-contract-map";
 import { apiEndpointCatalog } from "@/shared/contracts/api-endpoint-catalog";
 
-const KNOWN_OPENAPI_GAPS = new Set([
-  "GET /alerts",
-  "POST /alerts/{alertId}/read",
-  "DELETE /alerts/{alertId}",
-  "GET /alerts/preferences",
-  "PUT /alerts/preferences/{category}",
-  "GET /subscriptions/plans",
-  "GET /subscriptions/me",
-  "POST /subscriptions/checkout",
-  "POST /subscriptions/cancel",
-  "GET /shared-entries/by-me",
-  "GET /shared-entries/with-me",
-  "POST /shared-entries",
-  "DELETE /shared-entries/{sharedEntryId}",
-  "GET /shared-entries/invitations",
-  "POST /shared-entries/invitations",
-  "POST /shared-entries/invitations/{token}/accept",
-  "DELETE /shared-entries/invitations/{invitationId}",
-  "POST /fiscal/csv/upload",
-  "POST /fiscal/csv/confirm",
-  "GET /fiscal/receivables",
-  "POST /fiscal/receivables",
-  "PATCH /fiscal/receivables/{entryId}/receive",
-  "DELETE /fiscal/receivables/{entryId}",
-  "GET /fiscal/receivables/summary",
-  "GET /fiscal/fiscal-documents",
-  "POST /fiscal/fiscal-documents",
-]);
+const knownOpenApiGaps = new Set(
+  (
+    JSON.parse(
+      fs.readFileSync(
+        path.resolve(__dirname, "../../contracts/known-openapi-gaps.json"),
+        "utf8",
+      ),
+    ) as { readonly openApiMissing?: readonly string[] }
+  ).openApiMissing ?? [],
+);
 
 describe("apiContractMap", () => {
   it("mantem path/method unicos por contrato", () => {
@@ -95,9 +77,38 @@ describe("apiContractMap", () => {
       .map((contract) => `${contract.method} ${contract.path}`)
       .filter(
         (signature) =>
-          !openApiEntries.has(signature) && !KNOWN_OPENAPI_GAPS.has(signature),
+          !openApiEntries.has(signature) && !knownOpenApiGaps.has(signature),
       );
 
     expect(missingFromOpenApi).toEqual([]);
+  });
+
+  it("nao mantem gaps conhecidos obsoletos", () => {
+    const contractEntries = new Set(
+      Object.values(apiContractMap).map((contract) => {
+        return `${contract.method} ${contract.path}`;
+      }),
+    );
+    const snapshot = JSON.parse(
+      fs.readFileSync(
+        path.resolve(__dirname, "../../contracts/openapi.snapshot.json"),
+        "utf8",
+      ),
+    ) as {
+      readonly paths?: Record<string, Record<string, unknown>>;
+    };
+    const openApiEntries = new Set<string>();
+
+    for (const [path, methods] of Object.entries(snapshot.paths ?? {})) {
+      for (const method of Object.keys(methods)) {
+        openApiEntries.add(`${method.toUpperCase()} ${path}`);
+      }
+    }
+
+    const staleKnownGaps = [...knownOpenApiGaps].filter((signature) => {
+      return openApiEntries.has(signature) || !contractEntries.has(signature);
+    });
+
+    expect(staleKnownGaps).toEqual([]);
   });
 });

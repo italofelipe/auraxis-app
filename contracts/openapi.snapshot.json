@@ -53,7 +53,11 @@
           },
           "opportunity_rate_type": {
             "default": "manual",
-            "enum": ["manual", "product_default", "inflation_only"],
+            "enum": [
+              "manual",
+              "product_default",
+              "inflation_only"
+            ],
             "type": "string"
           },
           "scenario_label": {
@@ -63,7 +67,11 @@
             "type": "string"
           }
         },
-        "required": ["cash_price", "inflation_rate_annual", "installment_count"],
+        "required": [
+          "cash_price",
+          "inflation_rate_annual",
+          "installment_count"
+        ],
         "type": "object"
       },
       "InstallmentVsCashGoalBridge": {
@@ -92,7 +100,10 @@
             "type": "integer"
           },
           "selected_option": {
-            "enum": ["cash", "installment"],
+            "enum": [
+              "cash",
+              "installment"
+            ],
             "type": "string"
           },
           "target_date": {
@@ -107,7 +118,10 @@
             "type": "string"
           }
         },
-        "required": ["selected_option", "title"],
+        "required": [
+          "selected_option",
+          "title"
+        ],
         "type": "object"
       },
       "InstallmentVsCashPlannedExpenseBridge": {
@@ -155,12 +169,21 @@
             "type": "string"
           },
           "selected_option": {
-            "enum": ["cash", "installment"],
+            "enum": [
+              "cash",
+              "installment"
+            ],
             "type": "string"
           },
           "status": {
             "default": "pending",
-            "enum": ["pending", "paid", "cancelled", "postponed", "overdue"],
+            "enum": [
+              "pending",
+              "paid",
+              "cancelled",
+              "postponed",
+              "overdue"
+            ],
             "type": "string"
           },
           "tag_id": {
@@ -181,7 +204,10 @@
             "type": "string"
           }
         },
-        "required": ["selected_option", "title"],
+        "required": [
+          "selected_option",
+          "title"
+        ],
         "type": "object"
       },
       "InstallmentVsCashSave": {
@@ -236,7 +262,11 @@
           },
           "opportunity_rate_type": {
             "default": "manual",
-            "enum": ["manual", "product_default", "inflation_only"],
+            "enum": [
+              "manual",
+              "product_default",
+              "inflation_only"
+            ],
             "type": "string"
           },
           "scenario_label": {
@@ -246,7 +276,11 @@
             "type": "string"
           }
         },
-        "required": ["cash_price", "inflation_rate_annual", "installment_count"],
+        "required": [
+          "cash_price",
+          "inflation_rate_annual",
+          "installment_count"
+        ],
         "type": "object"
       },
       "TransactionCreate": {
@@ -358,7 +392,13 @@
           },
           "status": {
             "description": "Status atual da transação",
-            "enum": ["paid", "pending", "cancelled", "postponed", "overdue"],
+            "enum": [
+              "paid",
+              "pending",
+              "cancelled",
+              "postponed",
+              "overdue"
+            ],
             "example": "pending",
             "type": "string"
           },
@@ -377,7 +417,10 @@
           },
           "type": {
             "description": "Tipo da transação: receita ou despesa",
-            "enum": ["income", "expense"],
+            "enum": [
+              "income",
+              "expense"
+            ],
             "example": "expense",
             "type": "string"
           },
@@ -394,7 +437,12 @@
             "type": "string"
           }
         },
-        "required": ["amount", "due_date", "title", "type"],
+        "required": [
+          "amount",
+          "due_date",
+          "title",
+          "type"
+        ],
         "type": "object"
       },
       "TransactionCreate_7d3b606eab": {
@@ -506,7 +554,13 @@
           },
           "status": {
             "description": "Status atual da transação",
-            "enum": ["paid", "pending", "cancelled", "postponed", "overdue"],
+            "enum": [
+              "paid",
+              "pending",
+              "cancelled",
+              "postponed",
+              "overdue"
+            ],
             "example": "pending",
             "type": "string"
           },
@@ -525,7 +579,10 @@
           },
           "type": {
             "description": "Tipo da transação: receita ou despesa",
-            "enum": ["income", "expense"],
+            "enum": [
+              "income",
+              "expense"
+            ],
             "example": "expense",
             "type": "string"
           },
@@ -565,7 +622,10 @@
             "type": "string"
           }
         },
-        "required": ["email", "password"],
+        "required": [
+          "email",
+          "password"
+        ],
         "type": "object"
       },
       "app_schemas_auth_schema_ConfirmEmailSchema": {
@@ -578,7 +638,9 @@
             "type": "string"
           }
         },
-        "required": ["token"],
+        "required": [
+          "token"
+        ],
         "type": "object"
       },
       "app_schemas_auth_schema_ForgotPasswordSchema": {
@@ -590,7 +652,9 @@
             "type": "string"
           }
         },
-        "required": ["email"],
+        "required": [
+          "email"
+        ],
         "type": "object"
       },
       "app_schemas_auth_schema_ResetPasswordSchema": {
@@ -610,7 +674,10 @@
             "type": "string"
           }
         },
-        "required": ["new_password", "token"],
+        "required": [
+          "new_password",
+          "token"
+        ],
         "type": "object"
       },
       "app_schemas_user_schemas_DeleteAccountSchema": {
@@ -622,7 +689,9 @@
             "writeOnly": true
           }
         },
-        "required": ["password"],
+        "required": [
+          "password"
+        ],
         "type": "object"
       },
       "app_schemas_user_schemas_QuestionnaireAnswerSchema": {
@@ -639,7 +708,9 @@
             "type": "array"
           }
         },
-        "required": ["answers"],
+        "required": [
+          "answers"
+        ],
         "type": "object"
       },
       "app_schemas_user_schemas_SalaryIncreaseSimulationRequestSchema": {
@@ -669,7 +740,12 @@
             "type": "number"
           }
         },
-        "required": ["base_date", "base_salary", "discounts", "target_real_increase"],
+        "required": [
+          "base_date",
+          "base_salary",
+          "discounts",
+          "target_real_increase"
+        ],
         "type": "object"
       },
       "app_schemas_user_schemas_UserProfileSchema": {
@@ -687,7 +763,11 @@
           },
           "gender": {
             "description": "Gênero do usuário",
-            "enum": ["masculino", "feminino", "outro"],
+            "enum": [
+              "masculino",
+              "feminino",
+              "outro"
+            ],
             "example": "masculino",
             "type": "string"
           },
@@ -705,7 +785,11 @@
           },
           "investor_profile": {
             "description": "Perfil do investidor",
-            "enum": ["conservador", "explorador", "entusiasta"],
+            "enum": [
+              "conservador",
+              "explorador",
+              "entusiasta"
+            ],
             "example": "conservador",
             "type": "string"
           },
@@ -793,7 +877,12 @@
           },
           "investor_profile": {
             "description": "Perfil do investidor auto declarado",
-            "enum": ["conservador", "explorador", "entusiasta", null],
+            "enum": [
+              "conservador",
+              "explorador",
+              "entusiasta",
+              null
+            ],
             "example": "conservador",
             "nullable": true,
             "type": "string"
@@ -813,7 +902,11 @@
             "writeOnly": true
           }
         },
-        "required": ["email", "name", "password"],
+        "required": [
+          "email",
+          "name",
+          "password"
+        ],
         "type": "object"
       }
     },
@@ -896,7 +989,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -935,7 +1031,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -974,7 +1073,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -992,7 +1094,9 @@
           }
         },
         "summary": "Confirmar conta",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/auth/email/resend": {
@@ -1028,7 +1132,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -1067,7 +1174,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1106,7 +1216,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1124,7 +1237,9 @@
           }
         },
         "summary": "Reenviar confirmacao de conta",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/auth/login": {
@@ -1190,7 +1305,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -1229,7 +1347,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1268,7 +1389,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1310,7 +1434,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1349,7 +1476,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1388,7 +1518,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1406,7 +1539,9 @@
           }
         },
         "summary": "Autenticar usuário",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/auth/logout": {
@@ -1442,7 +1577,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -1465,7 +1603,9 @@
           }
         ],
         "summary": "Revogar sessão atual",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/auth/password/forgot": {
@@ -1523,7 +1663,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -1562,7 +1705,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1601,7 +1747,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1640,7 +1789,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1658,7 +1810,9 @@
           }
         },
         "summary": "Solicitar recuperação de senha",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/auth/password/reset": {
@@ -1717,7 +1871,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -1756,7 +1913,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1795,7 +1955,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1813,7 +1976,9 @@
           }
         },
         "summary": "Redefinir senha",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/auth/refresh": {
@@ -1852,7 +2017,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -1891,7 +2059,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1930,7 +2101,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -1948,7 +2122,9 @@
           }
         },
         "summary": "Renovar access token",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/auth/register": {
@@ -2015,7 +2191,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -2054,7 +2233,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2093,7 +2275,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2132,7 +2317,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2150,7 +2338,9 @@
           }
         },
         "summary": "Registrar usuário",
-        "tags": ["Autenticação"]
+        "tags": [
+          "Autenticação"
+        ]
       }
     },
     "/dashboard/overview": {
@@ -2158,19 +2348,19 @@
         "description": "Contrato canônico do dashboard financeiro do MVP1. Use esta rota para visão agregada mensal; `/transactions/dashboard` permanece apenas como compatibilidade transitória.",
         "parameters": [
           {
-            "description": "Mês de referência no formato YYYY-MM",
-            "example": "2026-03",
-            "in": "query",
-            "name": "month",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "Mês de referência no formato YYYY-MM",
+            "example": "2026-03",
+            "in": "query",
+            "name": "month",
+            "required": true,
             "type": "string"
           }
         ],
@@ -2228,7 +2418,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -2267,7 +2460,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2306,7 +2502,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2345,7 +2544,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2368,7 +2570,9 @@
           }
         ],
         "summary": "Obter overview mensal do dashboard",
-        "tags": ["Dashboard"]
+        "tags": [
+          "Dashboard"
+        ]
       }
     },
     "/dashboard/trends": {
@@ -2376,20 +2580,20 @@
         "description": "Retorna a série histórica de receitas, despesas e saldo para os últimos N meses (apenas transações pagas).",
         "parameters": [
           {
-            "description": "Número de meses a incluir (1–24, padrão 6)",
-            "example": 6,
-            "in": "query",
-            "name": "months",
-            "required": false,
-            "type": "integer"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
             "type": "string"
+          },
+          {
+            "description": "Número de meses a incluir (1–24, padrão 6)",
+            "example": 6,
+            "in": "query",
+            "name": "months",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
@@ -2422,7 +2626,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -2461,7 +2668,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2500,7 +2710,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2539,7 +2752,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -2562,7 +2778,9 @@
           }
         ],
         "summary": "Tendências mensais do dashboard",
-        "tags": ["Dashboard"]
+        "tags": [
+          "Dashboard"
+        ]
       }
     },
     "/entitlements": {
@@ -2582,7 +2800,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Entitlements"]
+        "tags": [
+          "Entitlements"
+        ]
       }
     },
     "/entitlements/admin": {
@@ -2605,7 +2825,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Entitlements"]
+        "tags": [
+          "Entitlements"
+        ]
       }
     },
     "/entitlements/admin/{entitlement_id}": {
@@ -2635,7 +2857,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Entitlements"]
+        "tags": [
+          "Entitlements"
+        ]
       }
     },
     "/entitlements/check": {
@@ -2665,7 +2889,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Entitlements"]
+        "tags": [
+          "Entitlements"
+        ]
       }
     },
     "/goals": {
@@ -2702,7 +2928,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Metas"]
+        "tags": [
+          "Metas"
+        ]
       }
     },
     "/goals/{goal_id}": {
@@ -2735,7 +2963,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Metas"]
+        "tags": [
+          "Metas"
+        ]
       },
       "get": {
         "description": "Retorna uma meta específica do usuário autenticado.",
@@ -2766,7 +2996,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Metas"]
+        "tags": [
+          "Metas"
+        ]
       },
       "patch": {
         "description": "Atualiza parcialmente uma meta específica do usuário autenticado.",
@@ -2800,7 +3032,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Metas"]
+        "tags": [
+          "Metas"
+        ]
       },
       "put": {
         "description": "Alias legado para atualização de metas. Use `PATCH /goals/{goal_id}` como contrato canônico para update parcial.",
@@ -2864,7 +3098,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Metas"]
+        "tags": [
+          "Metas"
+        ]
       }
     },
     "/goals/{goal_id}/plan": {
@@ -2897,7 +3133,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Metas"]
+        "tags": [
+          "Metas"
+        ]
       }
     },
     "/healthz": {
@@ -2909,7 +3147,9 @@
             "description": "Serviço saudável"
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       },
       "options": {
         "description": "Endpoint público de liveness para probes de infraestrutura.",
@@ -2919,7 +3159,9 @@
             "description": "Serviço saudável"
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       }
     },
     "/ops/metrics": {
@@ -2937,7 +3179,9 @@
             "description": "Export desabilitado"
           }
         },
-        "tags": ["Observability"]
+        "tags": [
+          "Observability"
+        ]
       },
       "options": {
         "description": "Exporta métricas em formato texto compatível com scrape simples.",
@@ -2953,7 +3197,9 @@
             "description": "Export desabilitado"
           }
         },
-        "tags": ["Observability"]
+        "tags": [
+          "Observability"
+        ]
       }
     },
     "/ops/observability": {
@@ -2971,7 +3217,9 @@
             "description": "Export desabilitado"
           }
         },
-        "tags": ["Observability"]
+        "tags": [
+          "Observability"
+        ]
       },
       "options": {
         "description": "Exporta snapshot JSON de métricas internas para collector externo.",
@@ -2987,7 +3235,9 @@
             "description": "Export desabilitado"
           }
         },
-        "tags": ["Observability"]
+        "tags": [
+          "Observability"
+        ]
       }
     },
     "/readiness": {
@@ -3005,7 +3255,9 @@
             "description": "Uma ou mais dependências indisponíveis"
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       },
       "options": {
         "description": "Readiness probe: verifica se DB e Redis estão acessíveis. Retorna 200 quando tudo está ok, 503 quando alguma dependência falhou. Protegido por bearer token (READINESS_TOKEN) quando configurado.",
@@ -3021,7 +3273,9 @@
             "description": "Uma ou mais dependências indisponíveis"
           }
         },
-        "tags": ["Health"]
+        "tags": [
+          "Health"
+        ]
       }
     },
     "/simulations": {
@@ -3067,7 +3321,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Simulações"]
+        "tags": [
+          "Simulações"
+        ]
       }
     },
     "/simulations/installment-vs-cash/calculate": {
@@ -3092,7 +3348,9 @@
           }
         },
         "security": [],
-        "tags": ["Simulações"]
+        "tags": [
+          "Simulações"
+        ]
       }
     },
     "/simulations/installment-vs-cash/save": {
@@ -3154,7 +3412,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Simulações"]
+        "tags": [
+          "Simulações"
+        ]
       }
     },
     "/simulations/{simulation_id}": {
@@ -3184,7 +3444,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Simulações"]
+        "tags": [
+          "Simulações"
+        ]
       },
       "get": {
         "description": "Retorna uma simulação específica do usuário autenticado.",
@@ -3212,7 +3474,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Simulações"]
+        "tags": [
+          "Simulações"
+        ]
       }
     },
     "/simulations/{simulation_id}/goal": {
@@ -3256,7 +3520,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Simulações"]
+        "tags": [
+          "Simulações"
+        ]
       }
     },
     "/simulations/{simulation_id}/planned-expense": {
@@ -3300,7 +3566,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Simulações"]
+        "tags": [
+          "Simulações"
+        ]
       }
     },
     "/transactions": {
@@ -3373,7 +3641,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -3412,7 +3683,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3451,7 +3725,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3474,7 +3751,9 @@
           }
         ],
         "summary": "Listar transações",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       },
       "post": {
         "description": "Cria uma nova transação financeira.\n\nAceita receitas e despesas, com suporte a recorrência e parcelamento.",
@@ -3565,7 +3844,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -3604,7 +3886,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3643,7 +3928,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3682,7 +3970,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3705,7 +3996,9 @@
           }
         ],
         "summary": "Criar transação",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/dashboard": {
@@ -3713,18 +4006,18 @@
         "description": "Compatibilidade transitória para o dashboard mensal. Prefira `GET /dashboard/overview`.",
         "parameters": [
           {
-            "description": "Mês de referência no formato YYYY-MM",
-            "example": "2026-03",
-            "in": "query",
-            "name": "month",
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "Mês de referência no formato YYYY-MM",
+            "example": "2026-03",
+            "in": "query",
+            "name": "month",
             "type": "string"
           }
         ],
@@ -3758,7 +4051,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -3825,7 +4121,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3864,7 +4163,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3903,7 +4205,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -3926,7 +4231,9 @@
           }
         ],
         "summary": "Obter dashboard mensal legado de transações",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/deleted": {
@@ -3991,7 +4298,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -4030,7 +4340,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4069,7 +4382,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4092,7 +4408,9 @@
           }
         ],
         "summary": "Listar transações deletadas",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/due-range": {
@@ -4170,7 +4488,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -4209,7 +4530,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4248,7 +4572,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4287,7 +4614,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4310,7 +4640,9 @@
           }
         ],
         "summary": "Listar vencimentos por período",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/expenses": {
@@ -4388,7 +4720,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -4455,7 +4790,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4494,7 +4832,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4533,7 +4874,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4556,7 +4900,9 @@
           }
         ],
         "summary": "Listar despesas por período (compatibilidade)",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/list": {
@@ -4629,7 +4975,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -4696,7 +5045,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4735,7 +5087,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4758,7 +5113,9 @@
           }
         ],
         "summary": "Listar transações (compatibilidade /transactions/list)",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/restore/{transaction_id}": {
@@ -4829,7 +5186,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -4868,7 +5228,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4907,7 +5270,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4946,7 +5312,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -4969,7 +5338,9 @@
           }
         ],
         "summary": "Restaurar transação deletada",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/summary": {
@@ -4977,18 +5348,18 @@
         "description": "Resumo mensal de receitas, despesas e itens paginados por mês.",
         "parameters": [
           {
-            "description": "Mês de referência no formato YYYY-MM",
-            "example": "2026-03",
-            "in": "query",
-            "name": "month",
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "Mês de referência no formato YYYY-MM",
+            "example": "2026-03",
+            "in": "query",
+            "name": "month",
             "type": "string"
           }
         ],
@@ -5051,7 +5422,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -5090,7 +5464,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5129,7 +5506,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5168,7 +5548,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5191,7 +5574,9 @@
           }
         ],
         "summary": "Obter resumo mensal de transações",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/{transaction_id}": {
@@ -5237,7 +5622,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -5276,7 +5664,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5315,7 +5706,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5354,7 +5748,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5393,7 +5790,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5416,7 +5816,9 @@
           }
         ],
         "summary": "Remover transação logicamente",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       },
       "get": {
         "description": "Retorna o detalhe canônico de uma transação do usuário.",
@@ -5485,7 +5887,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -5524,7 +5929,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5563,7 +5971,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5602,7 +6013,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5641,7 +6055,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5664,7 +6081,9 @@
           }
         ],
         "summary": "Obter detalhe de transação",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       },
       "patch": {
         "description": "Atualiza parcialmente uma transação existente. Este é o contrato canônico de update do MVP1.",
@@ -5756,7 +6175,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -5795,7 +6217,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5834,7 +6259,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5873,7 +6301,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5912,7 +6343,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5951,7 +6385,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -5974,7 +6411,9 @@
           }
         ],
         "summary": "Atualizar transação parcialmente",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       },
       "put": {
         "description": "Compatibilidade transitória para update parcial. Prefira `PATCH /transactions/{transaction_id}`.",
@@ -6066,7 +6505,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -6133,7 +6575,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6172,7 +6617,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6211,7 +6659,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6250,7 +6701,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6289,7 +6743,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6312,7 +6769,9 @@
           }
         ],
         "summary": "Atualizar transação (compatibilidade PUT)",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/transactions/{transaction_id}/force": {
@@ -6358,7 +6817,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -6397,7 +6859,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6436,7 +6901,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6475,7 +6943,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6498,7 +6969,9 @@
           }
         ],
         "summary": "Remover transação permanentemente",
-        "tags": ["Transações"]
+        "tags": [
+          "Transações"
+        ]
       }
     },
     "/user/bootstrap": {
@@ -6595,7 +7068,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -6634,7 +7110,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6673,7 +7152,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6696,7 +7178,9 @@
           }
         ],
         "summary": "Obter bootstrap da home do usuário",
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       }
     },
     "/user/me": {
@@ -6746,7 +7230,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -6785,7 +7272,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6824,7 +7314,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6863,7 +7356,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -6886,7 +7382,9 @@
           }
         ],
         "summary": "Excluir conta do usuário (LGPD)",
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       },
       "get": {
         "description": "Retorna o contexto do usuário autenticado.\n\nUso recomendado:\n- `X-API-Contract: v3` para o contrato canônico e leve\n- `/user/bootstrap` para agregado da home\n- `/transactions` para coleção paginada e filtros\n\nLegado:\n- `v1`/`v2` ainda aceitam paginação e filtros de coleção\n- respostas legadas enviam headers de deprecação e sunset",
@@ -6952,7 +7450,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -6991,7 +7492,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7014,7 +7518,9 @@
           }
         ],
         "summary": "Obter contexto do usuário autenticado",
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       }
     },
     "/user/profile": {
@@ -7058,7 +7564,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -7097,7 +7606,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7136,7 +7648,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7159,7 +7674,9 @@
           }
         ],
         "summary": "Obter perfil reduzido do usuário",
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       },
       "put": {
         "description": "Atualiza o perfil do usuário autenticado.\n\nCampos aceitos:\n- gender: 'masculino', 'feminino', 'outro'\n- birth_date: 'YYYY-MM-DD'\n- monthly_income, net_worth, monthly_expenses, initial_investment,\n  monthly_investment: decimal\n- investment_goal_date: 'YYYY-MM-DD'\n- investor_profile: 'conservador', 'explorador', 'entusiasta'\n\nExemplo de request:\n{\n  'gender': 'masculino',\n  'birth_date': '1990-05-15',\n  'monthly_income': '5000.00',\n  'net_worth': '100000.00',\n  'monthly_expenses': '2000.00',\n  'initial_investment': '10000.00',\n  'monthly_investment': '500.00',\n  'investment_goal_date': '2025-12-31',\n  'investor_profile': 'conservador'\n}\n\nExemplo de resposta:\n{ 'message': 'Perfil atualizado com sucesso', 'data': { ...dados do usuário... } }",
@@ -7229,7 +7746,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -7268,7 +7788,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7307,7 +7830,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7346,7 +7872,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7385,7 +7914,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7408,7 +7940,9 @@
           }
         ],
         "summary": "Atualizar perfil do usuário",
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       }
     },
     "/user/profile/questionnaire": {
@@ -7464,7 +7998,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -7503,7 +8040,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7526,7 +8066,9 @@
           }
         ],
         "summary": "Listar questionário de perfil de investidor",
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       },
       "post": {
         "description": "Submete as respostas do questionário e classifica o perfil de investidor.\n\nEnvie exatamente 5 respostas, cada uma com os pontos da opção escolhida (1–3).\n\nPerfis possíveis:\n- **conservador** — score ≤ 7\n- **explorador**  — score de 8 a 11\n- **entusiasta**  — score ≥ 12\n\nO resultado é persistido no perfil do usuário autenticado.",
@@ -7545,7 +8087,13 @@
             "application/json": {
               "description": "Lista de 5 respostas, cada uma entre 1 e 3 pontos.",
               "example": {
-                "answers": [1, 2, 2, 3, 1]
+                "answers": [
+                  1,
+                  2,
+                  2,
+                  3,
+                  1
+                ]
               },
               "schema": {
                 "$ref": "#/components/schemas/app_schemas_user_schemas_QuestionnaireAnswerSchema"
@@ -7577,7 +8125,10 @@
                       "type": "object"
                     }
                   },
-                  "required": ["message", "data"],
+                  "required": [
+                    "message",
+                    "data"
+                  ],
                   "type": "object"
                 }
               }
@@ -7616,7 +8167,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7655,7 +8209,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7677,7 +8234,9 @@
                 "example": {
                   "code": "VALIDATION_ERROR",
                   "details": {
-                    "answers": ["Missing data for required field."]
+                    "answers": [
+                      "Missing data for required field."
+                    ]
                   },
                   "message": "Dados inválidos",
                   "status_code": 422
@@ -7697,7 +8256,10 @@
                       "type": "integer"
                     }
                   },
-                  "required": ["message", "code"],
+                  "required": [
+                    "message",
+                    "code"
+                  ],
                   "type": "object"
                 }
               }
@@ -7720,7 +8282,9 @@
           }
         ],
         "summary": "Responder questionário de perfil de investidor",
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       }
     },
     "/user/simulate-salary-increase": {
@@ -7752,7 +8316,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Usuário"]
+        "tags": [
+          "Usuário"
+        ]
       }
     },
     "/wallet": {
@@ -7798,7 +8364,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Lista os investimentos cadastrados na carteira com paginação.",
@@ -7842,7 +8410,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "post": {
         "description": "Adiciona um novo item à carteira do usuário.\n\nVocê pode informar um valor fixo (como R$1000,00 em poupança) ou um ativo com ticker.\n\nRegras:\n- Se informar o campo 'ticker', o campo 'value' será ignorado.\n- Se não informar 'ticker', é obrigatório informar 'value'.\n- Se informar 'ticker', também é obrigatório informar 'quantity'.\n\nExemplo com valor fixo:\n{'name': 'Poupança', 'value': 1500.00, 'register_date': '2024-07-01', 'should_be_on_wallet': true}\n\nExemplo com ticker:\n{'name': 'Investimento PETR4', 'ticker': 'petr4', 'quantity': 10, 'register_date': '2024-07-01', 'should_be_on_wallet': true}\n\nResposta esperada:\n{'message': 'Ativo cadastrado com sucesso'}",
@@ -7866,7 +8436,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/valuation": {
@@ -7894,7 +8466,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna a valorização atual consolidada da carteira do usuário, com cálculo por investimento.",
@@ -7920,7 +8494,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/valuation/history": {
@@ -7928,10 +8504,9 @@
         "description": "Retorna histórico diário de evolução da carteira por período, com totais de compra/venda e valor líquido investido acumulado.",
         "parameters": [
           {
-            "deprecated": true,
-            "description": "Alias legado de `end_date`.",
+            "description": "Data final (YYYY-MM-DD). Opcional.",
             "in": "query",
-            "name": "finalDate",
+            "name": "end_date",
             "required": false
           },
           {
@@ -7942,22 +8517,23 @@
             "type": "string"
           },
           {
-            "description": "Data inicial (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "start_date",
-            "required": false
-          },
-          {
-            "description": "Data final (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "end_date",
-            "required": false
-          },
-          {
             "deprecated": true,
             "description": "Alias legado de `start_date`.",
             "in": "query",
             "name": "startDate",
+            "required": false
+          },
+          {
+            "deprecated": true,
+            "description": "Alias legado de `end_date`.",
+            "in": "query",
+            "name": "finalDate",
+            "required": false
+          },
+          {
+            "description": "Data inicial (YYYY-MM-DD). Opcional.",
+            "in": "query",
+            "name": "start_date",
             "required": false
           }
         ],
@@ -8007,16 +8583,17 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna histórico diário de evolução da carteira por período, com totais de compra/venda e valor líquido investido acumulado.",
         "parameters": [
           {
-            "deprecated": true,
-            "description": "Alias legado de `end_date`.",
+            "description": "Data final (YYYY-MM-DD). Opcional.",
             "in": "query",
-            "name": "finalDate",
+            "name": "end_date",
             "required": false
           },
           {
@@ -8027,22 +8604,23 @@
             "type": "string"
           },
           {
-            "description": "Data inicial (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "start_date",
-            "required": false
-          },
-          {
-            "description": "Data final (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "end_date",
-            "required": false
-          },
-          {
             "deprecated": true,
             "description": "Alias legado de `start_date`.",
             "in": "query",
             "name": "startDate",
+            "required": false
+          },
+          {
+            "deprecated": true,
+            "description": "Alias legado de `end_date`.",
+            "in": "query",
+            "name": "finalDate",
+            "required": false
+          },
+          {
+            "description": "Data inicial (YYYY-MM-DD). Opcional.",
+            "in": "query",
+            "name": "start_date",
             "required": false
           }
         ],
@@ -8092,7 +8670,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}": {
@@ -8133,7 +8713,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "get": {
         "description": "Retorna o detalhe canônico de um investimento específico da carteira do usuário autenticado.",
@@ -8172,7 +8754,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Compatibilidade transitória para atualização parcial de investimento. Use `PATCH /wallet/{investment_id}` como método canônico.",
@@ -8241,7 +8825,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "patch": {
         "description": "Atualiza parcialmente um investimento existente da carteira do usuário. Este é o método canônico para alterações parciais.",
@@ -8280,7 +8866,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "put": {
         "description": "Compatibilidade transitória para atualização parcial de investimento. Use `PATCH /wallet/{investment_id}` como método canônico.",
@@ -8349,7 +8937,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/history": {
@@ -8390,7 +8980,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna o histórico de alterações de um investimento, paginado e ordenado.",
@@ -8429,7 +9021,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations": {
@@ -8488,7 +9082,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Lista operações de investimento de um item da carteira com paginação.",
@@ -8545,7 +9141,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "post": {
         "description": "Registra uma operação de investimento (buy/sell) para um item da carteira.",
@@ -8587,7 +9185,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/invested-amount": {
@@ -8640,7 +9240,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna o valor investido no dia informado, considerando operações de compra e venda do investimento.",
@@ -8691,7 +9293,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/position": {
@@ -8732,7 +9336,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna posição atual e custo médio do investimento com base nas operações registradas.",
@@ -8771,7 +9377,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/summary": {
@@ -8812,7 +9420,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Resumo agregado das operações de um investimento.",
@@ -8851,7 +9461,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/operations/{operation_id}": {
@@ -8859,16 +9471,16 @@
         "description": "Remove operação de investimento.",
         "parameters": [
           {
-            "description": "ID do investimento",
+            "description": "ID da operação",
             "in": "path",
-            "name": "investment_id",
+            "name": "operation_id",
             "required": true,
             "type": "string"
           },
           {
-            "description": "ID da operação",
+            "description": "ID do investimento",
             "in": "path",
-            "name": "operation_id",
+            "name": "investment_id",
             "required": true,
             "type": "string"
           },
@@ -8899,22 +9511,24 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Atualiza operação de investimento existente.",
         "parameters": [
           {
-            "description": "ID do investimento",
+            "description": "ID da operação",
             "in": "path",
-            "name": "investment_id",
+            "name": "operation_id",
             "required": true,
             "type": "string"
           },
           {
-            "description": "ID da operação",
+            "description": "ID do investimento",
             "in": "path",
-            "name": "operation_id",
+            "name": "investment_id",
             "required": true,
             "type": "string"
           },
@@ -8948,22 +9562,24 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "put": {
         "description": "Atualiza operação de investimento existente.",
         "parameters": [
           {
-            "description": "ID do investimento",
+            "description": "ID da operação",
             "in": "path",
-            "name": "investment_id",
+            "name": "operation_id",
             "required": true,
             "type": "string"
           },
           {
-            "description": "ID da operação",
+            "description": "ID do investimento",
             "in": "path",
-            "name": "operation_id",
+            "name": "investment_id",
             "required": true,
             "type": "string"
           },
@@ -8997,7 +9613,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     },
     "/wallet/{investment_id}/valuation": {
@@ -9038,7 +9656,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       },
       "options": {
         "description": "Retorna a valorização atual de um investimento específico.",
@@ -9077,7 +9697,9 @@
             "BearerAuth": []
           }
         ],
-        "tags": ["Wallet"]
+        "tags": [
+          "Wallet"
+        ]
       }
     }
   },

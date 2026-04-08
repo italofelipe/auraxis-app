@@ -6447,13 +6447,6 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /**
-                     * @deprecated
-                     * @description Alias legado de `end_date`.
-                     */
-                    finalDate?: string;
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    start_date?: string;
                     /** @description Data final (YYYY-MM-DD). Opcional. */
                     end_date?: string;
                     /**
@@ -6461,6 +6454,13 @@ export interface paths {
                      * @description Alias legado de `start_date`.
                      */
                     startDate?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
+                    finalDate?: string;
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -6521,13 +6521,6 @@ export interface paths {
         options: {
             parameters: {
                 query?: {
-                    /**
-                     * @deprecated
-                     * @description Alias legado de `end_date`.
-                     */
-                    finalDate?: string;
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    start_date?: string;
                     /** @description Data final (YYYY-MM-DD). Opcional. */
                     end_date?: string;
                     /**
@@ -6535,6 +6528,13 @@ export interface paths {
                      * @description Alias legado de `start_date`.
                      */
                     startDate?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
+                    finalDate?: string;
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -7496,10 +7496,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID do investimento */
-                    investment_id: string;
                     /** @description ID da operação */
                     operation_id: string;
+                    /** @description ID do investimento */
+                    investment_id: string;
                 };
                 cookie?: never;
             };
@@ -7552,10 +7552,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID do investimento */
-                    investment_id: string;
                     /** @description ID da operação */
                     operation_id: string;
+                    /** @description ID do investimento */
+                    investment_id: string;
                 };
                 cookie?: never;
             };
@@ -7600,10 +7600,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID do investimento */
-                    investment_id: string;
                     /** @description ID da operação */
                     operation_id: string;
+                    /** @description ID do investimento */
+                    investment_id: string;
                 };
                 cookie?: never;
             };
