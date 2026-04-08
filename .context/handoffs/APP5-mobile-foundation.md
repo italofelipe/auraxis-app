@@ -401,3 +401,10 @@
 ### Proximo passo
 - seguir para `APP FND-05A`, endurecendo sessão, expiração/refresh e política de auth do runtime mobile;
 - em seguida atacar `FND-05B/FND-05C` com logging, observabilidade cliente, degraded states e confiabilidade operacional antes de liberar a primeira feature real.
+
+### Follow-up de CI
+- alinhei [`sonar-project.properties`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/sonar-project.properties) com a baseline real do Jest, trocando `sonar.sources=lib,components,hooks` por `sonar.sources=.` e restringindo o escopo via `sonar.inclusions` aos mesmos arquivos versionados em `collectCoverageFrom`;
+- adicionei o guardrail [`scripts/check-sonar-config-governance.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/scripts/check-sonar-config-governance.cjs) e o liguei ao [`package.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-04b-contract-catalog/package.json), para que drift entre Sonar e Jest passe a falhar no `policy:check` antes do GitHub Actions;
+- validação adicional executada:
+  - `node scripts/check-sonar-config-governance.cjs`
+  - `npm run policy:check`
