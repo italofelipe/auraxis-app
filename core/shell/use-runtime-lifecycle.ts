@@ -17,6 +17,7 @@ import {
   type RuntimeAppState,
   useAppShellStore,
 } from "@/core/shell/app-shell-store";
+import { reachabilityService } from "@/core/shell/reachability-service";
 import { createRuntimeRevalidationService } from "@/core/shell/runtime-revalidation";
 import { useSessionStore } from "@/core/session/session-store";
 import { appLogger } from "@/core/telemetry/app-logger";
@@ -43,6 +44,16 @@ const shouldSyncOnForeground = (
     next === "active" &&
     (previous === "inactive" || previous === "background")
   );
+};
+
+type RuntimeSyncReason = "startup" | "foreground" | "checkout-return";
+
+const resolveRuntimeFailureReason = (
+  reason: Exclude<RuntimeSyncReason, "startup">,
+) => {
+  return reason === "checkout-return"
+    ? "checkout-return-failed"
+    : "runtime-revalidation-failed";
 };
 
 interface IncomingUrlHandlerDependencies {
@@ -167,6 +178,12 @@ const bindAppStateLifecycle = (
 export const useRuntimeLifecycle = (): void => {
   const queryClient = useQueryClient();
   const setAppState = useAppShellStore((state) => state.setAppState);
+  const setConnectivityStatus = useAppShellStore(
+    (state) => state.setConnectivityStatus,
+  );
+  const setRuntimeDegradedReason = useAppShellStore(
+    (state) => state.setRuntimeDegradedReason,
+  );
   const setPendingCheckoutReturn = useAppShellStore(
     (state) => state.setPendingCheckoutReturn,
   );
@@ -178,6 +195,9 @@ export const useRuntimeLifecycle = (): void => {
   );
   const recordForegroundSync = useAppShellStore(
     (state) => state.recordForegroundSync,
+  );
+  const recordReachabilityCheck = useAppShellStore(
+    (state) => state.recordReachabilityCheck,
   );
   const signOut = useSessionStore((state) => state.signOut);
   const markSessionValidated = useSessionStore(
@@ -204,10 +224,53 @@ export const useRuntimeLifecycle = (): void => {
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
-  const revalidateWithTelemetry = useMemo(() => {
+  const probeConnectivity = useMemo(() => {
     return async (
-      reason: "foreground" | "checkout-return",
+      reason: RuntimeSyncReason,
+    ) => {
+      appLogger.info({
+        domain: "runtime",
+        event: "runtime.reachability_probe_started",
+        context: {
+          reason,
+        },
+      });
+
+      const result = await reachabilityService.probe();
+
+      setConnectivityStatus(result.status);
+      recordReachabilityCheck(result.checkedAt);
+      setRuntimeDegradedReason(result.status === "online" ? null : result.degradedReason);
+
+      appLogger[result.status === "online" ? "info" : "warn"]({
+        domain: "runtime",
+        event: "runtime.reachability_probe_completed",
+        context: {
+          reason,
+          status: result.status,
+          degradedReason: result.degradedReason,
+          latencyMs: result.latencyMs,
+          statusCode: result.statusCode,
+        },
+      });
+
+      return result;
+    };
+  }, [
+    recordReachabilityCheck,
+    setConnectivityStatus,
+    setRuntimeDegradedReason,
+  ]);
+
+  const syncRuntime = useMemo(() => {
+    return async (
+      reason: RuntimeSyncReason,
     ): Promise<unknown> => {
+      const probeResult = await probeConnectivity(reason);
+      if (reason === "startup" || probeResult.status !== "online") {
+        return null;
+      }
+
       appLogger.info({
         domain: "runtime",
         event: "runtime.revalidation_started",
@@ -218,6 +281,7 @@ export const useRuntimeLifecycle = (): void => {
 
       try {
         const result = await runtimeRevalidationService.revalidate(reason);
+        setRuntimeDegradedReason(null);
 
         appLogger[result.signedOut ? "warn" : "info"]({
           domain: "runtime",
@@ -232,6 +296,7 @@ export const useRuntimeLifecycle = (): void => {
 
         return result;
       } catch (error) {
+        setRuntimeDegradedReason(resolveRuntimeFailureReason(reason));
         appLogger.error({
           domain: "runtime",
           event: "runtime.revalidation_failed",
@@ -240,24 +305,28 @@ export const useRuntimeLifecycle = (): void => {
           },
           error,
         });
-        throw error;
+        return null;
       }
     };
-  }, [runtimeRevalidationService]);
+  }, [probeConnectivity, runtimeRevalidationService, setRuntimeDegradedReason]);
 
   const handleIncomingUrl = useMemo(
     () =>
       createIncomingUrlHandler({
         setPendingCheckoutReturn,
         setLastHandledUrl,
-        revalidate: (reason) => revalidateWithTelemetry(reason),
+        revalidate: (reason) => syncRuntime(reason),
       }),
-    [revalidateWithTelemetry, setLastHandledUrl, setPendingCheckoutReturn],
+    [setLastHandledUrl, setPendingCheckoutReturn, syncRuntime],
   );
 
   useEffect(() => {
     setAppState(normalizeAppState(AppState.currentState));
   }, [setAppState]);
+
+  useEffect(() => {
+    void syncRuntime("startup");
+  }, [syncRuntime]);
 
   useEffect(() => {
     return bindInitialUrlLifecycle(handleIncomingUrl);
@@ -267,7 +336,7 @@ export const useRuntimeLifecycle = (): void => {
     return bindAppStateLifecycle(
       appStateRef,
       setAppState,
-      (reason) => revalidateWithTelemetry(reason),
+      (reason) => syncRuntime(reason),
     );
-  }, [revalidateWithTelemetry, setAppState]);
+  }, [setAppState, syncRuntime]);
 };

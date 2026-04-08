@@ -53,6 +53,8 @@ const config = {
     "core/session/session-policy.ts",
     "core/session/session-storage.ts",
     "core/session/session-store.ts",
+    "core/query/retry-policy.ts",
+    "core/shell/reachability-service.ts",
     "core/shell/runtime-revalidation.ts",
     "core/shell/use-app-startup.ts",
     "core/shell/use-runtime-lifecycle.ts",

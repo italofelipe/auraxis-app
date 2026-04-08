@@ -3,24 +3,42 @@ import { create } from "zustand";
 import type { CheckoutReturnIntent } from "@/core/navigation/deep-linking";
 
 export type RuntimeAppState = "unknown" | "active" | "inactive" | "background";
+export type RuntimeConnectivityStatus =
+  | "unknown"
+  | "online"
+  | "offline"
+  | "degraded";
+export type RuntimeDegradedReason =
+  | "offline"
+  | "probe-timeout"
+  | "healthcheck-failed"
+  | "runtime-revalidation-failed"
+  | "checkout-return-failed"
+  | null;
 
 export interface AppShellState {
   readonly fontsReady: boolean;
   readonly reducedMotionEnabled: boolean;
   readonly startupReady: boolean;
   readonly appState: RuntimeAppState;
+  readonly connectivityStatus: RuntimeConnectivityStatus;
+  readonly runtimeDegradedReason: RuntimeDegradedReason;
   readonly entitlementsVersion: number | null;
   readonly pendingCheckoutReturn: CheckoutReturnIntent | null;
   readonly lastHandledUrl: string | null;
   readonly lastForegroundSyncAt: string | null;
+  readonly lastReachabilityCheckAt: string | null;
   setFontsReady: (value: boolean) => void;
   setReducedMotionEnabled: (value: boolean) => void;
   setStartupReady: (value: boolean) => void;
   setAppState: (value: RuntimeAppState) => void;
+  setConnectivityStatus: (value: RuntimeConnectivityStatus) => void;
+  setRuntimeDegradedReason: (value: RuntimeDegradedReason) => void;
   setEntitlementsVersion: (value: number | null) => void;
   setPendingCheckoutReturn: (value: CheckoutReturnIntent | null) => void;
   setLastHandledUrl: (value: string | null) => void;
   recordForegroundSync: (timestamp: string) => void;
+  recordReachabilityCheck: (timestamp: string) => void;
 }
 
 export const useAppShellStore = create<AppShellState>((set) => ({
@@ -28,10 +46,13 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   reducedMotionEnabled: false,
   startupReady: false,
   appState: "unknown",
+  connectivityStatus: "unknown",
+  runtimeDegradedReason: null,
   entitlementsVersion: null,
   pendingCheckoutReturn: null,
   lastHandledUrl: null,
   lastForegroundSyncAt: null,
+  lastReachabilityCheckAt: null,
   setFontsReady: (value: boolean): void => {
     set({ fontsReady: value });
   },
@@ -44,6 +65,12 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   setAppState: (value: RuntimeAppState): void => {
     set({ appState: value });
   },
+  setConnectivityStatus: (value: RuntimeConnectivityStatus): void => {
+    set({ connectivityStatus: value });
+  },
+  setRuntimeDegradedReason: (value: RuntimeDegradedReason): void => {
+    set({ runtimeDegradedReason: value });
+  },
   setEntitlementsVersion: (value: number | null): void => {
     set({ entitlementsVersion: value });
   },
@@ -55,5 +82,8 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   },
   recordForegroundSync: (timestamp: string): void => {
     set({ lastForegroundSyncAt: timestamp });
+  },
+  recordReachabilityCheck: (timestamp: string): void => {
+    set({ lastReachabilityCheckAt: timestamp });
   },
 }));

@@ -6,6 +6,7 @@ import * as Linking from "expo-linking";
 import { AppState, type AppStateStatus } from "react-native";
 
 import { useAppShellStore } from "@/core/shell/app-shell-store";
+import { reachabilityService } from "@/core/shell/reachability-service";
 import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
 import { useSessionStore } from "@/core/session/session-store";
 import { appLogger } from "@/core/telemetry/app-logger";
@@ -25,6 +26,12 @@ jest.mock("@/core/shell/runtime-revalidation", () => ({
   createRuntimeRevalidationService: jest.fn(() => ({
     revalidate: mockRevalidate,
   })),
+}));
+
+jest.mock("@/core/shell/reachability-service", () => ({
+  reachabilityService: {
+    probe: jest.fn(),
+  },
 }));
 
 jest.mock("@/core/telemetry/app-logger", () => ({
@@ -67,10 +74,13 @@ const resetStores = (): void => {
     reducedMotionEnabled: false,
     startupReady: true,
     appState: "unknown",
+    connectivityStatus: "unknown",
+    runtimeDegradedReason: null,
     entitlementsVersion: null,
     pendingCheckoutReturn: null,
     lastHandledUrl: null,
     lastForegroundSyncAt: null,
+    lastReachabilityCheckAt: null,
   });
   useSessionStore.setState({
     accessToken: "token",
@@ -98,6 +108,13 @@ describe("useRuntimeLifecycle - core flow", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appStateListener = null;
+    jest.mocked(reachabilityService.probe).mockResolvedValue({
+      status: "online",
+      degradedReason: null,
+      checkedAt: "2026-04-08T15:00:00.000Z",
+      latencyMs: 42,
+      statusCode: 200,
+    });
     Object.defineProperty(AppState, "currentState", {
       configurable: true,
       value: "background",
@@ -111,6 +128,28 @@ describe("useRuntimeLifecycle - core flow", () => {
       },
     );
     resetStores();
+  });
+
+  it("faz probe de conectividade no startup sem disparar runtime revalidation", async () => {
+    jest.mocked(Linking.getInitialURL).mockResolvedValue(null);
+    jest.mocked(Linking.addEventListener).mockImplementation(
+      ((..._args) => createLinkingSubscription()) as typeof Linking.addEventListener,
+    );
+
+    renderHook(() => useRuntimeLifecycle(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(useAppShellStore.getState()).toMatchObject({
+        connectivityStatus: "online",
+        runtimeDegradedReason: null,
+        lastReachabilityCheckAt: "2026-04-08T15:00:00.000Z",
+      });
+    });
+
+    expect(reachabilityService.probe).toHaveBeenCalledTimes(1);
+    expect(mockRevalidate).not.toHaveBeenCalled();
   });
 
   it("processa o deep link inicial de retorno do checkout", async () => {
@@ -142,6 +181,7 @@ describe("useRuntimeLifecycle - core flow", () => {
     expect(useAppShellStore.getState().lastHandledUrl).toBe(
       "auraxisapp://assinatura?status=success&provider=asaas&token=%3Credacted%3E",
     );
+    expect(useAppShellStore.getState().connectivityStatus).toBe("online");
     expect(mockRevalidate).toHaveBeenCalledWith("checkout-return");
     expect(appLogger.info).toHaveBeenCalledWith({
       domain: "checkout",
@@ -173,7 +213,11 @@ describe("useRuntimeLifecycle - core flow", () => {
       expect(mockRevalidate).toHaveBeenCalledWith("foreground");
     });
 
-    expect(useAppShellStore.getState().appState).toBe("active");
+    expect(useAppShellStore.getState()).toMatchObject({
+      appState: "active",
+      connectivityStatus: "online",
+      runtimeDegradedReason: null,
+    });
     expect(appLogger.info).toHaveBeenCalledWith({
       domain: "runtime",
       event: "runtime.app_state_changed",

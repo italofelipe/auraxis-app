@@ -93,6 +93,37 @@ describe("hostedCheckoutService", () => {
     });
   });
 
+  it("faz fallback para o browser quando a auth session falha no mobile", async () => {
+    const openAuthSessionAsync = jest
+      .fn()
+      .mockRejectedValue(new Error("auth session unavailable"));
+    const openBrowserAsync = jest.fn().mockResolvedValue({
+      type: "opened",
+    });
+    const service = createHostedCheckoutService({
+      openAuthSessionAsync,
+      openBrowserAsync,
+      dismissBrowser: jest.fn(),
+    });
+
+    const result = await service.openCheckout({
+      planSlug: "premium",
+      planCode: "premium_monthly",
+      billingCycle: "monthly",
+      checkoutUrl: "https://payments.auraxis.dev/checkout/123",
+      provider: "asaas",
+    });
+
+    expect(openBrowserAsync).toHaveBeenCalledWith(
+      "https://payments.auraxis.dev/checkout/123",
+      expect.any(Object),
+    );
+    expect(result).toEqual({
+      type: "opened",
+      returnUrl: "auraxisapp://assinatura?checkout_return=1",
+    });
+  });
+
   it("falha rapido quando a sessao de checkout nao possui URL", async () => {
     const service = createHostedCheckoutService({
       openAuthSessionAsync: jest.fn(),
