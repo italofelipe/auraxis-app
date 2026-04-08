@@ -235,3 +235,47 @@
 ### Proximo passo
 - abrir `APP FND-03B` para consolidar primitives, forms e wrappers visuais até o app inteiro depender só de blocos reutilizáveis canônicos;
 - em seguida entrar no `APP FND-03C` para fatiar controllers grandes, especialmente `installment-vs-cash`, e subir a cobertura da lógica de orquestração no mesmo padrão da fundação.
+
+---
+
+## Update - APP FND-03B
+
+### O que foi feito
+- consolidei wrappers visuais canônicos novos em:
+  - [`shared/components/app-key-value-row.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/shared/components/app-key-value-row.tsx)
+  - [`shared/components/app-toggle-row.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/shared/components/app-toggle-row.tsx)
+- movi componentes de produto que ainda viviam em `components/` para a trilha canônica:
+  - alertas em [`features/alerts/components/alert-record-card.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/alerts/components/alert-record-card.tsx) e [`features/alerts/components/alert-preference-row.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/alerts/components/alert-preference-row.tsx)
+  - entitlement/paywall em [`features/entitlements/components/paywall-gate.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/entitlements/components/paywall-gate.tsx) e [`features/entitlements/hooks/use-feature-access.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/entitlements/hooks/use-feature-access.ts)
+  - upgrade premium em [`features/subscription/components/upgrade-cta.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/subscription/components/upgrade-cta.tsx)
+- atualizei as rotas e componentes de domínio para usar esses blocos reutilizáveis:
+  - [`app/(private)/alertas.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/app/(private)/alertas.tsx)
+  - [`app/(private)/assinatura.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/app/(private)/assinatura.tsx)
+  - [`app/(private)/carteira.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/app/(private)/carteira.tsx)
+  - [`features/tools/components/installment-vs-cash-form.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/tools/components/installment-vs-cash-form.tsx)
+  - [`features/tools/components/installment-vs-cash-history-list.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/tools/components/installment-vs-cash-history-list.tsx)
+- removi os componentes herdados de produto de `components/` e o hook legado [`hooks/use-feature-access.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/hooks/use-feature-access.ts), deixando ali apenas infraestrutura/template ainda fora do escopo deste slice;
+- endureci o guardrail em [`scripts/check-frontend-governance.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/scripts/check-frontend-governance.cjs) para falhar cedo se o app voltar a importar esses blocos legados;
+- alinhei a mutation de preferencias de alerta em [`features/alerts/hooks/use-alerts-mutations.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/alerts/hooks/use-alerts-mutations.ts) com o contrato canônico de `globalOptOut`;
+- subi cobertura nova para os wrappers/gates/componentes canônicos em:
+  - [`shared/components/app-key-value-row.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/shared/components/app-key-value-row.test.tsx)
+  - [`shared/components/app-toggle-row.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/shared/components/app-toggle-row.test.tsx)
+  - [`features/alerts/components/alert-record-card.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/alerts/components/alert-record-card.test.tsx)
+  - [`features/alerts/components/alert-preference-row.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/alerts/components/alert-preference-row.test.tsx)
+  - [`features/subscription/components/upgrade-cta.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/subscription/components/upgrade-cta.test.tsx)
+  - [`features/entitlements/components/paywall-gate.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/entitlements/components/paywall-gate.test.tsx)
+  - [`features/entitlements/hooks/use-feature-access.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03b-ui-foundation/features/entitlements/hooks/use-feature-access.test.ts)
+
+### O que foi validado
+- `npx jest shared/components/app-key-value-row.test.tsx shared/components/app-toggle-row.test.tsx features/alerts/components/alert-record-card.test.tsx features/alerts/components/alert-preference-row.test.tsx features/subscription/components/upgrade-cta.test.tsx features/entitlements/components/paywall-gate.test.tsx features/entitlements/hooks/use-feature-access.test.ts --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- `components/` ainda guarda alguns blocos de infraestrutura/template (`haptic-tab`, `parallax-scroll-view`, `themed-*`, `ui/collapsible`) que não são mais trilha válida para UI de produto, mas ainda não foram reconciliados neste slice;
+- a camada visual canônica melhorou bastante, porém ainda faltam wrappers mais ricos de section/list/empty state para reduzir ainda mais a variabilidade quando começarmos as primeiras telas finais;
+- o próximo hotspot estrutural segue sendo a lógica de orquestração de telas e controllers maiores, especialmente no domínio `installment-vs-cash`.
+
+### Proximo passo
+- seguir para `APP FND-03C`, extraindo controladores de screen e removendo a lógica restante de view para que `.tsx` virem somente composição;
+- depois abrir `APP FND-04A`, completando o scaffold dos domínios canônicos restantes do MVP1 antes da primeira feature real.

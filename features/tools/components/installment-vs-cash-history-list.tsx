@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 
 import { Paragraph, YStack } from "tamagui";
 
+import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { formatCurrency, formatShortDate } from "@/shared/utils/formatters";
 import type { InstallmentVsCashSavedSimulation } from "@/features/tools/contracts";
@@ -29,13 +30,14 @@ export function InstallmentVsCashHistoryList({
               <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
                 Salva em {formatShortDate(item.createdAt)}
               </Paragraph>
-              <Paragraph color="$color" fontFamily="$body" fontSize="$3">
-                A vista: {formatCurrency(item.result.comparison.cashOptionTotal)}
-              </Paragraph>
-              <Paragraph color="$color" fontFamily="$body" fontSize="$3">
-                Valor presente do parcelado:{" "}
-                {formatCurrency(item.result.comparison.installmentPresentValue)}
-              </Paragraph>
+              <AppKeyValueRow
+                label="A vista"
+                value={formatCurrency(item.result.comparison.cashOptionTotal)}
+              />
+              <AppKeyValueRow
+                label="Valor presente do parcelado"
+                value={formatCurrency(item.result.comparison.installmentPresentValue)}
+              />
             </YStack>
           </AppSurfaceCard>
         ))}

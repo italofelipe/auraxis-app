@@ -1,6 +1,7 @@
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { useWalletScreenController } from "@/features/wallet/hooks/use-wallet-screen-controller";
+import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { AsyncStateNotice } from "@/shared/components/async-state-notice";
@@ -38,17 +39,20 @@ export default function WalletScreen() {
               />
             ) : (
               controller.assets.map((asset) => (
-                <XStack key={asset.id} justifyContent="space-between" gap="$3">
-                  <Paragraph color="$color" fontFamily="$body" fontSize="$4" flex={1}>
-                    {asset.name}
-                  </Paragraph>
-                  <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-                    {formatCurrency(asset.amount)}
-                  </Paragraph>
-                  <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-                    {formatPercent(asset.allocation)}
-                  </Paragraph>
-                </XStack>
+                <AppKeyValueRow
+                  key={asset.id}
+                  label={asset.name}
+                  value={
+                    <XStack alignItems="center" gap="$2">
+                      <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+                        {formatCurrency(asset.amount)}
+                      </Paragraph>
+                      <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+                        {formatPercent(asset.allocation)}
+                      </Paragraph>
+                    </XStack>
+                  }
+                />
               ))
             )}
           </YStack>

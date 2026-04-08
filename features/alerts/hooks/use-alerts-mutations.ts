@@ -9,6 +9,7 @@ export interface UpdateAlertPreferenceVariables {
   readonly payload: {
     readonly enabled: boolean;
     readonly channels: string[];
+    readonly globalOptOut: boolean;
   };
 }
 
@@ -42,7 +43,7 @@ export const useUpdateAlertPreferenceMutation = () => {
       return alertsService.updatePreference(category, {
         enabled: payload.enabled,
         channels: payload.channels,
-        globalOptOut: false,
+        globalOptOut: payload.globalOptOut,
       });
     },
     onSuccess: async () => {
