@@ -52,6 +52,23 @@ const readDetailsFromPayload = (payload: unknown): Record<string, unknown> => {
   return {};
 };
 
+const createSafeAxiosPayload = (
+  payload: unknown,
+  message: string,
+  status: number,
+  code: string,
+): unknown => {
+  if (status > 0) {
+    return payload;
+  }
+
+  return {
+    message,
+    status,
+    code,
+  };
+};
+
 export class ApiError extends Error {
   readonly status: number;
   readonly code: string;
@@ -81,12 +98,15 @@ export const toApiError = (error: unknown): ApiError => {
 
   if (isAxiosError(error)) {
     const payload = error.response?.data as ApiErrorEnvelope | unknown;
+    const message = readMessageFromPayload(payload) ?? error.message ?? DEFAULT_MESSAGE;
+    const status = error.response?.status ?? 0;
+    const code = readCodeFromPayload(payload) ?? DEFAULT_CODE;
     return new ApiError({
-      message: readMessageFromPayload(payload) ?? error.message ?? DEFAULT_MESSAGE,
-      status: error.response?.status ?? 0,
-      code: readCodeFromPayload(payload) ?? DEFAULT_CODE,
+      message,
+      status,
+      code,
       details: readDetailsFromPayload(payload),
-      payload,
+      payload: createSafeAxiosPayload(payload, message, status, code),
     });
   }
 

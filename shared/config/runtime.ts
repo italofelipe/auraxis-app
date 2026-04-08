@@ -7,16 +7,18 @@ export interface AppRuntimeConfig {
   readonly apiMode: ApiMode;
   readonly apiContractVersion: string;
   readonly requestTimeoutMs: number;
+  readonly sessionExpiryLeewayMs: number;
   readonly appScheme: string;
   readonly checkoutReturnPath: string;
   readonly observabilityExportEnabled: boolean;
-  readonly observabilityExportToken: string | null;
+  readonly observabilityExportPublicKey: string | null;
   readonly mockLatencyMs: number;
 }
 
 const DEFAULT_API_BASE_URL = "http://localhost:5000";
 const DEFAULT_API_CONTRACT_VERSION = "v2";
 const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
+const DEFAULT_SESSION_EXPIRY_LEEWAY_MS = 30_000;
 const DEFAULT_MOCK_LATENCY_MS = 150;
 const DEFAULT_APP_SCHEME = "auraxisapp";
 const DEFAULT_CHECKOUT_RETURN_PATH = "/assinatura";
@@ -28,9 +30,11 @@ type RuntimeEnvKey =
   | "EXPO_PUBLIC_API_MODE"
   | "EXPO_PUBLIC_API_CONTRACT_VERSION"
   | "EXPO_PUBLIC_API_TIMEOUT_MS"
+  | "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS"
   | "EXPO_PUBLIC_APP_SCHEME"
   | "EXPO_PUBLIC_CHECKOUT_RETURN_PATH"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED"
+  | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN"
   | "EXPO_PUBLIC_API_MOCK_LATENCY_MS";
 
@@ -44,12 +48,16 @@ const readExpoEnv = (envKey: RuntimeEnvKey): string | undefined => {
       return process.env.EXPO_PUBLIC_API_CONTRACT_VERSION;
     case "EXPO_PUBLIC_API_TIMEOUT_MS":
       return process.env.EXPO_PUBLIC_API_TIMEOUT_MS;
+    case "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS":
+      return process.env.EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS;
     case "EXPO_PUBLIC_APP_SCHEME":
       return process.env.EXPO_PUBLIC_APP_SCHEME;
     case "EXPO_PUBLIC_CHECKOUT_RETURN_PATH":
       return process.env.EXPO_PUBLIC_CHECKOUT_RETURN_PATH;
     case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED":
       return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED;
+    case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY":
+      return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY;
     case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN":
       return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN;
     case "EXPO_PUBLIC_API_MOCK_LATENCY_MS":
@@ -83,6 +91,22 @@ const readOptionalString = (
 ): string | null => {
   const resolved = readString(envKey, extraKey, "");
   return resolved.length > 0 ? resolved : null;
+};
+
+const readOptionalStringFromAliases = (
+  aliases: ReadonlyArray<{
+    readonly envKey: RuntimeEnvKey;
+    readonly extraKey: string;
+  }>,
+): string | null => {
+  for (const alias of aliases) {
+    const resolved = readOptionalString(alias.envKey, alias.extraKey);
+    if (resolved) {
+      return resolved;
+    }
+  }
+
+  return null;
 };
 
 const readNumber = (
@@ -139,6 +163,11 @@ export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
     "apiTimeoutMs",
     DEFAULT_REQUEST_TIMEOUT_MS,
   ),
+  sessionExpiryLeewayMs: readNumber(
+    "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS",
+    "sessionExpiryLeewayMs",
+    DEFAULT_SESSION_EXPIRY_LEEWAY_MS,
+  ),
   appScheme: readString(
     "EXPO_PUBLIC_APP_SCHEME",
     "appScheme",
@@ -154,10 +183,16 @@ export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
     "observabilityExportEnabled",
     false,
   ),
-  observabilityExportToken: readOptionalString(
-    "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN",
-    "observabilityExportToken",
-  ),
+  observabilityExportPublicKey: readOptionalStringFromAliases([
+    {
+      envKey: "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY",
+      extraKey: "observabilityExportKey",
+    },
+    {
+      envKey: "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN",
+      extraKey: "observabilityExportToken",
+    },
+  ]),
   mockLatencyMs: readNumber(
     "EXPO_PUBLIC_API_MOCK_LATENCY_MS",
     "apiMockLatencyMs",

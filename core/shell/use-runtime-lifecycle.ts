@@ -10,6 +10,7 @@ import { AppState, type AppStateStatus } from "react-native";
 
 import {
   parseAppUrl,
+  sanitizeAppUrl,
   type CheckoutReturnIntent,
 } from "@/core/navigation/deep-linking";
 import {
@@ -57,7 +58,9 @@ const createIncomingUrlHandler = (
       return;
     }
 
-    if (useAppShellStore.getState().lastHandledUrl === rawUrl) {
+    const sanitizedUrl = sanitizeAppUrl(rawUrl);
+
+    if (useAppShellStore.getState().lastHandledUrl === sanitizedUrl) {
       return;
     }
 
@@ -66,7 +69,7 @@ const createIncomingUrlHandler = (
       return;
     }
 
-    dependencies.setLastHandledUrl(rawUrl);
+    dependencies.setLastHandledUrl(sanitizedUrl);
 
     if (intent.kind !== "checkout-return") {
       return;
@@ -131,6 +134,9 @@ export const useRuntimeLifecycle = (): void => {
     (state) => state.recordForegroundSync,
   );
   const signOut = useSessionStore((state) => state.signOut);
+  const markSessionValidated = useSessionStore(
+    (state) => state.markSessionValidated,
+  );
 
   const runtimeRevalidationService = useMemo(() => {
     return createRuntimeRevalidationService({
@@ -140,8 +146,10 @@ export const useRuntimeLifecycle = (): void => {
       signOut,
       setEntitlementsVersion,
       recordForegroundSync,
+      markSessionValidated,
     });
   }, [
+    markSessionValidated,
     queryClient,
     recordForegroundSync,
     setEntitlementsVersion,

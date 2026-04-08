@@ -2,6 +2,7 @@ import {
   buildAppUrl,
   buildCheckoutReturnUrl,
   parseAppUrl,
+  sanitizeAppUrl,
 } from "@/core/navigation/deep-linking";
 import { appRoutes } from "@/core/navigation/routes";
 
@@ -23,12 +24,11 @@ describe("deep linking", () => {
       kind: "checkout-return",
       href: appRoutes.private.subscription,
       rawUrl:
-        "auraxisapp://assinatura?status=paid&provider=asaas&plan_slug=premium&external_reference=chk_123&token=checkout_456",
+        "auraxisapp://assinatura?status=paid&provider=asaas&plan_slug=premium&external_reference=chk_123&token=%3Credacted%3E",
       status: "success",
       provider: "asaas",
       planSlug: "premium",
       externalReference: "chk_123",
-      checkoutToken: "checkout_456",
     });
   });
 
@@ -43,7 +43,6 @@ describe("deep linking", () => {
       provider: null,
       planSlug: null,
       externalReference: null,
-      checkoutToken: null,
     });
   });
 
@@ -78,6 +77,16 @@ describe("deep linking", () => {
   it("gera a URL de retorno canônica do checkout", () => {
     expect(buildCheckoutReturnUrl()).toBe(
       "auraxisapp://assinatura?checkout_return=1",
+    );
+  });
+
+  it("redige parametros sensiveis de URL antes de persisti-los no runtime", () => {
+    expect(
+      sanitizeAppUrl(
+        "auraxisapp://assinatura?status=paid&token=secret&checkout_token=secret-2",
+      ),
+    ).toBe(
+      "auraxisapp://assinatura?status=paid&token=%3Credacted%3E&checkout_token=%3Credacted%3E",
     );
   });
 });

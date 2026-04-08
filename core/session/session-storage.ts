@@ -1,10 +1,17 @@
 import * as SecureStore from "expo-secure-store";
 
+import { withSessionMetadata } from "@/core/session/session-policy";
 import type { StoredSession } from "@/core/session/types";
 
 const SESSION_KEY = "auraxis.session";
 const LEGACY_ACCESS_TOKEN_KEY = "auraxis.access-token";
 const LEGACY_USER_EMAIL_KEY = "auraxis.user-email";
+
+export interface LoadedStoredSession {
+  readonly session: StoredSession | null;
+  readonly source: "canonical" | "legacy" | "none";
+  readonly invalidStoredPayload: boolean;
+}
 
 const parseStoredSession = (payload: string | null): StoredSession | null => {
   if (!payload) {
@@ -22,7 +29,7 @@ const parseStoredSession = (payload: string | null): StoredSession | null => {
       return null;
     }
 
-    return {
+    return withSessionMetadata({
       accessToken: parsed.accessToken,
       refreshToken:
         typeof parsed.refreshToken === "string" ? parsed.refreshToken : null,
@@ -32,7 +39,13 @@ const parseStoredSession = (payload: string | null): StoredSession | null => {
         email: parsed.user.email,
         emailConfirmed: parsed.user.emailConfirmed === true,
       },
-    };
+      authenticatedAt:
+        typeof parsed.authenticatedAt === "string"
+          ? parsed.authenticatedAt
+          : null,
+      expiresAt:
+        typeof parsed.expiresAt === "string" ? parsed.expiresAt : null,
+    });
   } catch {
     return null;
   }
@@ -48,7 +61,7 @@ const loadLegacySession = async (): Promise<StoredSession | null> => {
     return null;
   }
 
-  return {
+  return withSessionMetadata({
     accessToken,
     refreshToken: null,
     user: {
@@ -57,27 +70,48 @@ const loadLegacySession = async (): Promise<StoredSession | null> => {
       email: userEmail,
       emailConfirmed: false,
     },
-  };
+    authenticatedAt: null,
+    expiresAt: null,
+  });
 };
 
-export const loadStoredSession = async (): Promise<StoredSession | null> => {
+export const loadStoredSession = async (): Promise<LoadedStoredSession> => {
   const payload = await SecureStore.getItemAsync(SESSION_KEY);
-  const currentSession = parseStoredSession(payload);
+  const hasCanonicalPayload = typeof payload === "string" && payload.length > 0;
+  const canonicalSession = parseStoredSession(payload);
 
-  if (currentSession) {
-    return currentSession;
+  if (canonicalSession) {
+    return {
+      session: canonicalSession,
+      source: "canonical",
+      invalidStoredPayload: false,
+    };
   }
 
-  return loadLegacySession();
+  const legacySession = await loadLegacySession();
+  if (legacySession) {
+    return {
+      session: legacySession,
+      source: "legacy",
+      invalidStoredPayload: hasCanonicalPayload,
+    };
+  }
+
+  return {
+    session: null,
+    source: "none",
+    invalidStoredPayload: hasCanonicalPayload,
+  };
 };
 
 export const persistStoredSession = async (
   session: StoredSession,
 ): Promise<void> => {
+  const nextSession = withSessionMetadata(session);
   await Promise.all([
-    SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(session)),
-    SecureStore.setItemAsync(LEGACY_ACCESS_TOKEN_KEY, session.accessToken),
-    SecureStore.setItemAsync(LEGACY_USER_EMAIL_KEY, session.user.email),
+    SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(nextSession)),
+    SecureStore.setItemAsync(LEGACY_ACCESS_TOKEN_KEY, nextSession.accessToken),
+    SecureStore.setItemAsync(LEGACY_USER_EMAIL_KEY, nextSession.user.email),
   ]);
 };
 

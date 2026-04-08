@@ -106,7 +106,7 @@ describe("useRuntimeLifecycle - core flow", () => {
   it("processa o deep link inicial de retorno do checkout", async () => {
     const removeUrlListener = jest.fn();
     jest.mocked(Linking.getInitialURL).mockResolvedValue(
-      "auraxisapp://assinatura?status=success&provider=asaas",
+      "auraxisapp://assinatura?status=success&provider=asaas&token=checkout_secret",
     );
     jest.mocked(Linking.addEventListener).mockImplementation(
       ((..._args) => {
@@ -124,11 +124,13 @@ describe("useRuntimeLifecycle - core flow", () => {
       expect(useAppShellStore.getState().pendingCheckoutReturn).toMatchObject({
         status: "success",
         provider: "asaas",
+        rawUrl:
+          "auraxisapp://assinatura?status=success&provider=asaas&token=%3Credacted%3E",
       });
     });
 
     expect(useAppShellStore.getState().lastHandledUrl).toBe(
-      "auraxisapp://assinatura?status=success&provider=asaas",
+      "auraxisapp://assinatura?status=success&provider=asaas&token=%3Credacted%3E",
     );
     expect(mockRevalidate).toHaveBeenCalledWith("checkout-return");
   });
