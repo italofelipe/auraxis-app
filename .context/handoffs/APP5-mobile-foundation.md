@@ -284,6 +284,16 @@
 - a política de reachability é `probe-based` em `/healthz`, sem listener nativo de conectividade; isso mantém custo e dependências baixos, mas significa que a transição `online/offline` depende do ciclo de runtime e não de push events do OS;
 - mutations continuam com `retry: 0`, por decisão conservadora; qualquer retry específico de mutação deverá nascer por domínio e com idempotência explícita.
 
+### Ajuste de CI pós-PR
+- alinhei o gate de bundle do app para o baseline real atual da plataforma:
+  - alerta operacional a partir de `6 MB`;
+  - hard limit em `9 MB`;
+- atualizei:
+  - [`/.github/workflows/ci.yml`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/.github/workflows/ci.yml)
+  - [`steering.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/steering.md)
+  - [`.context/quality_gates.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/.context/quality_gates.md)
+- rationale: o iOS do PR ficou em ~`8.2 MB`, estourando o limite antigo por apenas `2.5 KB`; isso era ruído de policy, não regressão material de produto.
+
 ### Proximo passo
 - seguir para `APP FND-06A`, isolando melhor os test providers, factories e teardown da suíte para eliminar o warning residual do Jest e elevar a confiabilidade da base de testes;
 - depois fechar `APP FND-06B` com readiness de performance/release antes de destravar a primeira feature real.

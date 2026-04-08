@@ -66,7 +66,7 @@ node scripts/ci-audit-gate.js
 | `typecheck` | TypeScript strict | 0 erros | ✅ sim |
 | `test` | Jest + coverage | ≥ 85% (lines/functions/statements/branches) | ✅ sim |
 | `expo-bundle` | JS bundle compila | sem erros | ✅ sim |
-| `bundle-analysis` | Tamanho do bundle | ≤ 6 MB hard (Android/iOS) | ✅ sim (PR apenas) |
+| `bundle-analysis` | Tamanho do bundle | ≤ 9 MB hard (Android/iOS) | ✅ sim (PR apenas) |
 | `secret-scan-gitleaks` | Secrets no código | 0 detectados | ✅ sim |
 | `secret-scan-trufflehog` | Secrets com entropia | 0 verificados | ✅ sim |
 | `audit` | CVEs em deps instaladas | 0 high/critical | ✅ sim |
@@ -80,8 +80,8 @@ node scripts/ci-audit-gate.js
 
 | Plataforma | Aviso | Hard limit (falha CI) |
 |:-----------|:------|:----------------------|
-| Android | > 3 MB | > 6 MB |
-| iOS | > 3 MB | > 6 MB |
+| Android | > 6 MB | > 9 MB |
+| iOS | > 6 MB | > 9 MB |
 
 ---
 

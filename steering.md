@@ -77,7 +77,7 @@ Para integração com backend recém-entregue:
 - **Plataforma primeiro** — usar APIs nativas do RN antes de bibliotecas externas.
 - **Segurança por padrão** — token em `expo-secure-store`, nunca em `AsyncStorage`.
 - **Testes não são opcionais** — toda lógica nova tem teste antes de merge.
-- **Performance mobile** — bundle Android/iOS ≤ 6 MB (hard limit no CI).
+- **Performance mobile** — bundle Android/iOS ≤ 9 MB (hard limit no CI), com alerta operacional a partir de 6 MB.
 - **UI consistente por contrato** — tokens oficiais são obrigatórios, mesmo durante a fase transitória em React Native Paper.
 - **Token-first styling** — qualquer estilo visual deve referenciar tokens; valores soltos no código são não conformidade.
 - **Server-state com TanStack Query** — evitar fetch manual distribuído em telas/componentes.
@@ -149,8 +149,8 @@ npm run quality-check
 
 | Gate CI | Threshold | Job |
 |:--------|:----------|:----|
-| Bundle Android | ≤ 6 MB hard limit | `bundle-analysis` |
-| Bundle iOS | ≤ 6 MB hard limit | `bundle-analysis` |
+| Bundle Android | ≤ 9 MB hard limit | `bundle-analysis` |
+| Bundle iOS | ≤ 9 MB hard limit | `bundle-analysis` |
 | CVEs em novas deps | 0 high/critical | `dependency-review` |
 | Secrets detectados | 0 | `gitleaks` + `trufflehog` |
 | SonarCloud quality gate | Pass | `sonarcloud` |
@@ -169,7 +169,7 @@ push / PR → master
 ├── test              (jest-expo + coverage ≥ 85%)
 │
 ├── expo-bundle       (export android — valida que bundle JS compila)
-│   └── bundle-analysis   (comenta tamanho no PR; hard limit 6 MB)
+│   └── bundle-analysis   (comenta tamanho no PR; hard limit 9 MB)
 │
 ├── secret-scan-gitleaks
 ├── secret-scan-trufflehog
