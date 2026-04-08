@@ -69,6 +69,16 @@ const isMutatingMethod = (method: string): boolean => {
   return ["post", "put", "patch", "delete"].includes(method.toLowerCase());
 };
 
+const trimTrailingSlashes = (value: string): string => {
+  let end = value.length;
+
+  while (end > 1 && value[end - 1] === "/") {
+    end -= 1;
+  }
+
+  return value.slice(0, end);
+};
+
 const toSanitizedRequestPath = (url: string | undefined): string => {
   if (!url) {
     return "/";
@@ -77,7 +87,9 @@ const toSanitizedRequestPath = (url: string | undefined): string => {
   try {
     const resolvedUrl = new URL(url, normalizeBaseUrl(appRuntimeConfig.apiBaseUrl));
     const sanitizedUrl = new URL(sanitizeAppUrl(resolvedUrl.toString()));
-    return `${sanitizedUrl.pathname}${sanitizedUrl.search}`.replace(/\/+$/u, "") || "/";
+    return trimTrailingSlashes(
+      `${sanitizedUrl.pathname}${sanitizedUrl.search}`,
+    ) || "/";
   } catch {
     return url;
   }
