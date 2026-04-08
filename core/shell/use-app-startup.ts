@@ -15,6 +15,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { initSentry } from "@/app/services/sentry";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useSessionStore } from "@/core/session/session-store";
+import { appLogger } from "@/core/telemetry/app-logger";
 
 let sentryInitialized = false;
 let splashScreenPrevented = false;
@@ -62,6 +63,13 @@ export const useAppStartup = (): AppStartupState => {
   useEffect(() => {
     ensureSentryInitialized();
     ensureSplashScreenPrevented();
+    appLogger.info({
+      domain: "startup",
+      event: "startup.bootstrap_requested",
+      context: {
+        hydrated: useSessionStore.getState().hydrated,
+      },
+    });
     void bootstrapSession();
   }, [bootstrapSession]);
 
@@ -78,8 +86,16 @@ export const useAppStartup = (): AppStartupState => {
       return;
     }
 
+    appLogger.info({
+      domain: "startup",
+      event: "startup.ready",
+      context: {
+        fontsLoaded,
+        hydrated,
+      },
+    });
     void SplashScreen.hideAsync();
-  }, [ready, setStartupReady]);
+  }, [fontsLoaded, hydrated, ready, setStartupReady]);
 
   return {
     ready,

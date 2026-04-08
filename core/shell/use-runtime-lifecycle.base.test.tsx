@@ -8,6 +8,7 @@ import { AppState, type AppStateStatus } from "react-native";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
 import { useSessionStore } from "@/core/session/session-store";
+import { appLogger } from "@/core/telemetry/app-logger";
 
 const mockRevalidate = jest.fn().mockResolvedValue({
   revalidated: true,
@@ -24,6 +25,15 @@ jest.mock("@/core/shell/runtime-revalidation", () => ({
   createRuntimeRevalidationService: jest.fn(() => ({
     revalidate: mockRevalidate,
   })),
+}));
+
+jest.mock("@/core/telemetry/app-logger", () => ({
+  appLogger: {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 const createWrapper = (): ((
@@ -133,6 +143,18 @@ describe("useRuntimeLifecycle - core flow", () => {
       "auraxisapp://assinatura?status=success&provider=asaas&token=%3Credacted%3E",
     );
     expect(mockRevalidate).toHaveBeenCalledWith("checkout-return");
+    expect(appLogger.info).toHaveBeenCalledWith({
+      domain: "checkout",
+      event: "checkout.return_received",
+      context: {
+        href: "/assinatura",
+        status: "success",
+        provider: "asaas",
+        planSlug: null,
+        hasExternalReference: false,
+        url: "auraxisapp://assinatura?status=success&provider=asaas&token=%3Credacted%3E",
+      },
+    });
   });
 
   it("revalida dados quando o app volta do background", async () => {
@@ -152,5 +174,14 @@ describe("useRuntimeLifecycle - core flow", () => {
     });
 
     expect(useAppShellStore.getState().appState).toBe("active");
+    expect(appLogger.info).toHaveBeenCalledWith({
+      domain: "runtime",
+      event: "runtime.app_state_changed",
+      context: {
+        previousAppState: "background",
+        nextAppState: "active",
+        shouldSync: true,
+      },
+    });
   });
 });

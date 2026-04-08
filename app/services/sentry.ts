@@ -2,6 +2,14 @@ import * as Sentry from "@sentry/react-native";
 import Constants from "expo-constants";
 
 import { sanitizeAppUrl } from "@/core/navigation/deep-linking";
+import { sanitizeTelemetryContext } from "@/core/telemetry/sanitization";
+import type { AppBreadcrumb } from "@/core/telemetry/types";
+
+let sentryEnabled = false;
+
+const isJestRuntime = (): boolean => {
+  return typeof process !== "undefined" && Boolean(process.env.JEST_WORKER_ID);
+};
 
 const redactHeaderValue = (
   headers: Record<string, unknown> | undefined,
@@ -40,18 +48,47 @@ export const sanitizeSentryEvent = <T extends Sentry.Event>(event: T): T => {
   return event;
 };
 
+export const resetSentryRuntimeForTests = (): void => {
+  sentryEnabled = false;
+};
+
+export const recordSentryBreadcrumb = (breadcrumb: AppBreadcrumb): void => {
+  if (!sentryEnabled) {
+    return;
+  }
+
+  const level = breadcrumb.level === "warn" ? "warning" : breadcrumb.level;
+
+  Sentry.addBreadcrumb({
+    category: breadcrumb.category,
+    message: breadcrumb.message,
+    level,
+    data: sanitizeTelemetryContext(breadcrumb.data),
+  });
+};
+
+export const captureSentryException = (error: unknown): void => {
+  if (!sentryEnabled) {
+    return;
+  }
+
+  Sentry.captureException(error);
+};
+
 export function initSentry(): void {
   const dsn = Constants.expoConfig?.extra?.sentryDsn as string | undefined;
   const environment =
     (Constants.expoConfig?.extra?.appEnv as string) ?? "development";
 
   if (!dsn) {
-    if (__DEV__) {
+    sentryEnabled = false;
+    if (__DEV__ && !isJestRuntime()) {
       console.warn("[Sentry] DSN not configured — skipping initialization");
     }
     return;
   }
 
+  sentryEnabled = true;
   Sentry.init({
     dsn,
     environment,

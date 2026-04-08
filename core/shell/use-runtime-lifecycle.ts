@@ -19,6 +19,7 @@ import {
 } from "@/core/shell/app-shell-store";
 import { createRuntimeRevalidationService } from "@/core/shell/runtime-revalidation";
 import { useSessionStore } from "@/core/session/session-store";
+import { appLogger } from "@/core/telemetry/app-logger";
 import { bootstrapService } from "@/features/bootstrap/services/bootstrap-service";
 import { subscriptionService } from "@/features/subscription/services/subscription-service";
 
@@ -61,20 +62,54 @@ const createIncomingUrlHandler = (
     const sanitizedUrl = sanitizeAppUrl(rawUrl);
 
     if (useAppShellStore.getState().lastHandledUrl === sanitizedUrl) {
+      appLogger.debug({
+        domain: "navigation",
+        event: "navigation.deep_link_deduplicated",
+        context: {
+          url: sanitizedUrl,
+        },
+      });
       return;
     }
 
     const intent = parseAppUrl(rawUrl);
     if (!intent) {
+      appLogger.warn({
+        domain: "navigation",
+        event: "navigation.deep_link_ignored",
+        context: {
+          url: sanitizedUrl,
+        },
+      });
       return;
     }
 
     dependencies.setLastHandledUrl(sanitizedUrl);
 
     if (intent.kind !== "checkout-return") {
+      appLogger.info({
+        domain: "navigation",
+        event: "navigation.deep_link_handled",
+        context: {
+          url: intent.rawUrl,
+          href: intent.href,
+        },
+      });
       return;
     }
 
+    appLogger.info({
+      domain: "checkout",
+      event: "checkout.return_received",
+      context: {
+        href: intent.href,
+        status: intent.status,
+        provider: intent.provider,
+        planSlug: intent.planSlug,
+        hasExternalReference: intent.externalReference !== null,
+        url: intent.rawUrl,
+      },
+    });
     dependencies.setPendingCheckoutReturn(intent);
     await dependencies.revalidate("checkout-return");
   };
@@ -105,8 +140,19 @@ const bindAppStateLifecycle = (
     const previousAppState = appStateRef.current;
     appStateRef.current = nextAppState;
     setAppState(normalizeAppState(nextAppState));
+    const shouldSync = shouldSyncOnForeground(previousAppState, nextAppState);
 
-    if (!shouldSyncOnForeground(previousAppState, nextAppState)) {
+    appLogger.info({
+      domain: "runtime",
+      event: "runtime.app_state_changed",
+      context: {
+        previousAppState,
+        nextAppState,
+        shouldSync,
+      },
+    });
+
+    if (!shouldSync) {
       return;
     }
 
@@ -158,14 +204,55 @@ export const useRuntimeLifecycle = (): void => {
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
+  const revalidateWithTelemetry = useMemo(() => {
+    return async (
+      reason: "foreground" | "checkout-return",
+    ): Promise<unknown> => {
+      appLogger.info({
+        domain: "runtime",
+        event: "runtime.revalidation_started",
+        context: {
+          reason,
+        },
+      });
+
+      try {
+        const result = await runtimeRevalidationService.revalidate(reason);
+
+        appLogger[result.signedOut ? "warn" : "info"]({
+          domain: "runtime",
+          event: "runtime.revalidation_completed",
+          context: {
+            reason,
+            revalidated: result.revalidated,
+            signedOut: result.signedOut,
+            entitlementsVersion: result.entitlementsVersion,
+          },
+        });
+
+        return result;
+      } catch (error) {
+        appLogger.error({
+          domain: "runtime",
+          event: "runtime.revalidation_failed",
+          context: {
+            reason,
+          },
+          error,
+        });
+        throw error;
+      }
+    };
+  }, [runtimeRevalidationService]);
+
   const handleIncomingUrl = useMemo(
     () =>
       createIncomingUrlHandler({
-      setPendingCheckoutReturn,
-      setLastHandledUrl,
-      revalidate: (reason) => runtimeRevalidationService.revalidate(reason),
+        setPendingCheckoutReturn,
+        setLastHandledUrl,
+        revalidate: (reason) => revalidateWithTelemetry(reason),
       }),
-    [runtimeRevalidationService, setLastHandledUrl, setPendingCheckoutReturn],
+    [revalidateWithTelemetry, setLastHandledUrl, setPendingCheckoutReturn],
   );
 
   useEffect(() => {
@@ -180,7 +267,7 @@ export const useRuntimeLifecycle = (): void => {
     return bindAppStateLifecycle(
       appStateRef,
       setAppState,
-      (reason) => runtimeRevalidationService.revalidate(reason),
+      (reason) => revalidateWithTelemetry(reason),
     );
-  }, [runtimeRevalidationService, setAppState]);
+  }, [revalidateWithTelemetry, setAppState]);
 };

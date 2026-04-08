@@ -28,6 +28,7 @@ const config = {
   moduleNameMapper: {
     "\\.svg$": "<rootDir>/__mocks__/svgMock.ts",
     "\\.(png|jpg|jpeg|gif|webp)$": "<rootDir>/__mocks__/imageMock.ts",
+    "^@sentry/react-native$": "<rootDir>/__mocks__/sentryReactNativeMock.ts",
     "^@/(.*)$": "<rootDir>/$1",
     "^~/(.*)$": "<rootDir>/$1",
   },
@@ -44,6 +45,9 @@ const config = {
     "app/(private)/ferramentas.tsx",
     "core/providers/app-providers.tsx",
     "core/navigation/deep-linking.ts",
+    "core/telemetry/app-logger.ts",
+    "core/telemetry/sanitization.ts",
+    "core/telemetry/use-navigation-telemetry.ts",
     "core/http/api-error.ts",
     "core/http/http-client.ts",
     "core/session/session-policy.ts",

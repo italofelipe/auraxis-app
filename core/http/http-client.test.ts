@@ -2,11 +2,21 @@ import { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 import { createHttpClient, httpClient } from "@/core/http/http-client";
 import { useSessionStore } from "@/core/session/session-store";
+import { appLogger } from "@/core/telemetry/app-logger";
 
 jest.mock("@/core/session/session-storage", () => ({
   loadStoredSession: jest.fn(),
   persistStoredSession: jest.fn(),
   clearStoredSession: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock("@/core/telemetry/app-logger", () => ({
+  appLogger: {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  },
 }));
 
 const resetSessionStore = (): void => {
@@ -41,6 +51,7 @@ const readAuthorizationHeader = (
 
 describe("httpClient", () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     resetSessionStore();
   });
 
@@ -134,6 +145,20 @@ describe("httpClient", () => {
       isAuthenticated: false,
       authFailureReason: "unauthorized",
     });
+    expect(appLogger.warn).toHaveBeenCalledWith({
+      domain: "network",
+      event: "network.request_failed",
+      context: {
+        method: "GET",
+        path: "/dashboard",
+        status: 401,
+        code: "REQUEST_FAILED",
+        durationMs: expect.any(Number),
+        invalidationReason: "unauthorized",
+      },
+      error: expect.any(AxiosError),
+      captureInSentry: false,
+    });
   });
 
   it("anexa o bearer token no interceptor de request para sessao válida", async () => {
@@ -226,6 +251,30 @@ describe("httpClient", () => {
     jest.dontMock("@/shared/config/runtime");
   });
 
+  it("registra sucesso em requests de observabilidade", async () => {
+    const client = createHttpClient("https://api.auraxis.dev/");
+    client.defaults.adapter = async (config) => ({
+      data: { ok: true },
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config,
+    });
+
+    await client.get("/ops/observability");
+
+    expect(appLogger.info).toHaveBeenCalledWith({
+      domain: "network",
+      event: "network.request_succeeded",
+      context: {
+        method: "GET",
+        path: "/ops/observability",
+        status: 200,
+        durationMs: expect.any(Number),
+      },
+    });
+  });
+
   it("derruba a sessao com motivo forbidden quando a API responde 403", async () => {
     useSessionStore.setState((state) => ({
       ...state,
@@ -291,6 +340,20 @@ describe("httpClient", () => {
       isAuthenticated: false,
       authFailureReason: "forbidden",
     });
+    expect(appLogger.warn).toHaveBeenCalledWith({
+      domain: "network",
+      event: "network.request_failed",
+      context: {
+        method: "GET",
+        path: "/dashboard",
+        status: 403,
+        code: "REQUEST_FAILED",
+        durationMs: expect.any(Number),
+        invalidationReason: "forbidden",
+      },
+      error: expect.any(AxiosError),
+      captureInSentry: false,
+    });
   });
 
   it("nao invalida a sessao quando o 401 chega sem header de autorizacao", async () => {
@@ -353,6 +416,32 @@ describe("httpClient", () => {
     expect(useSessionStore.getState()).toMatchObject({
       isAuthenticated: true,
       authFailureReason: null,
+    });
+  });
+
+  it("usa logger de erro para falhas de rede sem response", async () => {
+    const client = createHttpClient("https://api.auraxis.dev/");
+    client.defaults.adapter = async (config) => {
+      throw new AxiosError("Network Error", "ERR_NETWORK", config);
+    };
+
+    await expect(client.get("/dashboard?token=secret")).rejects.toMatchObject({
+      status: 0,
+    });
+
+    expect(appLogger.error).toHaveBeenCalledWith({
+      domain: "network",
+      event: "network.request_failed",
+      context: {
+        method: "GET",
+        path: "/dashboard?token=%3Credacted%3E",
+        status: 0,
+        code: "REQUEST_FAILED",
+        durationMs: expect.any(Number),
+        invalidationReason: null,
+      },
+      error: expect.any(AxiosError),
+      captureInSentry: true,
     });
   });
 });
