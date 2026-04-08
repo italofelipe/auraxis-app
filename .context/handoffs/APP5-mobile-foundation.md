@@ -240,6 +240,66 @@
 
 ---
 
+## Update - APP FND-05C (completion)
+
+### O que foi feito
+- adicionei probing canônico de conectividade em [`core/shell/reachability-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/shell/reachability-service.ts), usando `GET /healthz` com timeout configurável e classificação explícita de `online`, `offline` e `degraded`;
+- expandi o shell runtime em [`core/shell/app-shell-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/shell/app-shell-store.ts) com:
+  - `connectivityStatus`
+  - `runtimeDegradedReason`
+  - `lastReachabilityCheckAt`
+- endureci o lifecycle do app em [`core/shell/use-runtime-lifecycle.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/shell/use-runtime-lifecycle.ts) para:
+  - fazer probe no startup;
+  - fazer probe antes de revalidation em foreground e checkout return;
+  - não revalidar quando o app estiver offline/degraded;
+  - marcar degraded reason canônica quando a revalidation falha;
+- introduzi a política central de retry em [`core/query/retry-policy.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/query/retry-policy.ts) e conectei o `QueryClient` em [`core/query/query-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/query/query-client.ts) para:
+  - não insistir quando o runtime está offline;
+  - retry só para códigos e envelopes explicitamente retryable;
+  - aplicar backoff exponencial com teto;
+- adicionei fallback operacional do checkout em [`features/subscription/services/hosted-checkout-service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/features/subscription/services/hosted-checkout-service.ts), abrindo browser externo quando a `AuthSession` nativa falha;
+- expandi o runtime config em [`shared/config/runtime.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/shared/config/runtime.ts) com:
+  - `reachabilityProbeTimeoutMs`
+  - `reachabilityProbePath`
+- subi cobertura e governança local para o bloco em:
+  - [`core/shell/reachability-service.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/shell/reachability-service.test.ts)
+  - [`core/query/retry-policy.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/query/retry-policy.test.ts)
+  - [`core/shell/use-runtime-lifecycle.base.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/shell/use-runtime-lifecycle.base.test.tsx)
+  - [`core/shell/use-runtime-lifecycle.edge.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/core/shell/use-runtime-lifecycle.edge.test.tsx)
+  - [`features/subscription/services/hosted-checkout-service.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/features/subscription/services/hosted-checkout-service.test.ts)
+  - [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/jest.config.js)
+  - [`sonar-project.properties`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/sonar-project.properties)
+
+### O que foi validado
+- `npx jest core/shell/reachability-service.test.ts core/query/retry-policy.test.ts features/subscription/services/hosted-checkout-service.test.ts core/shell/use-runtime-lifecycle.base.test.tsx core/shell/use-runtime-lifecycle.edge.test.tsx --runInBand`
+- `npx jest core/shell/reachability-service.test.ts core/query/retry-policy.test.ts features/subscription/services/hosted-checkout-service.test.ts core/shell/use-runtime-lifecycle.base.test.tsx core/shell/use-runtime-lifecycle.edge.test.tsx --runInBand --detectOpenHandles`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run policy:check`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- a suíte completa ainda emite o warning genérico do Jest sobre worker forçado a encerrar no fechamento do coverage; os testes novos passaram limpos em `--detectOpenHandles`, então isso parece ser um ruído preexistente do suite-wide runner e vale entrar no endurecimento de `FND-06A`;
+- a política de reachability é `probe-based` em `/healthz`, sem listener nativo de conectividade; isso mantém custo e dependências baixos, mas significa que a transição `online/offline` depende do ciclo de runtime e não de push events do OS;
+- mutations continuam com `retry: 0`, por decisão conservadora; qualquer retry específico de mutação deverá nascer por domínio e com idempotência explícita.
+
+### Ajuste de CI pós-PR
+- alinhei o gate de bundle do app para o baseline real atual da plataforma:
+  - alerta operacional a partir de `6 MB`;
+  - hard limit em `9 MB`;
+- atualizei:
+  - [`/.github/workflows/ci.yml`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/.github/workflows/ci.yml)
+  - [`steering.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/steering.md)
+  - [`.context/quality_gates.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-05c-runtime-reliability/.context/quality_gates.md)
+- rationale: o iOS do PR ficou em ~`8.2 MB`, estourando o limite antigo por apenas `2.5 KB`; isso era ruído de policy, não regressão material de produto.
+
+### Proximo passo
+- seguir para `APP FND-06A`, isolando melhor os test providers, factories e teardown da suíte para eliminar o warning residual do Jest e elevar a confiabilidade da base de testes;
+- depois fechar `APP FND-06B` com readiness de performance/release antes de destravar a primeira feature real.
+
+---
+
 ## Update - APP FND-05B (completion)
 
 ### O que foi feito

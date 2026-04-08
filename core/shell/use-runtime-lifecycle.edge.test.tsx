@@ -6,6 +6,7 @@ import * as Linking from "expo-linking";
 import { AppState, type AppStateStatus } from "react-native";
 
 import { useAppShellStore } from "@/core/shell/app-shell-store";
+import { reachabilityService } from "@/core/shell/reachability-service";
 import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
 import { useSessionStore } from "@/core/session/session-store";
 
@@ -24,6 +25,12 @@ jest.mock("@/core/shell/runtime-revalidation", () => ({
   createRuntimeRevalidationService: jest.fn(() => ({
     revalidate: mockRevalidate,
   })),
+}));
+
+jest.mock("@/core/shell/reachability-service", () => ({
+  reachabilityService: {
+    probe: jest.fn(),
+  },
 }));
 
 const createWrapper = (): ((
@@ -57,10 +64,13 @@ const resetStores = (): void => {
     reducedMotionEnabled: false,
     startupReady: true,
     appState: "unknown",
+    connectivityStatus: "unknown",
+    runtimeDegradedReason: null,
     entitlementsVersion: null,
     pendingCheckoutReturn: null,
     lastHandledUrl: null,
     lastForegroundSyncAt: null,
+    lastReachabilityCheckAt: null,
   });
   useSessionStore.setState({
     accessToken: "token",
@@ -88,6 +98,13 @@ describe("useRuntimeLifecycle - edge cases", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     appStateListener = null;
+    jest.mocked(reachabilityService.probe).mockResolvedValue({
+      status: "online",
+      degradedReason: null,
+      checkedAt: "2026-04-08T15:00:00.000Z",
+      latencyMs: 42,
+      statusCode: 200,
+    });
     Object.defineProperty(AppState, "currentState", {
       configurable: true,
       value: "background",
@@ -162,5 +179,67 @@ describe("useRuntimeLifecycle - edge cases", () => {
     });
 
     expect(mockRevalidate).not.toHaveBeenCalledWith("foreground");
+  });
+
+  it("nao revalida no foreground quando o probe detecta offline", async () => {
+    jest.mocked(Linking.getInitialURL).mockResolvedValue(null);
+    jest.mocked(Linking.addEventListener).mockImplementation(
+      ((..._args) => createLinkingSubscription()) as typeof Linking.addEventListener,
+    );
+    jest.mocked(reachabilityService.probe)
+      .mockResolvedValueOnce({
+        status: "online",
+        degradedReason: null,
+        checkedAt: "2026-04-08T15:00:00.000Z",
+        latencyMs: 42,
+        statusCode: 200,
+      })
+      .mockResolvedValueOnce({
+        status: "offline",
+        degradedReason: "offline",
+        checkedAt: "2026-04-08T15:05:00.000Z",
+        latencyMs: 130,
+        statusCode: null,
+      });
+
+    renderHook(() => useRuntimeLifecycle(), {
+      wrapper: createWrapper(),
+    });
+
+    appStateListener?.("active");
+
+    await waitFor(() => {
+      expect(useAppShellStore.getState()).toMatchObject({
+        appState: "active",
+        connectivityStatus: "offline",
+        runtimeDegradedReason: "offline",
+        lastReachabilityCheckAt: "2026-04-08T15:05:00.000Z",
+      });
+    });
+
+    expect(mockRevalidate).not.toHaveBeenCalledWith("foreground");
+  });
+
+  it("marca degraded state quando a revalidation de foreground falha", async () => {
+    jest.mocked(Linking.getInitialURL).mockResolvedValue(null);
+    jest.mocked(Linking.addEventListener).mockImplementation(
+      ((..._args) => createLinkingSubscription()) as typeof Linking.addEventListener,
+    );
+    mockRevalidate.mockRejectedValueOnce(new Error("foreground failed"));
+
+    renderHook(() => useRuntimeLifecycle(), {
+      wrapper: createWrapper(),
+    });
+
+    appStateListener?.("active");
+
+    await waitFor(() => {
+      expect(useAppShellStore.getState()).toMatchObject({
+        connectivityStatus: "online",
+        runtimeDegradedReason: "runtime-revalidation-failed",
+      });
+    });
+
+    expect(mockRevalidate).toHaveBeenCalledWith("foreground");
   });
 });

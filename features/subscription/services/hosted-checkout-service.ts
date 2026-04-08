@@ -73,15 +73,26 @@ export const createHostedCheckoutService = (
         };
       }
 
-      const result = await dependencies.openAuthSessionAsync(
-        checkoutSession.checkoutUrl,
-        returnUrl,
-      );
+      try {
+        const result = await dependencies.openAuthSessionAsync(
+          checkoutSession.checkoutUrl,
+          returnUrl,
+        );
 
-      return {
-        type: normalizeAuthSessionResult(result),
-        returnUrl,
-      };
+        return {
+          type: normalizeAuthSessionResult(result),
+          returnUrl,
+        };
+      } catch {
+        await dependencies.openBrowserAsync(checkoutSession.checkoutUrl, {
+          presentationStyle: WebBrowserPresentationStyle.AUTOMATIC,
+        });
+
+        return {
+          type: "opened",
+          returnUrl,
+        };
+      }
     },
     dismissCheckout: async (): Promise<void> => {
       await dependencies.dismissBrowser();

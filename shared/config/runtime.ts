@@ -7,6 +7,8 @@ export interface AppRuntimeConfig {
   readonly apiMode: ApiMode;
   readonly apiContractVersion: string;
   readonly requestTimeoutMs: number;
+  readonly reachabilityProbeTimeoutMs: number;
+  readonly reachabilityProbePath: string;
   readonly sessionExpiryLeewayMs: number;
   readonly appScheme: string;
   readonly checkoutReturnPath: string;
@@ -18,6 +20,8 @@ export interface AppRuntimeConfig {
 const DEFAULT_API_BASE_URL = "http://localhost:5000";
 const DEFAULT_API_CONTRACT_VERSION = "v2";
 const DEFAULT_REQUEST_TIMEOUT_MS = 15_000;
+const DEFAULT_REACHABILITY_PROBE_TIMEOUT_MS = 5_000;
+const DEFAULT_REACHABILITY_PROBE_PATH = "/healthz";
 const DEFAULT_SESSION_EXPIRY_LEEWAY_MS = 30_000;
 const DEFAULT_MOCK_LATENCY_MS = 150;
 const DEFAULT_APP_SCHEME = "auraxisapp";
@@ -30,6 +34,8 @@ type RuntimeEnvKey =
   | "EXPO_PUBLIC_API_MODE"
   | "EXPO_PUBLIC_API_CONTRACT_VERSION"
   | "EXPO_PUBLIC_API_TIMEOUT_MS"
+  | "EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS"
+  | "EXPO_PUBLIC_REACHABILITY_PROBE_PATH"
   | "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS"
   | "EXPO_PUBLIC_APP_SCHEME"
   | "EXPO_PUBLIC_CHECKOUT_RETURN_PATH"
@@ -48,6 +54,10 @@ const readExpoEnv = (envKey: RuntimeEnvKey): string | undefined => {
       return process.env.EXPO_PUBLIC_API_CONTRACT_VERSION;
     case "EXPO_PUBLIC_API_TIMEOUT_MS":
       return process.env.EXPO_PUBLIC_API_TIMEOUT_MS;
+    case "EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS":
+      return process.env.EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS;
+    case "EXPO_PUBLIC_REACHABILITY_PROBE_PATH":
+      return process.env.EXPO_PUBLIC_REACHABILITY_PROBE_PATH;
     case "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS":
       return process.env.EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS;
     case "EXPO_PUBLIC_APP_SCHEME":
@@ -162,6 +172,16 @@ export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
     "EXPO_PUBLIC_API_TIMEOUT_MS",
     "apiTimeoutMs",
     DEFAULT_REQUEST_TIMEOUT_MS,
+  ),
+  reachabilityProbeTimeoutMs: readNumber(
+    "EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS",
+    "reachabilityProbeTimeoutMs",
+    DEFAULT_REACHABILITY_PROBE_TIMEOUT_MS,
+  ),
+  reachabilityProbePath: readString(
+    "EXPO_PUBLIC_REACHABILITY_PROBE_PATH",
+    "reachabilityProbePath",
+    DEFAULT_REACHABILITY_PROBE_PATH,
   ),
   sessionExpiryLeewayMs: readNumber(
     "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS",
