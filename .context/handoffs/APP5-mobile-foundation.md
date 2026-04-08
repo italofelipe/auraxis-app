@@ -218,6 +218,41 @@
 - removi o allowlist do guardrail em [`scripts/check-app-route-boundaries.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-03a-legacy-removal/scripts/check-app-route-boundaries.cjs), então agora qualquer import de `components/`, `hooks/`, `lib/` ou `stores/` dentro de `app/` quebra localmente antes do CI;
 - eliminei os arquivos legados do domínio antigo (`components/tools/*`, `hooks/use-installment-vs-cash-controller.ts`, `hooks/queries/use-tools-query.ts`, `hooks/queries/use-installment-vs-cash-history-query.ts`, `hooks/mutations/use-installment-vs-cash-mutations.ts`, `lib/tools-api.ts`, `lib/installment-vs-cash-api.ts`) e atualizei os testes/cobertura para a nova topologia.
 
+---
+
+## Update - APP FND-04A (completion)
+
+### O que foi feito
+- scaffold completo dos domínios canônicos restantes do MVP1 em `features/*`:
+  - [`features/transactions`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/features/transactions)
+  - [`features/shared-entries`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/features/shared-entries)
+  - [`features/fiscal`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/features/fiscal)
+  - [`features/user-profile`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/features/user-profile)
+  - [`features/questionnaire`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/features/questionnaire)
+- alinhei o catálogo e a governança de contratos do app para absorver esses domínios em:
+  - [`shared/contracts/api-contract-map.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/shared/contracts/api-contract-map.ts)
+  - [`shared/contracts/api-endpoint-catalog.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/shared/contracts/api-endpoint-catalog.ts)
+  - [`shared/contracts/api-contract-map.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/shared/contracts/api-contract-map.test.ts)
+- expandi [`core/query/query-keys.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/core/query/query-keys.ts) para os namespaces `transactions`, `userProfile`, `questionnaire`, `sharedEntries` e `fiscal`;
+- alinhei `tools` ao novo baseline com [`features/tools/mocks.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/features/tools/mocks.ts) e export do tipo `InstallmentVsCashHistoryResponse` em [`features/tools/contracts.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/features/tools/contracts.ts);
+- endureci o gate local do app para esse recorte, incluindo os arquivos novos no [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-04a-domain-scaffold/jest.config.js), de forma que coverage baixa dos domínios novos falhe localmente antes do CI;
+- adicionei cobertura de services/hooks para todos os domínios novos, incluindo casos de fallback, paginação, envelopes de mutação e invalidação de cache.
+
+### O que foi validado
+- `npm run typecheck`
+- `npx jest features/transactions/services/transactions-service.test.ts features/transactions/hooks/use-transactions-query.test.ts features/user-profile/services/user-profile-service.test.ts features/user-profile/hooks/use-user-profile-query.test.ts features/questionnaire/services/questionnaire-service.test.ts features/questionnaire/hooks/use-questionnaire-query.test.ts features/shared-entries/services/shared-entries-service.test.ts features/shared-entries/hooks/use-shared-entries-query.test.ts features/fiscal/services/fiscal-service.test.ts features/fiscal/hooks/use-fiscal-query.test.ts --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- `shared-entries` e `fiscal` ainda são gaps conhecidos do snapshot OpenAPI do app; o contract map já os governa, mas o baseline tipado do OpenAPI continua dependente do backend publicar esses paths;
+- `APP FND-04B` ainda precisa expandir o coverage de endpoints do catálogo e reconciliar qualquer diferença remanescente entre o snapshot e os domínios canônicos;
+- a fundação de domínio está pronta, mas ainda faltam `FND-05A/B/C` e `FND-06A/B` para a baseline de 9.5 em segurança, observabilidade, confiabilidade e release-readiness.
+
+### Proximo passo
+- seguir para [`[APP] FND-04B`](https://github.com/italofelipe/auraxis-app/issues/214), fechando catálogo de contratos, coverage de endpoints e a última camada de governança de API do app;
+- depois entrar em `FND-05A`, endurecendo sessão, auth runtime e segurança operacional antes de qualquer feature real.
+
 ### O que foi validado
 - `node scripts/check-app-route-boundaries.cjs`
 - `npm run typecheck`

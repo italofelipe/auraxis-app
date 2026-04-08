@@ -7,6 +7,12 @@ export const queryKeys = {
     root: ["dashboard"] as const,
     overview: () => ["dashboard", "overview"] as const,
   },
+  transactions: {
+    root: ["transactions"] as const,
+    list: () => ["transactions", "list"] as const,
+    detail: (transactionId: string) => ["transactions", "detail", transactionId] as const,
+    summary: () => ["transactions", "summary"] as const,
+  },
   goals: {
     root: ["goals"] as const,
     list: () => ["goals", "list"] as const,
@@ -21,6 +27,20 @@ export const queryKeys = {
     check: (featureKey: string) => ["entitlements", "check", featureKey] as const,
     access: (featureKey: string) => ["entitlements", "access", featureKey] as const,
   },
+  userProfile: {
+    root: ["user-profile"] as const,
+    detail: () => ["user-profile", "detail"] as const,
+  },
+  questionnaire: {
+    root: ["questionnaire"] as const,
+    questions: () => ["questionnaire", "questions"] as const,
+  },
+  sharedEntries: {
+    root: ["shared-entries"] as const,
+    byMe: () => ["shared-entries", "by-me"] as const,
+    withMe: () => ["shared-entries", "with-me"] as const,
+    invitations: () => ["shared-entries", "invitations"] as const,
+  },
   subscription: {
     root: ["subscription"] as const,
     me: () => ["subscription", "me"] as const,
@@ -34,6 +54,12 @@ export const queryKeys = {
     root: ["observability"] as const,
     snapshot: () => ["observability", "snapshot"] as const,
     metrics: () => ["observability", "metrics"] as const,
+  },
+  fiscal: {
+    root: ["fiscal"] as const,
+    receivables: () => ["fiscal", "receivables"] as const,
+    summary: () => ["fiscal", "summary"] as const,
+    documents: () => ["fiscal", "documents"] as const,
   },
   tools: {
     root: ["tools"] as const,
