@@ -1,7 +1,7 @@
 # quality_gates.md — auraxis-app
 
 > Gates de qualidade obrigatórios para o aplicativo mobile do Auraxis.
-> Atualizado: 2026-02-23 — stack completa (jest-expo + Gitleaks + TruffleHog + SonarCloud)
+> Atualizado: 2026-04-08 — Node LTS unificado + stack completa (jest-expo + Gitleaks + TruffleHog + SonarCloud)
 
 ---
 
@@ -11,7 +11,7 @@ Execute nesta ordem:
 
 ```bash
 # 0. Paridade de runtime (obrigatorio para evitar drift local/CI)
-nvm use 25
+nvm use 24
 
 # 1. Lint (ESLint + eslint-config-expo)
 npm run lint
@@ -25,7 +25,7 @@ npm run test:coverage
 # Atalho — tudo de uma vez (obrigatório antes de commitar):
 npm run quality-check
 
-# Paridade CI local (ambiente dockerizado Node 25, igual ao runner Linux):
+# Paridade CI local (ambiente dockerizado Node 24, igual ao runner Linux):
 npm run ci:local
 ```
 

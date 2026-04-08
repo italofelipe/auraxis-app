@@ -624,3 +624,45 @@
 ### Proximo passo
 - seguir para `APP FND-05B`, criando logger cliente canônico, breadcrumbs e telemetria mínima de navegação/network/erro;
 - em seguida entrar em `APP FND-05C` para degraded states, offline/reachability, retry policy e confiabilidade operacional do runtime mobile.
+
+---
+
+## Update - APP FND-06B
+
+### O que foi feito
+- migrei a baseline de runtime do app para `Node 24 LTS`, centralizando a fonte de verdade em [`.nvmrc`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/.nvmrc) e alinhando:
+  - [`package.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/package.json)
+  - [`package-lock.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/package-lock.json)
+  - [`scripts/run_ci_like_actions_local.sh`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/scripts/run_ci_like_actions_local.sh)
+  - [`ci.yml`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/.github/workflows/ci.yml)
+  - [`deploy-minimum.yml`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/.github/workflows/deploy-minimum.yml)
+  - [`store-release.yml`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/.github/workflows/store-release.yml);
+- criei o guardrail [`check-runtime-release-governance.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/scripts/check-runtime-release-governance.cjs) e o acoplei ao `policy:check` e ao `lint-staged`, para falhar cedo quando houver drift de:
+  - Node LTS / CI / Docker local;
+  - thresholds de bundle (`6 MB` aviso / `9 MB` hard limit);
+  - configuração mínima de release-readiness do Expo/EAS;
+- subi cobertura do guardrail em [`check-runtime-release-governance.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/scripts/check-runtime-release-governance.test.ts);
+- endureci a configuração de publicação do app em [`app.json`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/app.json), adicionando `expo.ios.bundleIdentifier` para fechar o mínimo de readiness multi-plataforma;
+- alinhei a documentação canônica do repo com o estado real da fundação em:
+  - [`steering.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/steering.md)
+  - [`.context/quality_gates.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/.context/quality_gates.md)
+  - [`CODING_STANDARDS.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/CODING_STANDARDS.md)
+  - [`README.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/README.md)
+  - [`.context/architecture.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06b-release-readiness/.context/architecture.md)
+
+### O que foi validado
+- `node scripts/check-runtime-release-governance.cjs`
+- `npx jest scripts/check-runtime-release-governance.test.ts --runInBand`
+- `npm run policy:check`
+- `npm run typecheck`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o ambiente local atual ainda estava em `Node 25`, então a governança agora garante configuração/CI/documentação consistentes, mas a adoção operacional do `Node 24` precisa ser absorvida no shell do desenvolvedor com `nvm use 24`;
+- o app já tem baseline mínima de release via Expo/EAS, mas a trilha de publicação em stores e OTA continua fora do MVP1 foundation;
+- as próximas fundações (`FND-07+`) ainda precisam fechar error taxonomy, async states, segurança final e observabilidade cliente para liberar a primeira feature real.
+
+### Proximo passo
+- seguir para `APP FND-07A`, criando taxonomia canônica de erro e `ErrorBoundary` global/reutilizável;
+- depois entrar em `APP FND-07B` para padronizar `loading / empty / error / offline / degraded states` antes da primeira tela real.

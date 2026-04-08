@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Run a local gate bundle that mirrors GitHub Actions CI as closely as possible.
 #
-# Default: Dockerized Node 25 environment for parity with ubuntu-latest jobs.
+# Default: Dockerized Node LTS environment from .nvmrc for parity with ubuntu-latest jobs.
 # Flags:
 #   --local             Run in current shell environment
 #   --with-expo-bundle  Include expo JS bundle check (requires EXPO_TOKEN)
@@ -12,6 +12,20 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
+
+NODE_VERSION_FILE="$ROOT_DIR/.nvmrc"
+if [[ ! -f "$NODE_VERSION_FILE" ]]; then
+  echo "[ci-like-local] missing required runtime file: $NODE_VERSION_FILE" >&2
+  exit 3
+fi
+
+NODE_VERSION="$(tr -d '[:space:]' < "$NODE_VERSION_FILE")"
+if [[ -z "$NODE_VERSION" ]]; then
+  echo "[ci-like-local] .nvmrc is empty" >&2
+  exit 3
+fi
+
+NODE_DOCKER_IMAGE="node:${NODE_VERSION}-bookworm"
 
 MODE="docker"
 RUN_EXPO_BUNDLE=0
@@ -107,13 +121,13 @@ run_in_docker() {
     args+=("--with-sonar")
   fi
 
-  echo "[ci-like-local] running in node:25-bookworm container..."
+  echo "[ci-like-local] running in ${NODE_DOCKER_IMAGE} container..."
   docker run --rm \
     -v "$ROOT_DIR:/workspace" \
     -w /workspace \
     -e EXPO_TOKEN="${EXPO_TOKEN:-}" \
     -e SONAR_AURAXIS_APP_TOKEN="${SONAR_AURAXIS_APP_TOKEN:-}" \
-    node:25-bookworm \
+    "$NODE_DOCKER_IMAGE" \
     bash -lc "bash scripts/run_ci_like_actions_local.sh ${args[*]}"
 
   echo "[ci-like-local] all selected checks passed (docker mode)."
