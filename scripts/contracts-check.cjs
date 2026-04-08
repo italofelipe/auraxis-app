@@ -90,6 +90,47 @@ const validateContractPackBaseline = (remotePacks, baselinePayload) => {
   return errors;
 };
 
+const getBaselinePackEntries = (baselinePayload) => {
+  return Array.isArray(baselinePayload?.packs) ? baselinePayload.packs : [];
+};
+
+const shouldTreatRemoteContractFailureAsEmpty = (error, baselinePayload) => {
+  const status = Number(error?.status ?? 0);
+  if (status !== 401 && status !== 403) {
+    return false;
+  }
+
+  return getBaselinePackEntries(baselinePayload).length === 0;
+};
+
+/**
+ * @param {{
+ *   baselinePayload: { packs?: Array<unknown> } | null | undefined,
+ *   contractsApiUrl?: string,
+ *   listRemotePacks?: (contractsApiUrl: string) => Promise<Array<unknown>>,
+ *   stdout?: { write: (chunk: string) => unknown },
+ * }} options
+ */
+const resolveRemoteContractPacks = async ({
+  baselinePayload,
+  contractsApiUrl = CONTRACTS_API_URL,
+  listRemotePacks = listRemoteContractPacks,
+  stdout = process.stdout,
+}) => {
+  try {
+    return await listRemotePacks(contractsApiUrl);
+  } catch (error) {
+    if (shouldTreatRemoteContractFailureAsEmpty(error, baselinePayload)) {
+      stdout.write(
+        `[contracts:check] remote contract check degraded to local-only validation (${error.message}); baseline has no remote packs.\n`,
+      );
+      return [];
+    }
+
+    throw error;
+  }
+};
+
 const run = async () => {
   ensureFileExists(OPENAPI_SNAPSHOT_PATH);
   ensureFileExists(GENERATED_TYPES_PATH);
@@ -134,7 +175,9 @@ const run = async () => {
     return;
   }
 
-  const remotePacks = await listRemoteContractPacks(CONTRACTS_API_URL);
+  const remotePacks = await resolveRemoteContractPacks({
+    baselinePayload,
+  });
   const baselineErrors = validateContractPackBaseline(remotePacks, baselinePayload);
   const openApiErrors = validateRestEndpointsAgainstOpenApi(
     openApiDocument,
@@ -169,7 +212,17 @@ const run = async () => {
   );
 };
 
-run().catch((error) => {
-  process.stderr.write(`[contracts:check] FAILED: ${error.message}\n`);
-  process.exit(1);
-});
+if (require.main === module) {
+  run().catch((error) => {
+    process.stderr.write(`[contracts:check] FAILED: ${error.message}\n`);
+    process.exit(1);
+  });
+}
+
+module.exports = {
+  getBaselinePackEntries,
+  resolveRemoteContractPacks,
+  run,
+  shouldTreatRemoteContractFailureAsEmpty,
+  validateContractPackBaseline,
+};
