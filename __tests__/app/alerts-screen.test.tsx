@@ -2,8 +2,8 @@ import { render } from "@testing-library/react-native";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 
 import AlertsScreen from "@/app/(private)/alertas";
-import { AppProviders } from "@/core/providers/app-providers";
 import { useAlertsScreenController } from "@/features/alerts/hooks/use-alerts-screen-controller";
+import { TestProviders } from "@/shared/testing/test-providers";
 
 jest.mock("@/features/alerts/hooks/use-alerts-screen-controller", () => ({
   useAlertsScreenController: jest.fn(),
@@ -105,9 +105,9 @@ describe("AlertsScreen", () => {
     });
 
     const { getAllByText, getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <AlertsScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getAllByText("Alertas").length).toBeGreaterThan(0);

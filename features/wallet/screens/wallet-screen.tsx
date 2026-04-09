@@ -3,11 +3,10 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { useWalletScreenController } from "@/features/wallet/hooks/use-wallet-screen-controller";
-import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
+import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
-import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 import { formatCurrency, formatPercent } from "@/shared/utils/formatters";
 
 /**
@@ -21,35 +20,31 @@ export function WalletScreen(): ReactElement {
   return (
     <AppScreen>
       <AppSurfaceCard title="Carteira" description="Distribuicao atual do patrimonio.">
-        {controller.walletQuery.isPending ? (
-          <AsyncStateNotice
-            kind="loading"
-            title="Carregando carteira"
-            description="Buscando os ativos registrados para o usuario."
-          />
-        ) : controller.walletQuery.isError ? (
-          <AppErrorNotice
-            error={controller.walletQuery.error}
-            fallbackTitle="Nao foi possivel carregar a carteira"
-            fallbackDescription="Tente novamente em instantes."
-            onAction={() => {
-              void controller.walletQuery.refetch();
-            }}
-          />
-        ) : (
-          <YStack gap="$3">
-            <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
-              Total: {formatCurrency(controller.total)}
-            </Paragraph>
+        <AppQueryState
+          query={controller.walletQuery}
+          options={{
+            loading: {
+              title: "Carregando carteira",
+              description: "Buscando os ativos registrados para o usuario.",
+            },
+            empty: {
+              title: "Nenhum ativo encontrado",
+              description: "Os ativos adicionados vao aparecer aqui.",
+            },
+            error: {
+              fallbackTitle: "Nao foi possivel carregar a carteira",
+              fallbackDescription: "Tente novamente em instantes.",
+            },
+            isEmpty: (data) => data.items.length === 0,
+          }}
+        >
+          {() => (
+            <YStack gap="$3">
+              <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
+                Total: {formatCurrency(controller.total)}
+              </Paragraph>
 
-            {controller.assets.length === 0 ? (
-              <AsyncStateNotice
-                kind="empty"
-                title="Nenhum ativo encontrado"
-                description="Os ativos adicionados vao aparecer aqui."
-              />
-            ) : (
-              controller.assets.map((asset) => (
+              {controller.assets.map((asset) => (
                 <AppKeyValueRow
                   key={asset.id}
                   label={asset.name}
@@ -64,10 +59,10 @@ export function WalletScreen(): ReactElement {
                     </XStack>
                   }
                 />
-              ))
-            )}
-          </YStack>
-        )}
+              ))}
+            </YStack>
+          )}
+        </AppQueryState>
       </AppSurfaceCard>
     </AppScreen>
   );

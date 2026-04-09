@@ -1,12 +1,12 @@
 import { render } from "@testing-library/react-native";
 import InstallmentVsCashScreen from "@/app/(private)/installment-vs-cash";
-import { AppProviders } from "@/core/providers/app-providers";
 import { useInstallmentVsCashScreenController } from "@/features/tools/hooks/use-installment-vs-cash-screen-controller";
 import type {
   InstallmentVsCashCalculation,
   InstallmentVsCashSavedSimulation,
 } from "@/features/tools/contracts";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
+import { TestProviders } from "@/shared/testing/test-providers";
 
 jest.mock("@/features/tools/hooks/use-installment-vs-cash-screen-controller", () => ({
   useInstallmentVsCashScreenController: jest.fn(),
@@ -75,53 +75,53 @@ const buildCalculation = (): InstallmentVsCashCalculation => ({
   },
 });
 
-const buildMutation = (): UseMutationResult<unknown, Error, unknown, unknown> => ({
-  data: undefined,
-  error: null,
-  failureCount: 0,
-  failureReason: null,
-  isError: false,
-  isIdle: true,
-  isPending: false,
-  isPaused: false,
-  isSuccess: false,
-  mutate: jest.fn(),
-  mutateAsync: jest.fn(),
-  reset: jest.fn(),
-  status: "idle",
-  submittedAt: 0,
-  variables: undefined,
-} as unknown as UseMutationResult<unknown, Error, unknown, unknown>);
+const buildMutation = (): UseMutationResult<unknown, Error, unknown, unknown> =>
+  ({
+    data: undefined,
+    error: null,
+    failureCount: 0,
+    failureReason: null,
+    isError: false,
+    isIdle: true,
+    isPending: false,
+    isPaused: false,
+    isSuccess: false,
+    mutate: jest.fn(),
+    mutateAsync: jest.fn(),
+    reset: jest.fn(),
+    status: "idle",
+    submittedAt: 0,
+    variables: undefined,
+  }) as unknown as UseMutationResult<unknown, Error, unknown, unknown>;
 
-const buildQuery = <TData,>(
-  data: TData,
-): UseQueryResult<TData, Error> => ({
-  data,
-  error: null,
-  failureCount: 0,
-  failureReason: null,
-  fetchStatus: "idle",
-  isError: false,
-  isFetched: true,
-  isFetchedAfterMount: true,
-  isFetching: false,
-  isInitialLoading: false,
-  isLoading: false,
-  isLoadingError: false,
-  isPaused: false,
-  isPending: false,
-  isPlaceholderData: false,
-  isRefetchError: false,
-  isRefetching: false,
-  isStale: false,
-  isSuccess: true,
-  refetch: jest.fn(),
-  status: "success",
-  dataUpdatedAt: 0,
-  errorUpdatedAt: 0,
-  isEnabled: true,
-  promise: Promise.resolve(data),
-} as unknown as UseQueryResult<TData, Error>);
+const buildQuery = <TData,>(data: TData): UseQueryResult<TData, Error> =>
+  ({
+    data,
+    error: null,
+    failureCount: 0,
+    failureReason: null,
+    fetchStatus: "idle",
+    isError: false,
+    isFetched: true,
+    isFetchedAfterMount: true,
+    isFetching: false,
+    isInitialLoading: false,
+    isLoading: false,
+    isLoadingError: false,
+    isPaused: false,
+    isPending: false,
+    isPlaceholderData: false,
+    isRefetchError: false,
+    isRefetching: false,
+    isStale: false,
+    isSuccess: true,
+    refetch: jest.fn(),
+    status: "success",
+    dataUpdatedAt: 0,
+    errorUpdatedAt: 0,
+    isEnabled: true,
+    promise: Promise.resolve(data),
+  }) as unknown as UseQueryResult<TData, Error>;
 
 const buildController = (
   overrides: Partial<ReturnType<typeof useInstallmentVsCashScreenController>> = {},
@@ -151,14 +151,15 @@ const buildController = (
     isPending: false,
     isError: false,
   } as ReturnType<typeof useInstallmentVsCashScreenController>["calculateMutation"],
-  saveMutation:
-    buildMutation() as ReturnType<
-      typeof useInstallmentVsCashScreenController
-    >["saveMutation"],
-  createGoalMutation:
-    buildMutation() as ReturnType<typeof useInstallmentVsCashScreenController>["createGoalMutation"],
-  createPlannedExpenseMutation:
-    buildMutation() as ReturnType<typeof useInstallmentVsCashScreenController>["createPlannedExpenseMutation"],
+  saveMutation: buildMutation() as ReturnType<
+    typeof useInstallmentVsCashScreenController
+  >["saveMutation"],
+  createGoalMutation: buildMutation() as ReturnType<
+    typeof useInstallmentVsCashScreenController
+  >["createGoalMutation"],
+  createPlannedExpenseMutation: buildMutation() as ReturnType<
+    typeof useInstallmentVsCashScreenController
+  >["createPlannedExpenseMutation"],
   setTextField: jest.fn(),
   setInstallmentMode: jest.fn(),
   setDelayPreset: jest.fn(),
@@ -184,9 +185,9 @@ describe("InstallmentVsCashScreen", () => {
 
   it("renderiza a tela base da calculadora", () => {
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <InstallmentVsCashScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Parcelado vs a vista")).toBeTruthy();
@@ -205,9 +206,9 @@ describe("InstallmentVsCashScreen", () => {
     );
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <InstallmentVsCashScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Calculando cenario")).toBeTruthy();
@@ -225,9 +226,9 @@ describe("InstallmentVsCashScreen", () => {
     );
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <InstallmentVsCashScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Nao foi possivel calcular agora")).toBeTruthy();
@@ -254,9 +255,9 @@ describe("InstallmentVsCashScreen", () => {
     );
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <InstallmentVsCashScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Salvar no planejamento")).toBeTruthy();

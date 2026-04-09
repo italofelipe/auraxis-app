@@ -1,7 +1,7 @@
 import { Redirect } from "expo-router";
 
 import { useRootRouteGuard } from "@/core/navigation/use-route-guards";
-import { AsyncStateNotice } from "@/shared/components/async-state-notice";
+import { AppAsyncState } from "@/shared/components/app-async-state";
 import { AppScreen } from "@/shared/components/app-screen";
 
 export default function IndexScreen() {
@@ -10,10 +10,14 @@ export default function IndexScreen() {
   if (!ready) {
     return (
       <AppScreen scrollable={false}>
-        <AsyncStateNotice
-          kind="loading"
-          title="Carregando Auraxis"
-          description="Preparando a sua sessao para decidir o melhor proximo passo."
+        <AppAsyncState
+          state={{
+            kind: "loading",
+            title: "Carregando Auraxis",
+            description: "Preparando a sua sessao para decidir o melhor proximo passo.",
+            presentation: "notice",
+            skeletonLines: 3,
+          }}
         />
       </AppScreen>
     );

@@ -58,6 +58,7 @@ Telas (app/)
 - Nenhuma chamada HTTP direta em componentes — sempre via hook ou service.
 - `lib/` e `hooks/` legados existem apenas como camada de compatibilidade temporária.
 - Testes de UI/feature devem preferir `shared/testing/test-providers.tsx` para evitar acoplamento desnecessário com bootstrap de runtime.
+- Estados assíncronos de tela devem preferir `shared/components/app-query-state.tsx` e `shared/components/app-async-state.tsx`, mantendo `loading/empty/error/offline/degraded` fora das telas.
 
 ## Decisões de arquitetura
 
@@ -74,6 +75,8 @@ Telas (app/)
 | Contratos de API | `shared/contracts/api-contract-map.ts` | Fonte tipada única de path/method/request/response para o app |
 | Query keys | `core/query/query-keys.ts` | Evita drift de cache key e melhora invalidação futura |
 | Taxonomia de erro | `core/errors/*` + `shared/components/app-error-notice.tsx` | Traduz erro técnico para estado de UI único com retry/recoverability |
+| Async state composition | `core/query/query-feedback-state.ts` + `shared/components/app-query-state.tsx` | Unifica `loading`, `empty`, `offline`, `degraded` e `error` com runtime connectivity e error taxonomy |
+| Skeleton loading | `shared/components/app-skeleton-block.tsx` | Substitui loading genérico por placeholder canônico, acessível e reaproveitável |
 | Error boundaries | `core/errors/app-error-boundary.tsx` | Degrada falhas inesperadas no root e nos fluxos público/privado |
 | Tema e motion | `shared/theme/*` + `shared/animations/*` | Unifica tokens semânticos, animações e acessibilidade |
 | Formulários | `shared/forms/use-app-form.ts` + validators por feature | Reuso com Zod/RHF sem duplicar resolver/config |

@@ -1,5 +1,37 @@
 # APP5 - Scaffold base do app mobile
 
+## Update - APP FND-07B (completion)
+
+### O que foi feito
+- introduzi a composição canônica de estados assíncronos em `core/query/query-feedback-state.ts`, conectando `TanStack Query` ao `app-shell-store` para resolver `loading`, `empty`, `offline`, `degraded`, `error` e `content` com a mesma taxonomia;
+- criei os componentes compartilhados `shared/components/app-async-state.tsx`, `shared/components/app-query-state.tsx` e `shared/components/app-skeleton-block.tsx`, além de expandir `shared/components/async-state-notice.tsx` para cobrir estados de conectividade;
+- substituí o branching manual nas telas atuais por essa fundação em:
+  - `app/index.tsx`
+  - `features/dashboard/screens/dashboard-screen.tsx`
+  - `features/tools/screens/tools-screen.tsx`
+  - `features/alerts/screens/alerts-screen.tsx`
+  - `features/wallet/screens/wallet-screen.tsx`
+  - `features/subscription/screens/subscription-screen.tsx`
+  - `features/tools/screens/installment-vs-cash-screen.tsx`
+- migrei os testes de tela tocados para `shared/testing/test-providers.tsx`, removendo ruído de lifecycle do runtime real e fazendo os testes falharem mais cedo/localmente;
+- alinhei `jest.config.js` e `sonar-project.properties` para incluir a nova fundação em coverage e análise estática.
+
+### O que foi validado
+- `npm run typecheck`
+- `npm test -- --runInBand core/query/query-feedback-state.test.ts shared/components/app-skeleton-block.test.tsx shared/components/app-async-state.test.tsx shared/components/app-query-state.test.tsx shared/components/async-state-notice.test.tsx __tests__/app/dashboard-screen.test.tsx __tests__/app/tools-screen.test.tsx __tests__/app/alerts-screen.test.tsx __tests__/app/wallet-screen.test.tsx __tests__/app/subscription-screen.test.tsx __tests__/app/installment-vs-cash-screen.test.tsx`
+- `npm run lint`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- a fundação canônica já cobre query state e mutation feedback simples, mas `FND-08B` ainda precisa conectar forced sign-out e auth-failure flows na mesma ergonomia;
+- algumas telas futuras ainda podem precisar banners mais específicos de stale data, mas a base para `offline/degraded` já está centralizada e pronta para isso;
+- o próximo bloco deve reaproveitar `AppQueryState` por padrão para evitar regressão para branching manual em `.tsx`.
+
+### Proximo passo
+- seguir para `APP FND-08A`, fechando a auditoria final de segurança/configuração do app sobre a base agora estabilizada;
+- em seguida atacar `APP FND-08B` para consolidar forced sign-out, reauth e failure flows usando a mesma taxonomia de erro e async state.
+
 ## O que foi feito
 - reli os contratos canônicos da `auraxis-api` para `auth`, `user/bootstrap`, `subscriptions`, `dashboard`, `wallet`, `alerts`, `goals` e `observability`;
 - mapeei o catálogo de endpoints consumíveis do MVP1 em [`shared/contracts/api-endpoint-catalog.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/contracts/api-endpoint-catalog.ts);

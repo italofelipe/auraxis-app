@@ -8,11 +8,10 @@ import {
 } from "@/features/alerts/hooks/use-alerts-screen-controller";
 import { AlertPreferenceRow } from "@/features/alerts/components/alert-preference-row";
 import { AlertRecordCard } from "@/features/alerts/components/alert-record-card";
-import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppButton } from "@/shared/components/app-button";
+import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
-import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 
 const TABS: { readonly key: AlertsTabKey; readonly label: string }[] = [
   { key: "alerts", label: "Alertas" },
@@ -24,52 +23,40 @@ function AlertsFeedPanel({
 }: {
   readonly controller: ReturnType<typeof useAlertsScreenController>;
 }): ReactElement {
-  if (controller.alertsQuery.isPending) {
-    return (
-      <AsyncStateNotice
-        kind="loading"
-        title="Carregando alertas"
-        description="Buscando as notificacoes mais recentes."
-      />
-    );
-  }
-
-  if (controller.alertsQuery.isError) {
-    return (
-      <AppErrorNotice
-        error={controller.alertsQuery.error}
-        fallbackTitle="Nao foi possivel carregar os alertas"
-        fallbackDescription="Tente novamente em alguns instantes."
-        onAction={() => {
-          void controller.alertsQuery.refetch();
-        }}
-      />
-    );
-  }
-
-  if (!controller.alertsQuery.data?.alerts.length) {
-    return (
-      <AsyncStateNotice
-        kind="empty"
-        title="Nenhum alerta encontrado"
-        description="Novos alertas vao aparecer aqui quando forem gerados."
-      />
-    );
-  }
-
   return (
-    <YStack gap="$3">
-      {controller.alertsQuery.data.alerts.map((alert) => {
-        return (
-          <AlertRecordCard
-            key={alert.id}
-            alert={alert}
-            onMarkRead={(alertId) => controller.markReadMutation.mutate(alertId)}
-            onDelete={(alertId) => controller.deleteAlertMutation.mutate(alertId)}
-          />
-        );
-      })}
-    </YStack>
+    <AppQueryState
+      query={controller.alertsQuery}
+      options={{
+        loading: {
+          title: "Carregando alertas",
+          description: "Buscando as notificacoes mais recentes.",
+        },
+        empty: {
+          title: "Nenhum alerta encontrado",
+          description: "Novos alertas vao aparecer aqui quando forem gerados.",
+        },
+        error: {
+          fallbackTitle: "Nao foi possivel carregar os alertas",
+          fallbackDescription: "Tente novamente em alguns instantes.",
+        },
+        isEmpty: (data) => data.alerts.length === 0,
+      }}
+    >
+      {(data) => (
+        <YStack gap="$3">
+          {data.alerts.map((alert) => {
+            return (
+              <AlertRecordCard
+                key={alert.id}
+                alert={alert}
+                onMarkRead={(alertId) => controller.markReadMutation.mutate(alertId)}
+                onDelete={(alertId) => controller.deleteAlertMutation.mutate(alertId)}
+              />
+            );
+          })}
+        </YStack>
+      )}
+    </AppQueryState>
   );
 }
 
@@ -78,58 +65,46 @@ function AlertsPreferencesPanel({
 }: {
   readonly controller: ReturnType<typeof useAlertsScreenController>;
 }): ReactElement {
-  if (controller.preferencesQuery.isPending) {
-    return (
-      <AsyncStateNotice
-        kind="loading"
-        title="Carregando preferencias"
-        description="Buscando as configuracoes de notificacao do usuario."
-      />
-    );
-  }
-
-  if (controller.preferencesQuery.isError) {
-    return (
-      <AppErrorNotice
-        error={controller.preferencesQuery.error}
-        fallbackTitle="Nao foi possivel carregar as preferencias"
-        fallbackDescription="Tente novamente em alguns instantes."
-        onAction={() => {
-          void controller.preferencesQuery.refetch();
-        }}
-      />
-    );
-  }
-
-  if (!controller.preferencesQuery.data?.preferences.length) {
-    return (
-      <AsyncStateNotice
-        kind="empty"
-        title="Nenhuma preferencia encontrada"
-        description="As categorias vao aparecer aqui conforme o backend publicar a matriz."
-      />
-    );
-  }
-
   return (
-    <YStack gap="$3">
-      {controller.preferencesQuery.data.preferences.map((preference) => (
-        <AlertPreferenceRow
-          key={preference.id}
-          preference={preference}
-          onToggle={({ category, enabled, globalOptOut }) => {
-            controller.updatePreferenceMutation.mutate({
-              category,
-              payload: {
-                enabled,
-                channels: ["email"],
-                globalOptOut,
-              },
-            });
-          }}
-        />
-      ))}
-    </YStack>
+    <AppQueryState
+      query={controller.preferencesQuery}
+      options={{
+        loading: {
+          title: "Carregando preferencias",
+          description: "Buscando as configuracoes de notificacao do usuario.",
+        },
+        empty: {
+          title: "Nenhuma preferencia encontrada",
+          description: "As categorias vao aparecer aqui conforme o backend publicar a matriz.",
+        },
+        error: {
+          fallbackTitle: "Nao foi possivel carregar as preferencias",
+          fallbackDescription: "Tente novamente em alguns instantes.",
+        },
+        isEmpty: (data) => data.preferences.length === 0,
+      }}
+    >
+      {(data) => (
+        <YStack gap="$3">
+          {data.preferences.map((preference) => (
+            <AlertPreferenceRow
+              key={preference.id}
+              preference={preference}
+              onToggle={({ category, enabled, globalOptOut }) => {
+                controller.updatePreferenceMutation.mutate({
+                  category,
+                  payload: {
+                    enabled,
+                    channels: ["email"],
+                    globalOptOut,
+                  },
+                });
+              }}
+            />
+          ))}
+        </YStack>
+      )}
+    </AppQueryState>
   );
 }
 
@@ -147,7 +122,8 @@ export function AlertsScreen(): ReactElement {
           <AppButton
             key={tab.key}
             tone={controller.activeTab === tab.key ? "primary" : "secondary"}
-            onPress={() => controller.setActiveTab(tab.key)}>
+            onPress={() => controller.setActiveTab(tab.key)}
+          >
             {tab.label}
           </AppButton>
         ))}
@@ -156,13 +132,15 @@ export function AlertsScreen(): ReactElement {
       {controller.activeTab === "alerts" ? (
         <AppSurfaceCard
           title="Alertas"
-          description="Feed operacional do usuario, agora consumido pela trilha canônica.">
+          description="Feed operacional do usuario, agora consumido pela trilha canônica."
+        >
           <AlertsFeedPanel controller={controller} />
         </AppSurfaceCard>
       ) : (
         <AppSurfaceCard
           title="Preferencias"
-          description="Controles de categorias e canal principal de notificacao.">
+          description="Controles de categorias e canal principal de notificacao."
+        >
           <AlertsPreferencesPanel controller={controller} />
         </AppSurfaceCard>
       )}

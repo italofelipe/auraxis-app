@@ -2,9 +2,9 @@ import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { AppErrorNotice } from "@/shared/components/app-error-notice";
-import { AsyncStateNotice } from "@/shared/components/async-state-notice";
+import { AppAsyncState } from "@/shared/components/app-async-state";
 import { AppButton } from "@/shared/components/app-button";
+import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { InstallmentVsCashForm } from "@/features/tools/components/installment-vs-cash-form";
@@ -12,11 +12,7 @@ import { InstallmentVsCashHistoryList } from "@/features/tools/components/instal
 import { InstallmentVsCashResultCard } from "@/features/tools/components/installment-vs-cash-result-card";
 import { useInstallmentVsCashScreenController } from "@/features/tools/hooks/use-installment-vs-cash-screen-controller";
 
-function InstallmentVsCashHeader({
-  onBack,
-}: {
-  readonly onBack: () => void;
-}): ReactElement {
+function InstallmentVsCashHeader({ onBack }: { readonly onBack: () => void }): ReactElement {
   return (
     <XStack justifyContent="space-between" alignItems="center">
       <YStack gap="$1" flex={1}>
@@ -24,8 +20,8 @@ function InstallmentVsCashHeader({
           Parcelado vs a vista
         </Paragraph>
         <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-          Compare desconto, parcelas, inflacao e custo de oportunidade com uma
-          experiencia adaptada para o mobile.
+          Compare desconto, parcelas, inflacao e custo de oportunidade com uma experiencia adaptada
+          para o mobile.
         </Paragraph>
       </YStack>
       <AppButton tone="secondary" onPress={onBack}>
@@ -49,7 +45,8 @@ export function InstallmentVsCashScreen(): ReactElement {
 
       <AppSurfaceCard
         title="Simule sua compra"
-        description="Resposta rapida para decidir melhor sem perder a camada de detalhe.">
+        description="Resposta rapida para decidir melhor sem perder a camada de detalhe."
+      >
         <InstallmentVsCashForm
           draft={controller.draft}
           errors={controller.errors}
@@ -66,20 +63,27 @@ export function InstallmentVsCashScreen(): ReactElement {
       </AppSurfaceCard>
 
       {controller.calculateMutation.isPending ? (
-        <AsyncStateNotice
-          kind="loading"
-          title="Calculando cenario"
-          description="Conferindo valor presente, poder de compra e break-even."
+        <AppAsyncState
+          state={{
+            kind: "loading",
+            title: "Calculando cenario",
+            description: "Conferindo valor presente, poder de compra e break-even.",
+            presentation: "notice",
+            skeletonLines: 3,
+          }}
         />
       ) : null}
 
       {controller.calculateMutation.isError ? (
-        <AppErrorNotice
-          error={controller.calculateMutation.error}
-          fallbackTitle="Nao foi possivel calcular agora"
-          fallbackDescription="Revise os dados e tente novamente em alguns instantes."
-          onAction={() => {
-            void controller.handleCalculate();
+        <AppAsyncState
+          state={{
+            kind: "error",
+            error: controller.calculateMutation.error,
+            fallbackTitle: "Nao foi possivel calcular agora",
+            fallbackDescription: "Revise os dados e tente novamente em alguns instantes.",
+            onAction: (): void => {
+              void controller.handleCalculate();
+            },
           }}
         />
       ) : null}
@@ -105,28 +109,28 @@ export function InstallmentVsCashScreen(): ReactElement {
         />
       ) : null}
 
-      {controller.historyQuery.isPending ? (
-        <AsyncStateNotice
-          kind="loading"
-          title="Carregando historico"
-          description="Buscando suas ultimas simulacoes salvas desta ferramenta."
-        />
-      ) : null}
-
-      {controller.historyQuery.isError ? (
-        <AppErrorNotice
-          error={controller.historyQuery.error}
-          fallbackTitle="Nao foi possivel carregar o historico"
-          fallbackDescription="Tente novamente em alguns instantes para recuperar suas simulacoes."
-          onAction={() => {
-            void controller.historyQuery.refetch();
-          }}
-        />
-      ) : null}
-
-      {controller.historyQuery.isSuccess && controller.historyQuery.data.length > 0 ? (
-        <InstallmentVsCashHistoryList items={controller.historyQuery.data} />
-      ) : null}
+      <AppQueryState
+        query={controller.historyQuery}
+        options={{
+          loading: {
+            title: "Carregando historico",
+            description: "Buscando suas ultimas simulacoes salvas desta ferramenta.",
+          },
+          empty: {
+            title: "Nenhuma simulacao salva ainda",
+            description: "Seus cenarios salvos vao aparecer aqui para comparacoes futuras.",
+          },
+          error: {
+            fallbackTitle: "Nao foi possivel carregar o historico",
+            fallbackDescription:
+              "Tente novamente em alguns instantes para recuperar suas simulacoes.",
+          },
+          isEmpty: (data) => data.length === 0,
+          loadingPresentation: "notice",
+        }}
+      >
+        {(data) => <InstallmentVsCashHistoryList items={data} />}
+      </AppQueryState>
     </AppScreen>
   );
 }

@@ -2,20 +2,15 @@ import { render } from "@testing-library/react-native";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import DashboardScreen from "@/app/(private)/dashboard";
-import { AppProviders } from "@/core/providers/app-providers";
-import type {
-  DashboardOverview,
-  DashboardTrends,
-} from "@/features/dashboard/contracts";
+import type { DashboardOverview, DashboardTrends } from "@/features/dashboard/contracts";
 import { useDashboardScreenController } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
+import { TestProviders } from "@/shared/testing/test-providers";
 
 jest.mock("@/features/dashboard/hooks/use-dashboard-screen-controller", () => ({
   useDashboardScreenController: jest.fn(),
 }));
 
-const mockedUseDashboardScreenController = jest.mocked(
-  useDashboardScreenController,
-);
+const mockedUseDashboardScreenController = jest.mocked(useDashboardScreenController);
 
 const buildQuery = <TData,>(
   overrides: Partial<UseQueryResult<TData, Error>>,
@@ -89,14 +84,10 @@ describe("DashboardScreen", () => {
     mockedUseDashboardScreenController.mockReturnValue({
       overviewQuery: buildQuery({
         data: overviewData,
-      }) as unknown as ReturnType<
-        typeof useDashboardScreenController
-      >["overviewQuery"],
+      }) as unknown as ReturnType<typeof useDashboardScreenController>["overviewQuery"],
       trendsQuery: buildQuery({
         data: trendsData,
-      }) as unknown as ReturnType<
-        typeof useDashboardScreenController
-      >["trendsQuery"],
+      }) as unknown as ReturnType<typeof useDashboardScreenController>["trendsQuery"],
       selectedMonth: "2026-04",
       monthOptions: [{ value: "2026-04", label: "abril de 2026" }],
       monthSnapshot: {
@@ -110,9 +101,9 @@ describe("DashboardScreen", () => {
     });
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <DashboardScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Saldo geral")).toBeTruthy();
