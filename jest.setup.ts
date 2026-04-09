@@ -9,6 +9,29 @@ import { cleanup } from "@testing-library/react-native";
 // Ex: expect(element).toBeVisible(), expect(element).toHaveText('...')
 import '@testing-library/jest-native/extend-expect'
 
+const originalReadableStreamCancel = globalThis.ReadableStream?.prototype?.cancel
+
+if (typeof originalReadableStreamCancel === "function") {
+  globalThis.ReadableStream.prototype.cancel = function cancelWithExpoStreamGuard(
+    reason?: unknown,
+  ): Promise<void> {
+    return Promise.resolve(
+      originalReadableStreamCancel.call(this, reason) as Promise<void>,
+    ).catch((error: unknown) => {
+      if (
+        error instanceof TypeError &&
+        error.message === "Cannot cancel a stream that already has a reader"
+      ) {
+        return
+      }
+
+      return Promise.reject(error)
+    })
+  }
+}
+
+jest.mock("axios", () => require("axios/dist/node/axios.cjs"))
+
 // Mock global do expo-router (evita erros em testes unitários de componentes)
 jest.mock('expo-router', () => ({
   useRouter: () => ({

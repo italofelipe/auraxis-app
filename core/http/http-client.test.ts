@@ -63,6 +63,12 @@ describe("httpClient", () => {
     expect(httpClient.defaults.headers["X-API-Contract"]).toBeDefined();
   });
 
+  it("prioriza adapters xhr/http no modo live para evitar fallback fetch no Jest", () => {
+    const client = createHttpClient("https://api.auraxis.dev/");
+
+    expect(client.defaults.adapter).toEqual(["xhr", "http"]);
+  });
+
   it("invalida a sessao local quando o token ja expirou antes do request", async () => {
     useSessionStore.setState((state) => ({
       ...state,

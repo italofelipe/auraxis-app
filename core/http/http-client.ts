@@ -3,6 +3,7 @@ import axios, {
   type AxiosInstance,
   type AxiosRequestHeaders,
   type AxiosResponse,
+  type CreateAxiosDefaults,
   type InternalAxiosRequestConfig,
 } from "axios";
 
@@ -26,6 +27,10 @@ interface RequestTelemetryMetadata {
 type InstrumentedRequestConfig = InternalAxiosRequestConfig & {
   auraxisTelemetry?: RequestTelemetryMetadata;
 };
+
+const LIVE_API_ADAPTER_PRIORITY: NonNullable<
+  CreateAxiosDefaults["adapter"]
+> = ["xhr", "http"];
 
 const readHeader = (
   headers:
@@ -249,7 +254,7 @@ export const createHttpClient = (baseUrl: string): AxiosInstance => {
     adapter:
       appRuntimeConfig.apiMode === "mock"
         ? createMockApiAdapter(appRuntimeConfig.mockLatencyMs)
-        : undefined,
+        : LIVE_API_ADAPTER_PRIORITY,
   });
 
   client.interceptors.request.use(attachAuthHeaders);

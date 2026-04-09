@@ -27,7 +27,7 @@ const config = {
   },
 
   // Setup files: configura @testing-library/jest-native matchers
-  setupFilesAfterEnv: ["@testing-library/jest-native/extend-expect"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 
   // Cobertura
   // APP9 baseline: cobertura inicial em fluxo crítico de tema/renderização.

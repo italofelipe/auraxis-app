@@ -1,5 +1,29 @@
 # APP5 - Scaffold base do app mobile
 
+## Update - APP FND-07B (axios security gate + local parity)
+
+### O que foi feito
+- atualizei `axios` para `^1.15.0`, removendo a vulnerabilidade crítica `GHSA-3p68-rc4w-qgx5` que estava bloqueando o `ci-audit-gate`;
+- endureci o cliente HTTP em [`core/http/http-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/core/http/http-client.ts) para priorizar `["xhr", "http"]` no modo live, evitando fallback implícito para `fetch` no app e nos testes;
+- adicionei cobertura explícita desse comportamento em [`core/http/http-client.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/core/http/http-client.test.ts);
+- conectei de fato o setup canônico do Jest em [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/jest.config.js) e endureci [`jest.setup.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/jest.setup.ts) com:
+  - mock explícito de `axios` para o build Node/CJS durante testes;
+  - guard compatível com o bug de `ReadableStream.cancel()` no ambiente `jest-expo` + Expo streams sob Node 25, para que o bloco volte a falhar cedo localmente em vez de surpreender só no CI.
+
+### O que foi validado
+- `node scripts/ci-audit-gate.js`
+- `npm run test -- core/http/http-client.test.ts --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o runner local ainda está em Node `25.6.1`; os gates do repo continuam pinados em Node 24 LTS e seguem verdes, mas vale instalar `nvm install 24` na máquina para paridade total com CI;
+- o guard em `jest.setup.ts` é deliberadamente restrito ao erro conhecido do ambiente Expo/Jest; se o upstream do axios ou da Expo resolver esse bug, o ideal é remover essa compatibilidade e simplificar o setup.
+
+### Proximo passo
+- seguir para `APP FND-08A`, agora com `audit` e `quality-check` novamente alinhados e sem regressão de DX local;
+- manter a política de validar `node scripts/ci-audit-gate.js` e `npm run quality-check` antes de todo push do app para reduzir fricção de CI na raiz.
+
 ## Update - APP FND-07B (completion)
 
 ### O que foi feito
