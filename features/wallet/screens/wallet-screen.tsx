@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { useWalletScreenController } from "@/features/wallet/hooks/use-wallet-screen-controller";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -27,10 +28,13 @@ export function WalletScreen(): ReactElement {
             description="Buscando os ativos registrados para o usuario."
           />
         ) : controller.walletQuery.isError ? (
-          <AsyncStateNotice
-            kind="error"
-            title="Nao foi possivel carregar a carteira"
-            description="Tente novamente em instantes."
+          <AppErrorNotice
+            error={controller.walletQuery.error}
+            fallbackTitle="Nao foi possivel carregar a carteira"
+            fallbackDescription="Tente novamente em instantes."
+            onAction={() => {
+              void controller.walletQuery.refetch();
+            }}
           />
         ) : (
           <YStack gap="$3">

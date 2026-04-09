@@ -5,6 +5,7 @@ import { Paragraph, YStack } from "tamagui";
 
 import { useLoginScreenController } from "@/features/auth/hooks/use-login-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -67,6 +68,16 @@ export function LoginScreen(): ReactElement {
             disabled={controller.isSubmitting}>
             {controller.isSubmitting ? "Entrando..." : "Entrar"}
           </AppButton>
+
+          {controller.submitError ? (
+            <AppErrorNotice
+              error={controller.submitError}
+              fallbackTitle="Nao foi possivel entrar agora"
+              fallbackDescription="Confira seus dados e tente novamente."
+              secondaryActionLabel="Fechar"
+              onSecondaryAction={controller.dismissSubmitError}
+            />
+          ) : null}
 
           <AppButton tone="secondary" onPress={controller.handleForgotPassword}>
             Esqueceu sua senha?

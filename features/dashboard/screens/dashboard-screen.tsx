@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { useDashboardScreenController } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppButton } from "@/shared/components/app-button";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -27,10 +28,13 @@ export function DashboardScreen(): ReactElement {
             description="Buscando o consolidado financeiro mais recente."
           />
         ) : controller.overviewQuery.isError ? (
-          <AsyncStateNotice
-            kind="error"
-            title="Nao foi possivel carregar o dashboard"
-            description="Tente novamente em alguns instantes."
+          <AppErrorNotice
+            error={controller.overviewQuery.error}
+            fallbackTitle="Nao foi possivel carregar o dashboard"
+            fallbackDescription="Tente novamente em alguns instantes."
+            onAction={() => {
+              void controller.overviewQuery.refetch();
+            }}
           />
         ) : (
           <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
@@ -61,10 +65,13 @@ export function DashboardScreen(): ReactElement {
               description="Preparando a leitura mensal do seu fluxo."
             />
           ) : controller.trendsQuery.isError ? (
-            <AsyncStateNotice
-              kind="error"
-              title="Nao foi possivel carregar as tendencias"
-              description="Tente novamente em instantes."
+            <AppErrorNotice
+              error={controller.trendsQuery.error}
+              fallbackTitle="Nao foi possivel carregar as tendencias"
+              fallbackDescription="Tente novamente em instantes."
+              onAction={() => {
+                void controller.trendsQuery.refetch();
+              }}
             />
           ) : controller.monthSnapshot ? (
             <YStack gap="$2">

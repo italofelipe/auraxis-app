@@ -26,6 +26,7 @@ auraxis-app/
     _layout.tsx  # Root layout
   components/    # Componentes React Native reutilizáveis
   core/          # Runtime transversal: http, query, navigation, session, shell, providers
+    errors/      # Taxonomia de erro, boundaries e recoverability do cliente
   features/      # Domínios do app: auth, bootstrap, subscription, etc.
   shared/        # Config, mocks, contratos, forms, theme, testing e utilidades compartilhadas
   constants/     # Constantes, temas, cores
@@ -72,6 +73,8 @@ Telas (app/)
 | Mocks | adapter central de API | Permite scaffold rápido do app sem depender sempre do backend |
 | Contratos de API | `shared/contracts/api-contract-map.ts` | Fonte tipada única de path/method/request/response para o app |
 | Query keys | `core/query/query-keys.ts` | Evita drift de cache key e melhora invalidação futura |
+| Taxonomia de erro | `core/errors/*` + `shared/components/app-error-notice.tsx` | Traduz erro técnico para estado de UI único com retry/recoverability |
+| Error boundaries | `core/errors/app-error-boundary.tsx` | Degrada falhas inesperadas no root e nos fluxos público/privado |
 | Tema e motion | `shared/theme/*` + `shared/animations/*` | Unifica tokens semânticos, animações e acessibilidade |
 | Formulários | `shared/forms/use-app-form.ts` + validators por feature | Reuso com Zod/RHF sem duplicar resolver/config |
 

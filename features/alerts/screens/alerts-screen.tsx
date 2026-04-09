@@ -8,6 +8,7 @@ import {
 } from "@/features/alerts/hooks/use-alerts-screen-controller";
 import { AlertPreferenceRow } from "@/features/alerts/components/alert-preference-row";
 import { AlertRecordCard } from "@/features/alerts/components/alert-record-card";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppButton } from "@/shared/components/app-button";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -35,10 +36,13 @@ function AlertsFeedPanel({
 
   if (controller.alertsQuery.isError) {
     return (
-      <AsyncStateNotice
-        kind="error"
-        title="Nao foi possivel carregar os alertas"
-        description="Tente novamente em alguns instantes."
+      <AppErrorNotice
+        error={controller.alertsQuery.error}
+        fallbackTitle="Nao foi possivel carregar os alertas"
+        fallbackDescription="Tente novamente em alguns instantes."
+        onAction={() => {
+          void controller.alertsQuery.refetch();
+        }}
       />
     );
   }
@@ -86,10 +90,13 @@ function AlertsPreferencesPanel({
 
   if (controller.preferencesQuery.isError) {
     return (
-      <AsyncStateNotice
-        kind="error"
-        title="Nao foi possivel carregar as preferencias"
-        description="Tente novamente em alguns instantes."
+      <AppErrorNotice
+        error={controller.preferencesQuery.error}
+        fallbackTitle="Nao foi possivel carregar as preferencias"
+        fallbackDescription="Tente novamente em alguns instantes."
+        onAction={() => {
+          void controller.preferencesQuery.refetch();
+        }}
       />
     );
   }

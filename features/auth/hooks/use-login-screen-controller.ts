@@ -14,7 +14,9 @@ import { useAppForm } from "@/shared/forms/use-app-form";
 export interface LoginScreenController {
   readonly form: UseFormReturn<LoginFormValues>;
   readonly isSubmitting: boolean;
+  readonly submitError: unknown | null;
   readonly handleSubmit: () => Promise<void>;
+  readonly dismissSubmitError: () => void;
   readonly handleForgotPassword: () => void;
   readonly handleOpenTerms: () => Promise<void>;
   readonly handleOpenPrivacy: () => Promise<void>;
@@ -50,7 +52,11 @@ export function useLoginScreenController(
   return {
     form,
     isSubmitting: loginMutation.isPending,
+    submitError: loginMutation.error,
     handleSubmit,
+    dismissSubmitError: () => {
+      loginMutation.reset();
+    },
     handleForgotPassword: () => {
       router.push("/forgot-password");
     },
