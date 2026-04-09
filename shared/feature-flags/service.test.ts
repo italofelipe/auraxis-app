@@ -21,6 +21,7 @@ const resetFeatureFlagTestEnv = (): void => {
   delete process.env.EXPO_PUBLIC_UNLEASH_CACHE_TTL_MS;
   delete process.env.AURAXIS_FLAG_PROVIDER;
   delete process.env.AURAXIS_UNLEASH_URL;
+  delete process.env.AURAXIS_UNLEASH_CLIENT_KEY;
   delete process.env.AURAXIS_UNLEASH_API_TOKEN;
   delete process.env.AURAXIS_UNLEASH_CACHE_TTL_MS;
   jest.restoreAllMocks();
@@ -215,5 +216,28 @@ describe("feature flag service - unleash provider", () => {
 
     const snapshot = await fetchUnleashSnapshot();
     expect(snapshot["app.tools.salary-raise-calculator"]).toBe(true);
+  });
+
+  it("nao usa AURAXIS_UNLEASH_API_TOKEN como fallback de header no cliente", async () => {
+    process.env.AURAXIS_FLAG_PROVIDER = "unleash";
+    process.env.AURAXIS_UNLEASH_URL = "https://flags.local";
+    process.env.AURAXIS_UNLEASH_API_TOKEN = "server-token-should-not-leak";
+    const fetchSpy = jest.spyOn(global, "fetch").mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        features: [],
+      }),
+    } as unknown as Response);
+
+    await fetchUnleashSnapshot();
+
+    expect(fetchSpy).toHaveBeenCalledWith(
+      "https://flags.local/api/client/features",
+      expect.objectContaining({
+        headers: expect.not.objectContaining({
+          Authorization: "server-token-should-not-leak",
+        }),
+      }),
+    );
   });
 });

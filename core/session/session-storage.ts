@@ -108,17 +108,19 @@ export const persistStoredSession = async (
   session: StoredSession,
 ): Promise<void> => {
   const nextSession = withSessionMetadata(session);
+  await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(nextSession));
+};
+
+export const clearLegacyStoredSession = async (): Promise<void> => {
   await Promise.all([
-    SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(nextSession)),
-    SecureStore.setItemAsync(LEGACY_ACCESS_TOKEN_KEY, nextSession.accessToken),
-    SecureStore.setItemAsync(LEGACY_USER_EMAIL_KEY, nextSession.user.email),
+    SecureStore.deleteItemAsync(LEGACY_ACCESS_TOKEN_KEY),
+    SecureStore.deleteItemAsync(LEGACY_USER_EMAIL_KEY),
   ]);
 };
 
 export const clearStoredSession = async (): Promise<void> => {
   await Promise.all([
     SecureStore.deleteItemAsync(SESSION_KEY),
-    SecureStore.deleteItemAsync(LEGACY_ACCESS_TOKEN_KEY),
-    SecureStore.deleteItemAsync(LEGACY_USER_EMAIL_KEY),
+    clearLegacyStoredSession(),
   ]);
 };

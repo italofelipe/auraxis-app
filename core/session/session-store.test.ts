@@ -1,4 +1,5 @@
 import {
+  clearLegacyStoredSession,
   clearStoredSession,
   loadStoredSession,
   persistStoredSession,
@@ -7,11 +8,13 @@ import { useSessionStore } from "@/core/session/session-store";
 import type { StoredSession } from "@/core/session/types";
 
 jest.mock("@/core/session/session-storage", () => ({
+  clearLegacyStoredSession: jest.fn().mockResolvedValue(undefined),
   loadStoredSession: jest.fn(),
   persistStoredSession: jest.fn(),
   clearStoredSession: jest.fn().mockResolvedValue(undefined),
 }));
 
+const mockClearLegacyStoredSession = jest.mocked(clearLegacyStoredSession);
 const mockLoadStoredSession = jest.mocked(loadStoredSession);
 const mockPersistStoredSession = jest.mocked(persistStoredSession);
 const mockClearStoredSession = jest.mocked(clearStoredSession);
@@ -167,6 +170,7 @@ describe("session store", () => {
         accessToken: "header.payload.signature",
       }),
     );
+    expect(mockClearLegacyStoredSession).toHaveBeenCalledTimes(1);
     expect(useSessionStore.getState()).toMatchObject({
       hydrated: true,
       isAuthenticated: true,

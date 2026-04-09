@@ -19,7 +19,10 @@ npm run lint
 # 2. Type-check
 npm run typecheck
 
-# 3. Testes + coverage
+# 3. Guardrails de governança e segurança do cliente
+npm run policy:check
+
+# 4. Testes + coverage
 npm run test:coverage
 
 # Atalho — tudo de uma vez (obrigatório antes de commitar):
@@ -37,6 +40,7 @@ node scripts/ci-audit-gate.js
 
 - O relatório bruto do audit agora é gravado em arquivo temporário do sistema.
 - Para persistir um arquivo para debug manual, use `AURAXIS_AUDIT_OUTPUT_PATH=/caminho/audit.json`.
+- `npm run policy:check` inclui `check-client-security-governance.cjs`, que bloqueia env vars banidas no cliente, `expo.extra` sensível e regressões na persistência legada de sessão.
 
 > Se qualquer gate falhar: **não commitar**. Corrigir o problema primeiro.
 

@@ -1,6 +1,7 @@
 import * as SecureStore from "expo-secure-store";
 
 import {
+  clearLegacyStoredSession,
   clearStoredSession,
   loadStoredSession,
   persistStoredSession,
@@ -141,7 +142,7 @@ describe("session-storage", () => {
     });
   });
 
-  it("persiste a sessao normalizada no storage canônico e legado", async () => {
+  it("persiste a sessao normalizada apenas no storage canônico", async () => {
     await persistStoredSession(
       createStoredSession({
         authenticatedAt: null,
@@ -149,21 +150,24 @@ describe("session-storage", () => {
       }),
     );
 
-    expect(mockSetItemAsync).toHaveBeenCalledTimes(3);
-    expect(mockSetItemAsync).toHaveBeenNthCalledWith(
-      1,
+    expect(mockSetItemAsync).toHaveBeenCalledTimes(1);
+    expect(mockSetItemAsync).toHaveBeenCalledWith(
       "auraxis.session",
       expect.stringContaining("\"authenticatedAt\""),
     );
-    expect(mockSetItemAsync).toHaveBeenNthCalledWith(
-      2,
+  });
+
+  it("limpa apenas os artefatos legados quando requisitado", async () => {
+    await clearLegacyStoredSession();
+
+    expect(mockDeleteItemAsync).toHaveBeenCalledTimes(2);
+    expect(mockDeleteItemAsync).toHaveBeenNthCalledWith(
+      1,
       "auraxis.access-token",
-      expect.any(String),
     );
-    expect(mockSetItemAsync).toHaveBeenNthCalledWith(
-      3,
+    expect(mockDeleteItemAsync).toHaveBeenNthCalledWith(
+      2,
       "auraxis.user-email",
-      "italo@auraxis.dev",
     );
   });
 
@@ -172,13 +176,7 @@ describe("session-storage", () => {
 
     expect(mockDeleteItemAsync).toHaveBeenCalledTimes(3);
     expect(mockDeleteItemAsync).toHaveBeenNthCalledWith(1, "auraxis.session");
-    expect(mockDeleteItemAsync).toHaveBeenNthCalledWith(
-      2,
-      "auraxis.access-token",
-    );
-    expect(mockDeleteItemAsync).toHaveBeenNthCalledWith(
-      3,
-      "auraxis.user-email",
-    );
+    expect(mockDeleteItemAsync).toHaveBeenNthCalledWith(2, "auraxis.access-token");
+    expect(mockDeleteItemAsync).toHaveBeenNthCalledWith(3, "auraxis.user-email");
   });
 });

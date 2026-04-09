@@ -41,7 +41,6 @@ type RuntimeEnvKey =
   | "EXPO_PUBLIC_CHECKOUT_RETURN_PATH"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY"
-  | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN"
   | "EXPO_PUBLIC_API_MOCK_LATENCY_MS";
 
 const readExpoEnv = (envKey: RuntimeEnvKey): string | undefined => {
@@ -68,8 +67,6 @@ const readExpoEnv = (envKey: RuntimeEnvKey): string | undefined => {
       return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED;
     case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY":
       return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY;
-    case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN":
-      return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN;
     case "EXPO_PUBLIC_API_MOCK_LATENCY_MS":
       return process.env.EXPO_PUBLIC_API_MOCK_LATENCY_MS;
     default:
@@ -207,10 +204,6 @@ export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
     {
       envKey: "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY",
       extraKey: "observabilityExportKey",
-    },
-    {
-      envKey: "EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN",
-      extraKey: "observabilityExportToken",
     },
   ]),
   mockLatencyMs: readNumber(

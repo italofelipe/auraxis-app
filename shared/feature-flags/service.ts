@@ -28,7 +28,6 @@ const getKnownEnvValues = (): Record<string, string | undefined> => {
     AURAXIS_UNLEASH_INSTANCE_ID: process.env.AURAXIS_UNLEASH_INSTANCE_ID,
     EXPO_PUBLIC_UNLEASH_CLIENT_KEY: process.env.EXPO_PUBLIC_UNLEASH_CLIENT_KEY,
     AURAXIS_UNLEASH_CLIENT_KEY: process.env.AURAXIS_UNLEASH_CLIENT_KEY,
-    AURAXIS_UNLEASH_API_TOKEN: process.env.AURAXIS_UNLEASH_API_TOKEN,
     EXPO_PUBLIC_UNLEASH_PROXY_URL: process.env.EXPO_PUBLIC_UNLEASH_PROXY_URL,
     AURAXIS_UNLEASH_URL: process.env.AURAXIS_UNLEASH_URL,
   };
@@ -128,7 +127,6 @@ const buildUnleashHeaders = (): Record<string, string> => {
     [
       "EXPO_PUBLIC_UNLEASH_CLIENT_KEY",
       "AURAXIS_UNLEASH_CLIENT_KEY",
-      "AURAXIS_UNLEASH_API_TOKEN",
     ],
     "",
   );

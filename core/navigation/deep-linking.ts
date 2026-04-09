@@ -73,19 +73,19 @@ const readQueryValue = (
   return typeof value === "string" && value.length > 0 ? value : null;
 };
 
-const SENSITIVE_QUERY_KEYS = new Set([
-  "token",
-  "checkout_token",
-  "access_token",
-  "refresh_token",
-]);
+const SENSITIVE_QUERY_KEY_PATTERN =
+  /(^|[_-])(token|secret|password|email|authorization|auth|jwt|api[-_]?key|code)([_-]|$)/iu;
+
+const shouldRedactQueryKey = (key: string): boolean => {
+  return SENSITIVE_QUERY_KEY_PATTERN.test(key);
+};
 
 export const sanitizeAppUrl = (rawUrl: string): string => {
   try {
     const url = new URL(rawUrl);
 
-    for (const key of SENSITIVE_QUERY_KEYS) {
-      if (url.searchParams.has(key)) {
+    for (const key of [...url.searchParams.keys()]) {
+      if (shouldRedactQueryKey(key)) {
         url.searchParams.set(key, "<redacted>");
       }
     }
