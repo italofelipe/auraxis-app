@@ -33,7 +33,9 @@ describe("ForgotPasswordScreen", () => {
     mockedUseForgotPasswordScreenController.mockReturnValue({
       form: result.current,
       isSubmitting: false,
+      submitError: null,
       handleSubmit: jest.fn().mockResolvedValue(undefined),
+      dismissSubmitError: jest.fn(),
       handleBackToLogin: jest.fn(),
     });
 

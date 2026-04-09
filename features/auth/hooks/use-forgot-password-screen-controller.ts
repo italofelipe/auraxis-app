@@ -11,7 +11,9 @@ import { useAppForm } from "@/shared/forms/use-app-form";
 export interface ForgotPasswordScreenController {
   readonly form: UseFormReturn<ForgotPasswordFormValues>;
   readonly isSubmitting: boolean;
+  readonly submitError: unknown | null;
   readonly handleSubmit: () => Promise<void>;
+  readonly dismissSubmitError: () => void;
   readonly handleBackToLogin: () => void;
 }
 
@@ -36,7 +38,11 @@ export function useForgotPasswordScreenController(): ForgotPasswordScreenControl
   return {
     form,
     isSubmitting: forgotPasswordMutation.isPending,
+    submitError: forgotPasswordMutation.error,
     handleSubmit,
+    dismissSubmitError: () => {
+      forgotPasswordMutation.reset();
+    },
     handleBackToLogin: () => {
       router.replace("/login");
     },

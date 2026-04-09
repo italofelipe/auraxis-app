@@ -258,6 +258,37 @@
   - `cleanup()` após cada teste;
   - `jest.useRealTimers()` após cada teste;
   - limpeza/restauração global de mocks;
+
+---
+
+## Update - APP FND-07A (completion)
+
+### O que foi feito
+- introduzi a taxonomia canônica de erro do app em [`core/errors/app-error.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/core/errors/app-error.ts), cobrindo `auth`, `network`, `server`, `validation`, `unexpected` e `degraded`;
+- criei o boundary reutilizável em [`core/errors/app-error-boundary.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/core/errors/app-error-boundary.tsx), com fallback previsível, reset e logging canônico no `appLogger`;
+- adicionei o bloco reutilizável de feedback em [`shared/components/app-error-notice.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/shared/components/app-error-notice.tsx), unificando copy, retry e recoverability para query, mutation e boundary;
+- conectei boundaries no root e nos fluxos público/privado em:
+  - [`app/_layout.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/app/_layout.tsx)
+  - [`app/(public)/_layout.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/app/(public)/_layout.tsx)
+  - [`app/(private)/_layout.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/app/(private)/_layout.tsx)
+- removi tratamento ad-hoc de erro nas superfícies atuais e passei a usar o componente canônico em `dashboard`, `tools`, `alerts`, `wallet`, `subscription` e `installment-vs-cash`;
+- passei a expor erro e reset nas controllers de auth para `login` e `forgot-password`, permitindo feedback consistente sem jogar lógica de erro para a view;
+- alinhei cobertura e Sonar do bloco novo em [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/jest.config.js) e [`sonar-project.properties`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-07a-error-taxonomy/sonar-project.properties).
+
+### O que foi validado
+- `npm run typecheck`
+- `npx jest core/errors/app-error.test.ts core/errors/app-error-boundary.test.tsx shared/components/app-error-notice.test.tsx __tests__/app/login-screen.test.tsx __tests__/app/forgot-password-screen.test.tsx __tests__/app/dashboard-screen.test.tsx __tests__/app/tools-screen.test.tsx __tests__/app/alerts-screen.test.tsx __tests__/app/wallet-screen.test.tsx __tests__/app/subscription-screen.test.tsx __tests__/app/installment-vs-cash-screen.test.tsx --runInBand`
+- `npm run quality-check`
+
+### Riscos pendentes
+- o warning de worker forçado no `jest --coverage` continua aparecendo de forma intermitente; não quebrou o gate, mas vale atacar esse teardown em um bloco específico de harness se persistir;
+- várias telas ainda usam `query.isPending/isSuccess` direto na view, então a taxonomia foi unificada para erro, mas a abstração completa de estados assíncronos ainda pode ser consolidada em um próximo slice;
+- o boundary global cobre render/runtime do shell, porém ainda vale testar o comportamento em dispositivo real para confirmar UX do fallback em produção.
+
+### Proximo passo
+- avançar para o próximo slice de fundação focado em abstração de estados assíncronos e consistência de recoverability entre queries/mutations;
+- revisar se `auth`, `tools` e `subscription` já pedem um helper compartilhado para `loading/error/empty` além do tratamento de erro recém-padronizado;
+- seguir para a próxima task da trilha `FND-00` com base já pronta para receber features sem reinventar fallback e retry.
 - subi cobertura nova para a infraestrutura de testes em:
   - [`core/query/query-client.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/core/query/query-client.test.ts)
   - [`shared/testing/test-providers.test.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-06a-test-harness/shared/testing/test-providers.test.tsx)

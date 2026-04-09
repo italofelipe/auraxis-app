@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { useToolsScreenController } from "@/features/tools/hooks/use-tools-screen-controller";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppButton } from "@/shared/components/app-button";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -32,10 +33,13 @@ export function ToolsScreen(): ReactElement {
         ) : null}
 
         {toolsCatalogQuery.isError ? (
-          <AsyncStateNotice
-            kind="error"
-            title="Nao foi possivel carregar agora"
-            description="Tente novamente em instantes para visualizar o catalogo mais recente."
+          <AppErrorNotice
+            error={toolsCatalogQuery.error}
+            fallbackTitle="Nao foi possivel carregar agora"
+            fallbackDescription="Tente novamente em instantes para visualizar o catalogo mais recente."
+            onAction={() => {
+              void toolsCatalogQuery.refetch();
+            }}
           />
         ) : null}
 

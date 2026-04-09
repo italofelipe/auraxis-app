@@ -1,11 +1,14 @@
+import type { ReactElement } from "react";
+
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 
 import { colorPalette } from "@/config/design-tokens";
+import { AppErrorBoundary } from "@/core/errors/app-error-boundary";
 import { privateTabDefinitions } from "@/core/navigation/routes";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 
-export default function PrivateLayout() {
+function PrivateLayoutContent(): ReactElement | null {
   const { ready, redirectTo } = usePrivateRouteGuard();
 
   if (!ready) {
@@ -46,5 +49,17 @@ export default function PrivateLayout() {
         }}
       />
     </Tabs>
+  );
+}
+
+export default function PrivateLayout(): ReactElement {
+  return (
+    <AppErrorBoundary
+      scope="private-layout"
+      presentation="screen"
+      fallbackTitle="Nao foi possivel abrir a area logada"
+      fallbackDescription="Tente novamente para retomar a navegacao.">
+      <PrivateLayoutContent />
+    </AppErrorBoundary>
   );
 }

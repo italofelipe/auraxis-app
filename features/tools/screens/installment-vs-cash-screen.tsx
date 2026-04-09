@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 import { AppButton } from "@/shared/components/app-button";
 import { AppScreen } from "@/shared/components/app-screen";
@@ -73,10 +74,13 @@ export function InstallmentVsCashScreen(): ReactElement {
       ) : null}
 
       {controller.calculateMutation.isError ? (
-        <AsyncStateNotice
-          kind="error"
-          title="Nao foi possivel calcular agora"
-          description="Revise os dados e tente novamente em alguns instantes."
+        <AppErrorNotice
+          error={controller.calculateMutation.error}
+          fallbackTitle="Nao foi possivel calcular agora"
+          fallbackDescription="Revise os dados e tente novamente em alguns instantes."
+          onAction={() => {
+            void controller.handleCalculate();
+          }}
         />
       ) : null}
 
@@ -106,6 +110,17 @@ export function InstallmentVsCashScreen(): ReactElement {
           kind="loading"
           title="Carregando historico"
           description="Buscando suas ultimas simulacoes salvas desta ferramenta."
+        />
+      ) : null}
+
+      {controller.historyQuery.isError ? (
+        <AppErrorNotice
+          error={controller.historyQuery.error}
+          fallbackTitle="Nao foi possivel carregar o historico"
+          fallbackDescription="Tente novamente em alguns instantes para recuperar suas simulacoes."
+          onAction={() => {
+            void controller.historyQuery.refetch();
+          }}
         />
       ) : null}
 

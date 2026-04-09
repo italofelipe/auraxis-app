@@ -5,6 +5,7 @@ import { YStack } from "tamagui";
 
 import { useForgotPasswordScreenController } from "@/features/auth/hooks/use-forgot-password-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -52,6 +53,16 @@ export function ForgotPasswordScreen(): ReactElement {
             disabled={controller.isSubmitting}>
             {controller.isSubmitting ? "Enviando..." : "Enviar"}
           </AppButton>
+
+          {controller.submitError ? (
+            <AppErrorNotice
+              error={controller.submitError}
+              fallbackTitle="Nao foi possivel enviar o link agora"
+              fallbackDescription="Confira o e-mail informado e tente novamente."
+              secondaryActionLabel="Fechar"
+              onSecondaryAction={controller.dismissSubmitError}
+            />
+          ) : null}
 
           <AppButton tone="secondary" onPress={controller.handleBackToLogin}>
             Voltar para login

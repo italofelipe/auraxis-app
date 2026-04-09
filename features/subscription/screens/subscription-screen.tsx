@@ -5,6 +5,7 @@ import { YStack } from "tamagui";
 import { useSubscriptionScreenController } from "@/features/subscription/hooks/use-subscription-screen-controller";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -29,10 +30,13 @@ export function SubscriptionScreen(): ReactElement {
             description="Conferindo plano, status e ciclo vigente."
           />
         ) : controller.subscriptionQuery.isError ? (
-          <AsyncStateNotice
-            kind="error"
-            title="Nao foi possivel carregar a assinatura"
-            description="Tente novamente em instantes."
+          <AppErrorNotice
+            error={controller.subscriptionQuery.error}
+            fallbackTitle="Nao foi possivel carregar a assinatura"
+            fallbackDescription="Tente novamente em instantes."
+            onAction={() => {
+              void controller.subscriptionQuery.refetch();
+            }}
           />
         ) : subscription ? (
           <YStack gap="$3">
