@@ -2,9 +2,9 @@ import { render } from "@testing-library/react-native";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import ToolsScreen from "@/app/(private)/ferramentas";
-import { AppProviders } from "@/core/providers/app-providers";
 import { useToolsScreenController } from "@/features/tools/hooks/use-tools-screen-controller";
 import type { ToolsCatalog } from "@/features/tools/contracts";
+import { TestProviders } from "@/shared/testing/test-providers";
 
 jest.mock("@/features/tools/hooks/use-tools-screen-controller", () => ({
   useToolsScreenController: jest.fn(),
@@ -72,9 +72,9 @@ describe("ToolsScreen", () => {
     );
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <ToolsScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Carregando ferramentas")).toBeTruthy();
@@ -107,9 +107,9 @@ describe("ToolsScreen", () => {
     );
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <ToolsScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Parcelado vs a vista")).toBeTruthy();
@@ -131,9 +131,9 @@ describe("ToolsScreen", () => {
     );
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <ToolsScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Nenhuma ferramenta disponivel")).toBeTruthy();

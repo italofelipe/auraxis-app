@@ -4,16 +4,9 @@ const config = {
   preset: "jest-expo",
 
   // Padrões de arquivos de teste
-  testMatch: [
-    "**/__tests__/**/*.{ts,tsx}",
-    "**/*.{spec,test}.{ts,tsx}",
-  ],
+  testMatch: ["**/__tests__/**/*.{ts,tsx}", "**/*.{spec,test}.{ts,tsx}"],
 
-  testPathIgnorePatterns: [
-    "/node_modules/",
-    "/e2e/",
-    "/.expo/",
-  ],
+  testPathIgnorePatterns: ["/node_modules/", "/e2e/", "/.expo/"],
 
   // Transformações: jest-expo já configura babel-jest para RN
   transformIgnorePatterns: [
@@ -21,7 +14,7 @@ const config = {
       "@react-native|react-native|react-native-.*|expo.*|@expo.*|" +
       "@unimodules.*|unimodules.*|sentry-expo|native-base|" +
       "react-clone-referenced-element|@react-navigation|tamagui|@tamagui" +
-    "))",
+      "))",
   ],
 
   // Módulos que o Node não consegue importar diretamente (assets, etc.)
@@ -34,7 +27,7 @@ const config = {
   },
 
   // Setup files: configura @testing-library/jest-native matchers
-  setupFilesAfterEnv: ["@testing-library/jest-native/extend-expect"],
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
 
   // Cobertura
   // APP9 baseline: cobertura inicial em fluxo crítico de tema/renderização.
@@ -52,6 +45,7 @@ const config = {
     "core/errors/app-error-boundary.tsx",
     "core/http/api-error.ts",
     "core/http/http-client.ts",
+    "core/query/query-feedback-state.ts",
     "core/query/query-client.ts",
     "core/session/session-policy.ts",
     "core/session/session-storage.ts",
@@ -71,7 +65,10 @@ const config = {
     "shared/components/app-key-value-row.tsx",
     "shared/components/app-toggle-row.tsx",
     "shared/components/app-error-notice.tsx",
+    "shared/components/app-async-state.tsx",
+    "shared/components/app-query-state.tsx",
     "shared/components/async-state-notice.tsx",
+    "shared/components/app-skeleton-block.tsx",
     "shared/testing/test-providers.tsx",
     "shared/testing/test-query-client.ts",
     "shared/utils/formatters.ts",

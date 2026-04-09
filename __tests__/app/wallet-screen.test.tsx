@@ -2,8 +2,8 @@ import { render } from "@testing-library/react-native";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import WalletScreen from "@/app/(private)/carteira";
-import { AppProviders } from "@/core/providers/app-providers";
 import { useWalletScreenController } from "@/features/wallet/hooks/use-wallet-screen-controller";
+import { TestProviders } from "@/shared/testing/test-providers";
 
 jest.mock("@/features/wallet/hooks/use-wallet-screen-controller", () => ({
   useWalletScreenController: jest.fn(),
@@ -53,7 +53,13 @@ describe("WalletScreen", () => {
       walletQuery: buildQuery({
         data: {
           total: 25000,
-          items: [],
+          items: [
+            {
+              id: "asset-1",
+              name: "Tesouro Selic",
+              value: 15000,
+            },
+          ],
           returnedItems: 0,
           limit: 50,
           hasMore: false,
@@ -71,9 +77,9 @@ describe("WalletScreen", () => {
     });
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <WalletScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Carteira")).toBeTruthy();

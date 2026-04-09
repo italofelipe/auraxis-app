@@ -29,4 +29,30 @@ describe("AsyncStateNotice", () => {
 
     expect(getByText("Erro ao carregar")).toBeTruthy();
   });
+
+  it("renderiza estados de conectividade para offline e degraded", () => {
+    const { getByText, rerender } = render(
+      <AppProviders>
+        <AsyncStateNotice
+          kind="offline"
+          title="Sem conexao agora"
+          description="Tente novamente quando a internet voltar."
+        />
+      </AppProviders>,
+    );
+
+    expect(getByText("Sem conexao agora")).toBeTruthy();
+
+    rerender(
+      <AppProviders>
+        <AsyncStateNotice
+          kind="degraded"
+          title="Servico instavel"
+          description="Alguns dados podem demorar mais que o normal."
+        />
+      </AppProviders>,
+    );
+
+    expect(getByText("Servico instavel")).toBeTruthy();
+  });
 });

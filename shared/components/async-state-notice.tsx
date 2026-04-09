@@ -6,9 +6,9 @@ import { AppHeading } from "@/shared/components/app-heading";
 import { AppStack } from "@/shared/components/app-stack";
 
 export interface AsyncStateNoticeProps {
-  readonly kind: "loading" | "error" | "empty"
-  readonly title: string
-  readonly description?: string
+  readonly kind: "loading" | "error" | "empty" | "offline" | "degraded";
+  readonly title: string;
+  readonly description?: string;
 }
 
 /**
@@ -22,6 +22,13 @@ export function AsyncStateNotice({
   title,
   description,
 }: AsyncStateNoticeProps): ReactElement {
+  const titleColor =
+    kind === "error"
+      ? "$danger"
+      : kind === "offline" || kind === "degraded"
+        ? "$secondary"
+        : "$color";
+
   return (
     <AppStack
       alignItems="center"
@@ -32,12 +39,10 @@ export function AsyncStateNotice({
       backgroundColor="$surfaceCard"
       borderColor="$borderColor"
       borderWidth={1}
-      borderRadius="$2">
+      borderRadius="$2"
+    >
       {kind === "loading" ? <Spinner color="$secondary" size="large" /> : null}
-      <AppHeading
-        level={3}
-        color={kind === "error" ? "$danger" : "$color"}
-        fontSize="$5">
+      <AppHeading level={3} color={titleColor} fontSize="$5">
         {title}
       </AppHeading>
       {description ? (

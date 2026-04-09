@@ -1,5 +1,61 @@
 # APP5 - Scaffold base do app mobile
 
+## Update - APP FND-07B (axios security gate + local parity)
+
+### O que foi feito
+- atualizei `axios` para `^1.15.0`, removendo a vulnerabilidade crítica `GHSA-3p68-rc4w-qgx5` que estava bloqueando o `ci-audit-gate`;
+- endureci o cliente HTTP em [`core/http/http-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/core/http/http-client.ts) para priorizar `["xhr", "http"]` no modo live, evitando fallback implícito para `fetch` no app e nos testes;
+- adicionei cobertura explícita desse comportamento em [`core/http/http-client.test.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/core/http/http-client.test.ts);
+- conectei de fato o setup canônico do Jest em [`jest.config.js`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/jest.config.js) e endureci [`jest.setup.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-07b-async-states/jest.setup.ts) com:
+  - mock explícito de `axios` para o build Node/CJS durante testes;
+  - guard compatível com o bug de `ReadableStream.cancel()` no ambiente `jest-expo` + Expo streams sob Node 25, para que o bloco volte a falhar cedo localmente em vez de surpreender só no CI.
+
+### O que foi validado
+- `node scripts/ci-audit-gate.js`
+- `npm run test -- core/http/http-client.test.ts --runInBand`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o runner local ainda está em Node `25.6.1`; os gates do repo continuam pinados em Node 24 LTS e seguem verdes, mas vale instalar `nvm install 24` na máquina para paridade total com CI;
+- o guard em `jest.setup.ts` é deliberadamente restrito ao erro conhecido do ambiente Expo/Jest; se o upstream do axios ou da Expo resolver esse bug, o ideal é remover essa compatibilidade e simplificar o setup.
+
+### Proximo passo
+- seguir para `APP FND-08A`, agora com `audit` e `quality-check` novamente alinhados e sem regressão de DX local;
+- manter a política de validar `node scripts/ci-audit-gate.js` e `npm run quality-check` antes de todo push do app para reduzir fricção de CI na raiz.
+
+## Update - APP FND-07B (completion)
+
+### O que foi feito
+- introduzi a composição canônica de estados assíncronos em `core/query/query-feedback-state.ts`, conectando `TanStack Query` ao `app-shell-store` para resolver `loading`, `empty`, `offline`, `degraded`, `error` e `content` com a mesma taxonomia;
+- criei os componentes compartilhados `shared/components/app-async-state.tsx`, `shared/components/app-query-state.tsx` e `shared/components/app-skeleton-block.tsx`, além de expandir `shared/components/async-state-notice.tsx` para cobrir estados de conectividade;
+- substituí o branching manual nas telas atuais por essa fundação em:
+  - `app/index.tsx`
+  - `features/dashboard/screens/dashboard-screen.tsx`
+  - `features/tools/screens/tools-screen.tsx`
+  - `features/alerts/screens/alerts-screen.tsx`
+  - `features/wallet/screens/wallet-screen.tsx`
+  - `features/subscription/screens/subscription-screen.tsx`
+  - `features/tools/screens/installment-vs-cash-screen.tsx`
+- migrei os testes de tela tocados para `shared/testing/test-providers.tsx`, removendo ruído de lifecycle do runtime real e fazendo os testes falharem mais cedo/localmente;
+- alinhei `jest.config.js` e `sonar-project.properties` para incluir a nova fundação em coverage e análise estática.
+
+### O que foi validado
+- `npm run typecheck`
+- `npm test -- --runInBand core/query/query-feedback-state.test.ts shared/components/app-skeleton-block.test.tsx shared/components/app-async-state.test.tsx shared/components/app-query-state.test.tsx shared/components/async-state-notice.test.tsx __tests__/app/dashboard-screen.test.tsx __tests__/app/tools-screen.test.tsx __tests__/app/alerts-screen.test.tsx __tests__/app/wallet-screen.test.tsx __tests__/app/subscription-screen.test.tsx __tests__/app/installment-vs-cash-screen.test.tsx`
+- `npm run lint`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- a fundação canônica já cobre query state e mutation feedback simples, mas `FND-08B` ainda precisa conectar forced sign-out e auth-failure flows na mesma ergonomia;
+- algumas telas futuras ainda podem precisar banners mais específicos de stale data, mas a base para `offline/degraded` já está centralizada e pronta para isso;
+- o próximo bloco deve reaproveitar `AppQueryState` por padrão para evitar regressão para branching manual em `.tsx`.
+
+### Proximo passo
+- seguir para `APP FND-08A`, fechando a auditoria final de segurança/configuração do app sobre a base agora estabilizada;
+- em seguida atacar `APP FND-08B` para consolidar forced sign-out, reauth e failure flows usando a mesma taxonomia de erro e async state.
+
 ## O que foi feito
 - reli os contratos canônicos da `auraxis-api` para `auth`, `user/bootstrap`, `subscriptions`, `dashboard`, `wallet`, `alerts`, `goals` e `observability`;
 - mapeei o catálogo de endpoints consumíveis do MVP1 em [`shared/contracts/api-endpoint-catalog.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/shared/contracts/api-endpoint-catalog.ts);

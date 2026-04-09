@@ -2,17 +2,15 @@ import { render } from "@testing-library/react-native";
 import type { UseQueryResult } from "@tanstack/react-query";
 
 import SubscriptionScreen from "@/app/(private)/assinatura";
-import { AppProviders } from "@/core/providers/app-providers";
 import type { SubscriptionState } from "@/features/subscription/contracts";
 import { useSubscriptionScreenController } from "@/features/subscription/hooks/use-subscription-screen-controller";
+import { TestProviders } from "@/shared/testing/test-providers";
 
 jest.mock("@/features/subscription/hooks/use-subscription-screen-controller", () => ({
   useSubscriptionScreenController: jest.fn(),
 }));
 
-const mockedUseSubscriptionScreenController = jest.mocked(
-  useSubscriptionScreenController,
-);
+const mockedUseSubscriptionScreenController = jest.mocked(useSubscriptionScreenController);
 
 const buildQuery = <TData,>(
   overrides: Partial<UseQueryResult<TData, Error>>,
@@ -72,16 +70,14 @@ describe("SubscriptionScreen", () => {
     mockedUseSubscriptionScreenController.mockReturnValue({
       subscriptionQuery: buildQuery({
         data: subscriptionData,
-      }) as unknown as ReturnType<
-        typeof useSubscriptionScreenController
-      >["subscriptionQuery"],
+      }) as unknown as ReturnType<typeof useSubscriptionScreenController>["subscriptionQuery"],
       handleManageSubscription: jest.fn().mockResolvedValue(undefined),
     });
 
     const { getByText } = render(
-      <AppProviders>
+      <TestProviders>
         <SubscriptionScreen />
-      </AppProviders>,
+      </TestProviders>,
     );
 
     expect(getByText("Assinatura")).toBeTruthy();
