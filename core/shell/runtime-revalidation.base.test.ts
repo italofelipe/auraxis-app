@@ -6,6 +6,7 @@ import { useSessionStore } from "@/core/session/session-store";
 
 const createQueryClientMock = (): QueryClient => {
   return {
+    cancelQueries: jest.fn().mockResolvedValue(undefined),
     fetchQuery: jest.fn(),
     invalidateQueries: jest.fn(),
     removeQueries: jest.fn(),
@@ -18,6 +19,8 @@ const resetUnauthenticatedSession = (): void => {
     refreshToken: null,
     user: null,
     userEmail: null,
+    authFailureReason: null,
+    lastInvalidatedAt: null,
     hydrated: true,
     isAuthenticated: false,
   });
@@ -34,6 +37,8 @@ const setAuthenticatedSession = (): void => {
       emailConfirmed: true,
     },
     userEmail: "italo@auraxis.dev",
+    authFailureReason: null,
+    lastInvalidatedAt: null,
     hydrated: true,
     isAuthenticated: true,
   });

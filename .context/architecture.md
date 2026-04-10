@@ -80,6 +80,7 @@ Telas (app/)
 | Error boundaries | `core/errors/app-error-boundary.tsx` | Degrada falhas inesperadas no root e nos fluxos público/privado |
 | Tema e motion | `shared/theme/*` + `shared/animations/*` | Unifica tokens semânticos, animações e acessibilidade |
 | Formulários | `shared/forms/use-app-form.ts` + validators por feature | Reuso com Zod/RHF sem duplicar resolver/config |
+| Auth failure recovery | `core/session/session-invalidation.ts` + `use-session-failure-notice.ts` | Unifica forced sign-out, cleanup de runtime e copy canônica antes da primeira feature |
 
 ## Contratos com auraxis-api
 
@@ -107,6 +108,17 @@ Telas (app/)
   - bloquear reintrodução de persistência legada de sessão.
 - O guardrail roda dentro de `npm run policy:check` e, por consequência, falha cedo em `npm run quality-check`.
 - `SecureStore` do app escreve somente `auraxis.session`; as chaves legadas existem apenas para migração e limpeza.
+
+## Fluxo canônico de auth failure
+
+- Toda queda de sessão continua nascendo em `core/session/session-store.ts` via `invalidateSession(reason)`.
+- `401`, `403`, sessão expirada no interceptor e corrupção de payload no bootstrap convergem para `authFailureReason` + `lastInvalidatedAt`.
+- `core/shell/use-runtime-lifecycle.ts` observa essa invalidacao e executa o cleanup canônico do runtime:
+  - remove caches autenticados do `QueryClient`;
+  - zera `entitlementsVersion`;
+  - limpa `pendingCheckoutReturn`.
+- O fluxo público reutiliza `core/session/use-session-failure-notice.ts` para traduzir o motivo técnico em copy de recovery na tela de login.
+- `manual` continua limpando o runtime, mas não renderiza aviso de erro; os demais motivos (`expired`, `unauthorized`, `forbidden`, `bootstrap-invalid`) redirecionam para login com mensagem explícita e dismissível.
 
 ## Plataformas suportadas
 

@@ -7,6 +7,7 @@ import { useSessionStore } from "@/core/session/session-store";
 
 const createQueryClientMock = (): QueryClient => {
   return {
+    cancelQueries: jest.fn().mockResolvedValue(undefined),
     fetchQuery: jest.fn(),
     invalidateQueries: jest.fn(),
     removeQueries: jest.fn(),
@@ -24,6 +25,8 @@ const setAuthenticatedSession = (): void => {
       emailConfirmed: true,
     },
     userEmail: "italo@auraxis.dev",
+    authFailureReason: null,
+    lastInvalidatedAt: null,
     hydrated: true,
     isAuthenticated: true,
   });
@@ -69,6 +72,9 @@ describe("runtime revalidation service - error handling", () => {
     expect(signOut).toHaveBeenCalledTimes(1);
     expect(setEntitlementsVersion).toHaveBeenCalledWith(null);
     expect(queryClient.removeQueries).toHaveBeenCalledWith({
+      queryKey: queryKeys.bootstrap.root,
+    });
+    expect(queryClient.cancelQueries).toHaveBeenCalledWith({
       queryKey: queryKeys.bootstrap.root,
     });
     expect(queryClient.removeQueries).toHaveBeenCalledWith({

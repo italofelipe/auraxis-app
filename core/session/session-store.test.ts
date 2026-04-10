@@ -254,6 +254,18 @@ describe("session store", () => {
     });
   });
 
+  it("permite dispensar o aviso de falha sem restaurar a sessao", async () => {
+    await useSessionStore.getState().invalidateSession("unauthorized");
+
+    useSessionStore.getState().dismissAuthFailure();
+
+    expect(useSessionStore.getState()).toMatchObject({
+      isAuthenticated: false,
+      authFailureReason: null,
+      lastInvalidatedAt: expect.any(String),
+    });
+  });
+
   it("signOut usa invalidacao manual por padrão", async () => {
     await useSessionStore.getState().setSession(createStoredSession());
     mockClearStoredSession.mockClear();

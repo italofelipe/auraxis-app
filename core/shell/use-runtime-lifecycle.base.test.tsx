@@ -1,13 +1,15 @@
-import { renderHook, waitFor } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 import * as Linking from "expo-linking";
 import { AppState, type AppStateStatus } from "react-native";
 
+import { queryKeys } from "@/core/query/query-keys";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { reachabilityService } from "@/core/shell/reachability-service";
 import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
 import { useSessionStore } from "@/core/session/session-store";
 import { appLogger } from "@/core/telemetry/app-logger";
 import { createTestHookWrapper } from "@/shared/testing/test-providers";
+import { createTestQueryClient } from "@/shared/testing/test-query-client";
 
 const mockRevalidate = jest.fn().mockResolvedValue({
   revalidated: true,
@@ -73,12 +75,20 @@ const resetStores = (): void => {
       emailConfirmed: true,
     },
     userEmail: "italo@auraxis.dev",
+    authenticatedAt: "2026-04-10T11:00:00.000Z",
+    expiresAt: "2099-04-10T11:00:00.000Z",
+    authFailureReason: null,
+    lastValidatedAt: null,
+    lastInvalidatedAt: null,
     hydrated: true,
     isAuthenticated: true,
     bootstrapSession: jest.fn().mockResolvedValue(undefined),
     signIn: jest.fn().mockResolvedValue(undefined),
     setSession: jest.fn().mockResolvedValue(undefined),
     updateUser: jest.fn(),
+    markSessionValidated: jest.fn(),
+    dismissAuthFailure: jest.fn(),
+    invalidateSession: jest.fn().mockResolvedValue(undefined),
     signOut: jest.fn().mockResolvedValue(undefined),
   });
 };
@@ -206,6 +216,76 @@ describe("useRuntimeLifecycle - core flow", () => {
         previousAppState: "background",
         nextAppState: "active",
         shouldSync: true,
+      },
+    });
+  });
+
+  it("limpa caches autenticados e artefatos de shell quando a sessao e invalidada", async () => {
+    const queryClient = createTestQueryClient();
+    queryClient.setQueryData(queryKeys.bootstrap.user(), {
+      user: {
+        identity: {
+          id: "user-1",
+        },
+      },
+    });
+    queryClient.setQueryData(queryKeys.subscription.me(), {
+      status: "active",
+    });
+    queryClient.setQueryData(queryKeys.dashboard.overview(), {
+      summary: 1,
+    });
+
+    useAppShellStore.setState({
+      entitlementsVersion: 9,
+      pendingCheckoutReturn: {
+        kind: "checkout-return",
+        href: "/assinatura",
+        rawUrl: "auraxisapp://assinatura?status=success",
+        status: "success",
+        provider: "asaas",
+        planSlug: null,
+        externalReference: null,
+      },
+    });
+    jest.mocked(Linking.getInitialURL).mockResolvedValue(null);
+    jest.mocked(Linking.addEventListener).mockImplementation(
+      ((..._args) => createLinkingSubscription()) as typeof Linking.addEventListener,
+    );
+
+    renderHook(() => useRuntimeLifecycle(), {
+      wrapper: createTestHookWrapper({ queryClient }),
+    });
+
+    act(() => {
+      useSessionStore.setState((state) => ({
+        ...state,
+        accessToken: null,
+        refreshToken: null,
+        user: null,
+        userEmail: null,
+        isAuthenticated: false,
+        authFailureReason: "unauthorized",
+        lastInvalidatedAt: "2026-04-10T12:00:00.000Z",
+      }));
+    });
+
+    await waitFor(() => {
+      expect(useAppShellStore.getState()).toMatchObject({
+        entitlementsVersion: null,
+        pendingCheckoutReturn: null,
+      });
+      expect(queryClient.getQueryData(queryKeys.bootstrap.user())).toBeUndefined();
+      expect(queryClient.getQueryData(queryKeys.subscription.me())).toBeUndefined();
+      expect(queryClient.getQueryData(queryKeys.dashboard.overview())).toBeUndefined();
+    });
+
+    expect(appLogger.warn).toHaveBeenCalledWith({
+      domain: "auth",
+      event: "auth.session_invalidated",
+      context: {
+        reason: "unauthorized",
+        invalidatedAt: "2026-04-10T12:00:00.000Z",
       },
     });
   });
