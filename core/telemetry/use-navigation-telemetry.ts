@@ -2,7 +2,7 @@ import { usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
 
 import { appRouteRegistry, appRoutes } from "@/core/navigation/routes";
-import { appLogger } from "@/core/telemetry/app-logger";
+import { navigationLogger } from "@/core/telemetry/domain-loggers";
 import type { AppLogEntry } from "@/core/telemetry/types";
 
 export const normalizePathname = (value: string | null): string => {
@@ -43,7 +43,9 @@ export const useNavigationTelemetry = (): void => {
       return;
     }
 
-    appLogger.info(entry);
+    navigationLogger.log("navigation.route_changed", {
+      context: entry.context,
+    });
     lastLoggedRouteRef.current = route;
   }, [pathname]);
 };

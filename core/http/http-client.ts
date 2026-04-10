@@ -13,7 +13,7 @@ import {
   resolveSessionInvalidationReason,
 } from "@/core/session/session-policy";
 import { useSessionStore } from "@/core/session/session-store";
-import { appLogger } from "@/core/telemetry/app-logger";
+import { networkLogger } from "@/core/telemetry/domain-loggers";
 import { createMockApiAdapter } from "@/shared/mocks/api/router";
 import { appRuntimeConfig, normalizeBaseUrl } from "@/shared/config/runtime";
 import { sanitizeAppUrl } from "@/core/navigation/deep-linking";
@@ -128,9 +128,7 @@ const attachAuthHeaders = async (
   const sessionState = useSessionStore.getState();
   const accessToken = sessionState.accessToken;
 
-  appLogger.debug({
-    domain: "network",
-    event: "network.request_started",
+  networkLogger.log("network.request_started", {
     context: {
       method,
       path: requestPath,
@@ -183,9 +181,7 @@ const handleFulfilledResponse = (
   if (metadata) {
     const durationMs = Date.now() - metadata.startedAt;
     if (shouldLogSuccessfulRequest(metadata, durationMs)) {
-      appLogger.info({
-        domain: "network",
-        event: "network.request_succeeded",
+      networkLogger.log("network.request_succeeded", {
         context: {
           method: metadata.method,
           path: metadata.path,
@@ -212,9 +208,8 @@ const handleRejectedResponse = async (error: unknown): Promise<never> => {
       await useSessionStore.getState().invalidateSession(reason);
     }
 
-    appLogger[apiError.status >= 500 || apiError.status === 0 ? "error" : "warn"]({
-      domain: "network",
-      event: "network.request_failed",
+    networkLogger.log("network.request_failed", {
+      level: apiError.status >= 500 || apiError.status === 0 ? "error" : "warn",
       context: {
         method: metadata?.method ?? (error.config?.method ?? "get").toUpperCase(),
         path: metadata?.path ?? toSanitizedRequestPath(error.config?.url),
@@ -230,9 +225,8 @@ const handleRejectedResponse = async (error: unknown): Promise<never> => {
       captureInSentry: apiError.status >= 500 || apiError.status === 0,
     });
   } else {
-    appLogger.error({
-      domain: "network",
-      event: "network.request_failed",
+    networkLogger.log("network.request_failed", {
+      level: "error",
       context: {
         status: apiError.status,
         code: apiError.code,

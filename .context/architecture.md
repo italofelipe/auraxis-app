@@ -82,6 +82,7 @@ Telas (app/)
 | Formulários | `shared/forms/use-app-form.ts` + validators por feature | Reuso com Zod/RHF sem duplicar resolver/config |
 | Auth failure recovery | `core/session/session-invalidation.ts` + `use-session-failure-notice.ts` | Unifica forced sign-out, cleanup de runtime e copy canônica antes da primeira feature |
 | Observabilidade cliente | `core/telemetry/*` + `app/services/sentry.ts` + `use-observability-runtime-bridge.ts` | Mantém eventos mínimos, breadcrumbs sanitizados e contexto operacional consistente sem analytics pago |
+| Logging governance | `core/telemetry/logging-policy.ts` + `domain-loggers.ts` + `scripts/check-client-logging-governance.cjs` | Garante nível, boundary de uso e redaction canônicos antes da primeira feature |
 
 ## Contratos com auraxis-api
 
@@ -130,6 +131,20 @@ Telas (app/)
 - `core/telemetry/use-observability-runtime-bridge.ts` sincroniza o snapshot ampliado do runtime com o Sentry via `setContext`/`setTag`, sem enviar PII.
 - `core/session/session-store.ts` passou a registrar `startup.session_rehydrated` e `auth.session_established`, fechando a lacuna de rehydration/auth antes da primeira feature.
 - `core/telemetry/sanitization.ts` continua sendo o único ponto canônico de redaction para logs, breadcrumbs e contexto do Sentry.
+- `core/telemetry/logging-policy.ts` define a política executável de níveis, contexto mínimo e comportamento esperado de console para cada evento.
+- `core/telemetry/domain-loggers.ts` é a boundary obrigatória para uso em código de produto; `appLogger` fica restrito à infraestrutura de telemetry.
+- `scripts/check-client-logging-governance.cjs` bloqueia:
+  - `console.*` em código de produto fora de `core/telemetry/app-logger.ts` e `app/services/sentry.ts`;
+  - imports diretos de `appLogger` fora de `core/telemetry/domain-loggers.ts`.
+
+## Política canônica de logging
+
+- Formato estrutural de mensagem em console: `[auraxis:<domain>] <event>`.
+- Todo evento deve nascer de um domínio explícito (`startup`, `runtime`, `navigation`, `network`, `auth`, `checkout`, `observability`).
+- O nível padrão deve vir de `logging-policy.ts`; override é exceção e só é permitido quando o mesmo evento muda de severidade por contexto operacional.
+- Todo código de produto deve usar `startupLogger`, `runtimeLogger`, `networkLogger`, `authLogger`, `navigationLogger`, `checkoutLogger` ou `observabilityLogger`.
+- `appLogger` é infraestrutura interna; não deve ser importado diretamente por telas/hooks/services do produto.
+- `sanitizeTelemetryContext` é a única policy de redaction aceita para logs, breadcrumbs e contexto de Sentry.
 
 ## Matriz mínima de eventos operacionais
 

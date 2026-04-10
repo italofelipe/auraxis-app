@@ -10,7 +10,10 @@ import {
   isStoredSessionExpired,
   withSessionMetadata,
 } from "@/core/session/session-policy";
-import { appLogger } from "@/core/telemetry/app-logger";
+import {
+  authLogger,
+  startupLogger,
+} from "@/core/telemetry/domain-loggers";
 import type {
   SessionSeed,
   SessionInvalidationReason,
@@ -120,9 +123,7 @@ const createInvalidatedState = (
 };
 
 const logSessionRehydrated = (context: Record<string, unknown>): void => {
-  appLogger.info({
-    domain: "startup",
-    event: "startup.session_rehydrated",
+  startupLogger.log("startup.session_rehydrated", {
     context,
   });
 };
@@ -203,9 +204,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     );
     await persistStoredSession(nextSession);
     set(toState(nextSession));
-    appLogger.info({
-      domain: "auth",
-      event: "auth.session_established",
+    authLogger.log("auth.session_established", {
       context: {
         hasRefreshToken: nextSession.refreshToken !== null,
         emailConfirmed: nextSession.user.emailConfirmed,
