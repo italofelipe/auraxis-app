@@ -10,127 +10,161 @@ export interface AppEventLoggingPolicy {
   readonly consolePolicy: "dev-only" | "warn-and-error" | "never";
 }
 
+const createLoggingPolicy = (
+  level: AppLogLevel,
+  description: string,
+  minimumContextKeys: ReadonlyArray<string>,
+  consolePolicy: AppEventLoggingPolicy["consolePolicy"],
+): AppEventLoggingPolicy => {
+  return {
+    level,
+    description,
+    minimumContextKeys,
+    consolePolicy,
+  };
+};
+
+const devOnlyInfoPolicy = (
+  description: string,
+  minimumContextKeys: ReadonlyArray<string>,
+): AppEventLoggingPolicy => {
+  return createLoggingPolicy(
+    "info",
+    description,
+    minimumContextKeys,
+    "dev-only",
+  );
+};
+
+const devOnlyDebugPolicy = (
+  description: string,
+  minimumContextKeys: ReadonlyArray<string>,
+): AppEventLoggingPolicy => {
+  return createLoggingPolicy(
+    "debug",
+    description,
+    minimumContextKeys,
+    "dev-only",
+  );
+};
+
+const warnAndErrorInfoPolicy = (
+  description: string,
+  minimumContextKeys: ReadonlyArray<string>,
+): AppEventLoggingPolicy => {
+  return createLoggingPolicy(
+    "info",
+    description,
+    minimumContextKeys,
+    "warn-and-error",
+  );
+};
+
+const warnAndErrorWarnPolicy = (
+  description: string,
+  minimumContextKeys: ReadonlyArray<string>,
+): AppEventLoggingPolicy => {
+  return createLoggingPolicy(
+    "warn",
+    description,
+    minimumContextKeys,
+    "warn-and-error",
+  );
+};
+
+const warnAndErrorErrorPolicy = (
+  description: string,
+  minimumContextKeys: ReadonlyArray<string>,
+): AppEventLoggingPolicy => {
+  return createLoggingPolicy(
+    "error",
+    description,
+    minimumContextKeys,
+    "warn-and-error",
+  );
+};
+
 export const APP_EVENT_LOGGING_POLICY = Object.freeze({
-  "startup.bootstrap_requested": {
-    level: "info",
-    description: "Início do bootstrap estrutural do app.",
-    minimumContextKeys: ["hydrated"],
-    consolePolicy: "dev-only",
-  },
-  "startup.session_rehydrated": {
-    level: "info",
-    description: "Resultado da rehidratação da sessão persistida.",
-    minimumContextKeys: ["authenticated", "source", "migratedLegacySession"],
-    consolePolicy: "dev-only",
-  },
-  "startup.ready": {
-    level: "info",
-    description: "App pronto para renderização após bootstrap e fontes.",
-    minimumContextKeys: ["fontsLoaded", "hydrated"],
-    consolePolicy: "dev-only",
-  },
-  "runtime.app_state_changed": {
-    level: "info",
-    description: "Mudança de foreground/background do app.",
-    minimumContextKeys: ["previousAppState", "nextAppState", "shouldSync"],
-    consolePolicy: "dev-only",
-  },
-  "runtime.reachability_probe_started": {
-    level: "debug",
-    description: "Disparo de probe de conectividade do cliente.",
-    minimumContextKeys: ["reason"],
-    consolePolicy: "dev-only",
-  },
-  "runtime.reachability_probe_completed": {
-    level: "info",
-    description: "Resultado do probe de conectividade do cliente.",
-    minimumContextKeys: ["reason", "status", "degradedReason"],
-    consolePolicy: "warn-and-error",
-  },
-  "runtime.revalidation_started": {
-    level: "info",
-    description: "Início de sincronização de runtime em foreground/checkout.",
-    minimumContextKeys: ["reason"],
-    consolePolicy: "dev-only",
-  },
-  "runtime.revalidation_completed": {
-    level: "info",
-    description: "Resultado da sincronização de runtime.",
-    minimumContextKeys: ["reason", "revalidated", "signedOut"],
-    consolePolicy: "warn-and-error",
-  },
-  "runtime.revalidation_failed": {
-    level: "error",
-    description: "Falha inesperada durante revalidation do runtime.",
-    minimumContextKeys: ["reason"],
-    consolePolicy: "warn-and-error",
-  },
-  "runtime.error_boundary_captured": {
-    level: "error",
-    description: "Erro inesperado capturado por boundary de React.",
-    minimumContextKeys: ["scope", "componentStack"],
-    consolePolicy: "warn-and-error",
-  },
-  "navigation.route_changed": {
-    level: "info",
-    description: "Mudança efetiva de rota no app.",
-    minimumContextKeys: ["route", "routeKey", "access"],
-    consolePolicy: "dev-only",
-  },
-  "navigation.deep_link_deduplicated": {
-    level: "debug",
-    description: "Deep link repetido e ignorado pelo runtime.",
-    minimumContextKeys: ["url"],
-    consolePolicy: "dev-only",
-  },
-  "navigation.deep_link_ignored": {
-    level: "warn",
-    description: "Deep link inválido ou fora do contrato esperado.",
-    minimumContextKeys: ["url"],
-    consolePolicy: "warn-and-error",
-  },
-  "navigation.deep_link_handled": {
-    level: "info",
-    description: "Deep link válido processado pelo runtime.",
-    minimumContextKeys: ["url", "href"],
-    consolePolicy: "dev-only",
-  },
-  "network.request_started": {
-    level: "debug",
-    description: "Requisição HTTP iniciada pelo cliente.",
-    minimumContextKeys: ["method", "path", "authenticated"],
-    consolePolicy: "dev-only",
-  },
-  "network.request_succeeded": {
-    level: "info",
-    description: "Requisição HTTP concluída com sucesso.",
-    minimumContextKeys: ["method", "path", "status", "durationMs"],
-    consolePolicy: "dev-only",
-  },
-  "network.request_failed": {
-    level: "warn",
-    description: "Requisição HTTP falhou no cliente.",
-    minimumContextKeys: ["method", "path", "status", "code"],
-    consolePolicy: "warn-and-error",
-  },
-  "auth.session_established": {
-    level: "info",
-    description: "Sessão autenticada foi persistida/estabelecida.",
-    minimumContextKeys: ["hasRefreshToken", "emailConfirmed", "hasUserId"],
-    consolePolicy: "dev-only",
-  },
-  "auth.session_invalidated": {
-    level: "warn",
-    description: "Sessão foi invalidada por expiração, auth failure ou logout.",
-    minimumContextKeys: ["reason", "invalidatedAt"],
-    consolePolicy: "warn-and-error",
-  },
-  "checkout.return_received": {
-    level: "info",
-    description: "Retorno de checkout recebido via deep link.",
-    minimumContextKeys: ["href", "status", "provider", "url"],
-    consolePolicy: "dev-only",
-  },
+  "startup.bootstrap_requested": devOnlyInfoPolicy(
+    "Início do bootstrap estrutural do app.",
+    ["hydrated"],
+  ),
+  "startup.session_rehydrated": devOnlyInfoPolicy(
+    "Resultado da rehidratação da sessão persistida.",
+    ["authenticated", "source", "migratedLegacySession"],
+  ),
+  "startup.ready": devOnlyInfoPolicy(
+    "App pronto para renderização após bootstrap e fontes.",
+    ["fontsLoaded", "hydrated"],
+  ),
+  "runtime.app_state_changed": devOnlyInfoPolicy(
+    "Mudança de foreground/background do app.",
+    ["previousAppState", "nextAppState", "shouldSync"],
+  ),
+  "runtime.reachability_probe_started": devOnlyDebugPolicy(
+    "Disparo de probe de conectividade do cliente.",
+    ["reason"],
+  ),
+  "runtime.reachability_probe_completed": warnAndErrorInfoPolicy(
+    "Resultado do probe de conectividade do cliente.",
+    ["reason", "status", "degradedReason"],
+  ),
+  "runtime.revalidation_started": devOnlyInfoPolicy(
+    "Início de sincronização de runtime em foreground/checkout.",
+    ["reason"],
+  ),
+  "runtime.revalidation_completed": warnAndErrorInfoPolicy(
+    "Resultado da sincronização de runtime.",
+    ["reason", "revalidated", "signedOut"],
+  ),
+  "runtime.revalidation_failed": warnAndErrorErrorPolicy(
+    "Falha inesperada durante revalidation do runtime.",
+    ["reason"],
+  ),
+  "runtime.error_boundary_captured": warnAndErrorErrorPolicy(
+    "Erro inesperado capturado por boundary de React.",
+    ["scope", "componentStack"],
+  ),
+  "navigation.route_changed": devOnlyInfoPolicy(
+    "Mudança efetiva de rota no app.",
+    ["route", "routeKey", "access"],
+  ),
+  "navigation.deep_link_deduplicated": devOnlyDebugPolicy(
+    "Deep link repetido e ignorado pelo runtime.",
+    ["url"],
+  ),
+  "navigation.deep_link_ignored": warnAndErrorWarnPolicy(
+    "Deep link inválido ou fora do contrato esperado.",
+    ["url"],
+  ),
+  "navigation.deep_link_handled": devOnlyInfoPolicy(
+    "Deep link válido processado pelo runtime.",
+    ["url", "href"],
+  ),
+  "network.request_started": devOnlyDebugPolicy(
+    "Requisição HTTP iniciada pelo cliente.",
+    ["method", "path", "authenticated"],
+  ),
+  "network.request_succeeded": devOnlyInfoPolicy(
+    "Requisição HTTP concluída com sucesso.",
+    ["method", "path", "status", "durationMs"],
+  ),
+  "network.request_failed": warnAndErrorWarnPolicy(
+    "Requisição HTTP falhou no cliente.",
+    ["method", "path", "status", "code"],
+  ),
+  "auth.session_established": devOnlyInfoPolicy(
+    "Sessão autenticada foi persistida/estabelecida.",
+    ["hasRefreshToken", "emailConfirmed", "hasUserId"],
+  ),
+  "auth.session_invalidated": warnAndErrorWarnPolicy(
+    "Sessão foi invalidada por expiração, auth failure ou logout.",
+    ["reason", "invalidatedAt"],
+  ),
+  "checkout.return_received": devOnlyInfoPolicy(
+    "Retorno de checkout recebido via deep link.",
+    ["href", "status", "provider", "url"],
+  ),
 } satisfies Record<AppTelemetryEvent, AppEventLoggingPolicy>);
 
 export const getAppEventLoggingPolicy = (
