@@ -5,6 +5,7 @@ import {
   initSentry,
   recordSentryBreadcrumb,
   resetSentryRuntimeForTests,
+  syncSentryOperationalContext,
   sanitizeSentryEvent,
 } from "@/app/services/sentry";
 
@@ -23,12 +24,16 @@ jest.mock("@sentry/react-native", () => ({
   addBreadcrumb: jest.fn(),
   captureException: jest.fn(),
   init: jest.fn(),
+  setContext: jest.fn(),
+  setTag: jest.fn(),
   wrap: jest.fn((component) => component),
 }));
 
 const mockAddBreadcrumb = Sentry.addBreadcrumb as jest.Mock;
 const mockCaptureException = Sentry.captureException as jest.Mock;
 const mockSentryInit = Sentry.init as jest.Mock;
+const mockSetContext = Sentry.setContext as jest.Mock;
+const mockSetTag = Sentry.setTag as jest.Mock;
 
 describe("initSentry", () => {
   beforeEach(() => {
@@ -165,5 +170,72 @@ describe("initSentry", () => {
     captureSentryException(error);
 
     expect(mockCaptureException).toHaveBeenCalledWith(error);
+  });
+
+  it("sincroniza contexto operacional sanitizado quando o sentry esta ativo", () => {
+    syncSentryOperationalContext({
+      release: {
+        appEnv: "production",
+        appVersion: "1.3.0",
+        platform: "ios",
+        apiMode: "live",
+      },
+      runtime: {
+        connectivityStatus: "degraded",
+        runtimeDegradedReason: "offline",
+      },
+      session: {
+        authenticated: true,
+        email: "italo@auraxis.dev",
+      },
+    });
+    expect(mockSetContext).not.toHaveBeenCalled();
+
+    expoConfigMock.extra = {
+      sentryDsn: "https://test-dsn@o0.ingest.sentry.io/0",
+      appEnv: "production",
+    };
+    initSentry();
+
+    syncSentryOperationalContext({
+      release: {
+        appEnv: "production",
+        appVersion: "1.3.0",
+        platform: "ios",
+        apiMode: "live",
+      },
+      runtime: {
+        connectivityStatus: "degraded",
+        runtimeDegradedReason: "offline",
+      },
+      session: {
+        authenticated: true,
+        email: "italo@auraxis.dev",
+      },
+    });
+
+    expect(mockSetContext).toHaveBeenNthCalledWith(1, "release", {
+      appEnv: "production",
+      appVersion: "1.3.0",
+      platform: "ios",
+      apiMode: "live",
+    });
+    expect(mockSetContext).toHaveBeenNthCalledWith(2, "runtime", {
+      connectivityStatus: "degraded",
+      runtimeDegradedReason: "offline",
+    });
+    expect(mockSetContext).toHaveBeenNthCalledWith(3, "session", {
+      authenticated: true,
+      email: "<redacted>",
+    });
+    expect(mockSetTag).toHaveBeenCalledWith("app_env", "production");
+    expect(mockSetTag).toHaveBeenCalledWith("app_version", "1.3.0");
+    expect(mockSetTag).toHaveBeenCalledWith("platform", "ios");
+    expect(mockSetTag).toHaveBeenCalledWith("api_mode", "live");
+    expect(mockSetTag).toHaveBeenCalledWith("authenticated", "true");
+    expect(mockSetTag).toHaveBeenCalledWith(
+      "connectivity_status",
+      "degraded",
+    );
   });
 });

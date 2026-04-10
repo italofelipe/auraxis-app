@@ -3,6 +3,7 @@ import Constants from "expo-constants";
 
 import { sanitizeAppUrl } from "@/core/navigation/deep-linking";
 import { sanitizeTelemetryContext } from "@/core/telemetry/sanitization";
+import type { SentryOperationalContext } from "@/core/telemetry/operational-context";
 import type { AppBreadcrumb } from "@/core/telemetry/types";
 
 let sentryEnabled = false;
@@ -73,6 +74,40 @@ export const captureSentryException = (error: unknown): void => {
   }
 
   Sentry.captureException(error);
+};
+
+const setSentryTagIfPresent = (key: string, value: unknown): void => {
+  if (
+    typeof value !== "string" &&
+    typeof value !== "number" &&
+    typeof value !== "boolean"
+  ) {
+    return;
+  }
+
+  Sentry.setTag(key, String(value));
+};
+
+export const syncSentryOperationalContext = (
+  context: SentryOperationalContext,
+): void => {
+  if (!sentryEnabled) {
+    return;
+  }
+
+  const release = sanitizeTelemetryContext(context.release);
+  const runtime = sanitizeTelemetryContext(context.runtime);
+  const session = sanitizeTelemetryContext(context.session);
+
+  Sentry.setContext("release", release ?? {});
+  Sentry.setContext("runtime", runtime ?? {});
+  Sentry.setContext("session", session ?? {});
+  setSentryTagIfPresent("app_env", release?.appEnv);
+  setSentryTagIfPresent("app_version", release?.appVersion);
+  setSentryTagIfPresent("platform", release?.platform);
+  setSentryTagIfPresent("api_mode", release?.apiMode);
+  setSentryTagIfPresent("authenticated", session?.authenticated);
+  setSentryTagIfPresent("connectivity_status", runtime?.connectivityStatus);
 };
 
 export function initSentry(): void {

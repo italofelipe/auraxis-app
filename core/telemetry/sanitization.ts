@@ -4,11 +4,25 @@ const REDACTED_VALUE = "<redacted>";
 const MAX_DEPTH = 4;
 const MAX_STRING_LENGTH = 300;
 
-const SENSITIVE_KEY_PATTERN =
-  /(authorization|cookie|token|secret|api[-_]?key|observability[-_]?key|email|ip(_address)?|dsn)/iu;
+const normalizeKey = (value: string): string => {
+  return value.replace(/[^a-z0-9]/giu, "").toLowerCase();
+};
 
 const shouldRedactKey = (key: string): boolean => {
-  return SENSITIVE_KEY_PATTERN.test(key);
+  const normalizedKey = normalizeKey(key);
+
+  return (
+    normalizedKey.includes("authorization") ||
+    normalizedKey.includes("cookie") ||
+    normalizedKey.includes("secret") ||
+    normalizedKey.includes("apikey") ||
+    normalizedKey.includes("observabilitykey") ||
+    normalizedKey.includes("email") ||
+    normalizedKey.endsWith("token") ||
+    normalizedKey === "ip" ||
+    normalizedKey === "ipaddress" ||
+    normalizedKey === "dsn"
+  );
 };
 
 const trimString = (value: string): string => {

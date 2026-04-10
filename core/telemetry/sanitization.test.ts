@@ -59,4 +59,16 @@ describe("sanitizeTelemetryValue", () => {
     expect(sanitizeTelemetryValue(undefined)).toBeUndefined();
     expect(sanitizeTelemetryContext(undefined)).toBeUndefined();
   });
+
+  it("nao redige chaves operacionais inocentes por falso positivo de substring", () => {
+    expect(
+      sanitizeTelemetryValue({
+        appOwnership: "standalone",
+        relationship: "owner",
+      }),
+    ).toEqual({
+      appOwnership: "standalone",
+      relationship: "owner",
+    });
+  });
 });

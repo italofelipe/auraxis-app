@@ -7,6 +7,28 @@ jest.mock("@/app/services/sentry", () => ({
   recordSentryBreadcrumb: jest.fn(),
 }));
 
+jest.mock("@/core/telemetry/operational-context", () => ({
+  buildAppOperationalContext: jest.fn(() => ({
+    appEnv: "test",
+    appVersion: "1.3.0",
+    nativeBuildVersion: "20260410",
+    executionEnvironment: "storeClient",
+    appOwnership: "standalone",
+    easProjectId: "project-1",
+    platform: "ios",
+    platformVersion: "18.1",
+    apiMode: "live",
+    apiContractVersion: "v2",
+    sessionHydrated: false,
+    authenticated: false,
+    authFailureReason: null,
+    connectivityStatus: "unknown",
+    runtimeDegradedReason: null,
+    appState: "unknown",
+    startupReady: false,
+  })),
+}));
+
 const {
   captureSentryException,
   recordSentryBreadcrumb,
@@ -41,7 +63,7 @@ describe("appLogger", () => {
 
     logger.info({
       domain: "auth",
-      event: "auth.session_checked",
+      event: "auth.session_established",
       context: {
         email: "italo@auraxis.dev",
         accessToken: "secret-token",
@@ -51,13 +73,16 @@ describe("appLogger", () => {
 
     expect(recordSentryBreadcrumb).toHaveBeenCalledWith({
       category: "auth",
-      message: "auth.session_checked",
+      message: "auth.session_established",
       level: "info",
-      data: {
+      data: expect.objectContaining({
         email: "<redacted>",
         accessToken: "<redacted>",
         url: "auraxisapp://assinatura?token=%3Credacted%3E&status=paid",
-      },
+        appEnv: "test",
+        authenticated: false,
+        connectivityStatus: "unknown",
+      }),
     });
   });
 
@@ -78,9 +103,10 @@ describe("appLogger", () => {
       category: "network",
       message: "network.request_failed",
       level: "error",
-      data: {
+      data: expect.objectContaining({
         path: "/dashboard",
-      },
+        appEnv: "test",
+      }),
     });
     expect(captureSentryException).toHaveBeenCalledWith(error);
   });
@@ -91,7 +117,7 @@ describe("appLogger", () => {
 
     logger.error({
       domain: "auth",
-      event: "auth.expected_failure",
+      event: "auth.session_invalidated",
       error,
       captureInSentry: false,
     });
@@ -105,7 +131,7 @@ describe("appLogger", () => {
 
     logger.debug({
       domain: "runtime",
-      event: "runtime.noisy_debug",
+      event: "runtime.reachability_probe_started",
     });
 
     expect(recordSentryBreadcrumb).not.toHaveBeenCalled();
@@ -127,11 +153,15 @@ describe("appLogger", () => {
 
     isolatedLogger!.warn({
       domain: "runtime",
-      event: "runtime.degraded_mode",
+      event: "runtime.revalidation_failed",
     });
 
     expect(consoleWarnSpy).toHaveBeenCalledWith(
-      "[auraxis:runtime] runtime.degraded_mode",
+      "[auraxis:runtime] runtime.revalidation_failed",
+      expect.objectContaining({
+        appEnv: "test",
+        connectivityStatus: "unknown",
+      }),
     );
   });
 
@@ -142,7 +172,7 @@ describe("appLogger", () => {
 
     logger.info({
       domain: "runtime",
-      event: "runtime.ready",
+      event: "runtime.revalidation_completed",
       context: {
         mode: "production",
       },

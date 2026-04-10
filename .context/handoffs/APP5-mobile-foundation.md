@@ -777,6 +777,35 @@
 
 ### Proximo passo
 - seguir para `APP FND-05B`, criando logger cliente canônico, breadcrumbs e telemetria mínima de navegação/network/erro;
+
+## 2026-04-10 — APP FND-09A - Consolidação da observabilidade cliente do app
+
+### O que foi feito
+
+- consolidei o contexto operacional mínimo do app em [`core/telemetry/operational-context.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/core/telemetry/operational-context.ts), combinando release/environment, runtime e sessão sem expor PII;
+- passei o [`core/telemetry/app-logger.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/core/telemetry/app-logger.ts) a injetar esse contexto em todos os eventos e breadcrumbs;
+- ampliei o adapter do Sentry em [`app/services/sentry.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/app/services/sentry.ts) com `syncSentryOperationalContext`, usando `setContext` e `setTag` de forma sanitizada;
+- criei o bridge [`use-observability-runtime-bridge.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/core/telemetry/use-observability-runtime-bridge.ts) e pluguei no [`RuntimeProvider`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/core/providers/runtime-provider.tsx);
+- fechei a lacuna de auth/rehydration em [`core/session/session-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/core/session/session-store.ts), registrando:
+  - `startup.session_rehydrated`;
+  - `auth.session_established`;
+- refinei a redaction em [`core/telemetry/sanitization.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/core/telemetry/sanitization.ts) para evitar falso positivo em chaves operacionais como `appOwnership`, mantendo o bloqueio de `token`, `secret`, `email`, `ip`, `dsn` e similares;
+- documentei a matriz mínima de eventos operacionais em [`architecture.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-09a-client-observability/.context/architecture.md).
+
+### O que foi validado
+
+- `npm run typecheck`
+- `npx jest core/telemetry/app-logger.test.ts core/telemetry/operational-context.test.ts core/telemetry/sanitization.test.ts core/telemetry/use-observability-runtime-bridge.test.tsx __tests__/services/sentry.test.ts core/session/session-store.test.ts --runInBand`
+
+### Riscos pendentes
+
+- ainda não existe release health avançado nem session replay, por escolha deliberada de budget; seguimos apenas com Sentry + eventos operacionais mínimos;
+- o app continua dependente de `expo-constants` como superfície pública de release/env; qualquer expansão futura desse namespace deve continuar passando pelo scanner e pela matriz de redaction.
+- o `quality-check` está verde, mas a suíte completa ainda emite warnings de `act(...)` em alguns testes que montam `RuntimeProvider`; não quebra o gate atual, porém vale endereçar no próximo slice de DX/CI local parity para reduzir ruído.
+
+### Próximo passo
+
+- seguir para `APP FND-09B`, consolidando política de logging/redaction governance do app e fechando o contrato operacional antes de performance/design system.
 - em seguida entrar em `APP FND-05C` para degraded states, offline/reachability, retry policy e confiabilidade operacional do runtime mobile.
 
 ---

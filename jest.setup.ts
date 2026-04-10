@@ -55,11 +55,22 @@ jest.mock('expo-router', () => ({
 
 // Mock do expo-constants
 jest.mock('expo-constants', () => ({
+  __esModule: true,
   default: {
+    appOwnership: 'standalone',
+    easConfig: {
+      projectId: 'eas-project-id',
+    },
+    executionEnvironment: 'storeClient',
     expoConfig: {
       name: 'auraxis-app-test',
       slug: 'auraxis-app',
+      version: '1.3.0',
+      extra: {
+        appEnv: 'test',
+      },
     },
+    nativeBuildVersion: '100',
   },
 }))
 

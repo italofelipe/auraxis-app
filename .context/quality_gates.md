@@ -41,6 +41,12 @@ node scripts/ci-audit-gate.js
 - O relatório bruto do audit agora é gravado em arquivo temporário do sistema.
 - Para persistir um arquivo para debug manual, use `AURAXIS_AUDIT_OUTPUT_PATH=/caminho/audit.json`.
 - `npm run policy:check` inclui `check-client-security-governance.cjs`, que bloqueia env vars banidas no cliente, `expo.extra` sensível e regressões na persistência legada de sessão.
+- Observabilidade cliente tem suíte dirigida mínima obrigatória em blocos de runtime:
+  - `core/telemetry/app-logger.test.ts`
+  - `core/telemetry/operational-context.test.ts`
+  - `core/telemetry/sanitization.test.ts`
+  - `core/telemetry/use-observability-runtime-bridge.test.tsx`
+  - `__tests__/services/sentry.test.ts`
 
 > Se qualquer gate falhar: **não commitar**. Corrigir o problema primeiro.
 
