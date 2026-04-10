@@ -81,9 +81,13 @@ Fallback canônico suportado (cross-repo):
 
 - `AURAXIS_FLAG_PROVIDER`
 - `AURAXIS_UNLEASH_URL`
-- `AURAXIS_UNLEASH_API_TOKEN` / `AURAXIS_UNLEASH_CLIENT_KEY`
+- `AURAXIS_UNLEASH_CLIENT_KEY`
 - `AURAXIS_UNLEASH_ENVIRONMENT` / `AURAXIS_RUNTIME_ENV`
 - `AURAXIS_UNLEASH_CACHE_TTL_MS`
+
+Regra de segurança:
+
+- `AURAXIS_UNLEASH_API_TOKEN` é proibido no app. O cliente mobile só pode usar chave pública de proxy (`*_UNLEASH_CLIENT_KEY`) ou fallback local.
 
 Bootstrap central recomendado:
 

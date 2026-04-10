@@ -88,6 +88,26 @@ Telas (app/)
 - Versionar chamadas de API — não assumir contrato estável sem versão.
 - Toda integração nova deve preferir `apiContractMap` + services de feature antes de criar string solta de endpoint.
 
+## Matriz de segurança do cliente
+
+| Superfície | Classificação | Regra canônica |
+|:-----------|:--------------|:---------------|
+| `EXPO_PUBLIC_API_*`, `EXPO_PUBLIC_FLAG_*`, `EXPO_PUBLIC_UNLEASH_*`, `EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY` | Pública | Pode estar no bundle; nunca pode representar segredo de servidor ou credencial privilegiada |
+| `expo.extra.sentryDsn`, `expo.extra.appEnv`, `expo.extra.eas.projectId` | Pública | Permitida em `app.json`; serve apenas a bootstrap/observabilidade/release |
+| `accessToken`, `refreshToken`, `user.email` | Sensível | Persistir somente no payload canônico do `SecureStore`; proibido duplicar em storage legado, logs ou telemetria |
+| Chaves legadas `auraxis.access-token` / `auraxis.user-email` | Temporária | Apenas leitura de migração; devem ser limpas após regravação canônica |
+| Deep links, retorno de checkout, breadcrumbs e logs | Temporária sanitizada | Sempre registrar apenas URL/contexto redigido (`token`, `password`, `email`, `auth_code` e similares) |
+| Tokens de servidor, API tokens, secrets e passwords | Proibida no cliente | Não podem aparecer nem em `process.env`, nem em `expo.extra`, nem em fallbacks de runtime do app |
+
+## Guardrails de segurança do cliente
+
+- `scripts/check-client-security-governance.cjs` é o scanner canônico do app para:
+  - bloquear referências a env vars banidas em código cliente;
+  - bloquear `expo.extra` com nomes sensíveis;
+  - bloquear reintrodução de persistência legada de sessão.
+- O guardrail roda dentro de `npm run policy:check` e, por consequência, falha cedo em `npm run quality-check`.
+- `SecureStore` do app escreve somente `auraxis.session`; as chaves legadas existem apenas para migração e limpeza.
+
 ## Plataformas suportadas
 
 - **iOS**: target mínimo a definir (sugestão: iOS 15+)

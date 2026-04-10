@@ -1,5 +1,39 @@
 # APP5 - Scaffold base do app mobile
 
+## Update - APP FND-08A (security and configuration audit)
+
+### O que foi feito
+- endureci a persistência de sessão em [`core/session/session-storage.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/core/session/session-storage.ts):
+  - o app agora grava apenas `auraxis.session` no `SecureStore`;
+  - as chaves legadas `auraxis.access-token` e `auraxis.user-email` ficaram restritas à leitura de migração e limpeza explícita;
+- atualizei [`core/session/session-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/core/session/session-store.ts) para regravar sessão legada no payload canônico e limpar imediatamente os artefatos antigos;
+- removi caminhos indevidos de segredo do cliente:
+  - retirei o fallback `AURAXIS_UNLEASH_API_TOKEN` de [`shared/feature-flags/service.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/shared/feature-flags/service.ts);
+  - removi o alias público `EXPO_PUBLIC_OBSERVABILITY_EXPORT_TOKEN` de [`shared/config/runtime.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/shared/config/runtime.ts);
+- expandi a sanitização de URLs em [`core/navigation/deep-linking.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/core/navigation/deep-linking.ts) para redigir também `email`, `password`, `auth_code`, `secret`, `jwt` e similares;
+- criei o guardrail executável [`scripts/check-client-security-governance.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/scripts/check-client-security-governance.cjs) e o conectei ao `policy:check`, cobrindo:
+  - referências banidas de env vars no cliente;
+  - chaves sensíveis em `expo.extra`;
+  - regressão de escrita das chaves legadas de sessão;
+- documentei a matriz de segurança do cliente em [`architecture.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/.context/architecture.md) e alinhei o runbook de flags em [`docs/runbooks/PLT2-PLT5-foundation.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08a-security-audit/docs/runbooks/PLT2-PLT5-foundation.md).
+
+### O que foi validado
+- `npm run test -- core/session/session-storage.test.ts core/session/session-store.test.ts shared/feature-flags/service.test.ts core/navigation/deep-linking.test.ts scripts/check-client-security-governance.test.ts __tests__/services/sentry.test.ts core/telemetry/sanitization.test.ts --runInBand`
+- `npm run policy:check`
+- `node scripts/check-client-security-governance.cjs`
+- `node scripts/ci-audit-gate.js`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o app ainda depende de `Constants.expoConfig.extra` para `sentryDsn` e `appEnv`; isso está classificado como superfície pública, mas futuras chaves novas nesse namespace precisam continuar passando pelo scanner novo;
+- a migração legada de sessão segue temporariamente suportada; quando não houver mais base instalada dependente dessa leitura, vale remover de vez o fallback e as chaves antigas;
+- o Node 24 LTS continua sendo o runtime canônico do repo, mas esta máquina local ainda precisa de `nvm install 24` para paridade completa de ambiente.
+
+### Proximo passo
+- seguir para `APP FND-08B`, consolidando forced sign-out, reauth e auth-failure flows usando a taxonomia canônica de erro/async state;
+- depois avançar para `APP FND-09A/B`, fechando observabilidade, logging e governança de redaction sobre a base endurecida.
+
 ## Update - APP FND-07B (axios security gate + local parity)
 
 ### O que foi feito

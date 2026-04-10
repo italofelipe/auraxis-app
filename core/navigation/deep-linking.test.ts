@@ -89,4 +89,14 @@ describe("deep linking", () => {
       "auraxisapp://assinatura?status=paid&token=%3Credacted%3E&checkout_token=%3Credacted%3E",
     );
   });
+
+  it("redige outros parametros sensiveis alem de tokens", () => {
+    expect(
+      sanitizeAppUrl(
+        "auraxisapp://login?email=italo@auraxis.dev&password=12345678&auth_code=abc123",
+      ),
+    ).toBe(
+      "auraxisapp://login?email=%3Credacted%3E&password=%3Credacted%3E&auth_code=%3Credacted%3E",
+    );
+  });
 });

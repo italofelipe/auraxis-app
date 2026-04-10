@@ -1,6 +1,7 @@
 import { create } from "zustand";
 
 import {
+  clearLegacyStoredSession,
   clearStoredSession,
   loadStoredSession,
   persistStoredSession,
@@ -131,6 +132,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
 
         if (loadedSession.source === "legacy" && loadedSession.session) {
           await persistStoredSession(loadedSession.session);
+          await clearLegacyStoredSession();
         }
 
         if (
