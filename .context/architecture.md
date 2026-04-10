@@ -81,6 +81,7 @@ Telas (app/)
 | Tema e motion | `shared/theme/*` + `shared/animations/*` | Unifica tokens semânticos, animações e acessibilidade |
 | Formulários | `shared/forms/use-app-form.ts` + validators por feature | Reuso com Zod/RHF sem duplicar resolver/config |
 | Auth failure recovery | `core/session/session-invalidation.ts` + `use-session-failure-notice.ts` | Unifica forced sign-out, cleanup de runtime e copy canônica antes da primeira feature |
+| Observabilidade cliente | `core/telemetry/*` + `app/services/sentry.ts` + `use-observability-runtime-bridge.ts` | Mantém eventos mínimos, breadcrumbs sanitizados e contexto operacional consistente sem analytics pago |
 
 ## Contratos com auraxis-api
 
@@ -119,6 +120,41 @@ Telas (app/)
   - limpa `pendingCheckoutReturn`.
 - O fluxo público reutiliza `core/session/use-session-failure-notice.ts` para traduzir o motivo técnico em copy de recovery na tela de login.
 - `manual` continua limpando o runtime, mas não renderiza aviso de erro; os demais motivos (`expired`, `unauthorized`, `forbidden`, `bootstrap-invalid`) redirecionam para login com mensagem explícita e dismissível.
+
+## Observabilidade cliente canônica
+
+- `core/telemetry/app-logger.ts` injeta contexto operacional mínimo em todo log emitido pelo app:
+  - release/environment: `appEnv`, `appVersion`, `nativeBuildVersion`, `executionEnvironment`, `platform`, `platformVersion`, `apiMode`, `apiContractVersion`;
+  - runtime: `appState`, `connectivityStatus`, `runtimeDegradedReason`, `startupReady`;
+  - sessão: `sessionHydrated`, `authenticated`, `authFailureReason`.
+- `core/telemetry/use-observability-runtime-bridge.ts` sincroniza o snapshot ampliado do runtime com o Sentry via `setContext`/`setTag`, sem enviar PII.
+- `core/session/session-store.ts` passou a registrar `startup.session_rehydrated` e `auth.session_established`, fechando a lacuna de rehydration/auth antes da primeira feature.
+- `core/telemetry/sanitization.ts` continua sendo o único ponto canônico de redaction para logs, breadcrumbs e contexto do Sentry.
+
+## Matriz mínima de eventos operacionais
+
+| Domínio | Evento | Contexto mínimo esperado |
+|:--------|:-------|:-------------------------|
+| `startup` | `startup.bootstrap_requested` | `hydrated` |
+| `startup` | `startup.session_rehydrated` | `authenticated`, `source`, `migratedLegacySession`, `invalidStoredPayload` |
+| `startup` | `startup.ready` | `fontsLoaded`, `hydrated` |
+| `navigation` | `navigation.route_changed` | `route`, `routeKey`, `access`, `tabVisible` |
+| `navigation` | `navigation.deep_link_deduplicated` | `url` |
+| `navigation` | `navigation.deep_link_ignored` | `url` |
+| `navigation` | `navigation.deep_link_handled` | `url`, `href` |
+| `checkout` | `checkout.return_received` | `href`, `status`, `provider`, `planSlug`, `hasExternalReference`, `url` |
+| `runtime` | `runtime.app_state_changed` | `previousAppState`, `nextAppState`, `shouldSync` |
+| `runtime` | `runtime.reachability_probe_started` | `reason` |
+| `runtime` | `runtime.reachability_probe_completed` | `reason`, `status`, `degradedReason`, `latencyMs`, `statusCode` |
+| `runtime` | `runtime.revalidation_started` | `reason` |
+| `runtime` | `runtime.revalidation_completed` | `reason`, `revalidated`, `signedOut`, `entitlementsVersion` |
+| `runtime` | `runtime.revalidation_failed` | `reason` |
+| `runtime` | `runtime.error_boundary_captured` | `scope`, `componentStack` |
+| `network` | `network.request_started` | `method`, `path`, `authenticated` |
+| `network` | `network.request_succeeded` | `method`, `path`, `status`, `durationMs` |
+| `network` | `network.request_failed` | `method`, `path`, `status`, `code`, `durationMs`, `invalidationReason` |
+| `auth` | `auth.session_established` | `hasRefreshToken`, `emailConfirmed`, `hasUserId` |
+| `auth` | `auth.session_invalidated` | `reason`, `invalidatedAt` |
 
 ## Plataformas suportadas
 

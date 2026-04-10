@@ -10,6 +10,7 @@ import {
   isStoredSessionExpired,
   withSessionMetadata,
 } from "@/core/session/session-policy";
+import { appLogger } from "@/core/telemetry/app-logger";
 import type {
   SessionSeed,
   SessionInvalidationReason,
@@ -118,6 +119,14 @@ const createInvalidatedState = (
   };
 };
 
+const logSessionRehydrated = (context: Record<string, unknown>): void => {
+  appLogger.info({
+    domain: "startup",
+    event: "startup.session_rehydrated",
+    context,
+  });
+};
+
 let bootstrapSessionPromise: Promise<void> | null = null;
 
 export const useSessionStore = create<SessionState>((set, get) => ({
@@ -130,6 +139,7 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     if (!bootstrapSessionPromise) {
       bootstrapSessionPromise = (async (): Promise<void> => {
         const loadedSession = await loadStoredSession();
+        const migratedLegacySession = loadedSession.source === "legacy";
 
         if (loadedSession.source === "legacy" && loadedSession.session) {
           await persistStoredSession(loadedSession.session);
@@ -142,6 +152,13 @@ export const useSessionStore = create<SessionState>((set, get) => ({
         ) {
           await clearStoredSession();
           set(createInvalidatedState("expired", new Date().toISOString()));
+          logSessionRehydrated({
+            authenticated: false,
+            source: loadedSession.source,
+            migratedLegacySession,
+            invalidStoredPayload: loadedSession.invalidStoredPayload,
+            invalidationReason: "expired",
+          });
           return;
         }
 
@@ -150,10 +167,25 @@ export const useSessionStore = create<SessionState>((set, get) => ({
           set(
             createInvalidatedState("bootstrap-invalid", new Date().toISOString()),
           );
+          logSessionRehydrated({
+            authenticated: false,
+            source: loadedSession.source,
+            migratedLegacySession,
+            invalidStoredPayload: true,
+            invalidationReason: "bootstrap-invalid",
+          });
           return;
         }
 
         set(toState(loadedSession.session));
+        logSessionRehydrated({
+          authenticated: loadedSession.session !== null,
+          source: loadedSession.source,
+          migratedLegacySession,
+          invalidStoredPayload: loadedSession.invalidStoredPayload,
+          hasRefreshToken: loadedSession.session?.refreshToken !== null,
+          emailConfirmed: loadedSession.session?.user.emailConfirmed ?? null,
+        });
       })().finally(() => {
         bootstrapSessionPromise = null;
       });
@@ -171,6 +203,15 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     );
     await persistStoredSession(nextSession);
     set(toState(nextSession));
+    appLogger.info({
+      domain: "auth",
+      event: "auth.session_established",
+      context: {
+        hasRefreshToken: nextSession.refreshToken !== null,
+        emailConfirmed: nextSession.user.emailConfirmed,
+        hasUserId: nextSession.user.id !== null,
+      },
+    });
   },
   setSession: async (session: StoredSession | null): Promise<void> => {
     if (session === null) {

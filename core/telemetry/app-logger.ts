@@ -2,6 +2,7 @@ import {
   captureSentryException,
   recordSentryBreadcrumb,
 } from "@/app/services/sentry";
+import { buildAppOperationalContext } from "@/core/telemetry/operational-context";
 import { sanitizeTelemetryContext } from "@/core/telemetry/sanitization";
 import type {
   AppBreadcrumb,
@@ -35,6 +36,15 @@ const shouldRecordBreadcrumb = (level: AppLogLevel): boolean => {
   return level !== "debug";
 };
 
+const mergeContext = (
+  context: Record<string, unknown> | undefined,
+): Record<string, unknown> => {
+  return {
+    ...buildAppOperationalContext(),
+    ...(context ?? {}),
+  };
+};
+
 const toBreadcrumb = (
   level: AppLogLevel,
   entry: AppLogEntry,
@@ -57,7 +67,7 @@ export interface AppLogger {
 
 export const createAppLogger = (): AppLogger => {
   const emit = (level: AppLogLevel, entry: AppLogEntry): void => {
-    const context = sanitizeTelemetryContext(entry.context);
+    const context = sanitizeTelemetryContext(mergeContext(entry.context));
 
     if (shouldRecordBreadcrumb(level)) {
       recordSentryBreadcrumb(toBreadcrumb(level, entry, context));

@@ -7,12 +7,24 @@ import {
 import { useSessionStore } from "@/core/session/session-store";
 import type { StoredSession } from "@/core/session/types";
 
+jest.mock("@/core/telemetry/app-logger", () => ({
+  appLogger: {
+    info: jest.fn(),
+  },
+}));
+
 jest.mock("@/core/session/session-storage", () => ({
   clearLegacyStoredSession: jest.fn().mockResolvedValue(undefined),
   loadStoredSession: jest.fn(),
   persistStoredSession: jest.fn(),
   clearStoredSession: jest.fn().mockResolvedValue(undefined),
 }));
+
+const { appLogger } = jest.requireMock("@/core/telemetry/app-logger") as {
+  appLogger: {
+    info: jest.Mock;
+  };
+};
 
 const mockClearLegacyStoredSession = jest.mocked(clearLegacyStoredSession);
 const mockLoadStoredSession = jest.mocked(loadStoredSession);
@@ -77,6 +89,17 @@ describe("session store", () => {
       isAuthenticated: false,
       authFailureReason: "expired",
     });
+    expect(appLogger.info).toHaveBeenCalledWith({
+      domain: "startup",
+      event: "startup.session_rehydrated",
+      context: {
+        authenticated: false,
+        source: "canonical",
+        migratedLegacySession: false,
+        invalidStoredPayload: false,
+        invalidationReason: "expired",
+      },
+    });
   });
 
   it("marca payload invalido de storage como bootstrap-invalid", async () => {
@@ -93,6 +116,17 @@ describe("session store", () => {
       hydrated: true,
       isAuthenticated: false,
       authFailureReason: "bootstrap-invalid",
+    });
+    expect(appLogger.info).toHaveBeenCalledWith({
+      domain: "startup",
+      event: "startup.session_rehydrated",
+      context: {
+        authenticated: false,
+        source: "none",
+        migratedLegacySession: false,
+        invalidStoredPayload: true,
+        invalidationReason: "bootstrap-invalid",
+      },
     });
   });
 
@@ -119,6 +153,15 @@ describe("session store", () => {
     expect(useSessionStore.getState()).toMatchObject({
       isAuthenticated: true,
       authFailureReason: null,
+    });
+    expect(appLogger.info).toHaveBeenCalledWith({
+      domain: "auth",
+      event: "auth.session_established",
+      context: {
+        hasRefreshToken: true,
+        emailConfirmed: true,
+        hasUserId: true,
+      },
     });
   });
 
@@ -175,6 +218,18 @@ describe("session store", () => {
       hydrated: true,
       isAuthenticated: true,
       userEmail: "italo@auraxis.dev",
+    });
+    expect(appLogger.info).toHaveBeenCalledWith({
+      domain: "startup",
+      event: "startup.session_rehydrated",
+      context: {
+        authenticated: true,
+        source: "legacy",
+        migratedLegacySession: true,
+        invalidStoredPayload: false,
+        hasRefreshToken: true,
+        emailConfirmed: true,
+      },
     });
   });
 
