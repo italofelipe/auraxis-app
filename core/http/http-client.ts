@@ -55,6 +55,24 @@ const readHeader = (
     : null;
 };
 
+const setHeaderValue = (
+  config: InternalAxiosRequestConfig,
+  headerName: string,
+  headerValue: string,
+): void => {
+  if (config.headers && "set" in config.headers) {
+    config.headers.set(headerName, headerValue);
+    return;
+  }
+
+  const nextHeaders = Object.assign(
+    {},
+    (config.headers as Record<string, unknown> | undefined) ?? {},
+  ) as AxiosRequestHeaders;
+  nextHeaders[headerName] = headerValue;
+  config.headers = nextHeaders;
+};
+
 const invalidateExpiredSessionIfNeeded = async (): Promise<void> => {
   const sessionState = useSessionStore.getState();
   if (
@@ -137,16 +155,7 @@ const attachAuthHeaders = async (
   });
 
   if (accessToken) {
-    if (config.headers && "set" in config.headers) {
-      config.headers.set("Authorization", `Bearer ${accessToken}`);
-    } else {
-      const nextHeaders = Object.assign(
-        {},
-        (config.headers as Record<string, unknown> | undefined) ?? {},
-      ) as AxiosRequestHeaders;
-      nextHeaders.Authorization = `Bearer ${accessToken}`;
-      config.headers = nextHeaders;
-    }
+    setHeaderValue(config, "Authorization", `Bearer ${accessToken}`);
   }
 
   if (
@@ -154,20 +163,11 @@ const attachAuthHeaders = async (
     appRuntimeConfig.observabilityExportEnabled &&
     appRuntimeConfig.observabilityExportPublicKey
   ) {
-    if (config.headers && "set" in config.headers) {
-      config.headers.set(
-        "X-Observability-Key",
-        appRuntimeConfig.observabilityExportPublicKey,
-      );
-    } else {
-      const nextHeaders = Object.assign(
-        {},
-        (config.headers as Record<string, unknown> | undefined) ?? {},
-      ) as AxiosRequestHeaders;
-      nextHeaders["X-Observability-Key"] =
-        appRuntimeConfig.observabilityExportPublicKey;
-      config.headers = nextHeaders;
-    }
+    setHeaderValue(
+      config,
+      "X-Observability-Key",
+      appRuntimeConfig.observabilityExportPublicKey,
+    );
   }
 
   return config;

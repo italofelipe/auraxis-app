@@ -135,6 +135,12 @@ const bindInitialUrlLifecycle = (
     void handleIncomingUrl(url);
   });
 
+  return createSubscriptionTeardown(subscription);
+};
+
+const createSubscriptionTeardown = (
+  subscription: { remove: () => void },
+): (() => void) => {
   return () => {
     subscription.remove();
   };
@@ -166,9 +172,7 @@ const bindAppStateLifecycle = (
     void revalidate("foreground");
   });
 
-  return () => {
-    subscription.remove();
-  };
+  return createSubscriptionTeardown(subscription);
 };
 
 export const useRuntimeLifecycle = (): void => {
