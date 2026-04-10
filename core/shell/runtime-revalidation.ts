@@ -3,6 +3,7 @@ import type { QueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/core/http/api-error";
 import { queryKeys } from "@/core/query/query-keys";
 import { resolveSessionInvalidationReason } from "@/core/session/session-policy";
+import { resetRuntimeAfterSessionInvalidation } from "@/core/session/session-invalidation";
 import { useSessionStore } from "@/core/session/session-store";
 import type { SessionInvalidationReason } from "@/core/session/types";
 import type { UserBootstrap } from "@/features/bootstrap/contracts";
@@ -39,18 +40,6 @@ const isAuthenticationFailure = (error: unknown): error is ApiError => {
     error instanceof ApiError &&
     (error.status === 401 || error.status === 403)
   );
-};
-
-const clearAuthenticatedRuntimeCache = (queryClient: QueryClient): void => {
-  queryClient.removeQueries({
-    queryKey: queryKeys.bootstrap.root,
-  });
-  queryClient.removeQueries({
-    queryKey: queryKeys.subscription.root,
-  });
-  queryClient.removeQueries({
-    queryKey: queryKeys.entitlements.root,
-  });
 };
 
 const syncAuthenticatedRuntime = async (
@@ -113,9 +102,11 @@ const createAuthenticationFailureResult = async (
   await dependencies.signOut(
     resolveSessionInvalidationReason(error.status) ?? "unauthorized",
   );
-  dependencies.setEntitlementsVersion(null);
   dependencies.recordForegroundSync(refreshedAt);
-  clearAuthenticatedRuntimeCache(dependencies.queryClient);
+  await resetRuntimeAfterSessionInvalidation({
+    queryClient: dependencies.queryClient,
+    setEntitlementsVersion: dependencies.setEntitlementsVersion,
+  });
 
   return {
     revalidated: false,

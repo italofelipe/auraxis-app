@@ -38,6 +38,7 @@ interface SessionState {
   setSession: (session: StoredSession | null) => Promise<void>;
   updateUser: (user: SessionUser) => void;
   markSessionValidated: (timestamp: string) => void;
+  dismissAuthFailure: () => void;
   invalidateSession: (reason: SessionInvalidationReason) => Promise<void>;
   signOut: (reason?: SessionInvalidationReason) => Promise<void>;
 }
@@ -205,6 +206,11 @@ export const useSessionStore = create<SessionState>((set, get) => ({
   markSessionValidated: (timestamp: string): void => {
     set({
       lastValidatedAt: timestamp,
+      authFailureReason: null,
+    });
+  },
+  dismissAuthFailure: (): void => {
+    set({
       authFailureReason: null,
     });
   },

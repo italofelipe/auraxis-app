@@ -19,6 +19,7 @@ import {
 } from "@/core/shell/app-shell-store";
 import { reachabilityService } from "@/core/shell/reachability-service";
 import { createRuntimeRevalidationService } from "@/core/shell/runtime-revalidation";
+import { resetRuntimeAfterSessionInvalidation } from "@/core/session/session-invalidation";
 import { useSessionStore } from "@/core/session/session-store";
 import { appLogger } from "@/core/telemetry/app-logger";
 import { bootstrapService } from "@/features/bootstrap/services/bootstrap-service";
@@ -203,6 +204,8 @@ export const useRuntimeLifecycle = (): void => {
   const markSessionValidated = useSessionStore(
     (state) => state.markSessionValidated,
   );
+  const authFailureReason = useSessionStore((state) => state.authFailureReason);
+  const lastInvalidatedAt = useSessionStore((state) => state.lastInvalidatedAt);
 
   const runtimeRevalidationService = useMemo(() => {
     return createRuntimeRevalidationService({
@@ -223,6 +226,7 @@ export const useRuntimeLifecycle = (): void => {
   ]);
 
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
+  const lastHandledInvalidationRef = useRef<string | null>(null);
 
   const probeConnectivity = useMemo(() => {
     return async (
@@ -339,4 +343,37 @@ export const useRuntimeLifecycle = (): void => {
       (reason) => syncRuntime(reason),
     );
   }, [setAppState, syncRuntime]);
+
+  useEffect(() => {
+    if (!authFailureReason || !lastInvalidatedAt) {
+      return;
+    }
+
+    if (lastHandledInvalidationRef.current === lastInvalidatedAt) {
+      return;
+    }
+
+    lastHandledInvalidationRef.current = lastInvalidatedAt;
+
+    appLogger.warn({
+      domain: "auth",
+      event: "auth.session_invalidated",
+      context: {
+        reason: authFailureReason,
+        invalidatedAt: lastInvalidatedAt,
+      },
+    });
+
+    void resetRuntimeAfterSessionInvalidation({
+      queryClient,
+      setEntitlementsVersion,
+      setPendingCheckoutReturn,
+    });
+  }, [
+    authFailureReason,
+    lastInvalidatedAt,
+    queryClient,
+    setEntitlementsVersion,
+    setPendingCheckoutReturn,
+  ]);
 };

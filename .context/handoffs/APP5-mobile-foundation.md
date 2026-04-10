@@ -1,5 +1,38 @@
 # APP5 - Scaffold base do app mobile
 
+## Update - APP FND-08B (auth failure and forced sign-out flows)
+
+### O que foi feito
+- criei a camada canônica de invalidação de sessão em [`core/session/session-invalidation.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08b-auth-failure/core/session/session-invalidation.ts), consolidando:
+  - o mapa de copy/recovery para `expired`, `unauthorized`, `forbidden` e `bootstrap-invalid`;
+  - o cleanup central de caches autenticados e artefatos de shell depois de qualquer queda de sessão;
+- adicionei `dismissAuthFailure()` ao [`core/session/session-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08b-auth-failure/core/session/session-store.ts), permitindo fechar o aviso sem restaurar a sessão;
+- conectei o runtime global em [`core/shell/use-runtime-lifecycle.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08b-auth-failure/core/shell/use-runtime-lifecycle.ts) para reagir a qualquer `authFailureReason` novo:
+  - limpando queries autenticadas;
+  - zerando `entitlementsVersion`;
+  - limpando `pendingCheckoutReturn`;
+  - registrando `auth.session_invalidated` na telemetria;
+- alinhei [`core/shell/runtime-revalidation.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08b-auth-failure/core/shell/runtime-revalidation.ts) ao mesmo helper de cleanup, evitando drift entre foreground revalidation e interceptores HTTP;
+- criei o hook reutilizável [`core/session/use-session-failure-notice.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08b-auth-failure/core/session/use-session-failure-notice.ts) e o liguei ao [`use-login-screen-controller.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08b-auth-failure/features/auth/hooks/use-login-screen-controller.ts);
+- atualizei [`login-screen.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/_worktrees/app-fnd-08b-auth-failure/features/auth/screens/login-screen.tsx) para exibir o aviso canônico de recuperação de sessão antes do formulário, mantendo a view fina e sem lógica de store.
+
+### O que foi validado
+- `npm run test -- core/session/session-store.test.ts core/session/session-invalidation.test.ts core/session/use-session-failure-notice.test.tsx core/shell/runtime-revalidation.base.test.ts core/shell/runtime-revalidation.errors.test.ts core/shell/use-runtime-lifecycle.base.test.tsx core/shell/use-runtime-lifecycle.edge.test.tsx core/http/http-client.test.ts __tests__/app/login-screen.test.tsx --runInBand`
+- `npm run typecheck`
+- `npm run lint`
+- `npm run policy:check`
+- `npm run quality-check`
+- `git diff --check`
+
+### Riscos pendentes
+- o app ainda trata `403` como sessão não confiável e derruba a autenticação; isso mantém coerência com o runtime atual, mas vale revalidar esse contrato com a API se no futuro surgirem `403` semânticos de permissão/feature;
+- ainda não existe uma ação manual de logout em tela; o fluxo canônico já está pronto no runtime, mas a entrada visual virá quando o menu/perfil do app nascer;
+- o aviso de recuperação está hoje concentrado na tela de login, que é o destino canônico do redirect. Se no futuro surgirem outros entrypoints públicos relevantes, eles podem reutilizar o mesmo hook.
+
+### Proximo passo
+- seguir para `APP FND-09A`, consolidando observabilidade do cliente sobre essa base de invalidacao/logging canônica;
+- na sequência, fechar `APP FND-09B` com política explícita de redaction e governança de logs do app.
+
 ## Update - APP FND-08A (security and configuration audit)
 
 ### O que foi feito

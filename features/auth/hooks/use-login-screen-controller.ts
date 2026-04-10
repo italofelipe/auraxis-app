@@ -3,6 +3,7 @@ import { Linking } from "react-native";
 import { useRouter } from "expo-router";
 import type { UseFormReturn } from "react-hook-form";
 
+import { useSessionFailureNotice } from "@/core/session/use-session-failure-notice";
 import { useLoginMutation } from "@/features/auth/hooks/use-auth-mutations";
 import {
   loginSchema,
@@ -15,8 +16,14 @@ export interface LoginScreenController {
   readonly form: UseFormReturn<LoginFormValues>;
   readonly isSubmitting: boolean;
   readonly submitError: unknown | null;
+  readonly sessionFailureNotice: {
+    readonly title: string;
+    readonly description: string;
+    readonly dismissLabel: string | null;
+  } | null;
   readonly handleSubmit: () => Promise<void>;
   readonly dismissSubmitError: () => void;
+  readonly dismissSessionFailureNotice: () => void;
   readonly handleForgotPassword: () => void;
   readonly handleOpenTerms: () => Promise<void>;
   readonly handleOpenPrivacy: () => Promise<void>;
@@ -35,6 +42,7 @@ export function useLoginScreenController(
 ): LoginScreenController {
   const router = useRouter();
   const loginMutation = useLoginMutation();
+  const { notice, dismissNotice } = useSessionFailureNotice();
   const form = useAppForm<LoginFormValues>(loginSchema, {
     defaultValues: {
       email: "",
@@ -53,10 +61,12 @@ export function useLoginScreenController(
     form,
     isSubmitting: loginMutation.isPending,
     submitError: loginMutation.error,
+    sessionFailureNotice: notice,
     handleSubmit,
     dismissSubmitError: () => {
       loginMutation.reset();
     },
+    dismissSessionFailureNotice: dismissNotice,
     handleForgotPassword: () => {
       router.push("/forgot-password");
     },

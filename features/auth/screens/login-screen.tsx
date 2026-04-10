@@ -9,6 +9,7 @@ import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 
 /**
  * Canonical login screen composition for the mobile app.
@@ -26,6 +27,23 @@ export function LoginScreen(): ReactElement {
     <AppScreen>
       <AppSurfaceCard title="Entrar" description="Acesso a area logada.">
         <YStack gap="$4">
+          {controller.sessionFailureNotice ? (
+            <YStack gap="$3">
+              <AsyncStateNotice
+                kind="error"
+                title={controller.sessionFailureNotice.title}
+                description={controller.sessionFailureNotice.description}
+              />
+              {controller.sessionFailureNotice.dismissLabel ? (
+                <AppButton
+                  tone="secondary"
+                  onPress={controller.dismissSessionFailureNotice}>
+                  {controller.sessionFailureNotice.dismissLabel}
+                </AppButton>
+              ) : null}
+            </YStack>
+          ) : null}
+
           <Controller
             control={control}
             name="email"
