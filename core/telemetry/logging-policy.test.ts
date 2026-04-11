@@ -20,6 +20,12 @@ describe("logging policy", () => {
       minimumContextKeys: ["scope", "componentStack"],
       consolePolicy: "warn-and-error",
     });
+    expect(APP_EVENT_LOGGING_POLICY["observability.snapshot_requested"]).toEqual({
+      level: "info",
+      description: "Snapshot de observabilidade solicitado no cliente.",
+      minimumContextKeys: ["path"],
+      consolePolicy: "dev-only",
+    });
   });
 
   it("nao deixa eventos sem contexto minimo declarado", () => {

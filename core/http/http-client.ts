@@ -13,6 +13,7 @@ import {
   resolveSessionInvalidationReason,
 } from "@/core/session/session-policy";
 import { useSessionStore } from "@/core/session/session-store";
+import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { networkLogger } from "@/core/telemetry/domain-loggers";
 import { createMockApiAdapter } from "@/shared/mocks/api/router";
 import { appRuntimeConfig, normalizeBaseUrl } from "@/shared/config/runtime";
@@ -86,6 +87,28 @@ const invalidateExpiredSessionIfNeeded = async (): Promise<void> => {
   }
 
   await sessionState.invalidateSession("expired");
+};
+
+const markConnectivityOnline = (): void => {
+  const shellState = useAppShellStore.getState();
+  if (shellState.connectivityStatus !== "offline") {
+    return;
+  }
+
+  shellState.setConnectivityStatus("online");
+  if (shellState.runtimeDegradedReason === "offline") {
+    shellState.setRuntimeDegradedReason(null);
+  }
+};
+
+const markConnectivityOffline = (): void => {
+  const shellState = useAppShellStore.getState();
+  if (shellState.connectivityStatus === "offline") {
+    return;
+  }
+
+  shellState.setConnectivityStatus("offline");
+  shellState.setRuntimeDegradedReason("offline");
 };
 
 const isMutatingMethod = (method: string): boolean => {
@@ -176,6 +199,7 @@ const attachAuthHeaders = async (
 const handleFulfilledResponse = (
   response: AxiosResponse,
 ): AxiosResponse => {
+  markConnectivityOnline();
   const metadata = (response.config as InstrumentedRequestConfig).auraxisTelemetry;
 
   if (metadata) {
@@ -199,6 +223,9 @@ const handleRejectedResponse = async (error: unknown): Promise<never> => {
   const apiError = toApiError(error);
 
   if (isAxiosError(error)) {
+    if (apiError.status === 0) {
+      markConnectivityOffline();
+    }
     const reason = resolveSessionInvalidationReason(error.response?.status ?? 0);
     const authorizationHeader = readHeader(error.config?.headers, "Authorization");
     const metadata = (error.config as InstrumentedRequestConfig | undefined)

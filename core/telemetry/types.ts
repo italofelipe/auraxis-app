@@ -27,7 +27,9 @@ export type AppTelemetryEvent =
   | "network.request_failed"
   | "auth.session_established"
   | "auth.session_invalidated"
-  | "checkout.return_received";
+  | "checkout.return_received"
+  | "observability.snapshot_requested"
+  | "observability.metrics_requested";
 
 export type AppLogLevel = "debug" | "info" | "warn" | "error";
 
