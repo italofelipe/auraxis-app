@@ -32,11 +32,15 @@ export const buildNavigationRouteLogEntry = (
   };
 };
 
-export const useNavigationTelemetry = (): void => {
+export const useNavigationTelemetry = (enabled = true): void => {
   const pathname = usePathname();
   const lastLoggedRouteRef = useRef<string | null>(null);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     const entry = buildNavigationRouteLogEntry(pathname);
     const route = String(entry.context?.route ?? appRoutes.root);
     if (route === lastLoggedRouteRef.current) {
@@ -47,5 +51,5 @@ export const useNavigationTelemetry = (): void => {
       context: entry.context,
     });
     lastLoggedRouteRef.current = route;
-  }, [pathname]);
+  }, [enabled, pathname]);
 };

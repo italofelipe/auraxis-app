@@ -5,12 +5,16 @@ import { useAppShellStore } from "@/core/shell/app-shell-store";
 
 const REDUCE_MOTION_EVENT = "reduceMotionChanged";
 
-export const useAccessibilityPreferences = (): void => {
+export const useAccessibilityPreferences = (enabled = true): void => {
   const setReducedMotionEnabled = useAppShellStore(
     (state) => state.setReducedMotionEnabled,
   );
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     let subscribed = true;
 
     const syncReduceMotion = async (): Promise<void> => {
@@ -35,5 +39,5 @@ export const useAccessibilityPreferences = (): void => {
       subscribed = false;
       subscription.remove();
     };
-  }, [setReducedMotionEnabled]);
+  }, [enabled, setReducedMotionEnabled]);
 };

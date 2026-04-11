@@ -16,9 +16,11 @@ import { RuntimeProvider } from "@/core/providers/runtime-provider";
 export function AppProviders({
   children,
 }: PropsWithChildren): ReactElement {
+  const runtimeEnabled = process.env.NODE_ENV !== "test";
+
   return (
     <QueryClientProvider client={queryClient}>
-      <RuntimeProvider>
+      <RuntimeProvider enabled={runtimeEnabled}>
         <TamaguiProvider config={tamaguiConfig} defaultTheme="auraxis">
           <Theme name="auraxis">{children}</Theme>
         </TamaguiProvider>
