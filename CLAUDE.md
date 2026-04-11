@@ -12,14 +12,15 @@ Sempre trabalhe a partir da raiz da platform quando possível.
 
 Antes de qualquer ação, leia a partir da platform:
 
-1. `auraxis-platform/.context/06_context_index.md` — índice de contexto
-2. `auraxis-platform/.context/07_steering_global.md` — governança global
-3. `auraxis-platform/.context/08_agent_contract.md` — contrato de agente
-4. `auraxis-platform/.context/01_status_atual.md` — status atual
-5. `auraxis-platform/.context/02_backlog_next.md` — prioridades
-6. Este arquivo — diretiva do repo mobile
-7. `product.md` — visão e escopo ativo do app
-8. `.context/templates/feature_card_template.md` e `.context/templates/delivery_report_template.md` — artefatos SDD obrigatórios
+1. `../../.context/06_context_index.md` — índice de contexto
+2. `../../.context/07_steering_global.md` — governança global
+3. `../../.context/08_agent_contract.md` — contrato de agente
+4. Este arquivo — diretiva do repo mobile
+5. `product.md` — visão e escopo ativo do app
+6. `.context/templates/feature_card_template.md` e `.context/templates/delivery_report_template.md` — artefatos SDD obrigatórios
+
+> **Backlog e status** são gerenciados exclusivamente no **GitHub Projects**.
+> Não leia `01_status_atual.md`, `02_backlog_next.md` ou `tasks.md` — esses arquivos estão deprecated.
 
 ## Estrutura do repo
 
@@ -91,6 +92,7 @@ Contratos de API são definidos em `auraxis-api`.
 
 ## SDD (obrigatório para features)
 
-- Antes de codar: registrar Feature Card em `.context/reports/` (ou no `tasks.md`) com critérios de aceite.
+- Antes de codar: garantir que a task/issue no GitHub Projects tenha critérios de aceite claros.
+  Registrar contexto adicional em `.context/reports/` se necessário.
 - Ao finalizar bloco: registrar Delivery Report em `.context/reports/`.
 - Se interromper sessão: registrar handoff em `.context/handoffs/`.
