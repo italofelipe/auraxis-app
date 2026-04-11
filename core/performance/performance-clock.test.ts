@@ -18,7 +18,7 @@ describe("performance clock", () => {
 
   it("prefers performance.now when available", () => {
     const mockNow = jest.fn().mockReturnValue(128.5);
-    setPerformance({ now: mockNow } as Performance);
+    setPerformance({ now: mockNow } as unknown as Performance);
 
     expect(now()).toBe(128.5);
     expect(mockNow).toHaveBeenCalledTimes(1);
