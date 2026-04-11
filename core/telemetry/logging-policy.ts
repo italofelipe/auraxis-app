@@ -173,6 +173,14 @@ export const APP_EVENT_LOGGING_POLICY = Object.freeze({
     "Export de métricas Prometheus solicitado no cliente.",
     ["path"],
   ),
+  "performance.measurement_recorded": devOnlyInfoPolicy(
+    "Medição de performance registrada pelo runtime.",
+    ["metric", "durationMs", "budgetMs", "exceeded"],
+  ),
+  "performance.budget_exceeded": warnAndErrorWarnPolicy(
+    "Budget de performance excedido no cliente.",
+    ["metric", "durationMs", "budgetMs", "exceeded"],
+  ),
 } satisfies Record<AppTelemetryEvent, AppEventLoggingPolicy>);
 
 export const getAppEventLoggingPolicy = (

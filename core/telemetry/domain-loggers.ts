@@ -59,5 +59,6 @@ export const checkoutLogger = createDomainLogger("checkout");
 export const navigationLogger = createDomainLogger("navigation");
 export const networkLogger = createDomainLogger("network");
 export const observabilityLogger = createDomainLogger("observability");
+export const performanceLogger = createDomainLogger("performance");
 export const runtimeLogger = createDomainLogger("runtime");
 export const startupLogger = createDomainLogger("startup");
