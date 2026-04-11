@@ -6,7 +6,7 @@ import {
   loadStoredSession,
   persistStoredSession,
 } from "@/core/session/session-storage";
-import type { StoredSession } from "@/core/session/types";
+import { makeStoredSession } from "@/shared/testing/runtime-fixtures";
 
 jest.mock("expo-secure-store", () => ({
   getItemAsync: jest.fn(),
@@ -28,31 +28,14 @@ const createJwt = (payload: Record<string, unknown>): string => {
   return `${encode({ alg: "HS256", typ: "JWT" })}.${encode(payload)}.signature`;
 };
 
-const createStoredSession = (
-  overrides: Partial<StoredSession> = {},
-): StoredSession => {
-  return {
-    accessToken: createJwt({ exp: 4_102_444_800 }),
-    refreshToken: "refresh-token",
-    user: {
-      id: "user-1",
-      name: "Italo",
-      email: "italo@auraxis.dev",
-      emailConfirmed: true,
-    },
-    authenticatedAt: "2026-04-08T10:00:00.000Z",
-    expiresAt: "2100-01-01T00:00:00.000Z",
-    ...overrides,
-  };
-};
-
 describe("session-storage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it("carrega a sessao canônica e normaliza os metadados", async () => {
-    const storedSession = createStoredSession({
+    const storedSession = makeStoredSession({
+      accessToken: createJwt({ exp: 4_102_444_800 }),
       refreshToken: undefined as unknown as null,
       user: {
         id: undefined as unknown as string | null,
@@ -144,7 +127,8 @@ describe("session-storage", () => {
 
   it("persiste a sessao normalizada apenas no storage canônico", async () => {
     await persistStoredSession(
-      createStoredSession({
+      makeStoredSession({
+        accessToken: createJwt({ exp: 4_102_444_800 }),
         authenticatedAt: null,
         expiresAt: null,
       }),

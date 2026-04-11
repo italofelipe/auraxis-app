@@ -41,7 +41,22 @@ export interface AppShellState {
   recordReachabilityCheck: (timestamp: string) => void;
 }
 
-export const useAppShellStore = create<AppShellState>((set) => ({
+export type AppShellStateSnapshot = Pick<
+  AppShellState,
+  | "fontsReady"
+  | "reducedMotionEnabled"
+  | "startupReady"
+  | "appState"
+  | "connectivityStatus"
+  | "runtimeDegradedReason"
+  | "entitlementsVersion"
+  | "pendingCheckoutReturn"
+  | "lastHandledUrl"
+  | "lastForegroundSyncAt"
+  | "lastReachabilityCheckAt"
+>;
+
+export const appShellStateDefaults: AppShellStateSnapshot = {
   fontsReady: false,
   reducedMotionEnabled: false,
   startupReady: false,
@@ -53,6 +68,10 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   lastHandledUrl: null,
   lastForegroundSyncAt: null,
   lastReachabilityCheckAt: null,
+};
+
+export const useAppShellStore = create<AppShellState>((set) => ({
+  ...appShellStateDefaults,
   setFontsReady: (value: boolean): void => {
     set({ fontsReady: value });
   },
@@ -87,3 +106,15 @@ export const useAppShellStore = create<AppShellState>((set) => ({
     set({ lastReachabilityCheckAt: timestamp });
   },
 }));
+
+/**
+ * Resets the app shell store to its default state (test utility).
+ */
+export const resetAppShellStore = (
+  overrides: Partial<AppShellStateSnapshot> = {},
+): void => {
+  useAppShellStore.setState({
+    ...appShellStateDefaults,
+    ...overrides,
+  });
+};

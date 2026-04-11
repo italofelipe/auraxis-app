@@ -10,6 +10,10 @@ import {
   resetAppStartupRuntimeForTests,
   useAppStartup,
 } from "@/core/shell/use-app-startup";
+import {
+  makeSessionState,
+  resetRuntimeStores,
+} from "@/shared/testing/runtime-fixtures";
 
 jest.mock("expo-font", () => ({
   useFonts: jest.fn(),
@@ -34,28 +38,11 @@ describe("useAppStartup", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetAppStartupRuntimeForTests();
-    useAppShellStore.setState({
-      fontsReady: false,
-      reducedMotionEnabled: false,
-      startupReady: false,
-      appState: "unknown",
-      entitlementsVersion: null,
-      pendingCheckoutReturn: null,
-      lastHandledUrl: null,
-      lastForegroundSyncAt: null,
-    });
-    useSessionStore.setState({
-      accessToken: null,
-      refreshToken: null,
-      user: null,
-      userEmail: null,
-      hydrated: true,
-      isAuthenticated: false,
-      bootstrapSession: jest.fn().mockResolvedValue(undefined),
-      signIn: jest.fn().mockResolvedValue(undefined),
-      setSession: jest.fn().mockResolvedValue(undefined),
-      updateUser: jest.fn(),
-      signOut: jest.fn().mockResolvedValue(undefined),
+    resetRuntimeStores({
+      session: makeSessionState({
+        hydrated: true,
+        isAuthenticated: false,
+      }),
     });
   });
 

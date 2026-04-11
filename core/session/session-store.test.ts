@@ -5,7 +5,10 @@ import {
   persistStoredSession,
 } from "@/core/session/session-storage";
 import { useSessionStore } from "@/core/session/session-store";
-import type { StoredSession } from "@/core/session/types";
+import {
+  makeStoredSession,
+  resetRuntimeStores,
+} from "@/shared/testing/runtime-fixtures";
 
 jest.mock("@/core/telemetry/app-logger", () => ({
   appLogger: {
@@ -31,50 +34,15 @@ const mockLoadStoredSession = jest.mocked(loadStoredSession);
 const mockPersistStoredSession = jest.mocked(persistStoredSession);
 const mockClearStoredSession = jest.mocked(clearStoredSession);
 
-const resetSessionStore = (): void => {
-  useSessionStore.setState((state) => ({
-    ...state,
-    accessToken: null,
-    refreshToken: null,
-    user: null,
-    userEmail: null,
-    authenticatedAt: null,
-    expiresAt: null,
-    authFailureReason: null,
-    lastValidatedAt: null,
-    lastInvalidatedAt: null,
-    hydrated: false,
-    isAuthenticated: false,
-  }));
-};
-
-const createStoredSession = (
-  overrides: Partial<StoredSession> = {},
-): StoredSession => {
-  return {
-    accessToken: "header.payload.signature",
-    refreshToken: "refresh-token",
-    user: {
-      id: "user-1",
-      name: "Italo",
-      email: "italo@auraxis.dev",
-      emailConfirmed: true,
-    },
-    authenticatedAt: "2026-04-08T10:00:00.000Z",
-    expiresAt: "2099-04-08T12:00:00.000Z",
-    ...overrides,
-  };
-};
-
 describe("session store", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    resetSessionStore();
+    resetRuntimeStores();
   });
 
   it("invalida a sessao expirada durante o bootstrap", async () => {
     mockLoadStoredSession.mockResolvedValue({
-      session: createStoredSession({
+      session: makeStoredSession({
         expiresAt: "2026-04-08T09:00:00.000Z",
       }),
       source: "canonical",
@@ -138,7 +106,7 @@ describe("session store", () => {
     }));
 
     await useSessionStore.getState().signIn(
-      createStoredSession({
+      makeStoredSession({
         authenticatedAt: null,
         expiresAt: null,
       }),
@@ -201,7 +169,7 @@ describe("session store", () => {
 
   it("regrava a sessao legada no storage canônico durante o bootstrap", async () => {
     mockLoadStoredSession.mockResolvedValue({
-      session: createStoredSession(),
+      session: makeStoredSession(),
       source: "legacy",
       invalidStoredPayload: false,
     });
@@ -234,7 +202,7 @@ describe("session store", () => {
   });
 
   it("seta a sessao explicitamente e mantém o estado autenticado", async () => {
-    const session = createStoredSession();
+    const session = makeStoredSession();
 
     await useSessionStore.getState().setSession(session);
 
@@ -267,7 +235,7 @@ describe("session store", () => {
   });
 
   it("persiste updateUser preservando metadados da sessao", async () => {
-    await useSessionStore.getState().setSession(createStoredSession());
+    await useSessionStore.getState().setSession(makeStoredSession());
     mockPersistStoredSession.mockClear();
 
     useSessionStore.getState().updateUser({
@@ -292,7 +260,7 @@ describe("session store", () => {
   });
 
   it("marca a sessao como validada sem derrubar autenticacao", async () => {
-    await useSessionStore.getState().setSession(createStoredSession());
+    await useSessionStore.getState().setSession(makeStoredSession());
     useSessionStore.setState((state) => ({
       ...state,
       authFailureReason: "unauthorized",
@@ -322,7 +290,7 @@ describe("session store", () => {
   });
 
   it("signOut usa invalidacao manual por padrão", async () => {
-    await useSessionStore.getState().setSession(createStoredSession());
+    await useSessionStore.getState().setSession(makeStoredSession());
     mockClearStoredSession.mockClear();
 
     await useSessionStore.getState().signOut();

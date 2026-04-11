@@ -4,6 +4,11 @@ import { createHttpClient, httpClient } from "@/core/http/http-client";
 import { useSessionStore } from "@/core/session/session-store";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { appLogger } from "@/core/telemetry/app-logger";
+import {
+  makeSessionState,
+  makeSessionUser,
+  resetRuntimeStores,
+} from "@/shared/testing/runtime-fixtures";
 
 jest.mock("@/core/session/session-storage", () => ({
   loadStoredSession: jest.fn(),
@@ -19,31 +24,6 @@ jest.mock("@/core/telemetry/app-logger", () => ({
     error: jest.fn(),
   },
 }));
-
-const resetSessionStore = (): void => {
-  useSessionStore.setState((state) => ({
-    ...state,
-    accessToken: null,
-    refreshToken: null,
-    user: null,
-    userEmail: null,
-    authenticatedAt: null,
-    expiresAt: null,
-    authFailureReason: null,
-    lastValidatedAt: null,
-    lastInvalidatedAt: null,
-    hydrated: true,
-    isAuthenticated: false,
-  }));
-};
-
-const resetAppShellStore = (): void => {
-  useAppShellStore.setState((state) => ({
-    ...state,
-    connectivityStatus: "unknown",
-    runtimeDegradedReason: null,
-  }));
-};
 
 const readAuthorizationHeader = (
   config: InternalAxiosRequestConfig,
@@ -61,8 +41,12 @@ const readAuthorizationHeader = (
 describe("httpClient", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    resetSessionStore();
-    resetAppShellStore();
+    resetRuntimeStores({
+      session: makeSessionState({
+        hydrated: true,
+        isAuthenticated: false,
+      }),
+    });
   });
 
   it("normaliza o baseURL sem barras duplicadas", () => {
@@ -80,22 +64,18 @@ describe("httpClient", () => {
   });
 
   it("invalida a sessao local quando o token ja expirou antes do request", async () => {
-    useSessionStore.setState((state) => ({
-      ...state,
-      accessToken: "token",
-      refreshToken: "refresh",
-      user: {
-        id: "user-1",
-        name: "Italo",
-        email: "italo@auraxis.dev",
-        emailConfirmed: true,
-      },
-      userEmail: "italo@auraxis.dev",
-      authenticatedAt: "2026-04-08T10:00:00.000Z",
-      expiresAt: "2026-04-08T09:00:00.000Z",
-      hydrated: true,
-      isAuthenticated: true,
-    }));
+    useSessionStore.setState(
+      makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-08T10:00:00.000Z",
+        expiresAt: "2026-04-08T09:00:00.000Z",
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    );
 
     const client = createHttpClient("https://api.auraxis.dev/");
     client.defaults.adapter = async (config) => ({
@@ -118,22 +98,18 @@ describe("httpClient", () => {
   });
 
   it("derruba a sessao quando a API responde 401 em request autenticado", async () => {
-    useSessionStore.setState((state) => ({
-      ...state,
-      accessToken: "token",
-      refreshToken: "refresh",
-      user: {
-        id: "user-1",
-        name: "Italo",
-        email: "italo@auraxis.dev",
-        emailConfirmed: true,
-      },
-      userEmail: "italo@auraxis.dev",
-      authenticatedAt: "2026-04-08T10:00:00.000Z",
-      expiresAt: null,
-      hydrated: true,
-      isAuthenticated: true,
-    }));
+    useSessionStore.setState(
+      makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-08T10:00:00.000Z",
+        expiresAt: null,
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    );
 
     const client = createHttpClient("https://api.auraxis.dev/");
     client.defaults.adapter = async (config) => {
@@ -178,22 +154,18 @@ describe("httpClient", () => {
   });
 
   it("anexa o bearer token no interceptor de request para sessao válida", async () => {
-    useSessionStore.setState((state) => ({
-      ...state,
-      accessToken: "token",
-      refreshToken: "refresh",
-      user: {
-        id: "user-1",
-        name: "Italo",
-        email: "italo@auraxis.dev",
-        emailConfirmed: true,
-      },
-      userEmail: "italo@auraxis.dev",
-      authenticatedAt: "2026-04-08T10:00:00.000Z",
-      expiresAt: "2099-04-08T09:00:00.000Z",
-      hydrated: true,
-      isAuthenticated: true,
-    }));
+    useSessionStore.setState(
+      makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-08T10:00:00.000Z",
+        expiresAt: "2099-04-08T09:00:00.000Z",
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    );
 
     const client = createHttpClient("https://api.auraxis.dev/");
     const requestHandler = (
@@ -322,22 +294,18 @@ describe("httpClient", () => {
   });
 
   it("derruba a sessao com motivo forbidden quando a API responde 403", async () => {
-    useSessionStore.setState((state) => ({
-      ...state,
-      accessToken: "token",
-      refreshToken: "refresh",
-      user: {
-        id: "user-1",
-        name: "Italo",
-        email: "italo@auraxis.dev",
-        emailConfirmed: true,
-      },
-      userEmail: "italo@auraxis.dev",
-      authenticatedAt: "2026-04-08T10:00:00.000Z",
-      expiresAt: null,
-      hydrated: true,
-      isAuthenticated: true,
-    }));
+    useSessionStore.setState(
+      makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-08T10:00:00.000Z",
+        expiresAt: null,
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    );
 
     const client = createHttpClient("https://api.auraxis.dev/");
     const rejectedHandler = (
@@ -403,22 +371,18 @@ describe("httpClient", () => {
   });
 
   it("nao invalida a sessao quando o 401 chega sem header de autorizacao", async () => {
-    useSessionStore.setState((state) => ({
-      ...state,
-      accessToken: "token",
-      refreshToken: "refresh",
-      user: {
-        id: "user-1",
-        name: "Italo",
-        email: "italo@auraxis.dev",
-        emailConfirmed: true,
-      },
-      userEmail: "italo@auraxis.dev",
-      authenticatedAt: "2026-04-08T10:00:00.000Z",
-      expiresAt: null,
-      hydrated: true,
-      isAuthenticated: true,
-    }));
+    useSessionStore.setState(
+      makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-08T10:00:00.000Z",
+        expiresAt: null,
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    );
 
     const client = createHttpClient("https://api.auraxis.dev/");
     const rejectedHandler = (
