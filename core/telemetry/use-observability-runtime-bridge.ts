@@ -7,7 +7,7 @@ import { syncSentryOperationalContext } from "@/app/services/sentry";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useSessionStore } from "@/core/session/session-store";
 
-export const useObservabilityRuntimeBridge = (): void => {
+export const useObservabilityRuntimeBridge = (enabled = true): void => {
   const appState = useAppShellStore((state) => state.appState);
   const connectivityStatus = useAppShellStore((state) => state.connectivityStatus);
   const runtimeDegradedReason = useAppShellStore(
@@ -42,8 +42,13 @@ export const useObservabilityRuntimeBridge = (): void => {
   );
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     syncSentryOperationalContext(buildSentryOperationalContext());
   }, [
+    enabled,
     appState,
     authenticatedAt,
     authFailureReason,

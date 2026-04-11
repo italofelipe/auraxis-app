@@ -175,7 +175,7 @@ const bindAppStateLifecycle = (
   return createSubscriptionTeardown(subscription);
 };
 
-export const useRuntimeLifecycle = (): void => {
+export const useRuntimeLifecycle = (enabled = true): void => {
   const queryClient = useQueryClient();
   const setAppState = useAppShellStore((state) => state.setAppState);
   const setConnectivityStatus = useAppShellStore(
@@ -316,26 +316,46 @@ export const useRuntimeLifecycle = (): void => {
   );
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     setAppState(normalizeAppState(AppState.currentState));
-  }, [setAppState]);
+  }, [enabled, setAppState]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     void syncRuntime("startup");
-  }, [syncRuntime]);
+  }, [enabled, syncRuntime]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     return bindInitialUrlLifecycle(handleIncomingUrl);
-  }, [handleIncomingUrl]);
+  }, [enabled, handleIncomingUrl]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     return bindAppStateLifecycle(
       appStateRef,
       setAppState,
       (reason) => syncRuntime(reason),
     );
-  }, [setAppState, syncRuntime]);
+  }, [enabled, setAppState, syncRuntime]);
 
   useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
     if (!authFailureReason || !lastInvalidatedAt) {
       return;
     }
@@ -359,6 +379,7 @@ export const useRuntimeLifecycle = (): void => {
       setPendingCheckoutReturn,
     });
   }, [
+    enabled,
     authFailureReason,
     lastInvalidatedAt,
     queryClient,
