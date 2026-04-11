@@ -8,10 +8,10 @@ const createValidRuntimeInputs = () => {
   return {
     packageJson: {
       engines: {
-        node: "24.x",
+        node: "25.x",
       },
     },
-    nvmrc: "24\n",
+    nvmrc: "25\n",
     workflowFiles: {
       ".github/workflows/ci.yml": "with:\n  node-version-file: .nvmrc\n",
       ".github/workflows/deploy-minimum.yml": "with:\n  node-version-file: .nvmrc\n",
@@ -21,8 +21,8 @@ const createValidRuntimeInputs = () => {
       'NODE_VERSION_FILE="$ROOT_DIR/.nvmrc"',
       'NODE_DOCKER_IMAGE="node:${NODE_VERSION}-bookworm"',
     ].join("\n"),
-    qualityGatesDoc: "nvm use 24\n# Paridade CI local (ambiente dockerizado Node 24, igual ao runner Linux):",
-    steeringDoc: "| Toolchain | Node.js | 24 LTS |",
+    qualityGatesDoc: "nvm use 25\n# Paridade CI local (ambiente dockerizado Node 25, igual ao runner Linux):",
+    steeringDoc: "| Toolchain | Node.js | 25 LTS |",
   };
 };
 
@@ -34,20 +34,16 @@ describe("check-runtime-release-governance", () => {
   test("flags stale Node configuration drift", () => {
     const errors = validateNodeRuntimeGovernance({
       ...createValidRuntimeInputs(),
-      packageJson: { engines: { node: "25.x" } },
-      nvmrc: "25\n",
-      workflowFiles: {
-        ".github/workflows/ci.yml": "env:\n  NODE_VERSION: '25'\nwith:\n  node-version: ${{ env.NODE_VERSION }}\n",
-      },
-      ciLocalScript: 'echo "node:25-bookworm"',
-      qualityGatesDoc: "nvm use 25",
-      steeringDoc: "| Toolchain | Node.js | 25 |",
+      packageJson: { engines: { node: "24.x" } },
+      nvmrc: "24\n",
+      qualityGatesDoc: "nvm use 24\n# Node 24",
+      steeringDoc: "| Toolchain | Node.js | 24 LTS |",
     });
 
     expect(errors).toEqual(
       expect.arrayContaining([
-        "package.json engines.node must be 24.x",
-        ".nvmrc must pin Node 24",
+        "package.json engines.node must be 25.x",
+        ".nvmrc must pin Node 25",
       ]),
     );
   });

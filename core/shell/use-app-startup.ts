@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import {
   PlayfairDisplay_600SemiBold,
@@ -13,6 +13,10 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 
 import { initSentry } from "@/app/services/sentry";
+import {
+  performanceTracker,
+  resetPerformanceTrackerForTests,
+} from "@/core/performance/performance-tracker";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useSessionStore } from "@/core/session/session-store";
 import { startupLogger } from "@/core/telemetry/domain-loggers";
@@ -41,6 +45,7 @@ const ensureSplashScreenPrevented = (): void => {
 export const resetAppStartupRuntimeForTests = (): void => {
   sentryInitialized = false;
   splashScreenPrevented = false;
+  resetPerformanceTrackerForTests();
 };
 
 export interface AppStartupState {
@@ -52,6 +57,7 @@ export const useAppStartup = (): AppStartupState => {
   const setStartupReady = useAppShellStore((state) => state.setStartupReady);
   const bootstrapSession = useSessionStore((state) => state.bootstrapSession);
   const hydrated = useSessionStore((state) => state.hydrated);
+  const startupMeasurementStarted = useRef(false);
   const [fontsLoaded] = useFonts({
     PlayfairDisplay_600SemiBold,
     PlayfairDisplay_700Bold,
@@ -63,6 +69,10 @@ export const useAppStartup = (): AppStartupState => {
   useEffect(() => {
     ensureSentryInitialized();
     ensureSplashScreenPrevented();
+    if (!startupMeasurementStarted.current) {
+      performanceTracker.start("startup.total");
+      startupMeasurementStarted.current = true;
+    }
     startupLogger.log("startup.bootstrap_requested", {
       context: {
         hydrated: useSessionStore.getState().hydrated,
@@ -89,6 +99,10 @@ export const useAppStartup = (): AppStartupState => {
         fontsLoaded,
         hydrated,
       },
+    });
+    performanceTracker.end("startup.total", {
+      fontsLoaded,
+      hydrated,
     });
     void SplashScreen.hideAsync();
   }, [fontsLoaded, hydrated, ready, setStartupReady]);

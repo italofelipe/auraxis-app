@@ -83,7 +83,7 @@
     "typescript": "~5.9.2"
   },
   "engines": {
-    "node": "24.x"
+    "node": "25.x"
   },
   "private": true,
   "overrides": {

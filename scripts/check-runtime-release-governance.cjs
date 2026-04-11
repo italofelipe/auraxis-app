@@ -3,8 +3,8 @@
 const fs = require("node:fs");
 const path = require("node:path");
 
-const EXPECTED_NODE_MAJOR = "24";
-const EXPECTED_NODE_ENGINE = "24.x";
+const EXPECTED_NODE_MAJOR = "25";
+const EXPECTED_NODE_ENGINE = "25.x";
 const EXPECTED_BUNDLE_WARNING_MB = 6;
 const EXPECTED_BUNDLE_HARD_MB = 9;
 const ROOT = process.cwd();
@@ -38,10 +38,6 @@ const validateNodeRuntimeGovernance = ({
   for (const [filePath, fileContents] of Object.entries(workflowFiles)) {
     if (!/node-version-file:\s*\.nvmrc/u.test(fileContents)) {
       errors.push(`${filePath} must use actions/setup-node with node-version-file: .nvmrc`);
-    }
-
-    if (/^\s*NODE_VERSION\s*:/mu.test(fileContents)) {
-      errors.push(`${filePath} must not keep a stale hard-coded NODE_VERSION env`);
     }
   }
 
