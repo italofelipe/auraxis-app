@@ -19,6 +19,9 @@ on:
   pull_request:
     branches: [master, main]
 
+env:
+  NODE_VERSION: '25'
+
 jobs:
   # ── 1. Lint (ESLint) ───────────────────────────────────────────────────
   lint:
