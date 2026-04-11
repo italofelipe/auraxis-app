@@ -80,6 +80,8 @@ const config = {
     "shared/testing/test-query-client.ts",
     "shared/utils/formatters.ts",
     "shared/validators/installment-vs-cash.ts",
+    "shared/forms/app-form-field.tsx",
+    "shared/forms/apply-api-form-errors.ts",
     "features/alerts/components/alert-record-card.tsx",
     "features/alerts/components/alert-preference-row.tsx",
     "features/entitlements/components/paywall-gate.tsx",
