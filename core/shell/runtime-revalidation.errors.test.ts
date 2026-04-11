@@ -3,7 +3,11 @@ import type { QueryClient } from "@tanstack/react-query";
 import { ApiError } from "@/core/http/api-error";
 import { queryKeys } from "@/core/query/query-keys";
 import { createRuntimeRevalidationService } from "@/core/shell/runtime-revalidation";
-import { useSessionStore } from "@/core/session/session-store";
+import {
+  makeSessionState,
+  makeSessionUser,
+  resetRuntimeStores,
+} from "@/shared/testing/runtime-fixtures";
 
 const createQueryClientMock = (): QueryClient => {
   return {
@@ -14,27 +18,18 @@ const createQueryClientMock = (): QueryClient => {
   } as unknown as QueryClient;
 };
 
-const setAuthenticatedSession = (): void => {
-  useSessionStore.setState({
-    accessToken: "token",
-    refreshToken: "refresh",
-    user: {
-      id: "user-1",
-      name: "Italo",
-      email: "italo@auraxis.dev",
-      emailConfirmed: true,
-    },
-    userEmail: "italo@auraxis.dev",
-    authFailureReason: null,
-    lastInvalidatedAt: null,
-    hydrated: true,
-    isAuthenticated: true,
-  });
-};
-
 describe("runtime revalidation service - error handling", () => {
   it("derruba a sessao quando a revalidacao encontra erro de autorizacao", async () => {
-    setAuthenticatedSession();
+    resetRuntimeStores({
+      session: makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    });
 
     const queryClient = createQueryClientMock();
     const signOut = jest.fn().mockResolvedValue(undefined);
@@ -86,7 +81,16 @@ describe("runtime revalidation service - error handling", () => {
   });
 
   it("propaga erros que nao sao de autorizacao", async () => {
-    setAuthenticatedSession();
+    resetRuntimeStores({
+      session: makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    });
 
     const queryClient = createQueryClientMock();
     const service = createRuntimeRevalidationService({

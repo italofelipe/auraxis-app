@@ -47,7 +47,22 @@ interface SessionState {
   signOut: (reason?: SessionInvalidationReason) => Promise<void>;
 }
 
-const unauthenticatedState = {
+export type SessionStateSnapshot = Pick<
+  SessionState,
+  | "accessToken"
+  | "refreshToken"
+  | "user"
+  | "userEmail"
+  | "authenticatedAt"
+  | "expiresAt"
+  | "authFailureReason"
+  | "lastValidatedAt"
+  | "lastInvalidatedAt"
+  | "hydrated"
+  | "isAuthenticated"
+>;
+
+export const sessionStateDefaults: SessionStateSnapshot = {
   accessToken: null,
   refreshToken: null,
   user: null,
@@ -59,7 +74,7 @@ const unauthenticatedState = {
   lastInvalidatedAt: null,
   hydrated: false,
   isAuthenticated: false,
-} as const;
+};
 
 const toStoredSession = (
   session: SessionSeed | StoredSession | string,
@@ -93,7 +108,7 @@ const toStoredSession = (
 const toState = (session: StoredSession | null): Partial<SessionState> => {
   if (!session) {
     return {
-      ...unauthenticatedState,
+      ...sessionStateDefaults,
       hydrated: true,
     };
   }
@@ -131,7 +146,7 @@ const logSessionRehydrated = (context: Record<string, unknown>): void => {
 let bootstrapSessionPromise: Promise<void> | null = null;
 
 export const useSessionStore = create<SessionState>((set, get) => ({
-  ...unauthenticatedState,
+  ...sessionStateDefaults,
   bootstrapSession: async (): Promise<void> => {
     if (get().hydrated) {
       return;
@@ -263,3 +278,16 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     await get().invalidateSession(reason);
   },
 }));
+
+/**
+ * Resets the session store and clears any pending bootstrap promise (test utility).
+ */
+export const resetSessionStore = (
+  overrides: Partial<SessionStateSnapshot> = {},
+): void => {
+  bootstrapSessionPromise = null;
+  useSessionStore.setState({
+    ...sessionStateDefaults,
+    ...overrides,
+  });
+};

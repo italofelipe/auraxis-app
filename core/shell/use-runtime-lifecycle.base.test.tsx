@@ -8,6 +8,12 @@ import { reachabilityService } from "@/core/shell/reachability-service";
 import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
 import { useSessionStore } from "@/core/session/session-store";
 import { appLogger } from "@/core/telemetry/app-logger";
+import {
+  makeAppShellState,
+  makeSessionState,
+  makeSessionUser,
+  resetRuntimeStores,
+} from "@/shared/testing/runtime-fixtures";
 import { createTestHookWrapper } from "@/shared/testing/test-providers";
 import { createTestQueryClient } from "@/shared/testing/test-query-client";
 
@@ -51,48 +57,6 @@ const createLinkingSubscription = (): ReturnType<
   } as unknown as ReturnType<typeof Linking.addEventListener>;
 };
 
-const resetStores = (): void => {
-  useAppShellStore.setState({
-    fontsReady: true,
-    reducedMotionEnabled: false,
-    startupReady: true,
-    appState: "unknown",
-    connectivityStatus: "unknown",
-    runtimeDegradedReason: null,
-    entitlementsVersion: null,
-    pendingCheckoutReturn: null,
-    lastHandledUrl: null,
-    lastForegroundSyncAt: null,
-    lastReachabilityCheckAt: null,
-  });
-  useSessionStore.setState({
-    accessToken: "token",
-    refreshToken: "refresh",
-    user: {
-      id: "user-1",
-      name: "Italo",
-      email: "italo@auraxis.dev",
-      emailConfirmed: true,
-    },
-    userEmail: "italo@auraxis.dev",
-    authenticatedAt: "2026-04-10T11:00:00.000Z",
-    expiresAt: "2099-04-10T11:00:00.000Z",
-    authFailureReason: null,
-    lastValidatedAt: null,
-    lastInvalidatedAt: null,
-    hydrated: true,
-    isAuthenticated: true,
-    bootstrapSession: jest.fn().mockResolvedValue(undefined),
-    signIn: jest.fn().mockResolvedValue(undefined),
-    setSession: jest.fn().mockResolvedValue(undefined),
-    updateUser: jest.fn(),
-    markSessionValidated: jest.fn(),
-    dismissAuthFailure: jest.fn(),
-    invalidateSession: jest.fn().mockResolvedValue(undefined),
-    signOut: jest.fn().mockResolvedValue(undefined),
-  });
-};
-
 describe("useRuntimeLifecycle - core flow", () => {
   let appStateListener: ((state: AppStateStatus) => void) | null;
 
@@ -118,7 +82,22 @@ describe("useRuntimeLifecycle - core flow", () => {
         };
       },
     );
-    resetStores();
+    resetRuntimeStores({
+      appShell: makeAppShellState({
+        fontsReady: true,
+        startupReady: true,
+      }),
+      session: makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-10T11:00:00.000Z",
+        expiresAt: "2099-04-10T11:00:00.000Z",
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    });
   });
 
   it("faz probe de conectividade no startup sem disparar runtime revalidation", async () => {

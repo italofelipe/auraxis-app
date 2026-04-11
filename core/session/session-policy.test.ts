@@ -3,7 +3,7 @@ import {
   resolveSessionInvalidationReason,
   withSessionMetadata,
 } from "@/core/session/session-policy";
-import type { StoredSession } from "@/core/session/types";
+import { makeStoredSession } from "@/shared/testing/runtime-fixtures";
 
 const createJwt = (exp: number): string => {
   const encode = (value: unknown): string => {
@@ -13,28 +13,14 @@ const createJwt = (exp: number): string => {
   return `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ exp })}.signature`;
 };
 
-const createSession = (overrides: Partial<StoredSession> = {}): StoredSession => {
-  return {
-    accessToken: createJwt(Math.floor(Date.now() / 1_000) + 3_600),
-    refreshToken: "refresh-token",
-    user: {
-      id: "user-1",
-      name: "Italo",
-      email: "italo@auraxis.dev",
-      emailConfirmed: true,
-    },
-    authenticatedAt: null,
-    expiresAt: null,
-    ...overrides,
-  };
-};
-
 describe("session policy", () => {
   it("enriquece a sessao com metadados derivados do JWT", () => {
     const expiresAt = new Date("2026-04-08T12:00:00.000Z");
     const session = withSessionMetadata(
-      createSession({
+      makeStoredSession({
         accessToken: createJwt(Math.floor(expiresAt.getTime() / 1_000)),
+        authenticatedAt: null,
+        expiresAt: null,
       }),
       new Date("2026-04-08T10:00:00.000Z"),
     );

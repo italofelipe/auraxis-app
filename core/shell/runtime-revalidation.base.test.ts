@@ -2,7 +2,11 @@ import type { QueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/core/query/query-keys";
 import { createRuntimeRevalidationService } from "@/core/shell/runtime-revalidation";
-import { useSessionStore } from "@/core/session/session-store";
+import {
+  makeSessionState,
+  makeSessionUser,
+  resetRuntimeStores,
+} from "@/shared/testing/runtime-fixtures";
 
 const createQueryClientMock = (): QueryClient => {
   return {
@@ -11,37 +15,6 @@ const createQueryClientMock = (): QueryClient => {
     invalidateQueries: jest.fn(),
     removeQueries: jest.fn(),
   } as unknown as QueryClient;
-};
-
-const resetUnauthenticatedSession = (): void => {
-  useSessionStore.setState({
-    accessToken: null,
-    refreshToken: null,
-    user: null,
-    userEmail: null,
-    authFailureReason: null,
-    lastInvalidatedAt: null,
-    hydrated: true,
-    isAuthenticated: false,
-  });
-};
-
-const setAuthenticatedSession = (): void => {
-  useSessionStore.setState({
-    accessToken: "token",
-    refreshToken: "refresh",
-    user: {
-      id: "user-1",
-      name: "Italo",
-      email: "italo@auraxis.dev",
-      emailConfirmed: true,
-    },
-    userEmail: "italo@auraxis.dev",
-    authFailureReason: null,
-    lastInvalidatedAt: null,
-    hydrated: true,
-    isAuthenticated: true,
-  });
 };
 
 const createService = (queryClient: QueryClient) => {
@@ -62,7 +35,12 @@ const createService = (queryClient: QueryClient) => {
 
 describe("runtime revalidation service - base flow", () => {
   beforeEach(() => {
-    resetUnauthenticatedSession();
+    resetRuntimeStores({
+      session: makeSessionState({
+        hydrated: true,
+        isAuthenticated: false,
+      }),
+    });
   });
 
   it("nao sincroniza dados protegidos quando a sessao nao esta autenticada", async () => {
@@ -80,7 +58,16 @@ describe("runtime revalidation service - base flow", () => {
   });
 
   it("sincroniza bootstrap e assinatura quando o app volta ao foreground", async () => {
-    setAuthenticatedSession();
+    resetRuntimeStores({
+      session: makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    });
 
     const queryClient = createQueryClientMock();
     (queryClient.fetchQuery as jest.Mock)
@@ -107,5 +94,40 @@ describe("runtime revalidation service - base flow", () => {
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: queryKeys.entitlements.root,
     });
+  });
+
+  it("deduplica revalidacoes concorrentes para evitar excesso de fetch", async () => {
+    resetRuntimeStores({
+      session: makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    });
+
+    const queryClient = createQueryClientMock();
+    (queryClient.fetchQuery as jest.Mock)
+      .mockResolvedValueOnce({
+        user: {
+          productContext: {
+            entitlementsVersion: 11,
+          },
+        },
+      })
+      .mockResolvedValueOnce({
+        status: "active",
+      });
+
+    const service = createService(queryClient);
+    const [first, second] = await Promise.all([
+      service.revalidate("foreground"),
+      service.revalidate("checkout-return"),
+    ]);
+
+    expect(first).toEqual(second);
+    expect(queryClient.fetchQuery).toHaveBeenCalledTimes(2);
   });
 });

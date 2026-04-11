@@ -5,8 +5,12 @@ import {
   buildSentryOperationalContext,
   resetOperationalContextRuntimeForTests,
 } from "@/core/telemetry/operational-context";
-import { useAppShellStore } from "@/core/shell/app-shell-store";
-import { useSessionStore } from "@/core/session/session-store";
+import {
+  makeAppShellState,
+  makeSessionState,
+  makeSessionUser,
+  resetRuntimeStores,
+} from "@/shared/testing/runtime-fixtures";
 
 describe("operational telemetry context", () => {
   const originalPlatformVersion = Platform.Version;
@@ -18,44 +22,34 @@ describe("operational telemetry context", () => {
       value: "18.1",
     });
     resetOperationalContextRuntimeForTests();
-    useAppShellStore.setState({
-      fontsReady: true,
-      reducedMotionEnabled: true,
-      startupReady: true,
-      appState: "active",
-      connectivityStatus: "degraded",
-      runtimeDegradedReason: "healthcheck-failed",
-      entitlementsVersion: 3,
-      pendingCheckoutReturn: null,
-      lastHandledUrl: null,
-      lastForegroundSyncAt: "2026-04-10T13:00:00.000Z",
-      lastReachabilityCheckAt: "2026-04-10T13:05:00.000Z",
-    });
-    useSessionStore.setState({
-      accessToken: "token",
-      refreshToken: "refresh",
-      user: {
-        id: "user-1",
-        name: "Italo",
-        email: "italo@auraxis.dev",
-        emailConfirmed: true,
-      },
-      userEmail: "italo@auraxis.dev",
-      authenticatedAt: "2026-04-10T12:00:00.000Z",
-      expiresAt: "2099-04-10T12:00:00.000Z",
-      authFailureReason: null,
-      lastValidatedAt: "2026-04-10T12:05:00.000Z",
-      lastInvalidatedAt: null,
-      hydrated: true,
-      isAuthenticated: true,
-      bootstrapSession: jest.fn().mockResolvedValue(undefined),
-      signIn: jest.fn().mockResolvedValue(undefined),
-      setSession: jest.fn().mockResolvedValue(undefined),
-      updateUser: jest.fn(),
-      markSessionValidated: jest.fn(),
-      dismissAuthFailure: jest.fn(),
-      invalidateSession: jest.fn().mockResolvedValue(undefined),
-      signOut: jest.fn().mockResolvedValue(undefined),
+    resetRuntimeStores({
+      appShell: makeAppShellState({
+        fontsReady: true,
+        reducedMotionEnabled: true,
+        startupReady: true,
+        appState: "active",
+        connectivityStatus: "degraded",
+        runtimeDegradedReason: "healthcheck-failed",
+        entitlementsVersion: 3,
+        lastForegroundSyncAt: "2026-04-10T13:00:00.000Z",
+        lastReachabilityCheckAt: "2026-04-10T13:05:00.000Z",
+      }),
+      session: makeSessionState({
+        accessToken: "token",
+        refreshToken: "refresh",
+        user: makeSessionUser({
+          id: "user-1",
+          name: "Italo",
+        }),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-10T12:00:00.000Z",
+        expiresAt: "2099-04-10T12:00:00.000Z",
+        authFailureReason: null,
+        lastValidatedAt: "2026-04-10T12:05:00.000Z",
+        lastInvalidatedAt: null,
+        hydrated: true,
+        isAuthenticated: true,
+      }),
     });
   });
 

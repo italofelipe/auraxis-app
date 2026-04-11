@@ -118,38 +118,54 @@ const createAuthenticationFailureResult = async (
 export const createRuntimeRevalidationService = (
   dependencies: RuntimeRevalidationDependencies,
 ) => {
+  let inflightRevalidation: Promise<RuntimeRevalidationResult> | null = null;
+
+  const performRevalidation = async (
+    _reason: RuntimeRevalidationReason,
+  ): Promise<RuntimeRevalidationResult> => {
+    const refreshedAt = new Date().toISOString();
+    const sessionState = useSessionStore.getState();
+
+    if (!sessionState.isAuthenticated) {
+      return createUnauthenticatedResult(dependencies, refreshedAt);
+    }
+
+    try {
+      const bootstrap = await syncAuthenticatedRuntime(dependencies);
+      const entitlementsVersion =
+        bootstrap.user.productContext.entitlementsVersion;
+
+      return createSuccessResult(
+        dependencies,
+        refreshedAt,
+        entitlementsVersion,
+      );
+    } catch (error) {
+      if (!isAuthenticationFailure(error)) {
+        throw error;
+      }
+
+      return createAuthenticationFailureResult(
+        dependencies,
+        refreshedAt,
+        error,
+      );
+    }
+  };
+
   return {
     revalidate: async (
-      _reason: RuntimeRevalidationReason,
+      reason: RuntimeRevalidationReason,
     ): Promise<RuntimeRevalidationResult> => {
-      const refreshedAt = new Date().toISOString();
-      const sessionState = useSessionStore.getState();
-
-      if (!sessionState.isAuthenticated) {
-        return createUnauthenticatedResult(dependencies, refreshedAt);
+      if (inflightRevalidation) {
+        return inflightRevalidation;
       }
 
-      try {
-        const bootstrap = await syncAuthenticatedRuntime(dependencies);
-        const entitlementsVersion =
-          bootstrap.user.productContext.entitlementsVersion;
+      inflightRevalidation = performRevalidation(reason).finally(() => {
+        inflightRevalidation = null;
+      });
 
-        return createSuccessResult(
-          dependencies,
-          refreshedAt,
-          entitlementsVersion,
-        );
-      } catch (error) {
-        if (!isAuthenticationFailure(error)) {
-          throw error;
-        }
-
-        return createAuthenticationFailureResult(
-          dependencies,
-          refreshedAt,
-          error,
-        );
-      }
+      return inflightRevalidation;
     },
   };
 };
