@@ -51,6 +51,8 @@ const config = {
     "core/http/http-client.ts",
     "core/query/query-feedback-state.ts",
     "core/query/query-client.ts",
+    "core/query/query-policy.ts",
+    "core/query/prefetch-api-query.ts",
     "core/session/session-policy.ts",
     "core/session/session-storage.ts",
     "core/session/session-store.ts",
