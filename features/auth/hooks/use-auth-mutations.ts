@@ -30,6 +30,16 @@ export const useLoginMutation = () => {
   });
 };
 
+export const useLogoutMutation = () => {
+  const signOut = useSessionStore((state) => state.signOut);
+
+  return createApiMutation<void, void>(() => authService.logout(), {
+    onSettled: async () => {
+      await signOut();
+    },
+  });
+};
+
 export const useRegisterMutation = () => {
   return createApiMutation<AuthActionResult, RegisterCommand>(
     authService.register,

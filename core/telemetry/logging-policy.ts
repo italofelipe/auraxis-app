@@ -165,6 +165,14 @@ export const APP_EVENT_LOGGING_POLICY = Object.freeze({
     "Retorno de checkout recebido via deep link.",
     ["href", "status", "provider", "url"],
   ),
+  "observability.snapshot_requested": devOnlyInfoPolicy(
+    "Snapshot de observabilidade solicitado no cliente.",
+    ["path"],
+  ),
+  "observability.metrics_requested": devOnlyInfoPolicy(
+    "Export de métricas Prometheus solicitado no cliente.",
+    ["path"],
+  ),
 } satisfies Record<AppTelemetryEvent, AppEventLoggingPolicy>);
 
 export const getAppEventLoggingPolicy = (

@@ -2,6 +2,7 @@ import { AxiosError, type InternalAxiosRequestConfig } from "axios";
 
 import { createHttpClient, httpClient } from "@/core/http/http-client";
 import { useSessionStore } from "@/core/session/session-store";
+import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { appLogger } from "@/core/telemetry/app-logger";
 
 jest.mock("@/core/session/session-storage", () => ({
@@ -36,6 +37,14 @@ const resetSessionStore = (): void => {
   }));
 };
 
+const resetAppShellStore = (): void => {
+  useAppShellStore.setState((state) => ({
+    ...state,
+    connectivityStatus: "unknown",
+    runtimeDegradedReason: null,
+  }));
+};
+
 const readAuthorizationHeader = (
   config: InternalAxiosRequestConfig,
 ): string | undefined => {
@@ -53,6 +62,7 @@ describe("httpClient", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     resetSessionStore();
+    resetAppShellStore();
   });
 
   it("normaliza o baseURL sem barras duplicadas", () => {
@@ -257,6 +267,36 @@ describe("httpClient", () => {
     jest.dontMock("@/shared/config/runtime");
   });
 
+  it("restaura conectividade online apos request bem sucedido", async () => {
+    useAppShellStore.setState((state) => ({
+      ...state,
+      connectivityStatus: "offline",
+      runtimeDegradedReason: "offline",
+    }));
+
+    const client = createHttpClient("https://api.auraxis.dev/");
+    client.defaults.adapter = async (config) => ({
+      data: {
+        ok: true,
+      },
+      status: 200,
+      statusText: "OK",
+      headers: {},
+      config,
+    });
+
+    await expect(client.get("/dashboard")).resolves.toMatchObject({
+      data: {
+        ok: true,
+      },
+    });
+
+    expect(useAppShellStore.getState()).toMatchObject({
+      connectivityStatus: "online",
+      runtimeDegradedReason: null,
+    });
+  });
+
   it("registra sucesso em requests de observabilidade", async () => {
     const client = createHttpClient("https://api.auraxis.dev/");
     client.defaults.adapter = async (config) => ({
@@ -426,6 +466,12 @@ describe("httpClient", () => {
   });
 
   it("usa logger de erro para falhas de rede sem response", async () => {
+    useAppShellStore.setState((state) => ({
+      ...state,
+      connectivityStatus: "online",
+      runtimeDegradedReason: null,
+    }));
+
     const client = createHttpClient("https://api.auraxis.dev/");
     client.defaults.adapter = async (config) => {
       throw new AxiosError("Network Error", "ERR_NETWORK", config);
@@ -448,6 +494,10 @@ describe("httpClient", () => {
       },
       error: expect.any(AxiosError),
       captureInSentry: true,
+    });
+    expect(useAppShellStore.getState()).toMatchObject({
+      connectivityStatus: "offline",
+      runtimeDegradedReason: "offline",
     });
   });
 });
