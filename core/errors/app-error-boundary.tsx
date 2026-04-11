@@ -1,7 +1,7 @@
 import type { ErrorInfo, PropsWithChildren, ReactElement } from "react";
 import { Component } from "react";
 
-import { appLogger } from "@/core/telemetry/app-logger";
+import { runtimeLogger } from "@/core/telemetry/domain-loggers";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 
@@ -46,9 +46,7 @@ export class AppErrorBoundary extends Component<
   }
 
   override componentDidCatch(error: unknown, errorInfo: ErrorInfo): void {
-    appLogger.error({
-      domain: "runtime",
-      event: "runtime.error_boundary_captured",
+    runtimeLogger.log("runtime.error_boundary_captured", {
       context: {
         scope: this.props.scope,
         componentStack: errorInfo.componentStack,
@@ -106,4 +104,3 @@ export class AppErrorBoundary extends Component<
     return <>{this.props.children}</>;
   }
 }
-

@@ -31,6 +31,15 @@ export type AppTelemetryEvent =
 
 export type AppLogLevel = "debug" | "info" | "warn" | "error";
 
+export type AppTelemetryEventByDomain<TDomain extends AppTelemetryDomain> =
+  Extract<AppTelemetryEvent, `${TDomain}.${string}`>;
+
+export interface AppLogOptions {
+  readonly context?: Record<string, unknown>;
+  readonly error?: unknown;
+  readonly captureInSentry?: boolean;
+}
+
 export interface AppBreadcrumb {
   readonly category: AppTelemetryDomain;
   readonly message: string;

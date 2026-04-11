@@ -21,7 +21,12 @@ import { reachabilityService } from "@/core/shell/reachability-service";
 import { createRuntimeRevalidationService } from "@/core/shell/runtime-revalidation";
 import { resetRuntimeAfterSessionInvalidation } from "@/core/session/session-invalidation";
 import { useSessionStore } from "@/core/session/session-store";
-import { appLogger } from "@/core/telemetry/app-logger";
+import {
+  authLogger,
+  checkoutLogger,
+  navigationLogger,
+  runtimeLogger,
+} from "@/core/telemetry/domain-loggers";
 import { bootstrapService } from "@/features/bootstrap/services/bootstrap-service";
 import { subscriptionService } from "@/features/subscription/services/subscription-service";
 
@@ -74,9 +79,7 @@ const createIncomingUrlHandler = (
     const sanitizedUrl = sanitizeAppUrl(rawUrl);
 
     if (useAppShellStore.getState().lastHandledUrl === sanitizedUrl) {
-      appLogger.debug({
-        domain: "navigation",
-        event: "navigation.deep_link_deduplicated",
+      navigationLogger.log("navigation.deep_link_deduplicated", {
         context: {
           url: sanitizedUrl,
         },
@@ -86,9 +89,7 @@ const createIncomingUrlHandler = (
 
     const intent = parseAppUrl(rawUrl);
     if (!intent) {
-      appLogger.warn({
-        domain: "navigation",
-        event: "navigation.deep_link_ignored",
+      navigationLogger.log("navigation.deep_link_ignored", {
         context: {
           url: sanitizedUrl,
         },
@@ -99,9 +100,7 @@ const createIncomingUrlHandler = (
     dependencies.setLastHandledUrl(sanitizedUrl);
 
     if (intent.kind !== "checkout-return") {
-      appLogger.info({
-        domain: "navigation",
-        event: "navigation.deep_link_handled",
+      navigationLogger.log("navigation.deep_link_handled", {
         context: {
           url: intent.rawUrl,
           href: intent.href,
@@ -110,9 +109,7 @@ const createIncomingUrlHandler = (
       return;
     }
 
-    appLogger.info({
-      domain: "checkout",
-      event: "checkout.return_received",
+    checkoutLogger.log("checkout.return_received", {
       context: {
         href: intent.href,
         status: intent.status,
@@ -138,6 +135,12 @@ const bindInitialUrlLifecycle = (
     void handleIncomingUrl(url);
   });
 
+  return createSubscriptionTeardown(subscription);
+};
+
+const createSubscriptionTeardown = (
+  subscription: { remove: () => void },
+): (() => void) => {
   return () => {
     subscription.remove();
   };
@@ -154,9 +157,7 @@ const bindAppStateLifecycle = (
     setAppState(normalizeAppState(nextAppState));
     const shouldSync = shouldSyncOnForeground(previousAppState, nextAppState);
 
-    appLogger.info({
-      domain: "runtime",
-      event: "runtime.app_state_changed",
+    runtimeLogger.log("runtime.app_state_changed", {
       context: {
         previousAppState,
         nextAppState,
@@ -171,9 +172,7 @@ const bindAppStateLifecycle = (
     void revalidate("foreground");
   });
 
-  return () => {
-    subscription.remove();
-  };
+  return createSubscriptionTeardown(subscription);
 };
 
 export const useRuntimeLifecycle = (): void => {
@@ -232,9 +231,7 @@ export const useRuntimeLifecycle = (): void => {
     return async (
       reason: RuntimeSyncReason,
     ) => {
-      appLogger.info({
-        domain: "runtime",
-        event: "runtime.reachability_probe_started",
+      runtimeLogger.log("runtime.reachability_probe_started", {
         context: {
           reason,
         },
@@ -246,9 +243,8 @@ export const useRuntimeLifecycle = (): void => {
       recordReachabilityCheck(result.checkedAt);
       setRuntimeDegradedReason(result.status === "online" ? null : result.degradedReason);
 
-      appLogger[result.status === "online" ? "info" : "warn"]({
-        domain: "runtime",
-        event: "runtime.reachability_probe_completed",
+      runtimeLogger.log("runtime.reachability_probe_completed", {
+        level: result.status === "online" ? "info" : "warn",
         context: {
           reason,
           status: result.status,
@@ -275,9 +271,7 @@ export const useRuntimeLifecycle = (): void => {
         return null;
       }
 
-      appLogger.info({
-        domain: "runtime",
-        event: "runtime.revalidation_started",
+      runtimeLogger.log("runtime.revalidation_started", {
         context: {
           reason,
         },
@@ -287,9 +281,8 @@ export const useRuntimeLifecycle = (): void => {
         const result = await runtimeRevalidationService.revalidate(reason);
         setRuntimeDegradedReason(null);
 
-        appLogger[result.signedOut ? "warn" : "info"]({
-          domain: "runtime",
-          event: "runtime.revalidation_completed",
+        runtimeLogger.log("runtime.revalidation_completed", {
+          level: result.signedOut ? "warn" : "info",
           context: {
             reason,
             revalidated: result.revalidated,
@@ -301,9 +294,7 @@ export const useRuntimeLifecycle = (): void => {
         return result;
       } catch (error) {
         setRuntimeDegradedReason(resolveRuntimeFailureReason(reason));
-        appLogger.error({
-          domain: "runtime",
-          event: "runtime.revalidation_failed",
+        runtimeLogger.log("runtime.revalidation_failed", {
           context: {
             reason,
           },
@@ -355,9 +346,7 @@ export const useRuntimeLifecycle = (): void => {
 
     lastHandledInvalidationRef.current = lastInvalidatedAt;
 
-    appLogger.warn({
-      domain: "auth",
-      event: "auth.session_invalidated",
+    authLogger.log("auth.session_invalidated", {
       context: {
         reason: authFailureReason,
         invalidatedAt: lastInvalidatedAt,

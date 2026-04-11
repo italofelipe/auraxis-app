@@ -13,7 +13,7 @@ import {
   resolveSessionInvalidationReason,
 } from "@/core/session/session-policy";
 import { useSessionStore } from "@/core/session/session-store";
-import { appLogger } from "@/core/telemetry/app-logger";
+import { networkLogger } from "@/core/telemetry/domain-loggers";
 import { createMockApiAdapter } from "@/shared/mocks/api/router";
 import { appRuntimeConfig, normalizeBaseUrl } from "@/shared/config/runtime";
 import { sanitizeAppUrl } from "@/core/navigation/deep-linking";
@@ -53,6 +53,24 @@ const readHeader = (
   return typeof directValue === "string" && directValue.length > 0
     ? directValue
     : null;
+};
+
+const setHeaderValue = (
+  config: InternalAxiosRequestConfig,
+  headerName: string,
+  headerValue: string,
+): void => {
+  if (config.headers && "set" in config.headers) {
+    config.headers.set(headerName, headerValue);
+    return;
+  }
+
+  const nextHeaders = Object.assign(
+    {},
+    (config.headers as Record<string, unknown> | undefined) ?? {},
+  ) as AxiosRequestHeaders;
+  nextHeaders[headerName] = headerValue;
+  config.headers = nextHeaders;
 };
 
 const invalidateExpiredSessionIfNeeded = async (): Promise<void> => {
@@ -128,9 +146,7 @@ const attachAuthHeaders = async (
   const sessionState = useSessionStore.getState();
   const accessToken = sessionState.accessToken;
 
-  appLogger.debug({
-    domain: "network",
-    event: "network.request_started",
+  networkLogger.log("network.request_started", {
     context: {
       method,
       path: requestPath,
@@ -139,16 +155,7 @@ const attachAuthHeaders = async (
   });
 
   if (accessToken) {
-    if (config.headers && "set" in config.headers) {
-      config.headers.set("Authorization", `Bearer ${accessToken}`);
-    } else {
-      const nextHeaders = Object.assign(
-        {},
-        (config.headers as Record<string, unknown> | undefined) ?? {},
-      ) as AxiosRequestHeaders;
-      nextHeaders.Authorization = `Bearer ${accessToken}`;
-      config.headers = nextHeaders;
-    }
+    setHeaderValue(config, "Authorization", `Bearer ${accessToken}`);
   }
 
   if (
@@ -156,20 +163,11 @@ const attachAuthHeaders = async (
     appRuntimeConfig.observabilityExportEnabled &&
     appRuntimeConfig.observabilityExportPublicKey
   ) {
-    if (config.headers && "set" in config.headers) {
-      config.headers.set(
-        "X-Observability-Key",
-        appRuntimeConfig.observabilityExportPublicKey,
-      );
-    } else {
-      const nextHeaders = Object.assign(
-        {},
-        (config.headers as Record<string, unknown> | undefined) ?? {},
-      ) as AxiosRequestHeaders;
-      nextHeaders["X-Observability-Key"] =
-        appRuntimeConfig.observabilityExportPublicKey;
-      config.headers = nextHeaders;
-    }
+    setHeaderValue(
+      config,
+      "X-Observability-Key",
+      appRuntimeConfig.observabilityExportPublicKey,
+    );
   }
 
   return config;
@@ -183,9 +181,7 @@ const handleFulfilledResponse = (
   if (metadata) {
     const durationMs = Date.now() - metadata.startedAt;
     if (shouldLogSuccessfulRequest(metadata, durationMs)) {
-      appLogger.info({
-        domain: "network",
-        event: "network.request_succeeded",
+      networkLogger.log("network.request_succeeded", {
         context: {
           method: metadata.method,
           path: metadata.path,
@@ -212,9 +208,8 @@ const handleRejectedResponse = async (error: unknown): Promise<never> => {
       await useSessionStore.getState().invalidateSession(reason);
     }
 
-    appLogger[apiError.status >= 500 || apiError.status === 0 ? "error" : "warn"]({
-      domain: "network",
-      event: "network.request_failed",
+    networkLogger.log("network.request_failed", {
+      level: apiError.status >= 500 || apiError.status === 0 ? "error" : "warn",
       context: {
         method: metadata?.method ?? (error.config?.method ?? "get").toUpperCase(),
         path: metadata?.path ?? toSanitizedRequestPath(error.config?.url),
@@ -230,9 +225,8 @@ const handleRejectedResponse = async (error: unknown): Promise<never> => {
       captureInSentry: apiError.status >= 500 || apiError.status === 0,
     });
   } else {
-    appLogger.error({
-      domain: "network",
-      event: "network.request_failed",
+    networkLogger.log("network.request_failed", {
+      level: "error",
       context: {
         status: apiError.status,
         code: apiError.code,

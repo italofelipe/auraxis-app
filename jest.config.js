@@ -39,6 +39,8 @@ const config = {
     "core/providers/app-providers.tsx",
     "core/navigation/deep-linking.ts",
     "core/telemetry/app-logger.ts",
+    "core/telemetry/domain-loggers.ts",
+    "core/telemetry/logging-policy.ts",
     "core/telemetry/operational-context.ts",
     "core/telemetry/sanitization.ts",
     "core/telemetry/use-observability-runtime-bridge.ts",

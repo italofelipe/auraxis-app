@@ -806,6 +806,38 @@
 ### Próximo passo
 
 - seguir para `APP FND-09B`, consolidando política de logging/redaction governance do app e fechando o contrato operacional antes de performance/design system.
+
+## 2026-04-10 — APP FND-09B - Política de logging e redaction governance do app
+
+### O que foi feito
+
+- consolidei a política executável de logging em [`logging-policy.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/telemetry/logging-policy.ts), definindo nível padrão, descrição, contexto mínimo e comportamento esperado de console por evento;
+- criei helpers por domínio em [`domain-loggers.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/telemetry/domain-loggers.ts), reduzindo logging ad-hoc e restringindo `appLogger` à infraestrutura;
+- migrei os principais callsites de produto para os domain loggers:
+  - [`use-app-startup.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/shell/use-app-startup.ts)
+  - [`use-runtime-lifecycle.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/shell/use-runtime-lifecycle.ts)
+  - [`http-client.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/http/http-client.ts)
+  - [`session-store.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/session/session-store.ts)
+  - [`app-error-boundary.tsx`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/errors/app-error-boundary.tsx)
+  - [`use-navigation-telemetry.ts`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/core/telemetry/use-navigation-telemetry.ts)
+- criei o guardrail [`check-client-logging-governance.cjs`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/scripts/check-client-logging-governance.cjs), que agora faz parte de `npm run policy:check`;
+- alinhei baseline de coverage/Sonar com os novos artefatos de telemetry governance;
+- atualizei a documentação canônica em [`architecture.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/.context/architecture.md) e [`quality_gates.md`](/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/repos/auraxis-app/_worktrees/app-fnd-09b-logging-governance/.context/quality_gates.md).
+
+### O que foi validado
+
+- `npm run typecheck`
+- `node scripts/check-client-logging-governance.cjs`
+- `npx jest core/telemetry/app-logger.test.ts core/telemetry/logging-policy.test.ts core/telemetry/domain-loggers.test.ts core/telemetry/use-navigation-telemetry.test.tsx core/session/session-store.test.ts core/shell/use-app-startup.test.tsx core/shell/use-runtime-lifecycle.base.test.tsx core/http/http-client.test.ts core/errors/app-error-boundary.test.tsx scripts/check-client-logging-governance.test.ts --runInBand`
+
+### Riscos pendentes
+
+- o `quality-check` segue verde no bloco anterior, mas a suíte completa do app ainda emite warnings de `act(...)` em alguns testes com `RuntimeProvider`; isso continua fora do escopo deste slice de logging governance;
+- a policy canônica reduz drasticamente logging solto, mas continua dependendo de disciplina de novos eventos para manter `minimumContextKeys` coerentes quando o catálogo crescer.
+
+### Próximo passo
+
+- seguir para `APP FND-10A`, consolidando a foundation de performance e budgets do app antes de novas features.
 - em seguida entrar em `APP FND-05C` para degraded states, offline/reachability, retry policy e confiabilidade operacional do runtime mobile.
 
 ---
