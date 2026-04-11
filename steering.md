@@ -32,7 +32,7 @@ Para integração com backend recém-entregue:
 | Camada | Tecnologia | Versão |
 |:-------|:-----------|:-------|
 | Plataforma | React Native | 0.81.6 |
-| Toolchain | Node.js | 24 LTS |
+| Toolchain | Node.js | 25 LTS |
 | SDK | Expo SDK | ~54.0 |
 | Navegação | Expo Router v6 | ~6.0 |
 | Linguagem | TypeScript strict | ~5.9 |
