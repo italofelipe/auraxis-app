@@ -5,7 +5,8 @@ export type AppTelemetryDomain =
   | "network"
   | "auth"
   | "checkout"
-  | "observability";
+  | "observability"
+  | "performance";
 
 export type AppTelemetryEvent =
   | "startup.bootstrap_requested"
@@ -29,7 +30,9 @@ export type AppTelemetryEvent =
   | "auth.session_invalidated"
   | "checkout.return_received"
   | "observability.snapshot_requested"
-  | "observability.metrics_requested";
+  | "observability.metrics_requested"
+  | "performance.measurement_recorded"
+  | "performance.budget_exceeded";
 
 export type AppLogLevel = "debug" | "info" | "warn" | "error";
 
