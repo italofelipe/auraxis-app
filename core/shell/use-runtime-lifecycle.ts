@@ -13,6 +13,7 @@ import {
   sanitizeAppUrl,
   type CheckoutReturnIntent,
 } from "@/core/navigation/deep-linking";
+import { performanceTracker } from "@/core/performance/performance-tracker";
 import {
   type RuntimeAppState,
   useAppShellStore,
@@ -237,7 +238,13 @@ export const useRuntimeLifecycle = (enabled = true): void => {
         },
       });
 
+      performanceTracker.start("runtime.reachability");
       const result = await reachabilityService.probe();
+      performanceTracker.end("runtime.reachability", {
+        reason,
+        status: result.status,
+        latencyMs: result.latencyMs,
+      });
 
       setConnectivityStatus(result.status);
       recordReachabilityCheck(result.checkedAt);
@@ -277,6 +284,7 @@ export const useRuntimeLifecycle = (enabled = true): void => {
         },
       });
 
+      performanceTracker.start("runtime.revalidation");
       try {
         const result = await runtimeRevalidationService.revalidate(reason);
         setRuntimeDegradedReason(null);
@@ -290,6 +298,11 @@ export const useRuntimeLifecycle = (enabled = true): void => {
             entitlementsVersion: result.entitlementsVersion,
           },
         });
+        performanceTracker.end("runtime.revalidation", {
+          reason,
+          revalidated: result.revalidated,
+          signedOut: result.signedOut,
+        });
 
         return result;
       } catch (error) {
@@ -299,6 +312,10 @@ export const useRuntimeLifecycle = (enabled = true): void => {
             reason,
           },
           error,
+        });
+        performanceTracker.end("runtime.revalidation", {
+          reason,
+          failed: true,
         });
         return null;
       }
