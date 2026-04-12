@@ -62,7 +62,7 @@ Para integração com backend recém-entregue:
 - Tipografia oficial: `Playfair Display` (headings) + `Raleway` (body).
 - Grid base: `8px` (spacing estrutural em múltiplos de 8).
 - O runtime oficial usa **Tamagui** como fundação única de UI do app.
-- Qualquer abstração nova deve nascer sobre `config/tamagui-theme.ts` e `components/providers/app-providers.tsx`.
+- Qualquer abstração nova deve nascer sobre `config/tamagui-theme.ts` e `core/providers/app-providers.tsx`.
 - Componentes novos devem priorizar wrappers e tokens compartilhados para manter a troca de UI kit reversível.
 - É proibido usar valores literais de cor, spacing, radius, shadow, font-size e line-height em telas/componentes. Usar tokens semânticos.
 - **Tailwind não é permitido** neste repositório.
