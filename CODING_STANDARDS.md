@@ -184,13 +184,13 @@ export interface Portfolio {
 Todo componente segue esta ordem:
 
 ```typescript
-// components/portfolio/PortfolioCard.tsx
+// features/portfolio/components/PortfolioCard.tsx
 import React, { useCallback } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 // ---- 1. Imports --------------------------------------------------------
 
-import { usePortfolioCard } from '@/hooks/usePortfolioCard'
+import { usePortfolioCard } from '@/features/portfolio/hooks/use-portfolio-card'
 import { formatCurrency } from '@/utils/format'
 import type { Portfolio } from '@/types/domain/portfolio'
 import { semanticColors, semanticRadii, semanticSpacing, semanticTypography } from '@/shared/theme'
@@ -355,7 +355,7 @@ const handlePress = useCallback((id: string) => {
 ### 4.1 Estrutura canônica
 
 ```typescript
-// hooks/usePortfolios.ts
+// features/portfolio/hooks/use-portfolios.ts
 import { useCallback, useEffect, useState } from 'react'
 import { portfolioService } from '@/services/portfolioService'
 import type { Portfolio } from '@/types/domain/portfolio'
@@ -445,7 +445,7 @@ app/
 ```typescript
 // app/(auth)/_layout.tsx
 import { Redirect, Stack } from 'expo-router'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/features/auth/hooks/use-auth'
 
 export default function AuthLayout() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
 
 | Alvo | Ferramenta | Obrigatório |
 |:-----|:-----------|:-----------:|
-| Hooks customizados (`hooks/`) | jest-expo + `renderHook` | ✅ |
+| Hooks customizados (`features/*/hooks` ou `shared/hooks`) | jest-expo + `renderHook` | ✅ |
 | Utilitários (`utils/`) | jest-expo | ✅ |
 | Serviços HTTP | jest-expo (`jest.mock('fetch')`) | ✅ |
 | Componentes com lógica condicional | jest-expo + @testing-library/react-native | ✅ |
@@ -848,8 +848,8 @@ module.exports = {
     '\\.(png|jpg|jpeg|gif|webp)$': '<rootDir>/__mocks__/imageMock.ts',
   },
   collectCoverageFrom: [
-    'components/**/*.{ts,tsx}',
-    'hooks/**/*.{ts,tsx}',
+    'shared/components/**/*.{ts,tsx}',
+    'features/**/hooks/**/*.{ts,tsx}',
     'services/**/*.{ts,tsx}',
     'utils/**/*.{ts,tsx}',
     '!**/*.d.ts',
@@ -884,7 +884,7 @@ jest.mock('expo-secure-store', () => ({
 ### 9.4 Teste de componente
 
 ```typescript
-// components/portfolio/__tests__/PortfolioCard.test.tsx
+// features/portfolio/components/__tests__/PortfolioCard.test.tsx
 import React from 'react'
 import { render, fireEvent, screen } from '@testing-library/react-native'
 import { PortfolioCard } from '../PortfolioCard'
@@ -930,7 +930,7 @@ describe('PortfolioCard', () => {
 ### 9.5 Teste de hooks
 
 ```typescript
-// hooks/__tests__/usePortfolios.test.ts
+// features/portfolio/hooks/__tests__/use-portfolios.test.ts
 import { renderHook, waitFor } from '@testing-library/react-native'
 import { usePortfolios } from '../usePortfolios'
 import { portfolioService } from '@/services/portfolioService'
@@ -1161,7 +1161,7 @@ npm run test:coverage  # jest-expo + coverage report
 npm run test:watch     # modo watch durante desenvolvimento
 
 # Arquivo específico:
-npx jest src/hooks/useBalance.test.ts --watch
+npx jest features/wallet/hooks/use-balance.test.ts --watch
 
 # Limpar cache (quando módulos mudam):
 npx jest --clearCache
@@ -1251,7 +1251,7 @@ Workflows adicionais:
 | Arquivo de serviço | camelCase | `portfolioService.ts` |
 | Arquivo de tipo | kebab-case | `portfolio.response.ts`, `portfolio.ts` |
 | Arquivo de teste | `*.test.tsx` | `PortfolioCard.test.tsx` |
-| Diretório de testes | `__tests__/` | `components/portfolio/__tests__/` |
+| Diretório de testes | `__tests__/` | `features/portfolio/components/__tests__/` |
 | Constante global | camelCase | `colors.primary`, `spacing.md` |
 | Variável de ambiente | `EXPO_PUBLIC_*` | `EXPO_PUBLIC_API_URL` |
 | Branch git | `tipo/escopo` | `feat/portfolio-detail-screen` |
@@ -1274,12 +1274,12 @@ src/
     theme/             ← TODOS os tokens de design (ver seção 15)
     types/             ← tipos globais compartilhados
     utils/             ← funções puras agnósticas
-    constants/         ← constantes globais
+    validators/        ← validações compartilhadas
 
   features/
     auth/
       components/      ← LoginForm, PinPad (só usados por auth)
-      hooks/           ← useAuth, useSession, useOTP
+      hooks/           ← use-auth, use-session, use-otp
       screens/         ← LoginScreen, ForgotPasswordScreen
       services/        ← authService (chama a API)
       types/           ← AuthUser, LoginPayload, SessionToken
@@ -1296,13 +1296,13 @@ src/
 ```typescript
 // ✅ Feature importa de shared
 import { Button } from '@/shared/components/Button'
-import { colors } from '@/shared/theme'
+import { semanticColors } from '@/shared/theme'
 
 // ✅ Feature importa de si mesma
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../hooks/use-auth'
 
 // ❌ NUNCA — feature importa de outra feature
-import { useTransactions } from '@/features/transactions/hooks/useTransactions'
+import { useTransactionsQuery } from '@/features/transactions/hooks/use-transactions-query'
 // ↑ isso em features/auth/ é uma violação
 ```
 
