@@ -3,7 +3,8 @@ import type { QueryClient, QueryKey } from "@tanstack/react-query";
 import type { ApiError } from "@/core/http/api-error";
 import { resolveQueryPolicy } from "@/core/query/query-policy";
 
-export interface PrefetchApiQueryOptions {
+export interface PrefetchApiQueryOptions<TData> {
+  readonly queryFn: () => Promise<TData>;
   readonly enabled?: boolean;
   readonly staleTime?: number;
   readonly gcTime?: number;
@@ -15,8 +16,7 @@ export interface PrefetchApiQueryOptions {
 export const prefetchApiQuery = async <TData>(
   queryClient: QueryClient,
   queryKey: QueryKey,
-  queryFn: () => Promise<TData>,
-  options: PrefetchApiQueryOptions = {},
+  options: PrefetchApiQueryOptions<TData>,
 ): Promise<void> => {
   if (options.enabled === false) {
     return;
@@ -28,7 +28,7 @@ export const prefetchApiQuery = async <TData>(
 
   await queryClient.prefetchQuery<TData, ApiError>({
     queryKey,
-    queryFn,
+    queryFn: options.queryFn,
     staleTime,
     gcTime,
   });
