@@ -78,7 +78,7 @@ Toda task de UI/layout no `auraxis-app` deve seguir, sem exceção:
   - Critério:
     1. `tamagui`, `@tamagui/core`, `@tamagui/config` e `@tamagui/babel-plugin` instalados.
     2. `config/tamagui-theme.ts` com tokens Auraxis (`surface`, `brand`, `text`, `status`, `border`) mapeados para `createTokens` + `createTheme`.
-    3. `TamaguiProvider` configurado no root (`components/providers/app-providers.tsx`), substituindo `PaperProvider`.
+    3. `TamaguiProvider` configurado no root (`core/providers/app-providers.tsx`), substituindo `PaperProvider`.
     4. `config/paper-theme.ts` e dependência `react-native-paper` removidos do projeto.
     5. Todas as telas existentes migradas de imports `react-native-paper` para primitivos Tamagui.
     6. `quality-check` verde (lint + typecheck + testes + policy).

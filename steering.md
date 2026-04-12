@@ -90,15 +90,14 @@ Para integração com backend recém-entregue:
 | Diretório | O que vai aqui |
 |:----------|:---------------|
 | `app/` | Telas (Expo Router — file-based routing) |
-| `components/` | Componentes reutilizáveis |
-| `hooks/` | Hooks customizados (prefixo `use`) |
+| `core/` | Runtime canônico (providers, telemetry, http, sessão, query, shell) |
+| `features/` | Domínios de produto (components, hooks, services e types por feature) |
+| `shared/` | Código compartilhado (`shared/components`, `shared/types`, `shared/validators`, `shared/utils`, `shared/theme`) |
 | `stores/` | Estado global de cliente |
-| `services/` | Chamadas HTTP (um arquivo por domínio de API) |
-| `utils/` | Funções puras sem side-effects |
-| `types/` | Interfaces e tipos TypeScript |
-| `types/api/` | Tipos do contrato com auraxis-api |
-| `shared/` | Código compartilhado (`shared/components`, `shared/types`, `shared/validators`, `shared/utils`) |
-| `constants/` | Constantes e temas de cor |
+| `schemas/` | Schemas de validação (Zod) |
+| `types/` | Interfaces e tipos TypeScript globais |
+| `contracts/` | Snapshots e baseline de contratos (OpenAPI, packs) |
+| `config/` | Tokens, tema Tamagui e configuração de design |
 | `__tests__/` | Testes unitários (alternativa a co-localização) |
 | `e2e/` | Testes Detox (scaffold — requer macOS runner) |
 | `__mocks__/` | Mocks globais (SVG, imagens) |
@@ -195,16 +194,16 @@ Workflows adicionais:
 ### Estrutura de arquivos
 
 ```
-components/
+shared/components/
   Button/
     Button.tsx
     Button.test.tsx       ← co-localizado com o componente
 
-hooks/
-  useBalance.ts
-  useBalance.test.ts      ← co-localizado com o hook
+features/wallet/hooks/
+  use-balance.ts
+  use-balance.test.ts      ← co-localizado com o hook
 
-utils/
+shared/utils/
   currency.ts
   currency.test.ts
 
@@ -271,7 +270,7 @@ describe('useBalance', () => {
 
 | O que | Obrigatório | Tipo |
 |:------|:-----------:|:-----|
-| Hooks customizados (`hooks/`) | ✅ | Unitário (Jest) |
+| Hooks customizados (`features/*/hooks` ou `shared/hooks`) | ✅ | Unitário (Jest) |
 | Utilitários (`utils/`) | ✅ | Unitário (Jest) |
 | Serviços HTTP | ✅ | Unitário (mock de `fetch`) |
 | Componentes com lógica condicional | ✅ | Unitário (Jest + RNTL) |

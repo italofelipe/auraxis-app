@@ -27,9 +27,10 @@ Antes de qualquer ação, leia a partir da platform:
 ```
 auraxis-app/
   app/           # Telas e navegação (Expo Router)
-  components/    # Componentes reutilizáveis
-  constants/     # Constantes e temas
-  hooks/         # Custom hooks
+  core/          # Runtime canônico (providers, telemetry, http, sessão, shell)
+  features/      # Domínios de produto (components/hooks/services por feature)
+  shared/        # Componentes, types, validators, utils e theme compartilhados
+  stores/        # Estado global de cliente
   assets/        # Imagens, fontes, ícones
   scripts/       # Utilitários de desenvolvimento
 ```

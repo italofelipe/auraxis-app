@@ -46,18 +46,19 @@ auraxis-app/
       profile.tsx             → /profile
     _layout.tsx               # Root layout (providers, fontes, splash)
     +not-found.tsx            # 404
-  components/
-    base/                     # Primitivos: Button, Input, Card, Badge, etc.
-    domain/                   # Componentes de negócio: TransactionItem, GoalCard
-    layout/                   # AppHeader, BottomTabBar, SafeWrapper
-  hooks/                      # Custom hooks (lógica reutilizável)
-  services/                   # Clientes HTTP por domínio
+  core/                       # Runtime canônico (providers, telemetry, http, sessão, shell)
+  features/
+    transactions/             # Domínio de exemplo (components/hooks/services/types)
+  shared/
+    components/               # Componentes reutilizáveis (AppButton, AppCard)
+    theme/                    # Tokens semânticos e tema
+    utils/                    # Formatadores, helpers
+    validators/               # Validadores compartilhados
   stores/                     # Estado global (Context API ou Zustand)
   types/
     api/                      # Tipos de request/response da auraxis-api
     domain/                   # Tipos de domínio (Transaction, Goal, User)
-  constants/                  # Tema, cores, fontes, strings
-  utils/                      # Formatadores, validadores, helpers
+  schemas/                    # Schemas Zod compartilhados
   assets/                     # Imagens, fontes, ícones
   scripts/                    # Utilitários de dev
   app.json                    # Config Expo (pedir aprovação antes de alterar)
@@ -151,10 +152,10 @@ export type TransactionType = 'income' | 'expense'
 ### Functional components com TypeScript explícito
 
 ```tsx
-// components/domain/TransactionItem.tsx
+// features/transactions/components/TransactionItem.tsx
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import type { Transaction } from '@/types/domain/transaction'
-import { formatCurrency, formatDate } from '@/utils/formatters'
+import { formatCurrency, formatDate } from '@/shared/utils/formatters'
 import { semanticColors, semanticSpacing, semanticTypography } from '@/shared/theme'
 
 interface Props {
@@ -218,10 +219,10 @@ const styles = StyleSheet.create({
 | `testID` em elementos de interação | Para testes com Testing Library |
 | Nomes em PascalCase com extensão `.tsx` | `TransactionItem.tsx`, não `transactionItem.js` |
 
-### Componentes base em `components/base/`
+### Componentes base em `shared/components/`
 
 ```tsx
-// components/base/Button.tsx
+// shared/components/Button.tsx
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native'
 import { semanticColors } from '@/shared/theme'
 
@@ -269,9 +270,9 @@ export function Button({
 ### Prefixo `use` obrigatório, um hook = uma preocupação
 
 ```typescript
-// hooks/useTransactions.ts
+// features/transactions/hooks/use-transactions.ts
 import { useCallback, useEffect, useState } from 'react'
-import { transactionService } from '@/services/transaction.service'
+import { transactionService } from '@/features/transactions/services/transactions-service'
 import type { Transaction } from '@/types/domain/transaction'
 import type { CreateTransactionDto } from '@/types/api/transaction'
 
@@ -693,7 +694,7 @@ export function useThemeColors() {
 ### Jest + React Native Testing Library
 
 ```tsx
-// components/domain/__tests__/TransactionItem.test.tsx
+// features/transactions/components/__tests__/TransactionItem.test.tsx
 import { render, fireEvent, screen } from '@testing-library/react-native'
 import { TransactionItem } from '../TransactionItem'
 import { mockTransaction } from '@/tests/factories/transaction.factory'
