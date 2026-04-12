@@ -13,11 +13,9 @@ describe("prefetchApiQuery", () => {
     const queryClient = createQueryClientMock();
     const queryFn = jest.fn().mockResolvedValue("ok");
 
-    await prefetchApiQuery(
-      queryClient,
-      ["dashboard", "overview"],
+    await prefetchApiQuery(queryClient, ["dashboard", "overview"], {
       queryFn,
-    );
+    });
 
     expect(queryClient.prefetchQuery).toHaveBeenCalledWith({
       queryKey: ["dashboard", "overview"],
@@ -31,15 +29,11 @@ describe("prefetchApiQuery", () => {
     const queryClient = createQueryClientMock();
     const queryFn = jest.fn().mockResolvedValue("ok");
 
-    await prefetchApiQuery(
-      queryClient,
-      ["observability", "snapshot"],
+    await prefetchApiQuery(queryClient, ["observability", "snapshot"], {
       queryFn,
-      {
-        staleTime: 5_000,
-        gcTime: 60_000,
-      },
-    );
+      staleTime: 5_000,
+      gcTime: 60_000,
+    });
 
     expect(queryClient.prefetchQuery).toHaveBeenCalledWith({
       queryKey: ["observability", "snapshot"],
@@ -53,12 +47,10 @@ describe("prefetchApiQuery", () => {
     const queryClient = createQueryClientMock();
     const queryFn = jest.fn().mockResolvedValue("ok");
 
-    await prefetchApiQuery(
-      queryClient,
-      ["dashboard", "overview"],
+    await prefetchApiQuery(queryClient, ["dashboard", "overview"], {
       queryFn,
-      { enabled: false },
-    );
+      enabled: false,
+    });
 
     expect(queryClient.prefetchQuery).not.toHaveBeenCalled();
   });
