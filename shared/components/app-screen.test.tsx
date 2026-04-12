@@ -1,7 +1,7 @@
 import { render } from "@testing-library/react-native";
 import { Text } from "react-native";
 
-import { AppProviders } from "@/components/providers/app-providers";
+import { AppProviders } from "@/core/providers/app-providers";
 
 import { AppScreen } from "./app-screen";
 

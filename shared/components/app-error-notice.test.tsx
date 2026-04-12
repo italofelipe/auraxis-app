@@ -1,6 +1,6 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { AppProviders } from "@/components/providers/app-providers";
+import { AppProviders } from "@/core/providers/app-providers";
 import { ApiError } from "@/core/http/api-error";
 
 import { AppErrorNotice } from "./app-error-notice";
@@ -42,4 +42,3 @@ describe("AppErrorNotice", () => {
     expect(getByText("Recarregue a tela para tentar novamente.")).toBeTruthy();
   });
 });
-

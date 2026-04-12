@@ -1,6 +1,6 @@
 import { render } from "@testing-library/react-native";
 
-import { AppProviders } from "@/components/providers/app-providers";
+import { AppProviders } from "@/core/providers/app-providers";
 
 import { AsyncStateNotice } from "./async-state-notice";
 

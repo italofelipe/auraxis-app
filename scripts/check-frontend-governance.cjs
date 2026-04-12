@@ -35,13 +35,8 @@ const STYLE_TOKEN_EXCLUDE_PATTERNS = [
   /^config\/design-tokens\.ts$/,
   /^config\/tamagui-theme\.ts$/,
   /^config\/paper-theme\.ts$/,
-  /^constants\/theme\.ts$/,
   /^shared\/theme\/.+/,
   /^shared\/tokens\/.+/,
-  /^components\/hello-wave\.tsx$/,
-  /^components\/parallax-scroll-view\.tsx$/,
-  /^components\/themed-text\.tsx$/,
-  /^components\/themed-view\.tsx$/,
   /^components\/ui\/loading-skeleton\.tsx$/,
   /^.+\.test\.tsx?$/,
 ];
