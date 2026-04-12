@@ -131,7 +131,7 @@ npm run quality-check
 ```
 
 > **Falha em qualquer gate = não commitar.**
-> Se o bloqueio é dependência de outro time, registrar em `tasks.md` e abrir issue.
+> Se o bloqueio é dependência de outro time, registrar no GitHub Projects e abrir issue.
 
 ### Thresholds locais (jest.config.js)
 
