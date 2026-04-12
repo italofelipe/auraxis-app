@@ -2,7 +2,8 @@ import type { ComponentProps, ReactElement, ReactNode } from "react";
 
 import { Paragraph } from "tamagui";
 
-export interface AppTextProps extends Omit<ComponentProps<typeof Paragraph>, "children"> {
+export interface AppTextProps
+  extends Omit<ComponentProps<typeof Paragraph>, "children" | "size"> {
   readonly children: ReactNode;
   readonly size?: "body" | "bodySm" | "caption";
   readonly tone?: "default" | "muted" | "danger" | "primary";
