@@ -40,3 +40,7 @@ designs/
 
 # Maestro E2E reports
 .maestro/reports/
+
+# Local git worktrees (never commit checkouts of other branches)
+_worktrees/
+repos/

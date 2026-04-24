@@ -6,7 +6,13 @@ const config = {
   // Padrões de arquivos de teste
   testMatch: ["**/__tests__/**/*.{ts,tsx}", "**/*.{spec,test}.{ts,tsx}"],
 
-  testPathIgnorePatterns: ["/node_modules/", "/e2e/", "/.expo/"],
+  testPathIgnorePatterns: [
+    "/node_modules/",
+    "/e2e/",
+    "/.expo/",
+    "<rootDir>/_worktrees/",
+    "<rootDir>/repos/",
+  ],
 
   // Transformações: jest-expo já configura babel-jest para RN
   transformIgnorePatterns: [
@@ -87,6 +93,16 @@ const config = {
     "shared/validators/installment-vs-cash.ts",
     "shared/forms/app-form-field.tsx",
     "shared/forms/apply-api-form-errors.ts",
+    "features/auth/services/password-strength-analyzer.ts",
+    "features/auth/components/password-strength-meter.tsx",
+    "features/auth/utils/email-mask.ts",
+    "features/auth/hooks/use-register-screen-controller.ts",
+    "features/auth/hooks/use-confirm-email-pending-controller.ts",
+    "features/auth/hooks/use-forgot-password-screen-controller.ts",
+    "features/auth/validators.ts",
+    "features/dashboard/services/savings-rate-calculator.ts",
+    "features/goals/services/goal-progress-calculator.ts",
+    "features/goals/hooks/use-goals-screen-controller.ts",
     "features/alerts/components/alert-record-card.tsx",
     "features/alerts/components/alert-preference-row.tsx",
     "features/entitlements/components/paywall-gate.tsx",
