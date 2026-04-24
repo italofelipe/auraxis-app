@@ -2,21 +2,25 @@ type MaterialCommunityIconName =
   | "view-dashboard-outline"
   | "wallet-outline"
   | "tools"
-  | "bell-outline";
+  | "bell-outline"
+  | "flag-outline";
 
 export const appRoutes = {
   root: "/",
   public: {
     login: "/login",
+    register: "/register",
     forgotPassword: "/forgot-password",
   },
   private: {
     dashboard: "/dashboard",
     wallet: "/carteira",
+    goals: "/metas",
     tools: "/ferramentas",
     alerts: "/alertas",
     subscription: "/assinatura",
     installmentVsCash: "/installment-vs-cash",
+    confirmEmailPending: "/confirm-email-pending",
   },
 } as const;
 
@@ -37,7 +41,7 @@ export interface AppRouteDefinition {
 }
 
 export interface PrivateTabDefinition {
-  readonly name: "dashboard" | "carteira" | "ferramentas" | "alertas";
+  readonly name: "dashboard" | "carteira" | "metas" | "ferramentas" | "alertas";
   readonly href: PrivateAppRoute;
   readonly title: string;
   readonly icon: MaterialCommunityIconName;
@@ -55,6 +59,12 @@ export const privateTabDefinitions: readonly PrivateTabDefinition[] = [
     href: appRoutes.private.wallet,
     title: "Carteira",
     icon: "wallet-outline",
+  },
+  {
+    name: "metas",
+    href: appRoutes.private.goals,
+    title: "Metas",
+    icon: "flag-outline",
   },
   {
     name: "ferramentas",
@@ -86,6 +96,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     supportsHostedCheckoutReturn: false,
   },
   {
+    key: "register",
+    path: appRoutes.public.register,
+    access: "public",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
     key: "forgotPassword",
     path: appRoutes.public.forgotPassword,
     access: "public",
@@ -102,6 +119,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "wallet",
     path: appRoutes.private.wallet,
+    access: "private",
+    tabVisible: true,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "goals",
+    path: appRoutes.private.goals,
     access: "private",
     tabVisible: true,
     supportsHostedCheckoutReturn: false,
@@ -130,6 +154,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "installmentVsCash",
     path: appRoutes.private.installmentVsCash,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "confirmEmailPending",
+    path: appRoutes.private.confirmEmailPending,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,

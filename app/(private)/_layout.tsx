@@ -48,6 +48,12 @@ function PrivateLayoutContent(): ReactElement | null {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="confirm-email-pending"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
