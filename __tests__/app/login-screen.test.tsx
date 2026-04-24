@@ -38,6 +38,7 @@ describe("LoginScreen", () => {
       dismissSubmitError: jest.fn(),
       dismissSessionFailureNotice: jest.fn(),
       handleForgotPassword: jest.fn(),
+      handleRegister: jest.fn(),
       handleOpenTerms: jest.fn().mockResolvedValue(undefined),
       handleOpenPrivacy: jest.fn().mockResolvedValue(undefined),
     });

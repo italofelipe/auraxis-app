@@ -34,9 +34,11 @@ describe("ForgotPasswordScreen", () => {
       form: result.current,
       isSubmitting: false,
       submitError: null,
+      status: "idle",
       handleSubmit: jest.fn().mockResolvedValue(undefined),
       dismissSubmitError: jest.fn(),
       handleBackToLogin: jest.fn(),
+      handleResubmit: jest.fn(),
     });
 
     const { getByText } = render(

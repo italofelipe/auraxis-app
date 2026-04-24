@@ -25,7 +25,10 @@ export function LoginScreen(): ReactElement {
 
   return (
     <AppScreen>
-      <AppSurfaceCard title="Entrar" description="Acesso a area logada.">
+      <AppSurfaceCard
+        title="Bem-vindo de volta"
+        description="Faca login na sua conta para continuar."
+      >
         <YStack gap="$4">
           {controller.sessionFailureNotice ? (
             <YStack gap="$3">
@@ -37,7 +40,8 @@ export function LoginScreen(): ReactElement {
               {controller.sessionFailureNotice.dismissLabel ? (
                 <AppButton
                   tone="secondary"
-                  onPress={controller.dismissSessionFailureNotice}>
+                  onPress={controller.dismissSessionFailureNotice}
+                >
                   {controller.sessionFailureNotice.dismissLabel}
                 </AppButton>
               ) : null}
@@ -51,7 +55,7 @@ export function LoginScreen(): ReactElement {
               <AppInputField
                 id="login-email"
                 label="E-mail"
-                placeholder="E-mail"
+                placeholder="seu@email.com"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={value}
@@ -69,7 +73,7 @@ export function LoginScreen(): ReactElement {
               <AppInputField
                 id="login-password"
                 label="Senha"
-                placeholder="Senha"
+                placeholder="Sua senha"
                 secureTextEntry
                 value={value}
                 onBlur={onBlur}
@@ -83,7 +87,8 @@ export function LoginScreen(): ReactElement {
             onPress={() => {
               void controller.handleSubmit();
             }}
-            disabled={controller.isSubmitting}>
+            disabled={controller.isSubmitting}
+          >
             {controller.isSubmitting ? "Entrando..." : "Entrar"}
           </AppButton>
 
@@ -103,24 +108,30 @@ export function LoginScreen(): ReactElement {
         </YStack>
       </AppSurfaceCard>
 
-      <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-        Placeholder estrutural da rota de login, agora restrito a `features/auth`,
-        `shared/*` e `core/*`.
-      </Paragraph>
+      <YStack gap="$2" alignItems="center">
+        <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+          Ainda nao tem conta?
+        </Paragraph>
+        <AppButton tone="secondary" onPress={controller.handleRegister}>
+          Criar conta
+        </AppButton>
+      </YStack>
 
       <YStack gap="$2">
         <AppButton
           tone="secondary"
           onPress={() => {
             void controller.handleOpenTerms();
-          }}>
+          }}
+        >
           Termos de Uso
         </AppButton>
         <AppButton
           tone="secondary"
           onPress={() => {
             void controller.handleOpenPrivacy();
-          }}>
+          }}
+        >
           Politica de Privacidade
         </AppButton>
       </YStack>
