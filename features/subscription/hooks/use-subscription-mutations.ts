@@ -17,3 +17,9 @@ export const useCancelSubscriptionMutation = () => {
     subscriptionService.cancelSubscription(),
   );
 };
+
+export const useStartTrialMutation = () => {
+  return createApiMutation<SubscriptionState, void>(() =>
+    subscriptionService.startTrial(),
+  );
+};

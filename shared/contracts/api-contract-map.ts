@@ -641,6 +641,16 @@ export const apiContractMap = {
     path: "/subscriptions/cancel",
     authRequired: true,
   }),
+  subscriptionTrial: defineApiContract<
+    "POST",
+    "/subscriptions/trial",
+    never,
+    SubscriptionState
+  >({
+    method: "POST",
+    path: "/subscriptions/trial",
+    authRequired: true,
+  }),
   opsObservability: defineApiContract<
     "GET",
     "/ops/observability",

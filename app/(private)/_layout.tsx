@@ -7,9 +7,11 @@ import { colorPalette } from "@/config/design-tokens";
 import { AppErrorBoundary } from "@/core/errors/app-error-boundary";
 import { privateTabDefinitions } from "@/core/navigation/routes";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
+import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
 
 function PrivateLayoutContent(): ReactElement | null {
   const { ready, redirectTo } = usePrivateRouteGuard();
+  useEntitlementsForegroundRefresh();
 
   if (!ready) {
     return null;
@@ -44,6 +46,18 @@ function PrivateLayoutContent(): ReactElement | null {
       })}
       <Tabs.Screen
         name="installment-vs-cash"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="confirm-email-pending"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="compartilhamentos"
         options={{
           href: null,
         }}

@@ -71,7 +71,22 @@ describe("SubscriptionScreen", () => {
       subscriptionQuery: buildQuery({
         data: subscriptionData,
       }) as unknown as ReturnType<typeof useSubscriptionScreenController>["subscriptionQuery"],
+      plansQuery: buildQuery({ data: [] }) as unknown as ReturnType<
+        typeof useSubscriptionScreenController
+      >["plansQuery"],
+      subscription: subscriptionData,
+      presentations: [],
+      trialOffer: null,
+      isStartingCheckout: false,
+      isStartingTrial: false,
+      checkoutError: null,
+      trialError: null,
+      lastCheckoutOutcome: null,
+      handleSubscribe: jest.fn().mockResolvedValue(undefined),
+      handleStartTrial: jest.fn().mockResolvedValue(undefined),
       handleManageSubscription: jest.fn().mockResolvedValue(undefined),
+      dismissCheckoutError: jest.fn(),
+      dismissTrialError: jest.fn(),
     });
 
     const { getByText } = render(
@@ -80,7 +95,7 @@ describe("SubscriptionScreen", () => {
       </TestProviders>,
     );
 
-    expect(getByText("Assinatura")).toBeTruthy();
-    expect(getByText("Gerenciar assinatura")).toBeTruthy();
+    expect(getByText("Sua assinatura")).toBeTruthy();
+    expect(getByText("Gerenciar pelo navegador")).toBeTruthy();
   });
 });

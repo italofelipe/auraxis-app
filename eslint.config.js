@@ -10,6 +10,9 @@ module.exports = defineConfig([
       "dist/*",
       "e2e/**", // E2E (Detox) tem deps separadas não instaladas no CI padrão
       "artifacts/**",
+      "_worktrees/**",
+      "**/_worktrees/**",
+      "repos/**",
     ],
   },
   {

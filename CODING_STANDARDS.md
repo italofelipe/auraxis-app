@@ -184,16 +184,16 @@ export interface Portfolio {
 Todo componente segue esta ordem:
 
 ```typescript
-// components/portfolio/PortfolioCard.tsx
+// features/portfolio/components/PortfolioCard.tsx
 import React, { useCallback } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
 // ---- 1. Imports --------------------------------------------------------
 
-import { usePortfolioCard } from '@/hooks/usePortfolioCard'
+import { usePortfolioCard } from '@/features/portfolio/hooks/use-portfolio-card'
 import { formatCurrency } from '@/utils/format'
 import type { Portfolio } from '@/types/domain/portfolio'
-import { colors, spacing, typography } from '@/constants/theme'
+import { semanticColors, semanticRadii, semanticSpacing, semanticTypography } from '@/shared/theme'
 
 // ---- 2. Interface de props ---------------------------------------------
 
@@ -238,9 +238,9 @@ export function PortfolioCard({ portfolio, onPress, testID }: PortfolioCardProps
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
+    backgroundColor: semanticColors.surface,
+    borderRadius: semanticRadii.md,
+    padding: semanticSpacing.md,
   },
   pressed: {
     opacity: 0.8,
@@ -251,12 +251,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   name: {
-    ...typography.body1,
-    color: colors.textPrimary,
+    fontSize: semanticTypography.body,
+    color: semanticColors.foreground,
   },
   value: {
-    ...typography.body1Bold,
-    color: colors.textPrimary,
+    fontSize: semanticTypography.body,
+    color: semanticColors.foreground,
   },
 })
 ```
@@ -355,7 +355,7 @@ const handlePress = useCallback((id: string) => {
 ### 4.1 Estrutura canônica
 
 ```typescript
-// hooks/usePortfolios.ts
+// features/portfolio/hooks/use-portfolios.ts
 import { useCallback, useEffect, useState } from 'react'
 import { portfolioService } from '@/services/portfolioService'
 import type { Portfolio } from '@/types/domain/portfolio'
@@ -445,7 +445,7 @@ app/
 ```typescript
 // app/(auth)/_layout.tsx
 import { Redirect, Stack } from 'expo-router'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/features/auth/hooks/use-auth'
 
 export default function AuthLayout() {
   const { isAuthenticated, isLoading } = useAuth()
@@ -720,54 +720,47 @@ export function useAuth(): AuthContextValue {
 ### 8.1 Design system
 
 ```typescript
-// constants/theme.ts
-export const colors = {
-  // Brand
-  primary: '#ffab1a',
-  primaryDark: '#ffbe4d',
-  secondary: '#ffd180',
+// config/design-tokens.ts
+export const colorPalette = {
+  neutral950: "#0b0909",
+  neutral900: "#262121",
+  brand600: "#ffab1a",
+  brand500: "#ffbe4d",
+  brand300: "#ffd180",
+} as const;
 
-  // Semantic
-  success: '#ffbe4d',
-  error: '#ffab1a',
-  warning: '#ffd180',
-  info: '#ffbe4d',
+export const spacing = (step: number): number => step * 8;
 
-  // Neutros
-  background: '#0b0909',
-  surface: '#262121',
-  border: '#413939',
-  textPrimary: '#ffd180',
-  textSecondary: '#ffbe4d',
-  textDisabled: '#413939',
-} as const
+export const fontSizes = {
+  xs: 12,
+  sm: 13,
+  md: 14,
+  base: 15,
+  lg: 16,
+  xl: 20,
+} as const;
+```
 
-export const spacing = {
-  xs: 8,
-  sm: 16,
-  md: 24,
-  lg: 32,
-  xl: 40,
-  xxl: 48,
-} as const
+```typescript
+// shared/theme/semantic-theme.ts
+export const semanticColors = {
+  background: colorPalette.neutral950,
+  surface: colorPalette.neutral900,
+  primary: colorPalette.brand600,
+  mutedForeground: colorPalette.brand300,
+} as const;
 
-export const typography = {
-  h1: { fontSize: 32, fontWeight: '700' as const, lineHeight: 40, fontFamily: 'PlayfairDisplay-Bold' },
-  h2: { fontSize: 24, fontWeight: '700' as const, lineHeight: 32, fontFamily: 'PlayfairDisplay-Bold' },
-  h3: { fontSize: 20, fontWeight: '600' as const, lineHeight: 28, fontFamily: 'PlayfairDisplay-SemiBold' },
-  body1: { fontSize: 16, fontWeight: '400' as const, lineHeight: 24, fontFamily: 'Raleway-Regular' },
-  body1Bold: { fontSize: 16, fontWeight: '600' as const, lineHeight: 24, fontFamily: 'Raleway-SemiBold' },
-  body2: { fontSize: 14, fontWeight: '400' as const, lineHeight: 20, fontFamily: 'Raleway-Regular' },
-  caption: { fontSize: 12, fontWeight: '400' as const, lineHeight: 16, fontFamily: 'Raleway-Regular' },
-} as const
+export const semanticTypography = {
+  h1: fontSizes.xl,
+  body: fontSizes.base,
+  caption: fontSizes.xs,
+} as const;
 
-export const borderRadius = {
-  sm: 4,
-  md: 8,
-  lg: 12,
-  xl: 16,
-  full: 9999,
-} as const
+export const semanticSpacing = {
+  xs: spacing(1),
+  md: spacing(2),
+  xl: spacing(4),
+} as const;
 ```
 
 ### 8.2 StyleSheet.create
@@ -777,13 +770,13 @@ export const borderRadius = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
-    padding: spacing.md,
+    backgroundColor: semanticColors.background,
+    padding: semanticSpacing.md,
   },
   title: {
-    ...typography.h2,
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
+    fontSize: semanticTypography.h1,
+    color: semanticColors.foreground,
+    marginBottom: semanticSpacing.sm,
   },
 })
 
@@ -797,15 +790,15 @@ const styles = StyleSheet.create({
 ### 8.3 Regras de estilização
 
 **DEVE:**
-- Toda cor, espaçamento e tipografia via `constants/theme.ts`
+- Toda cor, espaçamento e tipografia via `shared/theme` + `config/design-tokens.ts`
 - `StyleSheet.create({})` para todos os estilos estáticos
 - Respeitar `SafeAreaView` / `useSafeAreaInsets` em todas as telas
 - Usar `Platform.select` para diferenças iOS/Android quando necessário
 - Testar em ambas as plataformas antes de commitar
 
 **NUNCA:**
-- Valores mágicos: `padding: 16` (use `spacing.md`)
-- Cores hardcoded: `color: '#ffab1a'` (use `colors.primary`)
+- Valores mágicos: `padding: 16` (use `semanticSpacing.md`)
+- Cores hardcoded: `color: '#ffab1a'` (use `semanticColors.primary`)
 - `position: 'absolute'` sem comentário explicando por quê
 - Ignorar suporte a dark mode se o design system suportar
 
@@ -824,7 +817,7 @@ const styles = StyleSheet.create({
 
 | Alvo | Ferramenta | Obrigatório |
 |:-----|:-----------|:-----------:|
-| Hooks customizados (`hooks/`) | jest-expo + `renderHook` | ✅ |
+| Hooks customizados (`features/*/hooks` ou `shared/hooks`) | jest-expo + `renderHook` | ✅ |
 | Utilitários (`utils/`) | jest-expo | ✅ |
 | Serviços HTTP | jest-expo (`jest.mock('fetch')`) | ✅ |
 | Componentes com lógica condicional | jest-expo + @testing-library/react-native | ✅ |
@@ -855,8 +848,8 @@ module.exports = {
     '\\.(png|jpg|jpeg|gif|webp)$': '<rootDir>/__mocks__/imageMock.ts',
   },
   collectCoverageFrom: [
-    'components/**/*.{ts,tsx}',
-    'hooks/**/*.{ts,tsx}',
+    'shared/components/**/*.{ts,tsx}',
+    'features/**/hooks/**/*.{ts,tsx}',
     'services/**/*.{ts,tsx}',
     'utils/**/*.{ts,tsx}',
     '!**/*.d.ts',
@@ -891,7 +884,7 @@ jest.mock('expo-secure-store', () => ({
 ### 9.4 Teste de componente
 
 ```typescript
-// components/portfolio/__tests__/PortfolioCard.test.tsx
+// features/portfolio/components/__tests__/PortfolioCard.test.tsx
 import React from 'react'
 import { render, fireEvent, screen } from '@testing-library/react-native'
 import { PortfolioCard } from '../PortfolioCard'
@@ -937,7 +930,7 @@ describe('PortfolioCard', () => {
 ### 9.5 Teste de hooks
 
 ```typescript
-// hooks/__tests__/usePortfolios.test.ts
+// features/portfolio/hooks/__tests__/use-portfolios.test.ts
 import { renderHook, waitFor } from '@testing-library/react-native'
 import { usePortfolios } from '../usePortfolios'
 import { portfolioService } from '@/services/portfolioService'
@@ -1168,7 +1161,7 @@ npm run test:coverage  # jest-expo + coverage report
 npm run test:watch     # modo watch durante desenvolvimento
 
 # Arquivo específico:
-npx jest src/hooks/useBalance.test.ts --watch
+npx jest features/wallet/hooks/use-balance.test.ts --watch
 
 # Limpar cache (quando módulos mudam):
 npx jest --clearCache
@@ -1258,7 +1251,7 @@ Workflows adicionais:
 | Arquivo de serviço | camelCase | `portfolioService.ts` |
 | Arquivo de tipo | kebab-case | `portfolio.response.ts`, `portfolio.ts` |
 | Arquivo de teste | `*.test.tsx` | `PortfolioCard.test.tsx` |
-| Diretório de testes | `__tests__/` | `components/portfolio/__tests__/` |
+| Diretório de testes | `__tests__/` | `features/portfolio/components/__tests__/` |
 | Constante global | camelCase | `colors.primary`, `spacing.md` |
 | Variável de ambiente | `EXPO_PUBLIC_*` | `EXPO_PUBLIC_API_URL` |
 | Branch git | `tipo/escopo` | `feat/portfolio-detail-screen` |
@@ -1281,12 +1274,12 @@ src/
     theme/             ← TODOS os tokens de design (ver seção 15)
     types/             ← tipos globais compartilhados
     utils/             ← funções puras agnósticas
-    constants/         ← constantes globais
+    validators/        ← validações compartilhadas
 
   features/
     auth/
       components/      ← LoginForm, PinPad (só usados por auth)
-      hooks/           ← useAuth, useSession, useOTP
+      hooks/           ← use-auth, use-session, use-otp
       screens/         ← LoginScreen, ForgotPasswordScreen
       services/        ← authService (chama a API)
       types/           ← AuthUser, LoginPayload, SessionToken
@@ -1303,13 +1296,13 @@ src/
 ```typescript
 // ✅ Feature importa de shared
 import { Button } from '@/shared/components/Button'
-import { colors } from '@/shared/theme'
+import { semanticColors } from '@/shared/theme'
 
 // ✅ Feature importa de si mesma
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../hooks/use-auth'
 
 // ❌ NUNCA — feature importa de outra feature
-import { useTransactions } from '@/features/transactions/hooks/useTransactions'
+import { useTransactionsQuery } from '@/features/transactions/hooks/use-transactions-query'
 // ↑ isso em features/auth/ é uma violação
 ```
 

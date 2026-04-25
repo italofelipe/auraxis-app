@@ -46,18 +46,19 @@ auraxis-app/
       profile.tsx             → /profile
     _layout.tsx               # Root layout (providers, fontes, splash)
     +not-found.tsx            # 404
-  components/
-    base/                     # Primitivos: Button, Input, Card, Badge, etc.
-    domain/                   # Componentes de negócio: TransactionItem, GoalCard
-    layout/                   # AppHeader, BottomTabBar, SafeWrapper
-  hooks/                      # Custom hooks (lógica reutilizável)
-  services/                   # Clientes HTTP por domínio
+  core/                       # Runtime canônico (providers, telemetry, http, sessão, shell)
+  features/
+    transactions/             # Domínio de exemplo (components/hooks/services/types)
+  shared/
+    components/               # Componentes reutilizáveis (AppButton, AppCard)
+    theme/                    # Tokens semânticos e tema
+    utils/                    # Formatadores, helpers
+    validators/               # Validadores compartilhados
   stores/                     # Estado global (Context API ou Zustand)
   types/
     api/                      # Tipos de request/response da auraxis-api
     domain/                   # Tipos de domínio (Transaction, Goal, User)
-  constants/                  # Tema, cores, fontes, strings
-  utils/                      # Formatadores, validadores, helpers
+  schemas/                    # Schemas Zod compartilhados
   assets/                     # Imagens, fontes, ícones
   scripts/                    # Utilitários de dev
   app.json                    # Config Expo (pedir aprovação antes de alterar)
@@ -151,11 +152,11 @@ export type TransactionType = 'income' | 'expense'
 ### Functional components com TypeScript explícito
 
 ```tsx
-// components/domain/TransactionItem.tsx
+// features/transactions/components/TransactionItem.tsx
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import type { Transaction } from '@/types/domain/transaction'
-import { formatCurrency, formatDate } from '@/utils/formatters'
-import { colors } from '@/constants/theme'
+import { formatCurrency, formatDate } from '@/shared/utils/formatters'
+import { semanticColors, semanticSpacing, semanticTypography } from '@/shared/theme'
 
 interface Props {
   transaction: Transaction
@@ -195,13 +196,13 @@ export function TransactionItem({ transaction, onDelete, compact = false }: Prop
 }
 
 const styles = StyleSheet.create({
-  container: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12 },
+  container: { flexDirection: 'row', alignItems: 'center', paddingVertical: semanticSpacing.sm },
   info: { flex: 1 },
-  description: { fontSize: 16, fontWeight: '500' },
-  date: { fontSize: 12, color: colors.textSecondary, marginTop: 2 },
-  amount: { fontSize: 16, fontWeight: '600' },
-  expense: { color: colors.danger },
-  income: { color: colors.success },
+  description: { fontSize: semanticTypography.body },
+  date: { fontSize: semanticTypography.caption, color: semanticColors.mutedForeground, marginTop: semanticSpacing.xxs },
+  amount: { fontSize: semanticTypography.body },
+  expense: { color: semanticColors.danger },
+  income: { color: semanticColors.success },
 })
 ```
 
@@ -218,12 +219,12 @@ const styles = StyleSheet.create({
 | `testID` em elementos de interação | Para testes com Testing Library |
 | Nomes em PascalCase com extensão `.tsx` | `TransactionItem.tsx`, não `transactionItem.js` |
 
-### Componentes base em `components/base/`
+### Componentes base em `shared/components/`
 
 ```tsx
-// components/base/Button.tsx
+// shared/components/Button.tsx
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity } from 'react-native'
-import { colors, typography } from '@/constants/theme'
+import { semanticColors } from '@/shared/theme'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
@@ -254,7 +255,7 @@ export function Button({
       accessibilityState={{ disabled: disabled || loading }}
     >
       {loading
-        ? <ActivityIndicator color={variant === 'primary' ? '#fff' : colors.primary} />
+        ? <ActivityIndicator color={variant === 'primary' ? '#fff' : semanticColors.primary} />
         : <Text style={[styles.label, styles[`label_${variant}`]]}>{label}</Text>
       }
     </TouchableOpacity>
@@ -269,9 +270,9 @@ export function Button({
 ### Prefixo `use` obrigatório, um hook = uma preocupação
 
 ```typescript
-// hooks/useTransactions.ts
+// features/transactions/hooks/use-transactions.ts
 import { useCallback, useEffect, useState } from 'react'
-import { transactionService } from '@/services/transaction.service'
+import { transactionService } from '@/features/transactions/services/transactions-service'
 import type { Transaction } from '@/types/domain/transaction'
 import type { CreateTransactionDto } from '@/types/api/transaction'
 
@@ -625,74 +626,60 @@ export function useAuth(): AuthContextValue {
 
 // ✅ StyleSheet.create — processado nativamente, memoizado
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background, padding: spacing.md },
+  container: { flex: 1, backgroundColor: semanticColors.background, padding: semanticSpacing.md },
 })
 ```
 
-### Design system centralizado em `constants/theme.ts`
+### Design system centralizado em `config/design-tokens.ts` + `shared/theme`
 
 ```typescript
-// constants/theme.ts
+// config/design-tokens.ts
+export const colorPalette = {
+  neutral950: "#0b0909",
+  neutral900: "#262121",
+  brand600: "#ffab1a",
+  brand500: "#ffbe4d",
+  brand300: "#ffd180",
+} as const;
 
-export const colors = {
-  primary: '#5C6BC0',
-  primaryLight: '#8E99F3',
-  success: '#43A047',
-  danger: '#E53935',
-  warning: '#FB8C00',
-  background: '#FAFAFA',
-  surface: '#FFFFFF',
-  textPrimary: '#212121',
-  textSecondary: '#757575',
-  border: '#E0E0E0',
-} as const
+export const spacing = (step: number): number => step * 8;
 
-export const spacing = {
-  xs: 4,
-  sm: 8,
-  md: 16,
-  lg: 24,
-  xl: 32,
-  xxl: 48,
-} as const
-
-export const typography = {
-  h1: { fontSize: 32, fontWeight: '700' as const, lineHeight: 40 },
-  h2: { fontSize: 24, fontWeight: '700' as const, lineHeight: 32 },
-  h3: { fontSize: 20, fontWeight: '600' as const, lineHeight: 28 },
-  body: { fontSize: 16, fontWeight: '400' as const, lineHeight: 24 },
-  caption: { fontSize: 12, fontWeight: '400' as const, lineHeight: 16 },
-} as const
-
-export const radius = {
-  sm: 4,
-  md: 8,
+export const fontSizes = {
+  xs: 12,
+  sm: 13,
+  md: 14,
+  base: 15,
   lg: 16,
-  full: 9999,
-} as const
+  xl: 20,
+} as const;
+```
 
-export const shadow = {
-  sm: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-} as const
+```typescript
+// shared/theme/semantic-theme.ts
+export const semanticColors = {
+  background: colorPalette.neutral950,
+  surface: colorPalette.neutral900,
+  primary: colorPalette.brand600,
+  mutedForeground: colorPalette.brand300,
+} as const;
+
+export const semanticTypography = {
+  h1: fontSizes.xl,
+  body: fontSizes.base,
+  caption: fontSizes.xs,
+} as const;
+
+export const semanticSpacing = {
+  xs: spacing(1),
+  md: spacing(2),
+  xl: spacing(4),
+} as const;
 ```
 
 ### Suporte a dark mode
 
 ```typescript
-import { useColorScheme } from '@/hooks/use-color-scheme'
+import { useColorScheme } from 'react-native'
 
 export function useThemeColors() {
   const scheme = useColorScheme()
@@ -707,7 +694,7 @@ export function useThemeColors() {
 ### Jest + React Native Testing Library
 
 ```tsx
-// components/domain/__tests__/TransactionItem.test.tsx
+// features/transactions/components/__tests__/TransactionItem.test.tsx
 import { render, fireEvent, screen } from '@testing-library/react-native'
 import { TransactionItem } from '../TransactionItem'
 import { mockTransaction } from '@/tests/factories/transaction.factory'
@@ -927,6 +914,6 @@ Para referência completa dos thresholds e CI: `.context/quality_gates.md`
 - Governança: `auraxis-platform/.context/07_steering_global.md`
 - Contrato de agente: `../CLAUDE.md`
 - Quality gates: `.context/quality_gates.md`
-- Tasks: `tasks.md`
+- Tasks: GitHub Projects (fonte de verdade)
 - Expo Router docs: https://docs.expo.dev/router/introduction/
 - React Native docs: https://reactnative.dev/docs/getting-started

@@ -97,6 +97,12 @@ describe("DashboardScreen", () => {
         balance: 1500,
       },
       currentBalance: 1500,
+      savingsRate: {
+        rate: 0.5,
+        level: "excellent",
+        summary: "Excelente taxa de poupanca!",
+      },
+      greetingName: "Italo",
       setSelectedMonth: jest.fn(),
     });
 
@@ -106,7 +112,7 @@ describe("DashboardScreen", () => {
       </TestProviders>,
     );
 
-    expect(getByText("Saldo geral")).toBeTruthy();
+    expect(getByText(/Saldo geral/u)).toBeTruthy();
     expect(getByText("abril de 2026")).toBeTruthy();
     expect(getByText(/Receitas:/u)).toBeTruthy();
   });
