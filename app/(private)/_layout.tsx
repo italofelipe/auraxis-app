@@ -56,6 +56,12 @@ function PrivateLayoutContent(): ReactElement | null {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="compartilhamentos"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
