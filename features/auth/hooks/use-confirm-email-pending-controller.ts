@@ -1,6 +1,7 @@
 import { useRouter } from "expo-router";
 import { useState } from "react";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { useSessionStore } from "@/core/session/session-store";
 import { useResendConfirmationMutation } from "@/features/auth/hooks/use-auth-mutations";
 import { maskEmail } from "@/features/auth/utils/email-mask";
@@ -46,7 +47,7 @@ export function useConfirmEmailPendingController(): ConfirmEmailPendingControlle
       setResendSucceeded(false);
     },
     handleSkip: () => {
-      router.replace("/dashboard");
+      router.replace(appRoutes.private.dashboard);
     },
   };
 }
