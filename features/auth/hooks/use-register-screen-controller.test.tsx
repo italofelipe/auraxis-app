@@ -5,7 +5,10 @@ import {
   useLoginMutation,
   useRegisterMutation,
 } from "@/features/auth/hooks/use-auth-mutations";
-import { useRegisterScreenController } from "@/features/auth/hooks/use-register-screen-controller";
+import {
+  useRegisterScreenController,
+  type RegisterScreenController,
+} from "@/features/auth/hooks/use-register-screen-controller";
 
 const mockReplace = jest.fn();
 
@@ -49,8 +52,6 @@ const buildMutationStub = (override: Partial<MutationStub> = {}): MutationStub =
   error: null,
   ...override,
 });
-
-import type { RegisterScreenController } from "@/features/auth/hooks/use-register-screen-controller";
 
 const fillValidForm = async (controller: RegisterScreenController) => {
   await act(async () => {
