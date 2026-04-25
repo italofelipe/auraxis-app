@@ -108,6 +108,7 @@ export const apiEndpointCatalog = {
     "GET /subscriptions/me",
     "POST /subscriptions/checkout",
     "POST /subscriptions/cancel",
+    "POST /subscriptions/trial",
     "POST /subscriptions/webhook",
   ],
   observability: [
