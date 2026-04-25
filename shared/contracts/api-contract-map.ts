@@ -19,7 +19,13 @@ import type {
   EntitlementCheckQuery,
   EntitlementCheckResult,
 } from "@/features/entitlements/contracts";
-import type { GoalListResponse } from "@/features/goals/contracts";
+import type {
+  CreateGoalCommand,
+  GoalDetailResponse,
+  GoalListResponse,
+  GoalRecord,
+  UpdateGoalCommand,
+} from "@/features/goals/contracts";
 import type {
   ObservabilityMetricsSnapshot,
   ObservabilitySnapshot,
@@ -315,6 +321,46 @@ export const apiContractMap = {
   goalsList: defineApiContract<"GET", "/goals", never, GoalListResponse>({
     method: "GET",
     path: "/goals",
+    authRequired: true,
+  }),
+  goalsCreate: defineApiContract<
+    "POST",
+    "/goals",
+    CreateGoalCommand,
+    GoalRecord
+  >({
+    method: "POST",
+    path: "/goals",
+    authRequired: true,
+  }),
+  goalDetail: defineApiContract<
+    "GET",
+    "/goals/{goal_id}",
+    never,
+    GoalDetailResponse
+  >({
+    method: "GET",
+    path: "/goals/{goal_id}",
+    authRequired: true,
+  }),
+  goalUpdate: defineApiContract<
+    "PATCH",
+    "/goals/{goal_id}",
+    UpdateGoalCommand,
+    GoalRecord
+  >({
+    method: "PATCH",
+    path: "/goals/{goal_id}",
+    authRequired: true,
+  }),
+  goalDelete: defineApiContract<
+    "DELETE",
+    "/goals/{goal_id}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/goals/{goal_id}",
     authRequired: true,
   }),
   walletSummary: defineApiContract<"GET", "/wallet", never, WalletSummary>({
