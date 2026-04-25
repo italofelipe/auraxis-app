@@ -108,6 +108,8 @@ const config = {
     "features/subscription/hooks/use-checkout-flow.ts",
     "features/subscription/hooks/use-subscription-screen-controller.ts",
     "features/entitlements/hooks/use-entitlements-foreground-refresh.ts",
+    "features/shared-entries/services/shared-entries-classifier.ts",
+    "features/shared-entries/hooks/use-shared-entries-screen-controller.ts",
     "features/alerts/components/alert-record-card.tsx",
     "features/alerts/components/alert-preference-row.tsx",
     "features/entitlements/components/paywall-gate.tsx",
