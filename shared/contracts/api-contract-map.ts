@@ -36,7 +36,12 @@ import type {
   CreateCheckoutCommand,
   SubscriptionState,
 } from "@/features/subscription/contracts";
-import type { WalletSummary } from "@/features/wallet/contracts";
+import type {
+  CreateWalletEntryCommand,
+  UpdateWalletEntryCommand,
+  WalletEntry,
+  WalletSummary,
+} from "@/features/wallet/contracts";
 import type {
   AlertListResponse,
   AlertPreferenceListResponse,
@@ -366,6 +371,46 @@ export const apiContractMap = {
   walletSummary: defineApiContract<"GET", "/wallet", never, WalletSummary>({
     method: "GET",
     path: "/wallet",
+    authRequired: true,
+  }),
+  walletCreate: defineApiContract<
+    "POST",
+    "/wallet",
+    CreateWalletEntryCommand,
+    WalletEntry
+  >({
+    method: "POST",
+    path: "/wallet",
+    authRequired: true,
+  }),
+  walletDetail: defineApiContract<
+    "GET",
+    "/wallet/{investment_id}",
+    never,
+    WalletEntry
+  >({
+    method: "GET",
+    path: "/wallet/{investment_id}",
+    authRequired: true,
+  }),
+  walletUpdate: defineApiContract<
+    "PATCH",
+    "/wallet/{investment_id}",
+    UpdateWalletEntryCommand,
+    WalletEntry
+  >({
+    method: "PATCH",
+    path: "/wallet/{investment_id}",
+    authRequired: true,
+  }),
+  walletDelete: defineApiContract<
+    "DELETE",
+    "/wallet/{investment_id}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/wallet/{investment_id}",
     authRequired: true,
   }),
   alertsList: defineApiContract<"GET", "/alerts", never, AlertListResponse>({
