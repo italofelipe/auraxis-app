@@ -12,3 +12,23 @@ export interface GoalListResponse {
 }
 
 export type GoalSummary = GoalRecord;
+
+export interface CreateGoalCommand {
+  readonly title: string;
+  readonly targetAmount: number;
+  readonly currentAmount?: number;
+  readonly targetDate?: string | null;
+}
+
+export interface UpdateGoalCommand {
+  readonly goalId: string;
+  readonly title?: string;
+  readonly targetAmount?: number;
+  readonly currentAmount?: number;
+  readonly targetDate?: string | null;
+  readonly status?: string;
+}
+
+export interface GoalDetailResponse {
+  readonly goal: GoalRecord;
+}

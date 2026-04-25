@@ -2,8 +2,13 @@ import { useMemo, type ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { useGoalsScreenController } from "@/features/goals/hooks/use-goals-screen-controller";
+import { GoalForm } from "@/features/goals/components/goal-form";
+import {
+  useGoalsScreenController,
+  type GoalsScreenController,
+} from "@/features/goals/hooks/use-goals-screen-controller";
 import type { GoalProgressView } from "@/features/goals/services/goal-progress-calculator";
+import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
@@ -21,8 +26,7 @@ const STATIC_GOALS_OPTIONS = {
   },
   empty: {
     title: "Nenhuma meta encontrada",
-    description:
-      "Crie sua primeira meta para comecar a acompanhar seu progresso.",
+    description: "Crie sua primeira meta para comecar a acompanhar seu progresso.",
   },
   error: {
     fallbackTitle: "Nao foi possivel carregar as metas",
@@ -33,11 +37,78 @@ const STATIC_GOALS_OPTIONS = {
 /**
  * Canonical goals screen composition for the mobile app.
  *
- * @returns Goal list with progress, loading, empty and error states.
+ * @returns Goal list with create/edit/delete actions or active form panel.
  */
 export function GoalsScreen(): ReactElement {
   const controller = useGoalsScreenController();
 
+  if (controller.formMode.kind !== "closed") {
+    return (
+      <AppScreen>
+        <GoalForm
+          initialGoal={
+            controller.formMode.kind === "edit" ? controller.formMode.goal : null
+          }
+          isSubmitting={controller.isSubmitting}
+          submitError={controller.submitError}
+          onSubmit={controller.handleSubmit}
+          onCancel={controller.handleCloseForm}
+          onDismissError={controller.dismissSubmitError}
+        />
+      </AppScreen>
+    );
+  }
+
+  return (
+    <AppScreen>
+      <SummaryCard controller={controller} />
+      <GoalsListCard controller={controller} />
+    </AppScreen>
+  );
+}
+
+interface ControllerProps {
+  readonly controller: GoalsScreenController;
+}
+
+function SummaryCard({ controller }: ControllerProps): ReactElement {
+  return (
+    <AppSurfaceCard
+      title="Suas metas"
+      description="Acompanhe o progresso das suas metas financeiras."
+    >
+      <YStack gap="$3">
+        <XStack gap="$3" flexWrap="wrap">
+          <SummaryStat label="Total" value={controller.summary.total} />
+          <SummaryStat label="Ativas" value={controller.summary.active} />
+          <SummaryStat label="Concluidas" value={controller.summary.completed} />
+        </XStack>
+        <AppButton onPress={controller.handleOpenCreate}>Nova meta</AppButton>
+      </YStack>
+    </AppSurfaceCard>
+  );
+}
+
+function SummaryStat({
+  label,
+  value,
+}: {
+  readonly label: string;
+  readonly value: number;
+}): ReactElement {
+  return (
+    <YStack gap="$1">
+      <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+        {label}
+      </Paragraph>
+      <Paragraph color="$color" fontFamily="$heading" fontSize="$6">
+        {value}
+      </Paragraph>
+    </YStack>
+  );
+}
+
+function GoalsListCard({ controller }: ControllerProps): ReactElement {
   const queryStateOptions = useMemo(
     () => ({
       ...STATIC_GOALS_OPTIONS,
@@ -48,80 +119,67 @@ export function GoalsScreen(): ReactElement {
   );
 
   return (
-    <AppScreen>
-      <AppSurfaceCard
-        title="Suas metas"
-        description="Acompanhe o progresso das suas metas financeiras."
-      >
-        <XStack gap="$3" flexWrap="wrap">
-          <YStack gap="$1">
-            <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-              Total
-            </Paragraph>
-            <Paragraph color="$color" fontFamily="$heading" fontSize="$6">
-              {controller.summary.total}
-            </Paragraph>
+    <AppSurfaceCard
+      title="Lista"
+      description="Metas em andamento aparecem primeiro."
+    >
+      <AppQueryState query={controller.goalsQuery} options={queryStateOptions}>
+        {() => (
+          <YStack gap="$3">
+            {controller.goals.map((goal) => (
+              <GoalRow
+                key={goal.id}
+                goal={goal}
+                isDeleting={controller.deletingGoalId === goal.id}
+                onEdit={() => controller.handleOpenEdit(goal)}
+                onDelete={() => {
+                  void controller.handleDelete(goal.id);
+                }}
+              />
+            ))}
           </YStack>
-          <YStack gap="$1">
-            <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-              Ativas
-            </Paragraph>
-            <Paragraph color="$color" fontFamily="$heading" fontSize="$6">
-              {controller.summary.active}
-            </Paragraph>
-          </YStack>
-          <YStack gap="$1">
-            <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-              Concluidas
-            </Paragraph>
-            <Paragraph color="$color" fontFamily="$heading" fontSize="$6">
-              {controller.summary.completed}
-            </Paragraph>
-          </YStack>
-        </XStack>
-      </AppSurfaceCard>
-
-      <AppSurfaceCard
-        title="Lista"
-        description="Metas em andamento aparecem primeiro."
-      >
-        <AppQueryState query={controller.goalsQuery} options={queryStateOptions}>
-          {() => <GoalsList goals={controller.goals} />}
-        </AppQueryState>
-      </AppSurfaceCard>
-    </AppScreen>
+        )}
+      </AppQueryState>
+    </AppSurfaceCard>
   );
 }
 
-interface GoalsListProps {
-  readonly goals: readonly GoalProgressView[];
+interface GoalRowProps {
+  readonly goal: GoalProgressView;
+  readonly isDeleting: boolean;
+  readonly onEdit: () => void;
+  readonly onDelete: () => void;
 }
 
-function GoalsList({ goals }: GoalsListProps): ReactElement {
+function GoalRow({ goal, isDeleting, onEdit, onDelete }: GoalRowProps): ReactElement {
   return (
-    <YStack gap="$3">
-      {goals.map((goal) => (
-        <AppKeyValueRow
-          key={goal.id}
-          label={goal.title}
-          value={
-            <YStack alignItems="flex-end" gap="$1">
-              <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-                {formatCurrency(goal.currentAmount)} /{" "}
-                {formatCurrency(goal.targetAmount)}
-              </Paragraph>
-              <Paragraph
-                color={goal.isCompleted ? "$success" : "$muted"}
-                fontFamily="$body"
-                fontSize="$3"
-              >
-                {goal.progress}%
-                {goal.isCompleted ? " · concluida" : ""}
-              </Paragraph>
-            </YStack>
-          }
-        />
-      ))}
+    <YStack gap="$2">
+      <AppKeyValueRow
+        label={goal.title}
+        value={
+          <YStack alignItems="flex-end" gap="$1">
+            <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+              {formatCurrency(goal.currentAmount)} /{" "}
+              {formatCurrency(goal.targetAmount)}
+            </Paragraph>
+            <Paragraph
+              color={goal.isCompleted ? "$success" : "$muted"}
+              fontFamily="$body"
+              fontSize="$3"
+            >
+              {goal.progress}%{goal.isCompleted ? " · concluida" : ""}
+            </Paragraph>
+          </YStack>
+        }
+      />
+      <XStack gap="$2" flexWrap="wrap">
+        <AppButton tone="secondary" onPress={onEdit} disabled={isDeleting}>
+          Editar
+        </AppButton>
+        <AppButton tone="secondary" onPress={onDelete} disabled={isDeleting}>
+          {isDeleting ? "Excluindo..." : "Excluir"}
+        </AppButton>
+      </XStack>
     </YStack>
   );
 }
