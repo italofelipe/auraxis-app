@@ -23,6 +23,7 @@ export const appRoutes = {
     installmentVsCash: "/installment-vs-cash",
     confirmEmailPending: "/confirm-email-pending",
     sharedEntries: "/compartilhamentos",
+    transactions: "/transacoes",
   },
 } as const;
 
@@ -177,6 +178,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "sharedEntries",
     path: appRoutes.private.sharedEntries,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "transactions",
+    path: appRoutes.private.transactions,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,

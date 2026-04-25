@@ -115,6 +115,7 @@ const config = {
     "features/auth/hooks/use-reset-password-screen-controller.ts",
     "features/goals/hooks/use-goals-mutations.ts",
     "features/goals/validators.ts",
+    "features/transactions/validators.ts",
     "features/alerts/components/alert-record-card.tsx",
     "features/alerts/components/alert-preference-row.tsx",
     "features/entitlements/components/paywall-gate.tsx",
