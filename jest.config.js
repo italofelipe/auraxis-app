@@ -103,6 +103,7 @@ const config = {
     "features/dashboard/services/savings-rate-calculator.ts",
     "features/goals/services/goal-progress-calculator.ts",
     "features/goals/hooks/use-goals-screen-controller.ts",
+    "core/navigation/auth-redirect-context.ts",
     "features/alerts/components/alert-record-card.tsx",
     "features/alerts/components/alert-preference-row.tsx",
     "features/entitlements/components/paywall-gate.tsx",

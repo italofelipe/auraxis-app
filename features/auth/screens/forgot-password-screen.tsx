@@ -1,9 +1,10 @@
 import type { ReactElement } from "react";
 
-import { Controller } from "react-hook-form";
+import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { Paragraph, YStack } from "tamagui";
 
 import { useForgotPasswordScreenController } from "@/features/auth/hooks/use-forgot-password-screen-controller";
+import type { ForgotPasswordFormValues } from "@/features/auth/validators";
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
@@ -18,33 +19,13 @@ import { AsyncStateNotice } from "@/shared/components/async-state-notice";
  */
 export function ForgotPasswordScreen(): ReactElement {
   const controller = useForgotPasswordScreenController();
-  const {
-    control,
-    formState: { errors },
-  } = controller.form;
 
   if (controller.status === "success") {
     return (
-      <AppScreen>
-        <AppSurfaceCard
-          title="E-mail enviado"
-          description="Verifique sua caixa de entrada nos proximos minutos."
-        >
-          <YStack gap="$4">
-            <AsyncStateNotice
-              kind="empty"
-              title="Pronto!"
-              description="Se esse e-mail estiver cadastrado, voce recebera um link de recuperacao em instantes. Cheque tambem a pasta de spam."
-            />
-            <AppButton onPress={controller.handleBackToLogin}>
-              Voltar para login
-            </AppButton>
-            <AppButton tone="secondary" onPress={controller.handleResubmit}>
-              Enviar para outro e-mail
-            </AppButton>
-          </YStack>
-        </AppSurfaceCard>
-      </AppScreen>
+      <ForgotPasswordSuccess
+        onBackToLogin={controller.handleBackToLogin}
+        onResubmit={controller.handleResubmit}
+      />
     );
   }
 
@@ -55,22 +36,9 @@ export function ForgotPasswordScreen(): ReactElement {
         description="Informe seu e-mail para receber as instrucoes."
       >
         <YStack gap="$4">
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <AppInputField
-                id="forgot-password-email"
-                label="E-mail"
-                placeholder="seu@email.com"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={value}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                errorText={errors.email?.message}
-              />
-            )}
+          <ForgotPasswordEmailField
+            control={controller.form.control}
+            errors={controller.form.formState.errors}
           />
 
           <AppButton
@@ -103,5 +71,68 @@ export function ForgotPasswordScreen(): ReactElement {
         </YStack>
       </AppSurfaceCard>
     </AppScreen>
+  );
+}
+
+interface ForgotPasswordSuccessProps {
+  readonly onBackToLogin: () => void;
+  readonly onResubmit: () => void;
+}
+
+function ForgotPasswordSuccess({
+  onBackToLogin,
+  onResubmit,
+}: ForgotPasswordSuccessProps): ReactElement {
+  return (
+    <AppScreen>
+      <AppSurfaceCard
+        title="E-mail enviado"
+        description="Verifique sua caixa de entrada nos proximos minutos."
+      >
+        <YStack gap="$4">
+          <AsyncStateNotice
+            kind="empty"
+            title="Pronto!"
+            description="Se esse e-mail estiver cadastrado, voce recebera um link de recuperacao em instantes. Cheque tambem a pasta de spam."
+          />
+          <AppButton onPress={onBackToLogin}>Voltar para login</AppButton>
+          <AppButton tone="secondary" onPress={onResubmit}>
+            Enviar para outro e-mail
+          </AppButton>
+        </YStack>
+      </AppSurfaceCard>
+    </AppScreen>
+  );
+}
+
+interface ForgotPasswordEmailFieldProps {
+  readonly control: Control<ForgotPasswordFormValues>;
+  readonly errors: FieldErrors<ForgotPasswordFormValues>;
+}
+
+function ForgotPasswordEmailField({
+  control,
+  errors,
+}: ForgotPasswordEmailFieldProps): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="email"
+      render={({ field: { onChange, onBlur, value } }) => (
+        <AppInputField
+          id="forgot-password-email"
+          label="E-mail"
+          placeholder="seu@email.com"
+          autoCapitalize="none"
+          autoComplete="email"
+          keyboardType="email-address"
+          textContentType="emailAddress"
+          value={value}
+          onBlur={onBlur}
+          onChangeText={onChange}
+          errorText={errors.email?.message}
+        />
+      )}
+    />
   );
 }

@@ -1,5 +1,7 @@
-import type { RedirectProps } from "expo-router";
+import { usePathname, type RedirectProps } from "expo-router";
+import { useEffect } from "react";
 
+import { useAuthRedirectStore } from "@/core/navigation/auth-redirect-context";
 import {
   resolvePrivateRouteGuard,
   resolvePublicRouteGuard,
@@ -26,7 +28,18 @@ const useRouteState = (): {
 };
 
 export const usePrivateRouteGuard = (): RouteGuardHookResult => {
-  return resolvePrivateRouteGuard(useRouteState());
+  const pathname = usePathname();
+  const captureRedirect = useAuthRedirectStore((state) => state.capture);
+  const result = resolvePrivateRouteGuard(useRouteState());
+
+  useEffect(() => {
+    if (result.redirectTo === null) {
+      return;
+    }
+    captureRedirect(pathname);
+  }, [result.redirectTo, pathname, captureRedirect]);
+
+  return result;
 };
 
 export const usePublicRouteGuard = (): RouteGuardHookResult => {
