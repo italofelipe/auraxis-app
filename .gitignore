@@ -47,3 +47,7 @@ designs/
 * 2.*
 * 3
 * 3.*
+
+# Local git worktrees (never commit checkouts of other branches)
+_worktrees/
+repos/

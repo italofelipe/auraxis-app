@@ -5,7 +5,7 @@
 ## Task Reference
 
 - Task ID: `APPx` / `PLTx` / `Bxx` (if integration)
-- Backlog updated in `/Users/italochagas/Desktop/projetos/auraxis-platform/repos/auraxis-app/tasks.md`: [ ] yes
+- GitHub Projects card updated (Status/Progress/Commit/Updated At): [ ] yes
 
 ## Validation
 

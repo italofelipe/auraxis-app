@@ -1,15 +1,22 @@
 import type { ReactElement } from "react";
 
-import { Controller } from "react-hook-form";
+import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { Paragraph, YStack } from "tamagui";
 
 import { useLoginScreenController } from "@/features/auth/hooks/use-login-screen-controller";
+import type { LoginFormValues } from "@/features/auth/validators";
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { AsyncStateNotice } from "@/shared/components/async-state-notice";
+
+interface SessionFailureNotice {
+  readonly title: string;
+  readonly description: string;
+  readonly dismissLabel: string | null;
+}
 
 /**
  * Canonical login screen composition for the mobile app.
@@ -18,72 +25,32 @@ import { AsyncStateNotice } from "@/shared/components/async-state-notice";
  */
 export function LoginScreen(): ReactElement {
   const controller = useLoginScreenController();
-  const {
-    control,
-    formState: { errors },
-  } = controller.form;
 
   return (
     <AppScreen>
-      <AppSurfaceCard title="Entrar" description="Acesso a area logada.">
+      <AppSurfaceCard
+        title="Bem-vindo de volta"
+        description="Faca login na sua conta para continuar."
+      >
         <YStack gap="$4">
           {controller.sessionFailureNotice ? (
-            <YStack gap="$3">
-              <AsyncStateNotice
-                kind="error"
-                title={controller.sessionFailureNotice.title}
-                description={controller.sessionFailureNotice.description}
-              />
-              {controller.sessionFailureNotice.dismissLabel ? (
-                <AppButton
-                  tone="secondary"
-                  onPress={controller.dismissSessionFailureNotice}>
-                  {controller.sessionFailureNotice.dismissLabel}
-                </AppButton>
-              ) : null}
-            </YStack>
+            <SessionFailureNoticeBlock
+              notice={controller.sessionFailureNotice}
+              onDismiss={controller.dismissSessionFailureNotice}
+            />
           ) : null}
 
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <AppInputField
-                id="login-email"
-                label="E-mail"
-                placeholder="E-mail"
-                autoCapitalize="none"
-                keyboardType="email-address"
-                value={value}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                errorText={errors.email?.message}
-              />
-            )}
-          />
-
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onChange, onBlur, value } }) => (
-              <AppInputField
-                id="login-password"
-                label="Senha"
-                placeholder="Senha"
-                secureTextEntry
-                value={value}
-                onBlur={onBlur}
-                onChangeText={onChange}
-                errorText={errors.password?.message}
-              />
-            )}
+          <LoginFields
+            control={controller.form.control}
+            errors={controller.form.formState.errors}
           />
 
           <AppButton
             onPress={() => {
               void controller.handleSubmit();
             }}
-            disabled={controller.isSubmitting}>
+            disabled={controller.isSubmitting}
+          >
             {controller.isSubmitting ? "Entrando..." : "Entrar"}
           </AppButton>
 
@@ -103,27 +70,121 @@ export function LoginScreen(): ReactElement {
         </YStack>
       </AppSurfaceCard>
 
-      <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-        Placeholder estrutural da rota de login, agora restrito a `features/auth`,
-        `shared/*` e `core/*`.
-      </Paragraph>
+      <RegisterCallToAction onPress={controller.handleRegister} />
 
-      <YStack gap="$2">
-        <AppButton
-          tone="secondary"
-          onPress={() => {
-            void controller.handleOpenTerms();
-          }}>
-          Termos de Uso
-        </AppButton>
-        <AppButton
-          tone="secondary"
-          onPress={() => {
-            void controller.handleOpenPrivacy();
-          }}>
-          Politica de Privacidade
-        </AppButton>
-      </YStack>
+      <LegalLinks
+        onOpenTerms={() => {
+          void controller.handleOpenTerms();
+        }}
+        onOpenPrivacy={() => {
+          void controller.handleOpenPrivacy();
+        }}
+      />
     </AppScreen>
+  );
+}
+
+interface LoginFieldsProps {
+  readonly control: Control<LoginFormValues>;
+  readonly errors: FieldErrors<LoginFormValues>;
+}
+
+function LoginFields({ control, errors }: LoginFieldsProps): ReactElement {
+  return (
+    <YStack gap="$4">
+      <Controller
+        control={control}
+        name="email"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppInputField
+            id="login-email"
+            label="E-mail"
+            placeholder="seu@email.com"
+            autoCapitalize="none"
+            autoComplete="email"
+            keyboardType="email-address"
+            textContentType="emailAddress"
+            value={value}
+            onBlur={onBlur}
+            onChangeText={onChange}
+            errorText={errors.email?.message}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="password"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppInputField
+            id="login-password"
+            label="Senha"
+            placeholder="Sua senha"
+            autoComplete="password"
+            textContentType="password"
+            secureTextEntry
+            value={value}
+            onBlur={onBlur}
+            onChangeText={onChange}
+            errorText={errors.password?.message}
+          />
+        )}
+      />
+    </YStack>
+  );
+}
+
+interface SessionFailureNoticeBlockProps {
+  readonly notice: SessionFailureNotice;
+  readonly onDismiss: () => void;
+}
+
+function SessionFailureNoticeBlock({
+  notice,
+  onDismiss,
+}: SessionFailureNoticeBlockProps): ReactElement {
+  return (
+    <YStack gap="$3">
+      <AsyncStateNotice
+        kind="error"
+        title={notice.title}
+        description={notice.description}
+      />
+      {notice.dismissLabel ? (
+        <AppButton tone="secondary" onPress={onDismiss}>
+          {notice.dismissLabel}
+        </AppButton>
+      ) : null}
+    </YStack>
+  );
+}
+
+function RegisterCallToAction({ onPress }: { readonly onPress: () => void }): ReactElement {
+  return (
+    <YStack gap="$2" alignItems="center">
+      <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+        Ainda nao tem conta?
+      </Paragraph>
+      <AppButton tone="secondary" onPress={onPress}>
+        Criar conta
+      </AppButton>
+    </YStack>
+  );
+}
+
+interface LegalLinksProps {
+  readonly onOpenTerms: () => void;
+  readonly onOpenPrivacy: () => void;
+}
+
+function LegalLinks({ onOpenTerms, onOpenPrivacy }: LegalLinksProps): ReactElement {
+  return (
+    <YStack gap="$2">
+      <AppButton tone="secondary" onPress={onOpenTerms}>
+        Termos de Uso
+      </AppButton>
+      <AppButton tone="secondary" onPress={onOpenPrivacy}>
+        Politica de Privacidade
+      </AppButton>
+    </YStack>
   );
 }

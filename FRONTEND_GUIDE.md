@@ -914,6 +914,6 @@ Para referência completa dos thresholds e CI: `.context/quality_gates.md`
 - Governança: `auraxis-platform/.context/07_steering_global.md`
 - Contrato de agente: `../CLAUDE.md`
 - Quality gates: `.context/quality_gates.md`
-- Tasks: `tasks.md`
+- Tasks: GitHub Projects (fonte de verdade)
 - Expo Router docs: https://docs.expo.dev/router/introduction/
 - React Native docs: https://reactnative.dev/docs/getting-started
