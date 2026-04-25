@@ -9,9 +9,14 @@ export {
   typography,
 } from "@/config/design-tokens";
 export {
+  iconLibrary,
+  iconSizes,
   semanticColors,
   semanticRadii,
+  semanticShadows,
   semanticSpacing,
   semanticTypography,
+  type IconSizeKey,
+  type SemanticShadowKey,
 } from "@/shared/theme/semantic-theme";
 export { motionDurations, motionOpacity, motionScales } from "@/shared/theme/motion";
