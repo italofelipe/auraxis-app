@@ -16,6 +16,7 @@ export class GoalProgressCalculator {
    * @param goal - Raw goal record from the API contract.
    * @returns Decorated goal with progress %, remaining amount and completion flag.
    */
+  // eslint-disable-next-line class-methods-use-this
   calculate(goal: GoalRecord): GoalProgressView {
     const target = Number.isFinite(goal.targetAmount) ? Math.max(goal.targetAmount, 0) : 0;
     const rawCurrent = Number.isFinite(goal.currentAmount) ? goal.currentAmount : 0;

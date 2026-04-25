@@ -18,6 +18,19 @@ const SUMMARIES: Record<SavingsRateLevel, string> = {
   excellent: "Excelente taxa de poupanca!",
 };
 
+const classifyRate = (rate: number): SavingsRateLevel => {
+  if (rate <= 0) {
+    return "negative";
+  }
+  if (rate < 0.1) {
+    return "low";
+  }
+  if (rate < 0.3) {
+    return "healthy";
+  }
+  return "excellent";
+};
+
 /**
  * Computes a deterministic savings rate (savings / income) and classifies it.
  *
@@ -30,6 +43,7 @@ export class SavingsRateCalculator {
    * @param input - Period incomes and expenses.
    * @returns Savings rate (0..1), level label and a short summary in pt-BR.
    */
+  // eslint-disable-next-line class-methods-use-this
   assess(input: SavingsRateInput): SavingsRateAssessment {
     const incomes = Number.isFinite(input.incomes) ? input.incomes : 0;
     const expenses = Number.isFinite(input.expenses) ? input.expenses : 0;
@@ -40,15 +54,8 @@ export class SavingsRateCalculator {
 
     const savings = incomes - expenses;
     const rate = savings / incomes;
-    const level = this.classify(rate);
+    const level = classifyRate(rate);
     return { rate, level, summary: SUMMARIES[level] };
-  }
-
-  private classify(rate: number): SavingsRateLevel {
-    if (rate <= 0) return "negative";
-    if (rate < 0.1) return "low";
-    if (rate < 0.3) return "healthy";
-    return "excellent";
   }
 }
 

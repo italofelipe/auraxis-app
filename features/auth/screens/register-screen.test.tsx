@@ -3,6 +3,8 @@ import { render } from "@testing-library/react-native";
 import { AppProviders } from "@/core/providers/app-providers";
 import { RegisterScreen } from "@/features/auth/screens/register-screen";
 
+import { useRegisterScreenController } from "@/features/auth/hooks/use-register-screen-controller";
+
 const mockController = {
   form: {
     control: {} as never,
@@ -42,8 +44,6 @@ jest.mock("react-hook-form", () => {
       }) as never,
   };
 });
-
-import { useRegisterScreenController } from "@/features/auth/hooks/use-register-screen-controller";
 
 const mockedUseController = jest.mocked(useRegisterScreenController);
 

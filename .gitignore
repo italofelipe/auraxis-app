@@ -41,6 +41,13 @@ designs/
 # Maestro E2E reports
 .maestro/reports/
 
+# iCloud Drive / Finder duplicates (name patterns: "foo 2.ext" and "foo 2")
+# Break Expo bundler auto-discovery when they land in app/ or components/.
+* 2
+* 2.*
+* 3
+* 3.*
+
 # Local git worktrees (never commit checkouts of other branches)
 _worktrees/
 repos/

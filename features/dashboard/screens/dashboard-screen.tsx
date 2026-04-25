@@ -2,8 +2,14 @@ import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { useDashboardScreenController } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
-import type { SavingsRateLevel } from "@/features/dashboard/services/savings-rate-calculator";
+import {
+  useDashboardScreenController,
+  type DashboardScreenController,
+} from "@/features/dashboard/hooks/use-dashboard-screen-controller";
+import type {
+  SavingsRateAssessment,
+  SavingsRateLevel,
+} from "@/features/dashboard/services/savings-rate-calculator";
 import { AppButton } from "@/shared/components/app-button";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
@@ -31,116 +37,144 @@ export function DashboardScreen(): ReactElement {
 
   return (
     <AppScreen>
-      <AppSurfaceCard
-        title={controller.greetingName ? `Ola, ${controller.greetingName}` : "Ola"}
-        description="Aqui esta o resumo das suas financas."
-      >
-        <AppQueryState
-          query={controller.overviewQuery}
-          options={{
-            loading: {
-              title: "Carregando dashboard",
-              description: "Buscando o consolidado financeiro mais recente.",
-            },
-            empty: {
-              title: "Nenhum consolidado encontrado",
-              description:
-                "Os totais vao aparecer aqui assim que houver movimentacoes.",
-            },
-            error: {
-              fallbackTitle: "Nao foi possivel carregar o dashboard",
-              fallbackDescription: "Tente novamente em alguns instantes.",
-            },
-            loadingPresentation: "skeleton",
-          }}
-        >
-          {() => (
-            <YStack gap="$1">
-              <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-                Saldo geral
-              </Paragraph>
-              <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
-                {formatCurrency(controller.currentBalance)}
-              </Paragraph>
-            </YStack>
-          )}
-        </AppQueryState>
-      </AppSurfaceCard>
-
+      <BalanceCard controller={controller} />
       {controller.savingsRate ? (
-        <AppSurfaceCard
-          title="Taxa de poupanca"
-          description="Quanto voce manteve do que recebeu no periodo."
-        >
-          <YStack gap="$2">
-            <Paragraph
-              color={SAVINGS_TONE[controller.savingsRate.level]}
-              fontFamily="$heading"
-              fontSize="$8"
-            >
-              {formatSavingsRate(controller.savingsRate.rate)}
-            </Paragraph>
+        <SavingsRateCard assessment={controller.savingsRate} />
+      ) : null}
+      <MonthSnapshotCard controller={controller} />
+    </AppScreen>
+  );
+}
+
+interface ControllerProps {
+  readonly controller: DashboardScreenController;
+}
+
+function BalanceCard({ controller }: ControllerProps): ReactElement {
+  return (
+    <AppSurfaceCard
+      title={controller.greetingName ? `Ola, ${controller.greetingName}` : "Ola"}
+      description="Aqui esta o resumo das suas financas."
+    >
+      <AppQueryState
+        query={controller.overviewQuery}
+        options={{
+          loading: {
+            title: "Carregando dashboard",
+            description: "Buscando o consolidado financeiro mais recente.",
+          },
+          empty: {
+            title: "Nenhum consolidado encontrado",
+            description:
+              "Os totais vao aparecer aqui assim que houver movimentacoes.",
+          },
+          error: {
+            fallbackTitle: "Nao foi possivel carregar o dashboard",
+            fallbackDescription: "Tente novamente em alguns instantes.",
+          },
+          loadingPresentation: "skeleton",
+        }}
+      >
+        {() => (
+          <YStack gap="$1">
             <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-              {controller.savingsRate.summary}
+              Saldo geral
+            </Paragraph>
+            <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
+              {formatCurrency(controller.currentBalance)}
             </Paragraph>
           </YStack>
-        </AppSurfaceCard>
-      ) : null}
+        )}
+      </AppQueryState>
+    </AppSurfaceCard>
+  );
+}
 
-      <AppSurfaceCard
-        title="Resumo por mes"
-        description="Receitas, despesas e saldo do periodo selecionado."
-      >
-        <YStack gap="$3">
-          <XStack gap="$2" flexWrap="wrap">
-            {controller.monthOptions.map((month) => (
-              <AppButton
-                key={month.value}
-                tone={controller.selectedMonth === month.value ? "primary" : "secondary"}
-                onPress={() => controller.setSelectedMonth(month.value)}
-              >
-                {month.label}
-              </AppButton>
-            ))}
-          </XStack>
+interface SavingsRateCardProps {
+  readonly assessment: SavingsRateAssessment;
+}
 
-          <AppQueryState
-            query={controller.trendsQuery}
-            options={{
-              loading: {
-                title: "Carregando tendencias",
-                description: "Preparando a leitura mensal do seu fluxo.",
-              },
-              empty: {
-                title: "Sem movimentos no periodo",
-                description:
-                  "Os totais mensais vao aparecer aqui assim que houver dados.",
-              },
-              error: {
-                fallbackTitle: "Nao foi possivel carregar as tendencias",
-                fallbackDescription: "Tente novamente em instantes.",
-              },
-              isEmpty: (data) =>
-                data.series.length === 0 || controller.monthSnapshot === null,
-              loadingPresentation: "notice",
-            }}
-          >
-            {() => (
-              <YStack gap="$2">
-                <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-                  Receitas: {formatCurrency(controller.monthSnapshot?.incomes ?? 0)}
-                </Paragraph>
-                <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-                  Despesas: {formatCurrency(controller.monthSnapshot?.expenses ?? 0)}
-                </Paragraph>
-                <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-                  Saldo: {formatCurrency(controller.monthSnapshot?.balance ?? 0)}
-                </Paragraph>
-              </YStack>
-            )}
-          </AppQueryState>
-        </YStack>
-      </AppSurfaceCard>
-    </AppScreen>
+function SavingsRateCard({ assessment }: SavingsRateCardProps): ReactElement {
+  return (
+    <AppSurfaceCard
+      title="Taxa de poupanca"
+      description="Quanto voce manteve do que recebeu no periodo."
+    >
+      <YStack gap="$2">
+        <Paragraph
+          color={SAVINGS_TONE[assessment.level]}
+          fontFamily="$heading"
+          fontSize="$8"
+        >
+          {formatSavingsRate(assessment.rate)}
+        </Paragraph>
+        <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+          {assessment.summary}
+        </Paragraph>
+      </YStack>
+    </AppSurfaceCard>
+  );
+}
+
+function MonthSnapshotCard({ controller }: ControllerProps): ReactElement {
+  return (
+    <AppSurfaceCard
+      title="Resumo por mes"
+      description="Receitas, despesas e saldo do periodo selecionado."
+    >
+      <YStack gap="$3">
+        <XStack gap="$2" flexWrap="wrap">
+          {controller.monthOptions.map((month) => (
+            <AppButton
+              key={month.value}
+              tone={controller.selectedMonth === month.value ? "primary" : "secondary"}
+              onPress={() => controller.setSelectedMonth(month.value)}
+            >
+              {month.label}
+            </AppButton>
+          ))}
+        </XStack>
+
+        <AppQueryState
+          query={controller.trendsQuery}
+          options={{
+            loading: {
+              title: "Carregando tendencias",
+              description: "Preparando a leitura mensal do seu fluxo.",
+            },
+            empty: {
+              title: "Sem movimentos no periodo",
+              description:
+                "Os totais mensais vao aparecer aqui assim que houver dados.",
+            },
+            error: {
+              fallbackTitle: "Nao foi possivel carregar as tendencias",
+              fallbackDescription: "Tente novamente em instantes.",
+            },
+            isEmpty: (data) =>
+              data.series.length === 0 || controller.monthSnapshot === null,
+            loadingPresentation: "notice",
+          }}
+        >
+          {() => <MonthSnapshotValues controller={controller} />}
+        </AppQueryState>
+      </YStack>
+    </AppSurfaceCard>
+  );
+}
+
+function MonthSnapshotValues({ controller }: ControllerProps): ReactElement {
+  return (
+    <YStack gap="$2">
+      <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+        Receitas: {formatCurrency(controller.monthSnapshot?.incomes ?? 0)}
+      </Paragraph>
+      <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+        Despesas: {formatCurrency(controller.monthSnapshot?.expenses ?? 0)}
+      </Paragraph>
+      <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+        Saldo: {formatCurrency(controller.monthSnapshot?.balance ?? 0)}
+      </Paragraph>
+    </YStack>
   );
 }

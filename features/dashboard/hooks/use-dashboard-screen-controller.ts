@@ -48,9 +48,9 @@ const getCurrentMonth = (): string => {
 };
 
 const firstName = (fullName: string | null | undefined): string => {
-  if (!fullName) return "";
+  if (!fullName) {return "";}
   const trimmed = fullName.trim();
-  if (trimmed.length === 0) return "";
+  if (trimmed.length === 0) {return "";}
   return trimmed.split(/\s+/)[0] ?? "";
 };
 
@@ -86,7 +86,7 @@ export function useDashboardScreenController(): DashboardScreenController {
     }
 
     const fallback = trendsQuery.data?.series[0];
-    if (!fallback) return null;
+    if (!fallback) {return null;}
 
     return {
       month: fallback.month,
@@ -97,7 +97,7 @@ export function useDashboardScreenController(): DashboardScreenController {
   }, [selectedMonth, trendsQuery.data]);
 
   const savingsRate = useMemo<SavingsRateAssessment | null>(() => {
-    if (!monthSnapshot) return null;
+    if (!monthSnapshot) {return null;}
     return savingsRateCalculator.assess({
       incomes: monthSnapshot.incomes,
       expenses: monthSnapshot.expenses,
