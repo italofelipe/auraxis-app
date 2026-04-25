@@ -127,6 +127,13 @@ export const createSubscriptionService = (client: AxiosInstance) => {
       }>(response.data);
       return mapSubscription(payload.subscription);
     },
+    startTrial: async (): Promise<SubscriptionState> => {
+      const response = await client.post(apiContractMap.subscriptionTrial.path);
+      const payload = unwrapEnvelopeData<{
+        readonly subscription: SubscriptionPayload;
+      }>(response.data);
+      return mapSubscription(payload.subscription);
+    },
   };
 };
 
