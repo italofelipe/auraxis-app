@@ -62,6 +62,12 @@ function PrivateLayoutContent(): ReactElement | null {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="transacoes"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
