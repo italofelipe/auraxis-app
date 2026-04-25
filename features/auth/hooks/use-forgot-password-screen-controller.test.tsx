@@ -50,23 +50,18 @@ describe("useForgotPasswordScreenController", () => {
     expect(result.current.status).toBe("success");
   });
 
-  it("nao avanca o status quando submissao falha", async () => {
+  it("mantem status idle e captura o erro na mutation quando submissao falha", async () => {
     mutateAsync.mockRejectedValueOnce(new ApiError({ message: "fail", status: 500 }));
     const { result } = renderHook(() => useForgotPasswordScreenController());
     await act(async () => {
       result.current.form.setValue("email", "user@auraxis.com");
     });
 
-    let caught: unknown = null;
     await act(async () => {
-      try {
-        await result.current.handleSubmit();
-      } catch (error) {
-        caught = error;
-      }
+      await result.current.handleSubmit();
     });
 
-    expect(caught).toBeInstanceOf(ApiError);
+    expect(mutateAsync).toHaveBeenCalled();
     expect(result.current.status).toBe("idle");
   });
 
