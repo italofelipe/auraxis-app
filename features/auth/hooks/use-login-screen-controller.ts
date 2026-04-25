@@ -1,8 +1,11 @@
 import { Linking } from "react-native";
 
 import { useRouter } from "expo-router";
+import { useCallback } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
+import { useAuthRedirectStore } from "@/core/navigation/auth-redirect-context";
+import { appRoutes } from "@/core/navigation/routes";
 import { useSessionFailureNotice } from "@/core/session/use-session-failure-notice";
 import { useLoginMutation } from "@/features/auth/hooks/use-auth-mutations";
 import {
@@ -43,6 +46,7 @@ export function useLoginScreenController(
 ): LoginScreenController {
   const router = useRouter();
   const loginMutation = useLoginMutation();
+  const consumeRedirect = useAuthRedirectStore((state) => state.consume);
   const { notice, dismissNotice } = useSessionFailureNotice();
   const form = useAppForm<LoginFormValues>(loginSchema, {
     defaultValues: {
@@ -54,9 +58,17 @@ export function useLoginScreenController(
   const openUrl = dependencies.openUrl ?? Linking.openURL;
 
   const handleSubmit = form.handleSubmit(async (values) => {
-    await loginMutation.mutateAsync(values);
-    router.replace("/dashboard");
+    try {
+      await loginMutation.mutateAsync(values);
+    } catch {
+      return;
+    }
+    const intended = consumeRedirect();
+    router.replace(intended ?? appRoutes.private.dashboard);
   });
+
+  const handleOpenTerms = useCallback(async () => openUrl(TERMS_URL), [openUrl]);
+  const handleOpenPrivacy = useCallback(async () => openUrl(PRIVACY_URL), [openUrl]);
 
   return {
     form,
@@ -69,12 +81,12 @@ export function useLoginScreenController(
     },
     dismissSessionFailureNotice: dismissNotice,
     handleForgotPassword: () => {
-      router.push("/forgot-password");
+      router.push(appRoutes.public.forgotPassword);
     },
     handleRegister: () => {
-      router.push("/register");
+      router.push(appRoutes.public.register);
     },
-    handleOpenTerms: async () => openUrl(TERMS_URL),
-    handleOpenPrivacy: async () => openUrl(PRIVACY_URL),
+    handleOpenTerms,
+    handleOpenPrivacy,
   };
 }

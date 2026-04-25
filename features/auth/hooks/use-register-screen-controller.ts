@@ -1,10 +1,11 @@
 import { Linking } from "react-native";
 
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
 import { ApiError } from "@/core/http/api-error";
+import { appRoutes } from "@/core/navigation/routes";
 import {
   useLoginMutation,
   useRegisterMutation,
@@ -19,7 +20,6 @@ import { useAppForm } from "@/shared/forms/use-app-form";
 
 export interface RegisterScreenController {
   readonly form: UseFormReturn<RegisterFormValues>;
-  readonly password: string;
   readonly isSubmitting: boolean;
   readonly submitError: unknown | null;
   readonly handleSubmit: () => Promise<void>;
@@ -29,13 +29,15 @@ export interface RegisterScreenController {
   readonly handleOpenPrivacy: () => Promise<void>;
 }
 
-const POST_REGISTER_ROUTE = "/confirm-email-pending" as const;
-const POST_REGISTER_FALLBACK = "/login" as const;
-
 /**
  * Controller for the registration screen. Orchestrates the register call,
  * auto-login on success, and graceful fallback to the login route when the
  * backend rejects the auto-login attempt (e.g. requires email confirmation).
+ *
+ * Side-effects owned here (kept out of the screen):
+ * - Cross-field revalidation: re-trigger `confirmPassword` validation when
+ *   `password` changes after `confirmPassword` was already touched, so the
+ *   user cannot bypass the equality refinement by editing `password` last.
  */
 export function useRegisterScreenController(
   dependencies: { readonly openUrl?: typeof Linking.openURL } = {},
@@ -53,7 +55,16 @@ export function useRegisterScreenController(
     },
   });
 
-  const password = form.watch("password");
+  const { watch, getFieldState, trigger } = form;
+  useEffect(() => {
+    const subscription = watch((_values, info) => {
+      if (info.name === "password" && getFieldState("confirmPassword").isTouched) {
+        void trigger("confirmPassword");
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, getFieldState, trigger]);
+
   const openUrl = dependencies.openUrl ?? Linking.openURL;
 
   const handleSubmit = form.handleSubmit(async (values) => {
@@ -77,15 +88,17 @@ export function useRegisterScreenController(
         email: values.email,
         password: values.password,
       });
-      router.replace(POST_REGISTER_ROUTE);
+      router.replace(appRoutes.private.confirmEmailPending);
     } catch {
-      router.replace(POST_REGISTER_FALLBACK);
+      router.replace(appRoutes.public.login);
     }
   });
 
+  const handleOpenTerms = useCallback(async () => openUrl(TERMS_URL), [openUrl]);
+  const handleOpenPrivacy = useCallback(async () => openUrl(PRIVACY_URL), [openUrl]);
+
   return {
     form,
-    password: typeof password === "string" ? password : "",
     isSubmitting: registerMutation.isPending || loginMutation.isPending,
     submitError,
     handleSubmit,
@@ -94,9 +107,9 @@ export function useRegisterScreenController(
       setSubmitError(null);
     },
     handleBackToLogin: () => {
-      router.replace("/login");
+      router.replace(appRoutes.public.login);
     },
-    handleOpenTerms: async () => openUrl(TERMS_URL),
-    handleOpenPrivacy: async () => openUrl(PRIVACY_URL),
+    handleOpenTerms,
+    handleOpenPrivacy,
   };
 }

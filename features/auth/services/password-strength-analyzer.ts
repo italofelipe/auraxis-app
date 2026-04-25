@@ -39,6 +39,13 @@ const SUMMARY_BY_LEVEL: Record<PasswordStrengthLevel, string> = {
   strong: "Senha forte.",
 };
 
+const scoreToLevel = (score: number): PasswordStrengthLevel => {
+  if (score <= 1) {return "weak";}
+  if (score === 2) {return "fair";}
+  if (score === 3) {return "good";}
+  return "strong";
+};
+
 /**
  * Encapsulates the policy-driven strength analysis for user-provided passwords.
  *
@@ -61,18 +68,19 @@ export class PasswordStrengthAnalyzer {
    */
   analyze(password: string): PasswordStrengthAssessment {
     if (password.length === 0) {
+      const criteria = this.buildCriteria("");
       return {
         level: "empty",
         score: 0,
-        criteria: this.buildCriteria(""),
-        missingLabels: this.buildCriteria("").map((item) => item.label),
+        criteria,
+        missingLabels: criteria.map((item) => item.label),
         summary: SUMMARY_BY_LEVEL.empty,
       };
     }
 
     const criteria = this.buildCriteria(password);
     const score = criteria.reduce((acc, item) => (item.satisfied ? acc + 1 : acc), 0);
-    const level = this.scoreToLevel(score);
+    const level = scoreToLevel(score);
 
     return {
       level,
@@ -110,12 +118,6 @@ export class PasswordStrengthAnalyzer {
     ];
   }
 
-  private scoreToLevel(score: number): PasswordStrengthLevel {
-    if (score <= 1) return "weak";
-    if (score === 2) return "fair";
-    if (score === 3) return "good";
-    return "strong";
-  }
 }
 
 export const passwordStrengthAnalyzer = new PasswordStrengthAnalyzer();

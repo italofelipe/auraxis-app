@@ -1,13 +1,34 @@
-import type { ReactElement } from "react";
+import { useMemo, type ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { useGoalsScreenController } from "@/features/goals/hooks/use-goals-screen-controller";
+import type { GoalProgressView } from "@/features/goals/services/goal-progress-calculator";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { formatCurrency } from "@/shared/utils/formatters";
+
+interface GoalsListData {
+  readonly goals: readonly { readonly id: string }[];
+}
+
+const STATIC_GOALS_OPTIONS = {
+  loading: {
+    title: "Carregando metas",
+    description: "Buscando suas metas financeiras.",
+  },
+  empty: {
+    title: "Nenhuma meta encontrada",
+    description:
+      "Crie sua primeira meta para comecar a acompanhar seu progresso.",
+  },
+  error: {
+    fallbackTitle: "Nao foi possivel carregar as metas",
+    fallbackDescription: "Tente novamente em instantes.",
+  },
+} as const;
 
 /**
  * Canonical goals screen composition for the mobile app.
@@ -16,6 +37,15 @@ import { formatCurrency } from "@/shared/utils/formatters";
  */
 export function GoalsScreen(): ReactElement {
   const controller = useGoalsScreenController();
+
+  const queryStateOptions = useMemo(
+    () => ({
+      ...STATIC_GOALS_OPTIONS,
+      isEmpty: (data: GoalsListData) =>
+        data.goals.length === 0 || controller.goals.length === 0,
+    }),
+    [controller.goals.length],
+  );
 
   return (
     <AppScreen>
@@ -55,53 +85,43 @@ export function GoalsScreen(): ReactElement {
         title="Lista"
         description="Metas em andamento aparecem primeiro."
       >
-        <AppQueryState
-          query={controller.goalsQuery}
-          options={{
-            loading: {
-              title: "Carregando metas",
-              description: "Buscando suas metas financeiras.",
-            },
-            empty: {
-              title: "Nenhuma meta encontrada",
-              description:
-                "Crie sua primeira meta para comecar a acompanhar seu progresso.",
-            },
-            error: {
-              fallbackTitle: "Nao foi possivel carregar as metas",
-              fallbackDescription: "Tente novamente em instantes.",
-            },
-            isEmpty: () => controller.goals.length === 0,
-          }}
-        >
-          {() => (
-            <YStack gap="$3">
-              {controller.goals.map((goal) => (
-                <AppKeyValueRow
-                  key={goal.id}
-                  label={goal.title}
-                  value={
-                    <YStack alignItems="flex-end" gap="$1">
-                      <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-                        {formatCurrency(goal.currentAmount)} /{" "}
-                        {formatCurrency(goal.targetAmount)}
-                      </Paragraph>
-                      <Paragraph
-                        color={goal.isCompleted ? "$success" : "$muted"}
-                        fontFamily="$body"
-                        fontSize="$3"
-                      >
-                        {goal.progress}%
-                        {goal.isCompleted ? " · concluida" : ""}
-                      </Paragraph>
-                    </YStack>
-                  }
-                />
-              ))}
-            </YStack>
-          )}
+        <AppQueryState query={controller.goalsQuery} options={queryStateOptions}>
+          {() => <GoalsList goals={controller.goals} />}
         </AppQueryState>
       </AppSurfaceCard>
     </AppScreen>
+  );
+}
+
+interface GoalsListProps {
+  readonly goals: readonly GoalProgressView[];
+}
+
+function GoalsList({ goals }: GoalsListProps): ReactElement {
+  return (
+    <YStack gap="$3">
+      {goals.map((goal) => (
+        <AppKeyValueRow
+          key={goal.id}
+          label={goal.title}
+          value={
+            <YStack alignItems="flex-end" gap="$1">
+              <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+                {formatCurrency(goal.currentAmount)} /{" "}
+                {formatCurrency(goal.targetAmount)}
+              </Paragraph>
+              <Paragraph
+                color={goal.isCompleted ? "$success" : "$muted"}
+                fontFamily="$body"
+                fontSize="$3"
+              >
+                {goal.progress}%
+                {goal.isCompleted ? " · concluida" : ""}
+              </Paragraph>
+            </YStack>
+          }
+        />
+      ))}
+    </YStack>
   );
 }

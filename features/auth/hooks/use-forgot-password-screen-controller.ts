@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { useForgotPasswordMutation } from "@/features/auth/hooks/use-auth-mutations";
 import {
   forgotPasswordSchema,
@@ -40,8 +41,12 @@ export function useForgotPasswordScreenController(): ForgotPasswordScreenControl
   });
 
   const handleSubmit = form.handleSubmit(async (values) => {
-    await forgotPasswordMutation.mutateAsync(values);
-    setStatus("success");
+    try {
+      await forgotPasswordMutation.mutateAsync(values);
+      setStatus("success");
+    } catch {
+      setStatus("idle");
+    }
   });
 
   return {
@@ -54,7 +59,7 @@ export function useForgotPasswordScreenController(): ForgotPasswordScreenControl
       forgotPasswordMutation.reset();
     },
     handleBackToLogin: () => {
-      router.replace("/login");
+      router.replace(appRoutes.public.login);
     },
     handleResubmit: () => {
       forgotPasswordMutation.reset();
