@@ -11,6 +11,7 @@ export const appRoutes = {
     login: "/login",
     register: "/register",
     forgotPassword: "/forgot-password",
+    resetPassword: "/reset-password",
   },
   private: {
     dashboard: "/dashboard",
@@ -106,6 +107,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "forgotPassword",
     path: appRoutes.public.forgotPassword,
+    access: "public",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "resetPassword",
+    path: appRoutes.public.resetPassword,
     access: "public",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
