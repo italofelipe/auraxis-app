@@ -1,4 +1,5 @@
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
 import { useForgotPasswordMutation } from "@/features/auth/hooks/use-auth-mutations";
@@ -8,23 +9,30 @@ import {
 } from "@/features/auth/validators";
 import { useAppForm } from "@/shared/forms/use-app-form";
 
+export type ForgotPasswordSubmissionStatus = "idle" | "success";
+
 export interface ForgotPasswordScreenController {
   readonly form: UseFormReturn<ForgotPasswordFormValues>;
   readonly isSubmitting: boolean;
   readonly submitError: unknown | null;
+  readonly status: ForgotPasswordSubmissionStatus;
   readonly handleSubmit: () => Promise<void>;
   readonly dismissSubmitError: () => void;
   readonly handleBackToLogin: () => void;
+  readonly handleResubmit: () => void;
 }
 
 /**
- * Creates the canonical controller for the forgot-password route.
+ * Canonical controller for the forgot-password route.
  *
- * @returns View-only bindings for password reset request flow.
+ * Tracks the submission status so the screen can render an
+ * email-enumeration-safe success message after a request is accepted by the
+ * backend (the backend always responds 200 to avoid leaking account existence).
  */
 export function useForgotPasswordScreenController(): ForgotPasswordScreenController {
   const router = useRouter();
   const forgotPasswordMutation = useForgotPasswordMutation();
+  const [status, setStatus] = useState<ForgotPasswordSubmissionStatus>("idle");
   const form = useAppForm<ForgotPasswordFormValues>(forgotPasswordSchema, {
     defaultValues: {
       email: "",
@@ -33,18 +41,24 @@ export function useForgotPasswordScreenController(): ForgotPasswordScreenControl
 
   const handleSubmit = form.handleSubmit(async (values) => {
     await forgotPasswordMutation.mutateAsync(values);
+    setStatus("success");
   });
 
   return {
     form,
     isSubmitting: forgotPasswordMutation.isPending,
     submitError: forgotPasswordMutation.error,
+    status,
     handleSubmit,
     dismissSubmitError: () => {
       forgotPasswordMutation.reset();
     },
     handleBackToLogin: () => {
       router.replace("/login");
+    },
+    handleResubmit: () => {
+      forgotPasswordMutation.reset();
+      setStatus("idle");
     },
   };
 }

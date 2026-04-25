@@ -1,7 +1,7 @@
 import type { ReactElement } from "react";
 
 import { Controller } from "react-hook-form";
-import { YStack } from "tamagui";
+import { Paragraph, YStack } from "tamagui";
 
 import { useForgotPasswordScreenController } from "@/features/auth/hooks/use-forgot-password-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
@@ -9,6 +9,7 @@ import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 
 /**
  * Canonical forgot-password screen composition for the mobile app.
@@ -22,11 +23,37 @@ export function ForgotPasswordScreen(): ReactElement {
     formState: { errors },
   } = controller.form;
 
+  if (controller.status === "success") {
+    return (
+      <AppScreen>
+        <AppSurfaceCard
+          title="E-mail enviado"
+          description="Verifique sua caixa de entrada nos proximos minutos."
+        >
+          <YStack gap="$4">
+            <AsyncStateNotice
+              kind="empty"
+              title="Pronto!"
+              description="Se esse e-mail estiver cadastrado, voce recebera um link de recuperacao em instantes. Cheque tambem a pasta de spam."
+            />
+            <AppButton onPress={controller.handleBackToLogin}>
+              Voltar para login
+            </AppButton>
+            <AppButton tone="secondary" onPress={controller.handleResubmit}>
+              Enviar para outro e-mail
+            </AppButton>
+          </YStack>
+        </AppSurfaceCard>
+      </AppScreen>
+    );
+  }
+
   return (
     <AppScreen>
       <AppSurfaceCard
         title="Recuperar senha"
-        description="Envie o link de recuperacao usando o fluxo canonico de auth.">
+        description="Informe seu e-mail para receber as instrucoes."
+      >
         <YStack gap="$4">
           <Controller
             control={control}
@@ -35,7 +62,7 @@ export function ForgotPasswordScreen(): ReactElement {
               <AppInputField
                 id="forgot-password-email"
                 label="E-mail"
-                placeholder="E-mail"
+                placeholder="seu@email.com"
                 autoCapitalize="none"
                 keyboardType="email-address"
                 value={value}
@@ -50,8 +77,9 @@ export function ForgotPasswordScreen(): ReactElement {
             onPress={() => {
               void controller.handleSubmit();
             }}
-            disabled={controller.isSubmitting}>
-            {controller.isSubmitting ? "Enviando..." : "Enviar"}
+            disabled={controller.isSubmitting}
+          >
+            {controller.isSubmitting ? "Enviando..." : "Enviar instrucoes"}
           </AppButton>
 
           {controller.submitError ? (
@@ -63,6 +91,11 @@ export function ForgotPasswordScreen(): ReactElement {
               onSecondaryAction={controller.dismissSubmitError}
             />
           ) : null}
+
+          <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+            Por seguranca, sempre confirmaremos o envio mesmo que o e-mail
+            informado nao esteja cadastrado.
+          </Paragraph>
 
           <AppButton tone="secondary" onPress={controller.handleBackToLogin}>
             Voltar para login

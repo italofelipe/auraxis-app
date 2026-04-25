@@ -3,21 +3,21 @@ import type { ReactElement } from "react";
 import { Controller } from "react-hook-form";
 import { Paragraph, YStack } from "tamagui";
 
-import { useLoginScreenController } from "@/features/auth/hooks/use-login-screen-controller";
+import { PasswordStrengthMeter } from "@/features/auth/components/password-strength-meter";
+import { useRegisterScreenController } from "@/features/auth/hooks/use-register-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
-import { AsyncStateNotice } from "@/shared/components/async-state-notice";
 
 /**
- * Canonical login screen composition for the mobile app.
+ * Canonical register screen composition for the mobile app.
  *
- * @returns View-only login surface bound to the auth controller.
+ * @returns View-only registration surface bound to the auth controller.
  */
-export function LoginScreen(): ReactElement {
-  const controller = useLoginScreenController();
+export function RegisterScreen(): ReactElement {
+  const controller = useRegisterScreenController();
   const {
     control,
     formState: { errors },
@@ -26,34 +26,33 @@ export function LoginScreen(): ReactElement {
   return (
     <AppScreen>
       <AppSurfaceCard
-        title="Bem-vindo de volta"
-        description="Faca login na sua conta para continuar."
+        title="Criar conta"
+        description="Preencha os dados abaixo para comecar."
       >
         <YStack gap="$4">
-          {controller.sessionFailureNotice ? (
-            <YStack gap="$3">
-              <AsyncStateNotice
-                kind="error"
-                title={controller.sessionFailureNotice.title}
-                description={controller.sessionFailureNotice.description}
+          <Controller
+            control={control}
+            name="name"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AppInputField
+                id="register-name"
+                label="Nome completo"
+                placeholder="Seu nome completo"
+                autoCapitalize="words"
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                errorText={errors.name?.message}
               />
-              {controller.sessionFailureNotice.dismissLabel ? (
-                <AppButton
-                  tone="secondary"
-                  onPress={controller.dismissSessionFailureNotice}
-                >
-                  {controller.sessionFailureNotice.dismissLabel}
-                </AppButton>
-              ) : null}
-            </YStack>
-          ) : null}
+            )}
+          />
 
           <Controller
             control={control}
             name="email"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppInputField
-                id="login-email"
+                id="register-email"
                 label="E-mail"
                 placeholder="seu@email.com"
                 autoCapitalize="none"
@@ -71,14 +70,33 @@ export function LoginScreen(): ReactElement {
             name="password"
             render={({ field: { onChange, onBlur, value } }) => (
               <AppInputField
-                id="login-password"
+                id="register-password"
                 label="Senha"
-                placeholder="Sua senha"
+                placeholder="Crie uma senha forte"
                 secureTextEntry
                 value={value}
                 onBlur={onBlur}
                 onChangeText={onChange}
                 errorText={errors.password?.message}
+              />
+            )}
+          />
+
+          <PasswordStrengthMeter password={controller.password} />
+
+          <Controller
+            control={control}
+            name="confirmPassword"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <AppInputField
+                id="register-confirm-password"
+                label="Confirmar senha"
+                placeholder="Repita sua senha"
+                secureTextEntry
+                value={value}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                errorText={errors.confirmPassword?.message}
               />
             )}
           />
@@ -89,35 +107,29 @@ export function LoginScreen(): ReactElement {
             }}
             disabled={controller.isSubmitting}
           >
-            {controller.isSubmitting ? "Entrando..." : "Entrar"}
+            {controller.isSubmitting ? "Criando..." : "Criar conta"}
           </AppButton>
 
           {controller.submitError ? (
             <AppErrorNotice
               error={controller.submitError}
-              fallbackTitle="Nao foi possivel entrar agora"
+              fallbackTitle="Nao foi possivel criar a conta"
               fallbackDescription="Confira seus dados e tente novamente."
               secondaryActionLabel="Fechar"
               onSecondaryAction={controller.dismissSubmitError}
             />
           ) : null}
 
-          <AppButton tone="secondary" onPress={controller.handleForgotPassword}>
-            Esqueceu sua senha?
+          <AppButton tone="secondary" onPress={controller.handleBackToLogin}>
+            Ja tenho conta. Entrar
           </AppButton>
         </YStack>
       </AppSurfaceCard>
 
-      <YStack gap="$2" alignItems="center">
-        <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-          Ainda nao tem conta?
-        </Paragraph>
-        <AppButton tone="secondary" onPress={controller.handleRegister}>
-          Criar conta
-        </AppButton>
-      </YStack>
-
       <YStack gap="$2">
+        <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+          Ao criar conta voce concorda com nossos termos.
+        </Paragraph>
         <AppButton
           tone="secondary"
           onPress={() => {

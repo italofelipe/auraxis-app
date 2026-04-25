@@ -3,23 +3,38 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { useDashboardScreenController } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
+import type { SavingsRateLevel } from "@/features/dashboard/services/savings-rate-calculator";
 import { AppButton } from "@/shared/components/app-button";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { formatCurrency } from "@/shared/utils/formatters";
 
+const SAVINGS_TONE: Record<SavingsRateLevel, "$danger" | "$muted" | "$success"> = {
+  negative: "$danger",
+  low: "$muted",
+  healthy: "$success",
+  excellent: "$success",
+};
+
+const formatSavingsRate = (rate: number): string => {
+  return `${(rate * 100).toFixed(1)}%`;
+};
+
 /**
  * Canonical dashboard screen composition for the mobile app.
  *
- * @returns Overview and monthly snapshot panels for the authenticated user.
+ * @returns Greeting, balance, savings rate and monthly snapshot panels.
  */
 export function DashboardScreen(): ReactElement {
   const controller = useDashboardScreenController();
 
   return (
     <AppScreen>
-      <AppSurfaceCard title="Saldo geral" description="Resumo consolidado.">
+      <AppSurfaceCard
+        title={controller.greetingName ? `Ola, ${controller.greetingName}` : "Ola"}
+        description="Aqui esta o resumo das suas financas."
+      >
         <AppQueryState
           query={controller.overviewQuery}
           options={{
@@ -29,7 +44,8 @@ export function DashboardScreen(): ReactElement {
             },
             empty: {
               title: "Nenhum consolidado encontrado",
-              description: "Os totais vao aparecer aqui assim que houver movimentacoes.",
+              description:
+                "Os totais vao aparecer aqui assim que houver movimentacoes.",
             },
             error: {
               fallbackTitle: "Nao foi possivel carregar o dashboard",
@@ -39,12 +55,37 @@ export function DashboardScreen(): ReactElement {
           }}
         >
           {() => (
-            <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
-              {formatCurrency(controller.currentBalance)}
-            </Paragraph>
+            <YStack gap="$1">
+              <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+                Saldo geral
+              </Paragraph>
+              <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
+                {formatCurrency(controller.currentBalance)}
+              </Paragraph>
+            </YStack>
           )}
         </AppQueryState>
       </AppSurfaceCard>
+
+      {controller.savingsRate ? (
+        <AppSurfaceCard
+          title="Taxa de poupanca"
+          description="Quanto voce manteve do que recebeu no periodo."
+        >
+          <YStack gap="$2">
+            <Paragraph
+              color={SAVINGS_TONE[controller.savingsRate.level]}
+              fontFamily="$heading"
+              fontSize="$8"
+            >
+              {formatSavingsRate(controller.savingsRate.rate)}
+            </Paragraph>
+            <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+              {controller.savingsRate.summary}
+            </Paragraph>
+          </YStack>
+        </AppSurfaceCard>
+      ) : null}
 
       <AppSurfaceCard
         title="Resumo por mes"
@@ -72,13 +113,15 @@ export function DashboardScreen(): ReactElement {
               },
               empty: {
                 title: "Sem movimentos no periodo",
-                description: "Os totais mensais vao aparecer aqui assim que houver dados.",
+                description:
+                  "Os totais mensais vao aparecer aqui assim que houver dados.",
               },
               error: {
                 fallbackTitle: "Nao foi possivel carregar as tendencias",
                 fallbackDescription: "Tente novamente em instantes.",
               },
-              isEmpty: (data) => data.series.length === 0 || controller.monthSnapshot === null,
+              isEmpty: (data) =>
+                data.series.length === 0 || controller.monthSnapshot === null,
               loadingPresentation: "notice",
             }}
           >

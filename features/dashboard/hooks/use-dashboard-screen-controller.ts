@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 
-import { useDashboardOverviewQuery, useDashboardTrendsQuery } from "@/features/dashboard/hooks/use-dashboard-overview-query";
+import { useSessionStore } from "@/core/session/session-store";
+import {
+  useDashboardOverviewQuery,
+  useDashboardTrendsQuery,
+} from "@/features/dashboard/hooks/use-dashboard-overview-query";
+import {
+  savingsRateCalculator,
+  type SavingsRateAssessment,
+} from "@/features/dashboard/services/savings-rate-calculator";
 
 export interface DashboardMonthOption {
   readonly value: string;
@@ -21,6 +29,8 @@ export interface DashboardScreenController {
   readonly monthOptions: DashboardMonthOption[];
   readonly monthSnapshot: DashboardMonthSnapshot | null;
   readonly currentBalance: number;
+  readonly savingsRate: SavingsRateAssessment | null;
+  readonly greetingName: string;
   readonly setSelectedMonth: (month: string) => void;
 }
 
@@ -37,44 +47,62 @@ const getCurrentMonth = (): string => {
   return new Date().toISOString().slice(0, 7);
 };
 
+const firstName = (fullName: string | null | undefined): string => {
+  if (!fullName) return "";
+  const trimmed = fullName.trim();
+  if (trimmed.length === 0) return "";
+  return trimmed.split(/\s+/)[0] ?? "";
+};
+
 /**
  * Builds the canonical controller for the dashboard overview screen.
  *
  * @returns Normalized dashboard bindings for view-only consumption.
  */
 export function useDashboardScreenController(): DashboardScreenController {
+  const userName = useSessionStore((state) => state.user?.name ?? null);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth);
   const overviewQuery = useDashboardOverviewQuery({ month: selectedMonth });
   const trendsQuery = useDashboardTrendsQuery(6);
 
   const monthOptions = useMemo<DashboardMonthOption[]>(() => {
-    return trendsQuery.data?.series.map((item) => ({
-      value: item.month,
-      label: formatMonth(item.month),
-    })) ?? [];
+    return (
+      trendsQuery.data?.series.map((item) => ({
+        value: item.month,
+        label: formatMonth(item.month),
+      })) ?? []
+    );
   }, [trendsQuery.data]);
 
   const monthSnapshot = useMemo<DashboardMonthSnapshot | null>(() => {
     const found = trendsQuery.data?.series.find((item) => item.month === selectedMonth);
-
-    if (!found) {
-      return trendsQuery.data?.series[0]
-        ? {
-            month: trendsQuery.data.series[0].month,
-            incomes: trendsQuery.data.series[0].income,
-            expenses: trendsQuery.data.series[0].expenses,
-            balance: trendsQuery.data.series[0].balance,
-          }
-        : null;
+    if (found) {
+      return {
+        month: found.month,
+        incomes: found.income,
+        expenses: found.expenses,
+        balance: found.balance,
+      };
     }
 
+    const fallback = trendsQuery.data?.series[0];
+    if (!fallback) return null;
+
     return {
-      month: found.month,
-      incomes: found.income,
-      expenses: found.expenses,
-      balance: found.balance,
+      month: fallback.month,
+      incomes: fallback.income,
+      expenses: fallback.expenses,
+      balance: fallback.balance,
     };
   }, [selectedMonth, trendsQuery.data]);
+
+  const savingsRate = useMemo<SavingsRateAssessment | null>(() => {
+    if (!monthSnapshot) return null;
+    return savingsRateCalculator.assess({
+      incomes: monthSnapshot.incomes,
+      expenses: monthSnapshot.expenses,
+    });
+  }, [monthSnapshot]);
 
   return {
     overviewQuery,
@@ -83,6 +111,8 @@ export function useDashboardScreenController(): DashboardScreenController {
     monthOptions,
     monthSnapshot,
     currentBalance: overviewQuery.data?.totals.balance ?? 0,
+    savingsRate,
+    greetingName: firstName(userName),
     setSelectedMonth,
   };
 }

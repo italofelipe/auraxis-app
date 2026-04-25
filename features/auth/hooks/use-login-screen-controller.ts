@@ -25,6 +25,7 @@ export interface LoginScreenController {
   readonly dismissSubmitError: () => void;
   readonly dismissSessionFailureNotice: () => void;
   readonly handleForgotPassword: () => void;
+  readonly handleRegister: () => void;
   readonly handleOpenTerms: () => Promise<void>;
   readonly handleOpenPrivacy: () => Promise<void>;
 }
@@ -69,6 +70,9 @@ export function useLoginScreenController(
     dismissSessionFailureNotice: dismissNotice,
     handleForgotPassword: () => {
       router.push("/forgot-password");
+    },
+    handleRegister: () => {
+      router.push("/register");
     },
     handleOpenTerms: async () => openUrl(TERMS_URL),
     handleOpenPrivacy: async () => openUrl(PRIVACY_URL),
