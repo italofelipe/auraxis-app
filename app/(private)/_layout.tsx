@@ -80,6 +80,12 @@ function PrivateLayoutContent(): ReactElement | null {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="questionario"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

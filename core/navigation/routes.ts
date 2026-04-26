@@ -26,6 +26,7 @@ export const appRoutes = {
     transactions: "/transacoes",
     profile: "/perfil",
     fiscal: "/fiscal",
+    questionnaire: "/questionario",
   },
 } as const;
 
@@ -201,6 +202,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "fiscal",
     path: appRoutes.private.fiscal,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "questionnaire",
+    path: appRoutes.private.questionnaire,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,

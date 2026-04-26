@@ -2,6 +2,9 @@ import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { DashboardCountsCard } from "@/features/dashboard/components/dashboard-counts-card";
+import { DashboardTopCategoriesCard } from "@/features/dashboard/components/dashboard-top-categories-card";
+import { DashboardTrendsChartCard } from "@/features/dashboard/components/dashboard-trends-chart-card";
 import {
   useDashboardScreenController,
   type DashboardScreenController,
@@ -34,6 +37,8 @@ const formatSavingsRate = (rate: number): string => {
  */
 export function DashboardScreen(): ReactElement {
   const controller = useDashboardScreenController();
+  const overview = controller.overviewQuery.data;
+  const trendsSeries = controller.trendsQuery.data?.series ?? [];
 
   return (
     <AppScreen>
@@ -42,6 +47,28 @@ export function DashboardScreen(): ReactElement {
         <SavingsRateCard assessment={controller.savingsRate} />
       ) : null}
       <MonthSnapshotCard controller={controller} />
+      {overview ? (
+        <DashboardCountsCard counts={overview.counts} />
+      ) : null}
+      {trendsSeries.length > 0 ? (
+        <DashboardTrendsChartCard series={trendsSeries} />
+      ) : null}
+      {overview ? (
+        <DashboardTopCategoriesCard
+          title="Top despesas"
+          description="Categorias que mais consumiram do periodo."
+          categories={overview.topCategories.expense}
+          tone="expense"
+        />
+      ) : null}
+      {overview ? (
+        <DashboardTopCategoriesCard
+          title="Top receitas"
+          description="Categorias que mais entraram no periodo."
+          categories={overview.topCategories.income}
+          tone="income"
+        />
+      ) : null}
     </AppScreen>
   );
 }
