@@ -23,6 +23,8 @@ import type {
   CreateGoalCommand,
   GoalDetailResponse,
   GoalListResponse,
+  GoalPlan,
+  GoalProjection,
   GoalRecord,
   UpdateGoalCommand,
 } from "@/features/goals/contracts";
@@ -38,8 +40,12 @@ import type {
 } from "@/features/subscription/contracts";
 import type {
   CreateWalletEntryCommand,
+  CreateWalletOperationCommand,
   UpdateWalletEntryCommand,
   WalletEntry,
+  WalletOperation,
+  WalletOperationsListResponse,
+  WalletOperationsPosition,
   WalletSummary,
 } from "@/features/wallet/contracts";
 import type {
@@ -368,6 +374,26 @@ export const apiContractMap = {
     path: "/goals/{goal_id}",
     authRequired: true,
   }),
+  goalPlan: defineApiContract<
+    "GET",
+    "/goals/{goal_id}/plan",
+    never,
+    GoalPlan
+  >({
+    method: "GET",
+    path: "/goals/{goal_id}/plan",
+    authRequired: true,
+  }),
+  goalProjection: defineApiContract<
+    "GET",
+    "/goals/{goal_id}/projection",
+    never,
+    GoalProjection
+  >({
+    method: "GET",
+    path: "/goals/{goal_id}/projection",
+    authRequired: true,
+  }),
   walletSummary: defineApiContract<"GET", "/wallet", never, WalletSummary>({
     method: "GET",
     path: "/wallet",
@@ -411,6 +437,46 @@ export const apiContractMap = {
   >({
     method: "DELETE",
     path: "/wallet/{investment_id}",
+    authRequired: true,
+  }),
+  walletOperationsList: defineApiContract<
+    "GET",
+    "/wallet/{investment_id}/operations",
+    never,
+    WalletOperationsListResponse
+  >({
+    method: "GET",
+    path: "/wallet/{investment_id}/operations",
+    authRequired: true,
+  }),
+  walletOperationCreate: defineApiContract<
+    "POST",
+    "/wallet/{investment_id}/operations",
+    CreateWalletOperationCommand,
+    WalletOperation
+  >({
+    method: "POST",
+    path: "/wallet/{investment_id}/operations",
+    authRequired: true,
+  }),
+  walletOperationDelete: defineApiContract<
+    "DELETE",
+    "/wallet/{investment_id}/operations/{operation_id}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/wallet/{investment_id}/operations/{operation_id}",
+    authRequired: true,
+  }),
+  walletOperationsPosition: defineApiContract<
+    "GET",
+    "/wallet/{investment_id}/operations/position",
+    never,
+    WalletOperationsPosition
+  >({
+    method: "GET",
+    path: "/wallet/{investment_id}/operations/position",
     authRequired: true,
   }),
   alertsList: defineApiContract<"GET", "/alerts", never, AlertListResponse>({

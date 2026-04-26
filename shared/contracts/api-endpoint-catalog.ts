@@ -31,6 +31,7 @@ export const apiEndpointCatalog = {
     "PATCH /goals/{goal_id}",
     "DELETE /goals/{goal_id}",
     "GET /goals/{goal_id}/plan",
+    "GET /goals/{goal_id}/projection",
   ],
   transactions: [
     "GET /transactions",

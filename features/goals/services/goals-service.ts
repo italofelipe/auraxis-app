@@ -5,6 +5,8 @@ import { httpClient } from "@/core/http/http-client";
 import type {
   CreateGoalCommand,
   GoalListResponse,
+  GoalPlan,
+  GoalProjection,
   GoalRecord,
   UpdateGoalCommand,
 } from "@/features/goals/contracts";
@@ -78,6 +80,50 @@ export const createGoalsService = (client: AxiosInstance) => {
       await client.delete(
         resolveApiContractPath(apiContractMap.goalDelete.path, { goal_id: goalId }),
       );
+    },
+    getPlan: async (goalId: string): Promise<GoalPlan> => {
+      const response = await client.get(
+        resolveApiContractPath(apiContractMap.goalPlan.path, { goal_id: goalId }),
+      );
+      const payload = unwrapEnvelopeData<{
+        readonly goal_id?: string;
+        readonly monthly_contribution?: number;
+        readonly months_to_target?: number | null;
+        readonly recommended_savings_rate?: number | null;
+        readonly disclaimer?: string | null;
+      }>(response.data);
+      return {
+        goalId: payload.goal_id ?? goalId,
+        monthlyContribution: payload.monthly_contribution ?? 0,
+        monthsToTarget: payload.months_to_target ?? null,
+        recommendedSavingsRate: payload.recommended_savings_rate ?? null,
+        disclaimer: payload.disclaimer ?? null,
+      };
+    },
+    getProjection: async (goalId: string): Promise<GoalProjection> => {
+      const response = await client.get(
+        resolveApiContractPath(apiContractMap.goalProjection.path, {
+          goal_id: goalId,
+        }),
+      );
+      const payload = unwrapEnvelopeData<{
+        readonly goal_id?: string;
+        readonly projected_finish_date?: string | null;
+        readonly projected_amount_at_target?: number | null;
+        readonly assumptions?: {
+          readonly annual_return_rate?: number | null;
+          readonly monthly_contribution?: number | null;
+        };
+      }>(response.data);
+      return {
+        goalId: payload.goal_id ?? goalId,
+        projectedFinishDate: payload.projected_finish_date ?? null,
+        projectedAmountAtTarget: payload.projected_amount_at_target ?? null,
+        assumptions: {
+          annualReturnRate: payload.assumptions?.annual_return_rate ?? null,
+          monthlyContribution: payload.assumptions?.monthly_contribution ?? null,
+        },
+      };
     },
   };
 };
