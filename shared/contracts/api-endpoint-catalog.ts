@@ -116,6 +116,32 @@ export const apiEndpointCatalog = {
     "GET /ops/observability",
     "GET /ops/metrics",
   ],
+  tags: [
+    "GET /tags",
+    "POST /tags",
+    "PUT /tags/{tag_id}",
+    "DELETE /tags/{tag_id}",
+  ],
+  accounts: [
+    "GET /accounts",
+    "POST /accounts",
+    "PUT /accounts/{account_id}",
+    "DELETE /accounts/{account_id}",
+  ],
+  creditCards: [
+    "GET /credit-cards",
+    "POST /credit-cards",
+    "PUT /credit-cards/{credit_card_id}",
+    "DELETE /credit-cards/{credit_card_id}",
+  ],
+  budgets: [
+    "GET /budgets",
+    "POST /budgets",
+    "GET /budgets/summary",
+    "GET /budgets/{budget_id}",
+    "PATCH /budgets/{budget_id}",
+    "DELETE /budgets/{budget_id}",
+  ],
 } as const;
 
 export type ApiDomain = keyof typeof apiEndpointCatalog;

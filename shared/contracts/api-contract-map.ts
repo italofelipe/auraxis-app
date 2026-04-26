@@ -97,6 +97,30 @@ import type {
   UserProfile,
 } from "@/features/user-profile/contracts";
 import type {
+  Account,
+  AccountListResponse,
+  CreateAccountCommand,
+  UpdateAccountCommand,
+} from "@/features/accounts/contracts";
+import type {
+  Budget,
+  BudgetSummary,
+  CreateBudgetCommand,
+  UpdateBudgetCommand,
+} from "@/features/budgets/contracts";
+import type {
+  CreateCreditCardCommand,
+  CreditCard,
+  CreditCardListResponse,
+  UpdateCreditCardCommand,
+} from "@/features/credit-cards/contracts";
+import type {
+  CreateTagCommand,
+  Tag,
+  TagListResponse,
+  UpdateTagCommand,
+} from "@/features/tags/contracts";
+import type {
   CreateGoalFromInstallmentVsCashDto,
   CreateGoalFromInstallmentVsCashResponseDto,
   CreatePlannedExpenseFromInstallmentVsCashDto,
@@ -827,6 +851,131 @@ export const apiContractMap = {
     method: "GET",
     path: "/ops/metrics",
     authRequired: false,
+  }),
+  tagsList: defineApiContract<"GET", "/tags", never, TagListResponse>({
+    method: "GET",
+    path: "/tags",
+    authRequired: true,
+  }),
+  tagsCreate: defineApiContract<"POST", "/tags", CreateTagCommand, Tag>({
+    method: "POST",
+    path: "/tags",
+    authRequired: true,
+  }),
+  tagUpdate: defineApiContract<"PUT", "/tags/{tag_id}", UpdateTagCommand, Tag>({
+    method: "PUT",
+    path: "/tags/{tag_id}",
+    authRequired: true,
+  }),
+  tagDelete: defineApiContract<"DELETE", "/tags/{tag_id}", never, void>({
+    method: "DELETE",
+    path: "/tags/{tag_id}",
+    authRequired: true,
+  }),
+  accountsList: defineApiContract<"GET", "/accounts", never, AccountListResponse>({
+    method: "GET",
+    path: "/accounts",
+    authRequired: true,
+  }),
+  accountsCreate: defineApiContract<
+    "POST",
+    "/accounts",
+    CreateAccountCommand,
+    Account
+  >({
+    method: "POST",
+    path: "/accounts",
+    authRequired: true,
+  }),
+  accountUpdate: defineApiContract<
+    "PUT",
+    "/accounts/{account_id}",
+    UpdateAccountCommand,
+    Account
+  >({
+    method: "PUT",
+    path: "/accounts/{account_id}",
+    authRequired: true,
+  }),
+  accountDelete: defineApiContract<"DELETE", "/accounts/{account_id}", never, void>({
+    method: "DELETE",
+    path: "/accounts/{account_id}",
+    authRequired: true,
+  }),
+  creditCardsList: defineApiContract<
+    "GET",
+    "/credit-cards",
+    never,
+    CreditCardListResponse
+  >({
+    method: "GET",
+    path: "/credit-cards",
+    authRequired: true,
+  }),
+  creditCardsCreate: defineApiContract<
+    "POST",
+    "/credit-cards",
+    CreateCreditCardCommand,
+    CreditCard
+  >({
+    method: "POST",
+    path: "/credit-cards",
+    authRequired: true,
+  }),
+  creditCardUpdate: defineApiContract<
+    "PUT",
+    "/credit-cards/{credit_card_id}",
+    UpdateCreditCardCommand,
+    CreditCard
+  >({
+    method: "PUT",
+    path: "/credit-cards/{credit_card_id}",
+    authRequired: true,
+  }),
+  creditCardDelete: defineApiContract<
+    "DELETE",
+    "/credit-cards/{credit_card_id}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/credit-cards/{credit_card_id}",
+    authRequired: true,
+  }),
+  budgetsList: defineApiContract<"GET", "/budgets", never, readonly Budget[]>({
+    method: "GET",
+    path: "/budgets",
+    authRequired: true,
+  }),
+  budgetsCreate: defineApiContract<"POST", "/budgets", CreateBudgetCommand, Budget>({
+    method: "POST",
+    path: "/budgets",
+    authRequired: true,
+  }),
+  budgetSummary: defineApiContract<"GET", "/budgets/summary", never, BudgetSummary>({
+    method: "GET",
+    path: "/budgets/summary",
+    authRequired: true,
+  }),
+  budgetDetail: defineApiContract<"GET", "/budgets/{budget_id}", never, Budget>({
+    method: "GET",
+    path: "/budgets/{budget_id}",
+    authRequired: true,
+  }),
+  budgetUpdate: defineApiContract<
+    "PATCH",
+    "/budgets/{budget_id}",
+    UpdateBudgetCommand,
+    Budget
+  >({
+    method: "PATCH",
+    path: "/budgets/{budget_id}",
+    authRequired: true,
+  }),
+  budgetDelete: defineApiContract<"DELETE", "/budgets/{budget_id}", never, void>({
+    method: "DELETE",
+    path: "/budgets/{budget_id}",
+    authRequired: true,
   }),
 } as const;
 
