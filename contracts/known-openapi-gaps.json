@@ -26,6 +26,7 @@
     "DELETE /fiscal/receivables/{entryId}",
     "GET /fiscal/receivables/summary",
     "GET /fiscal/fiscal-documents",
-    "POST /fiscal/fiscal-documents"
+    "POST /fiscal/fiscal-documents",
+    "GET /goals/{goal_id}/projection"
   ]
 }

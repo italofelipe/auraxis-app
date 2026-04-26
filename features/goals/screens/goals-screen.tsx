@@ -3,6 +3,8 @@ import { useMemo, type ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { GoalForm } from "@/features/goals/components/goal-form";
+import { GoalPlanCard } from "@/features/goals/components/goal-plan-card";
+import { GoalProjectionCard } from "@/features/goals/components/goal-projection-card";
 import {
   useGoalsScreenController,
   type GoalsScreenController,
@@ -127,15 +129,24 @@ function GoalsListCard({ controller }: ControllerProps): ReactElement {
         {() => (
           <YStack gap="$3">
             {controller.goals.map((goal) => (
-              <GoalRow
-                key={goal.id}
-                goal={goal}
-                isDeleting={controller.deletingGoalId === goal.id}
-                onEdit={() => controller.handleOpenEdit(goal)}
-                onDelete={() => {
-                  void controller.handleDelete(goal.id);
-                }}
-              />
+              <YStack key={goal.id} gap="$3">
+                <GoalRow
+                  goal={goal}
+                  isPlanOpen={controller.selectedPlanGoalId === goal.id}
+                  isDeleting={controller.deletingGoalId === goal.id}
+                  onEdit={() => controller.handleOpenEdit(goal)}
+                  onDelete={() => {
+                    void controller.handleDelete(goal.id);
+                  }}
+                  onTogglePlan={() => controller.handleTogglePlan(goal.id)}
+                />
+                {controller.selectedPlanGoalId === goal.id ? (
+                  <YStack gap="$3">
+                    <GoalPlanCard goalId={goal.id} />
+                    <GoalProjectionCard goalId={goal.id} />
+                  </YStack>
+                ) : null}
+              </YStack>
             ))}
           </YStack>
         )}
@@ -146,12 +157,21 @@ function GoalsListCard({ controller }: ControllerProps): ReactElement {
 
 interface GoalRowProps {
   readonly goal: GoalProgressView;
+  readonly isPlanOpen: boolean;
   readonly isDeleting: boolean;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
+  readonly onTogglePlan: () => void;
 }
 
-function GoalRow({ goal, isDeleting, onEdit, onDelete }: GoalRowProps): ReactElement {
+function GoalRow({
+  goal,
+  isPlanOpen,
+  isDeleting,
+  onEdit,
+  onDelete,
+  onTogglePlan,
+}: GoalRowProps): ReactElement {
   return (
     <YStack gap="$2">
       <AppKeyValueRow
@@ -173,6 +193,9 @@ function GoalRow({ goal, isDeleting, onEdit, onDelete }: GoalRowProps): ReactEle
         }
       />
       <XStack gap="$2" flexWrap="wrap">
+        <AppButton tone="secondary" onPress={onTogglePlan} disabled={isDeleting}>
+          {isPlanOpen ? "Ocultar plano" : "Ver plano"}
+        </AppButton>
         <AppButton tone="secondary" onPress={onEdit} disabled={isDeleting}>
           Editar
         </AppButton>

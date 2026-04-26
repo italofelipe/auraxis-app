@@ -9,6 +9,17 @@ import { privateTabDefinitions } from "@/core/navigation/routes";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
 
+const HIDDEN_TAB_NAMES: readonly string[] = [
+  "installment-vs-cash",
+  "confirm-email-pending",
+  "compartilhamentos",
+  "transacoes",
+  "perfil",
+  "fiscal",
+  "questionario",
+  "carteira-operacoes",
+];
+
 function PrivateLayoutContent(): ReactElement | null {
   const { ready, redirectTo } = usePrivateRouteGuard();
   useEntitlementsForegroundRefresh();
@@ -44,48 +55,9 @@ function PrivateLayoutContent(): ReactElement | null {
           />
         );
       })}
-      <Tabs.Screen
-        name="installment-vs-cash"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="confirm-email-pending"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="compartilhamentos"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="transacoes"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="perfil"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="fiscal"
-        options={{
-          href: null,
-        }}
-      />
-      <Tabs.Screen
-        name="questionario"
-        options={{
-          href: null,
-        }}
-      />
+      {HIDDEN_TAB_NAMES.map((name) => (
+        <Tabs.Screen key={name} name={name} options={{ href: null }} />
+      ))}
     </Tabs>
   );
 }

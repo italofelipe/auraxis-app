@@ -32,11 +32,13 @@ export interface GoalsScreenController {
   readonly isSubmitting: boolean;
   readonly submitError: unknown | null;
   readonly deletingGoalId: string | null;
+  readonly selectedPlanGoalId: string | null;
   readonly handleOpenCreate: () => void;
   readonly handleOpenEdit: (goal: GoalRecord) => void;
   readonly handleCloseForm: () => void;
   readonly handleSubmit: (values: CreateGoalFormValues) => Promise<void>;
   readonly handleDelete: (goalId: string) => Promise<void>;
+  readonly handleTogglePlan: (goalId: string) => void;
   readonly dismissSubmitError: () => void;
 }
 
@@ -45,6 +47,65 @@ const buildSummary = (goals: readonly GoalProgressView[]): GoalsScreenSummary =>
     total: goals.length,
     active: goals.filter((goal) => !goal.isCompleted).length,
     completed: goals.filter((goal) => goal.isCompleted).length,
+  };
+};
+
+interface SubmitHandlerDeps {
+  readonly formMode: GoalFormMode;
+  readonly createMutation: ReturnType<typeof useCreateGoalMutation>;
+  readonly updateMutation: ReturnType<typeof useUpdateGoalMutation>;
+  readonly setFormMode: (mode: GoalFormMode) => void;
+  readonly setSubmitError: (error: unknown | null) => void;
+}
+
+const buildSubmitHandler = ({
+  formMode,
+  createMutation,
+  updateMutation,
+  setFormMode,
+  setSubmitError,
+}: SubmitHandlerDeps) => {
+  return async (values: CreateGoalFormValues): Promise<void> => {
+    setSubmitError(null);
+    try {
+      const payload = {
+        title: values.title,
+        targetAmount: values.targetAmount,
+        currentAmount: values.currentAmount,
+        targetDate: values.targetDate,
+      };
+      if (formMode.kind === "edit") {
+        await updateMutation.mutateAsync({ goalId: formMode.goal.id, ...payload });
+      } else {
+        await createMutation.mutateAsync(payload);
+      }
+      setFormMode({ kind: "closed" });
+    } catch (error) {
+      setSubmitError(error);
+    }
+  };
+};
+
+interface DeleteHandlerDeps {
+  readonly deleteMutation: ReturnType<typeof useDeleteGoalMutation>;
+  readonly setDeletingGoalId: (id: string | null) => void;
+  readonly setSubmitError: (error: unknown | null) => void;
+}
+
+const buildDeleteHandler = ({
+  deleteMutation,
+  setDeletingGoalId,
+  setSubmitError,
+}: DeleteHandlerDeps) => {
+  return async (goalId: string): Promise<void> => {
+    setDeletingGoalId(goalId);
+    try {
+      await deleteMutation.mutateAsync(goalId);
+    } catch (error) {
+      setSubmitError(error);
+    } finally {
+      setDeletingGoalId(null);
+    }
   };
 };
 
@@ -61,6 +122,7 @@ export function useGoalsScreenController(): GoalsScreenController {
   const [formMode, setFormMode] = useState<GoalFormMode>({ kind: "closed" });
   const [submitError, setSubmitError] = useState<unknown | null>(null);
   const [deletingGoalId, setDeletingGoalId] = useState<string | null>(null);
+  const [selectedPlanGoalId, setSelectedPlanGoalId] = useState<string | null>(null);
 
   const goals = useMemo<readonly GoalProgressView[]>(() => {
     const records = goalsQuery.data?.goals ?? [];
@@ -69,41 +131,19 @@ export function useGoalsScreenController(): GoalsScreenController {
 
   const summary = useMemo<GoalsScreenSummary>(() => buildSummary(goals), [goals]);
 
-  const handleSubmit = async (values: CreateGoalFormValues): Promise<void> => {
-    setSubmitError(null);
-    try {
-      if (formMode.kind === "edit") {
-        await updateMutation.mutateAsync({
-          goalId: formMode.goal.id,
-          title: values.title,
-          targetAmount: values.targetAmount,
-          currentAmount: values.currentAmount,
-          targetDate: values.targetDate,
-        });
-      } else {
-        await createMutation.mutateAsync({
-          title: values.title,
-          targetAmount: values.targetAmount,
-          currentAmount: values.currentAmount,
-          targetDate: values.targetDate,
-        });
-      }
-      setFormMode({ kind: "closed" });
-    } catch (error) {
-      setSubmitError(error);
-    }
-  };
+  const handleSubmit = buildSubmitHandler({
+    formMode,
+    createMutation,
+    updateMutation,
+    setFormMode,
+    setSubmitError,
+  });
 
-  const handleDelete = async (goalId: string): Promise<void> => {
-    setDeletingGoalId(goalId);
-    try {
-      await deleteMutation.mutateAsync(goalId);
-    } catch (error) {
-      setSubmitError(error);
-    } finally {
-      setDeletingGoalId(null);
-    }
-  };
+  const handleDelete = buildDeleteHandler({
+    deleteMutation,
+    setDeletingGoalId,
+    setSubmitError,
+  });
 
   return {
     goalsQuery,
@@ -113,6 +153,7 @@ export function useGoalsScreenController(): GoalsScreenController {
     isSubmitting: createMutation.isPending || updateMutation.isPending,
     submitError,
     deletingGoalId,
+    selectedPlanGoalId,
     handleOpenCreate: () => {
       setSubmitError(null);
       setFormMode({ kind: "create" });
@@ -127,6 +168,9 @@ export function useGoalsScreenController(): GoalsScreenController {
     },
     handleSubmit,
     handleDelete,
+    handleTogglePlan: (goalId: string) => {
+      setSelectedPlanGoalId((current) => (current === goalId ? null : goalId));
+    },
     dismissSubmitError: () => {
       setSubmitError(null);
       createMutation.reset();

@@ -32,3 +32,21 @@ export interface UpdateGoalCommand {
 export interface GoalDetailResponse {
   readonly goal: GoalRecord;
 }
+
+export interface GoalPlan {
+  readonly goalId: string;
+  readonly monthlyContribution: number;
+  readonly monthsToTarget: number | null;
+  readonly recommendedSavingsRate: number | null;
+  readonly disclaimer: string | null;
+}
+
+export interface GoalProjection {
+  readonly goalId: string;
+  readonly projectedFinishDate: string | null;
+  readonly projectedAmountAtTarget: number | null;
+  readonly assumptions: {
+    readonly annualReturnRate: number | null;
+    readonly monthlyContribution: number | null;
+  };
+}

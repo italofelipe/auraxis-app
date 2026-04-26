@@ -16,6 +16,8 @@ export const queryKeys = {
   goals: {
     root: ["goals"] as const,
     list: () => ["goals", "list"] as const,
+    plan: (goalId: string) => ["goals", "plan", goalId] as const,
+    projection: (goalId: string) => ["goals", "projection", goalId] as const,
   },
   alerts: {
     root: ["alerts"] as const,
@@ -49,6 +51,8 @@ export const queryKeys = {
   wallet: {
     root: ["wallet"] as const,
     summary: () => ["wallet", "summary"] as const,
+    operations: (entryId: string) => ["wallet", "operations", entryId] as const,
+    position: (entryId: string) => ["wallet", "position", entryId] as const,
   },
   observability: {
     root: ["observability"] as const,

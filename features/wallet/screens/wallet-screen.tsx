@@ -1,7 +1,9 @@
+import { useRouter } from "expo-router";
 import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { WalletEntryForm } from "@/features/wallet/components/wallet-entry-form";
 import {
   useWalletScreenController,
@@ -21,6 +23,13 @@ import { formatCurrency, formatPercent } from "@/shared/utils/formatters";
  */
 export function WalletScreen(): ReactElement {
   const controller = useWalletScreenController();
+  const router = useRouter();
+  const handleOpenOperations = (entryId: string): void => {
+    router.push({
+      pathname: appRoutes.private.walletOperations,
+      params: { entryId },
+    });
+  };
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -42,7 +51,10 @@ export function WalletScreen(): ReactElement {
   return (
     <AppScreen>
       <SummaryCard controller={controller} />
-      <AssetsListCard controller={controller} />
+      <AssetsListCard
+        controller={controller}
+        onOpenOperations={handleOpenOperations}
+      />
     </AppScreen>
   );
 }
@@ -67,7 +79,14 @@ function SummaryCard({ controller }: ControllerProps): ReactElement {
   );
 }
 
-function AssetsListCard({ controller }: ControllerProps): ReactElement {
+interface AssetsListCardProps extends ControllerProps {
+  readonly onOpenOperations: (entryId: string) => void;
+}
+
+function AssetsListCard({
+  controller,
+  onOpenOperations,
+}: AssetsListCardProps): ReactElement {
   return (
     <AppSurfaceCard
       title="Ativos"
@@ -109,6 +128,7 @@ function AssetsListCard({ controller }: ControllerProps): ReactElement {
                   onDelete={() => {
                     void controller.handleDelete(asset.id);
                   }}
+                  onOpenOperations={() => onOpenOperations(asset.id)}
                 />
               );
             })}
@@ -126,6 +146,7 @@ interface WalletAssetRowProps {
   readonly isDeleting: boolean;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
+  readonly onOpenOperations: () => void;
 }
 
 function WalletAssetRow({
@@ -135,6 +156,7 @@ function WalletAssetRow({
   isDeleting,
   onEdit,
   onDelete,
+  onOpenOperations,
 }: WalletAssetRowProps): ReactElement {
   return (
     <YStack gap="$2">
@@ -152,6 +174,9 @@ function WalletAssetRow({
         }
       />
       <XStack gap="$2" flexWrap="wrap">
+        <AppButton tone="secondary" onPress={onOpenOperations} disabled={isDeleting}>
+          Ver operacoes
+        </AppButton>
         <AppButton tone="secondary" onPress={onEdit} disabled={isDeleting}>
           Editar
         </AppButton>

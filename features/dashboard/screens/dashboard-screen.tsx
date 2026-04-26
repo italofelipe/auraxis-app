@@ -3,12 +3,14 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { DashboardCountsCard } from "@/features/dashboard/components/dashboard-counts-card";
+import { DashboardSurvivalIndexCard } from "@/features/dashboard/components/dashboard-survival-index-card";
 import { DashboardTopCategoriesCard } from "@/features/dashboard/components/dashboard-top-categories-card";
 import { DashboardTrendsChartCard } from "@/features/dashboard/components/dashboard-trends-chart-card";
 import {
   useDashboardScreenController,
   type DashboardScreenController,
 } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
+import { useUserProfileQuery } from "@/features/user-profile/hooks/use-user-profile-query";
 import type {
   SavingsRateAssessment,
   SavingsRateLevel,
@@ -39,6 +41,7 @@ export function DashboardScreen(): ReactElement {
   const controller = useDashboardScreenController();
   const overview = controller.overviewQuery.data;
   const trendsSeries = controller.trendsQuery.data?.series ?? [];
+  const profile = useUserProfileQuery().data ?? null;
 
   return (
     <AppScreen>
@@ -47,6 +50,12 @@ export function DashboardScreen(): ReactElement {
         <SavingsRateCard assessment={controller.savingsRate} />
       ) : null}
       <MonthSnapshotCard controller={controller} />
+      {profile ? (
+        <DashboardSurvivalIndexCard
+          netWorth={profile.netWorth}
+          monthlyExpenses={profile.monthlyExpenses}
+        />
+      ) : null}
       {overview ? (
         <DashboardCountsCard counts={overview.counts} />
       ) : null}

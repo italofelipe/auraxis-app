@@ -49,3 +49,42 @@ export interface UpdateWalletEntryCommand {
   readonly targetWithdrawDate?: string | null;
   readonly shouldBeOnWallet?: boolean;
 }
+
+export type WalletOperationKind = "buy" | "sell";
+
+export interface WalletOperation {
+  readonly id: string;
+  readonly kind: WalletOperationKind;
+  readonly quantity: number;
+  readonly unitPrice: number;
+  readonly totalValue: number;
+  readonly executedAt: string;
+  readonly notes: string | null;
+}
+
+export interface WalletOperationsListResponse {
+  readonly operations: WalletOperation[];
+  readonly count: number;
+}
+
+export interface WalletOperationsPosition {
+  readonly entryId: string;
+  readonly currentQuantity: number;
+  readonly averagePrice: number;
+  readonly investedAmount: number;
+  readonly realizedProfit: number;
+}
+
+export interface CreateWalletOperationCommand {
+  readonly entryId: string;
+  readonly kind: WalletOperationKind;
+  readonly quantity: number;
+  readonly unitPrice: number;
+  readonly executedAt: string;
+  readonly notes?: string | null;
+}
+
+export interface DeleteWalletOperationCommand {
+  readonly entryId: string;
+  readonly operationId: string;
+}
