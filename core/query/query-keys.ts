@@ -70,4 +70,22 @@ export const queryKeys = {
     catalog: () => ["tools", "catalog"] as const,
     simulationHistory: (toolId: string) => ["simulations", toolId] as const,
   },
+  tags: {
+    root: ["tags"] as const,
+    list: () => ["tags", "list"] as const,
+  },
+  accounts: {
+    root: ["accounts"] as const,
+    list: () => ["accounts", "list"] as const,
+  },
+  creditCards: {
+    root: ["credit-cards"] as const,
+    list: () => ["credit-cards", "list"] as const,
+  },
+  budgets: {
+    root: ["budgets"] as const,
+    list: () => ["budgets", "list"] as const,
+    summary: () => ["budgets", "summary"] as const,
+    detail: (budgetId: string) => ["budgets", "detail", budgetId] as const,
+  },
 } as const;

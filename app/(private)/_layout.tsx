@@ -18,6 +18,10 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "fiscal",
   "questionario",
   "carteira-operacoes",
+  "tags",
+  "contas",
+  "cartoes",
+  "orcamentos",
 ];
 
 function PrivateLayoutContent(): ReactElement | null {

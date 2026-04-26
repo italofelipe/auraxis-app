@@ -28,6 +28,10 @@ export const appRoutes = {
     fiscal: "/fiscal",
     questionnaire: "/questionario",
     walletOperations: "/carteira-operacoes",
+    tags: "/tags",
+    accounts: "/contas",
+    creditCards: "/cartoes",
+    budgets: "/orcamentos",
   },
 } as const;
 
@@ -217,6 +221,34 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "walletOperations",
     path: appRoutes.private.walletOperations,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "tags",
+    path: appRoutes.private.tags,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "accounts",
+    path: appRoutes.private.accounts,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "creditCards",
+    path: appRoutes.private.creditCards,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "budgets",
+    path: appRoutes.private.budgets,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
