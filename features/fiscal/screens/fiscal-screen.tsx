@@ -2,6 +2,7 @@ import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { FiscalDocumentsCard } from "@/features/fiscal/components/fiscal-documents-card";
 import { ReceivableForm } from "@/features/fiscal/components/receivable-form";
 import type {
   ReceivableRecord,
@@ -51,6 +52,7 @@ export function FiscalScreen(): ReactElement {
     <AppScreen>
       <SummaryCard controller={controller} />
       <ReceivablesListCard controller={controller} />
+      <FiscalDocumentsCard />
     </AppScreen>
   );
 }
