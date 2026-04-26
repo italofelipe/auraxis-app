@@ -26,3 +26,26 @@ export interface WalletListQuery {
 }
 
 export type WalletSummary = WalletCollection;
+
+export interface CreateWalletEntryCommand {
+  readonly name: string;
+  readonly assetClass: string;
+  readonly value?: number | null;
+  readonly ticker?: string | null;
+  readonly quantity?: number | null;
+  readonly annualRate?: number | null;
+  readonly targetWithdrawDate?: string | null;
+  readonly registerDate?: string | null;
+}
+
+export interface UpdateWalletEntryCommand {
+  readonly entryId: string;
+  readonly name?: string;
+  readonly assetClass?: string;
+  readonly value?: number | null;
+  readonly ticker?: string | null;
+  readonly quantity?: number | null;
+  readonly annualRate?: number | null;
+  readonly targetWithdrawDate?: string | null;
+  readonly shouldBeOnWallet?: boolean;
+}

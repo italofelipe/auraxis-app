@@ -49,31 +49,42 @@ describe("WalletScreen", () => {
   });
 
   it("renderiza o resumo da carteira e os ativos da composicao canônica", () => {
+    const entry = {
+      id: "asset-1",
+      name: "Tesouro Selic",
+      value: 15000,
+      estimatedValueOnCreateDate: null,
+      ticker: null,
+      quantity: null,
+      assetClass: "fixed-income",
+      annualRate: null,
+      targetWithdrawDate: null,
+      registerDate: "2026-01-01",
+      shouldBeOnWallet: true,
+    };
     mockedUseWalletScreenController.mockReturnValue({
       walletQuery: buildQuery({
         data: {
           total: 25000,
-          items: [
-            {
-              id: "asset-1",
-              name: "Tesouro Selic",
-              value: 15000,
-            },
-          ],
-          returnedItems: 0,
+          items: [entry],
+          returnedItems: 1,
           limit: 50,
           hasMore: false,
         },
       }) as ReturnType<typeof useWalletScreenController>["walletQuery"],
       total: 25000,
-      assets: [
-        {
-          id: "asset-1",
-          name: "Tesouro Selic",
-          amount: 15000,
-          allocation: 60,
-        },
-      ],
+      assets: [{ id: "asset-1", name: "Tesouro Selic", amount: 15000, allocation: 60 }],
+      entries: [entry],
+      formMode: { kind: "closed" },
+      isSubmitting: false,
+      submitError: null,
+      deletingEntryId: null,
+      handleOpenCreate: jest.fn(),
+      handleOpenEdit: jest.fn(),
+      handleCloseForm: jest.fn(),
+      handleSubmit: jest.fn().mockResolvedValue(undefined),
+      handleDelete: jest.fn().mockResolvedValue(undefined),
+      dismissSubmitError: jest.fn(),
     });
 
     const { getByText } = render(

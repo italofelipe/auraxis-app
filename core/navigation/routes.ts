@@ -24,6 +24,8 @@ export const appRoutes = {
     confirmEmailPending: "/confirm-email-pending",
     sharedEntries: "/compartilhamentos",
     transactions: "/transacoes",
+    profile: "/perfil",
+    fiscal: "/fiscal",
   },
 } as const;
 
@@ -185,6 +187,20 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "transactions",
     path: appRoutes.private.transactions,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "profile",
+    path: appRoutes.private.profile,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "fiscal",
+    path: appRoutes.private.fiscal,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
