@@ -1,0 +1,70 @@
+{
+  "common": {
+    "actions": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "delete": "Delete",
+      "edit": "Edit",
+      "close": "Close",
+      "back": "Back",
+      "tryAgain": "Try again",
+      "create": "Create",
+      "loading": "Loading..."
+    },
+    "errors": {
+      "unknown": "Something went wrong. Please try again shortly.",
+      "network": "No connection right now",
+      "validation": "Check the highlighted fields"
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Choose how Auraxis should look on your device.",
+      "system": "Follow system",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "language": {
+      "title": "Language",
+      "description": "Choose the language shown across the app.",
+      "pt": "Portuguese",
+      "en": "English"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign in",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "submit": "Sign in",
+      "submitting": "Signing in...",
+      "forgotPassword": "I forgot my password",
+      "noAccount": "Don't have an account yet?",
+      "createAccount": "Create account"
+    },
+    "register": {
+      "title": "Create account",
+      "submit": "Create account",
+      "submitting": "Creating..."
+    },
+    "forgotPassword": {
+      "title": "Recover password",
+      "submit": "Send instructions",
+      "submitting": "Sending..."
+    },
+    "resetPassword": {
+      "title": "Set new password",
+      "submit": "Save new password",
+      "submitting": "Saving..."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Hello, {{name}}",
+    "balanceLabel": "Total balance",
+    "monthSummary": {
+      "title": "Monthly summary",
+      "description": "Income, expenses and balance for the selected period."
+    }
+  }
+}

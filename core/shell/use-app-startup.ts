@@ -20,9 +20,19 @@ import {
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useSessionStore } from "@/core/session/session-store";
 import { startupLogger } from "@/core/telemetry/domain-loggers";
+import { initI18n } from "@/shared/i18n";
 
 let sentryInitialized = false;
 let splashScreenPrevented = false;
+let i18nInitialized = false;
+
+const ensureI18nInitialized = (initialLocale?: "pt" | "en"): void => {
+  if (i18nInitialized) {
+    return;
+  }
+  i18nInitialized = true;
+  void initI18n(initialLocale);
+};
 
 const ensureSentryInitialized = (): void => {
   if (sentryInitialized) {
@@ -45,6 +55,7 @@ const ensureSplashScreenPrevented = (): void => {
 export const resetAppStartupRuntimeForTests = (): void => {
   sentryInitialized = false;
   splashScreenPrevented = false;
+  i18nInitialized = false;
   resetPerformanceTrackerForTests();
 };
 
@@ -69,6 +80,7 @@ export const useAppStartup = (): AppStartupState => {
   useEffect(() => {
     ensureSentryInitialized();
     ensureSplashScreenPrevented();
+    ensureI18nInitialized(useAppShellStore.getState().locale);
     if (!startupMeasurementStarted.current) {
       performanceTracker.start("startup.total");
       startupMeasurementStarted.current = true;

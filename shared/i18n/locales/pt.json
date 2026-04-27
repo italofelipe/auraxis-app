@@ -1,0 +1,70 @@
+{
+  "common": {
+    "actions": {
+      "save": "Salvar",
+      "cancel": "Cancelar",
+      "confirm": "Confirmar",
+      "delete": "Excluir",
+      "edit": "Editar",
+      "close": "Fechar",
+      "back": "Voltar",
+      "tryAgain": "Tentar novamente",
+      "create": "Criar",
+      "loading": "Carregando..."
+    },
+    "errors": {
+      "unknown": "Algo deu errado. Tente novamente em instantes.",
+      "network": "Sem conexao para carregar agora",
+      "validation": "Verifique os campos destacados"
+    },
+    "appearance": {
+      "title": "Aparencia",
+      "description": "Escolha como o Auraxis deve aparecer no seu dispositivo.",
+      "system": "Seguir sistema",
+      "light": "Claro",
+      "dark": "Escuro"
+    },
+    "language": {
+      "title": "Idioma",
+      "description": "Escolha o idioma exibido em todo o app.",
+      "pt": "Portugues",
+      "en": "English"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Entrar",
+      "emailLabel": "Email",
+      "passwordLabel": "Senha",
+      "submit": "Entrar",
+      "submitting": "Entrando...",
+      "forgotPassword": "Esqueci minha senha",
+      "noAccount": "Ainda nao tem conta?",
+      "createAccount": "Criar conta"
+    },
+    "register": {
+      "title": "Criar conta",
+      "submit": "Criar conta",
+      "submitting": "Criando..."
+    },
+    "forgotPassword": {
+      "title": "Recuperar senha",
+      "submit": "Enviar instrucoes",
+      "submitting": "Enviando..."
+    },
+    "resetPassword": {
+      "title": "Definir nova senha",
+      "submit": "Salvar nova senha",
+      "submitting": "Salvando..."
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "greeting": "Ola, {{name}}",
+    "balanceLabel": "Saldo geral",
+    "monthSummary": {
+      "title": "Resumo por mes",
+      "description": "Receitas, despesas e saldo do periodo selecionado."
+    }
+  }
+}
