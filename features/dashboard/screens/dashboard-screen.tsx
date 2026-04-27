@@ -2,10 +2,15 @@ import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { DashboardComparisonCard } from "@/features/dashboard/components/dashboard-comparison-card";
 import { DashboardCountsCard } from "@/features/dashboard/components/dashboard-counts-card";
+import { DashboardGoalsSummaryCard } from "@/features/dashboard/components/dashboard-goals-summary-card";
+import { DashboardQuickAddFab } from "@/features/dashboard/components/dashboard-quick-add-fab";
 import { DashboardSurvivalIndexCard } from "@/features/dashboard/components/dashboard-survival-index-card";
 import { DashboardTopCategoriesCard } from "@/features/dashboard/components/dashboard-top-categories-card";
 import { DashboardTrendsChartCard } from "@/features/dashboard/components/dashboard-trends-chart-card";
+import { DashboardUpcomingDueCard } from "@/features/dashboard/components/dashboard-upcoming-due-card";
+import { DashboardWalletSummaryCard } from "@/features/dashboard/components/dashboard-wallet-summary-card";
 import {
   useDashboardScreenController,
   type DashboardScreenController,
@@ -38,6 +43,7 @@ const formatSavingsRate = (rate: number): string => {
  *
  * @returns Greeting, balance, savings rate and monthly snapshot panels.
  */
+// eslint-disable-next-line complexity
 export function DashboardScreen(): ReactElement {
   const controller = useDashboardScreenController();
   const overview = controller.overviewQuery.data;
@@ -47,6 +53,39 @@ export function DashboardScreen(): ReactElement {
   return (
     <AppScreen>
       <BalanceCard controller={controller} />
+      {controller.monthSnapshot ? (
+        <DashboardComparisonCard
+          title="Saldo"
+          value={controller.monthSnapshot.balance}
+          delta={controller.comparison.delta?.balance ?? null}
+          percent={controller.comparison.percent?.balance ?? null}
+          positiveIsGood
+          testID="dashboard-comparison-balance"
+        />
+      ) : null}
+      {controller.monthSnapshot ? (
+        <DashboardComparisonCard
+          title="Receitas"
+          value={controller.monthSnapshot.incomes}
+          delta={controller.comparison.delta?.income ?? null}
+          percent={controller.comparison.percent?.income ?? null}
+          positiveIsGood
+          testID="dashboard-comparison-income"
+        />
+      ) : null}
+      {controller.monthSnapshot ? (
+        <DashboardComparisonCard
+          title="Despesas"
+          value={controller.monthSnapshot.expenses}
+          delta={controller.comparison.delta?.expenses ?? null}
+          percent={controller.comparison.percent?.expenses ?? null}
+          positiveIsGood={false}
+          testID="dashboard-comparison-expenses"
+        />
+      ) : null}
+      <DashboardUpcomingDueCard />
+      <DashboardGoalsSummaryCard />
+      <DashboardWalletSummaryCard />
       {controller.savingsRate ? (
         <SavingsRateCard assessment={controller.savingsRate} />
       ) : null}
@@ -79,6 +118,7 @@ export function DashboardScreen(): ReactElement {
           tone="income"
         />
       ) : null}
+      <DashboardQuickAddFab />
     </AppScreen>
   );
 }

@@ -80,6 +80,47 @@
     "monthSummary": {
       "title": "Monthly summary",
       "description": "Income, expenses and balance for the selected period."
+    },
+    "quickAdd": {
+      "fabLabel": "Quick transaction",
+      "title": "Quick entry",
+      "description": "Create a transaction with just 4 fields.",
+      "submit": "Create",
+      "submitting": "Creating...",
+      "cancel": "Cancel",
+      "fields": {
+        "title": "Description",
+        "amount": "Amount",
+        "type": "Type",
+        "dueDate": "Date"
+      },
+      "types": {
+        "income": "Income",
+        "expense": "Expense"
+      }
+    },
+    "comparison": {
+      "vsPrevious": "vs previous month",
+      "noBaseline": "No comparison available."
+    },
+    "upcomingDue": {
+      "title": "Upcoming due",
+      "description": "Pending transactions in the next 7 days.",
+      "empty": "No upcoming dues this week.",
+      "markPaid": "Mark as paid",
+      "marking": "Marking..."
+    },
+    "embeddedSummaries": {
+      "goals": {
+        "title": "Your goals",
+        "viewAll": "View all",
+        "empty": "No goals yet."
+      },
+      "wallet": {
+        "title": "Your wallet",
+        "viewAll": "View wallet",
+        "empty": "Wallet is empty."
+      }
     }
   }
 }

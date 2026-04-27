@@ -80,6 +80,47 @@
     "monthSummary": {
       "title": "Resumo por mes",
       "description": "Receitas, despesas e saldo do periodo selecionado."
+    },
+    "quickAdd": {
+      "fabLabel": "Nova transacao rapida",
+      "title": "Lancamento rapido",
+      "description": "Crie uma transacao com apenas 4 campos.",
+      "submit": "Criar",
+      "submitting": "Criando...",
+      "cancel": "Cancelar",
+      "fields": {
+        "title": "Descricao",
+        "amount": "Valor",
+        "type": "Tipo",
+        "dueDate": "Data"
+      },
+      "types": {
+        "income": "Receita",
+        "expense": "Despesa"
+      }
+    },
+    "comparison": {
+      "vsPrevious": "vs mes anterior",
+      "noBaseline": "Sem comparacao disponivel."
+    },
+    "upcomingDue": {
+      "title": "Proximos vencimentos",
+      "description": "Transacoes pendentes nos proximos 7 dias.",
+      "empty": "Nenhum vencimento na semana.",
+      "markPaid": "Marcar como pago",
+      "marking": "Marcando..."
+    },
+    "embeddedSummaries": {
+      "goals": {
+        "title": "Suas metas",
+        "viewAll": "Ver todas",
+        "empty": "Nenhuma meta cadastrada ainda."
+      },
+      "wallet": {
+        "title": "Sua carteira",
+        "viewAll": "Ver carteira",
+        "empty": "Sua carteira esta vazia."
+      }
     }
   }
 }

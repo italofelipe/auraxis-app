@@ -6,6 +6,10 @@ import {
   useDashboardTrendsQuery,
 } from "@/features/dashboard/hooks/use-dashboard-overview-query";
 import {
+  buildPeriodComparison,
+  type PeriodComparison,
+} from "@/features/dashboard/services/period-comparison";
+import {
   savingsRateCalculator,
   type SavingsRateAssessment,
 } from "@/features/dashboard/services/savings-rate-calculator";
@@ -30,6 +34,7 @@ export interface DashboardScreenController {
   readonly monthSnapshot: DashboardMonthSnapshot | null;
   readonly currentBalance: number;
   readonly savingsRate: SavingsRateAssessment | null;
+  readonly comparison: PeriodComparison;
   readonly greetingName: string;
   readonly setSelectedMonth: (month: string) => void;
 }
@@ -104,6 +109,13 @@ export function useDashboardScreenController(): DashboardScreenController {
     });
   }, [monthSnapshot]);
 
+  const comparison = useMemo<PeriodComparison>(() => {
+    return buildPeriodComparison(
+      trendsQuery.data?.series ?? [],
+      selectedMonth,
+    );
+  }, [selectedMonth, trendsQuery.data]);
+
   return {
     overviewQuery,
     trendsQuery,
@@ -112,6 +124,7 @@ export function useDashboardScreenController(): DashboardScreenController {
     monthSnapshot,
     currentBalance: overviewQuery.data?.totals.balance ?? 0,
     savingsRate,
+    comparison,
     greetingName: firstName(userName),
     setSelectedMonth,
   };
