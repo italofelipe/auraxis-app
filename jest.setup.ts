@@ -62,6 +62,27 @@ jest.mock("react-native-reanimated", () => {
 });
 /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */
 
+// Default-mock react-native-webview: the package's iOS/Android entry
+// registers a native turbo module that fails outside a real RN
+// runtime. Suites that need to assert on bridge messages still
+// override locally to capture the WebView props.
+/* eslint-disable @typescript-eslint/no-require-imports */
+jest.mock("react-native-webview", () => {
+  const ReactInner = require("react");
+  const ReactNative = require("react-native");
+  const Stub = ReactInner.forwardRef(
+    (props: Record<string, unknown>, ref: unknown) =>
+      ReactInner.createElement(ReactNative.View, {
+        ...props,
+        ref,
+        testID: (props.testID as string | undefined) ?? "webview",
+      }),
+  );
+  Stub.displayName = "WebViewMock";
+  return { __esModule: true, WebView: Stub, default: Stub };
+});
+/* eslint-enable @typescript-eslint/no-require-imports */
+
 // Default-mock jail-monkey: the native module ships ESM that jest does
 // not transform, and individual suites stub their own assertions.
 jest.mock("jail-monkey", () => ({

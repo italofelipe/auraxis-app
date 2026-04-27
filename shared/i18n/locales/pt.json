@@ -41,6 +41,12 @@
     }
   },
   "auth": {
+    "captcha": {
+      "label": "Verificacao de seguranca",
+      "testKeyHint": "Modo de desenvolvimento — chave de teste Turnstile.",
+      "error": "Nao foi possivel verificar. Tente novamente em instantes.",
+      "missing": "Complete a verificacao de seguranca antes de continuar."
+    },
     "login": {
       "title": "Entrar",
       "emailLabel": "Email",
