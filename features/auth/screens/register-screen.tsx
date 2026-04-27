@@ -4,13 +4,18 @@ import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { Paragraph, YStack } from "tamagui";
 
 import { PasswordStrengthMeter } from "@/features/auth/components/password-strength-meter";
-import { useRegisterScreenController } from "@/features/auth/hooks/use-register-screen-controller";
+import { TurnstileChallenge } from "@/features/auth/components/turnstile-challenge";
+import {
+  useRegisterScreenController,
+  type RegisterScreenController,
+} from "@/features/auth/hooks/use-register-screen-controller";
 import type { RegisterFormValues } from "@/features/auth/validators";
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { useT } from "@/shared/i18n";
 
 const resolvePassword = (value: string | undefined): string => value ?? "";
 
@@ -35,6 +40,8 @@ export function RegisterScreen(): ReactElement {
       >
         <YStack gap="$4">
           <RegisterFields control={control} errors={errors} password={password} />
+
+          <CaptchaBlock controller={controller} />
 
           <AppButton
             onPress={() => {
@@ -70,6 +77,31 @@ export function RegisterScreen(): ReactElement {
         }}
       />
     </AppScreen>
+  );
+}
+
+interface CaptchaBlockProps {
+  readonly controller: RegisterScreenController;
+}
+
+function CaptchaBlock({ controller }: CaptchaBlockProps): ReactElement | null {
+  const { t } = useT();
+  if (!controller.captcha.required) {
+    return null;
+  }
+  return (
+    <YStack gap="$2">
+      <TurnstileChallenge
+        onToken={controller.handleCaptchaToken}
+        onExpired={controller.handleCaptchaExpired}
+        testID="register-captcha"
+      />
+      {controller.captcha.missingChallenge ? (
+        <Paragraph color="$danger" fontFamily="$body" fontSize="$2">
+          {t("auth.captcha.missing")}
+        </Paragraph>
+      ) : null}
+    </YStack>
   );
 }
 
