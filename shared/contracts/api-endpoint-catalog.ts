@@ -18,6 +18,8 @@ export const apiEndpointCatalog = {
     "POST /user/profile/questionnaire",
     "POST /user/simulate-salary-increase",
     "GET /user/bootstrap",
+    "GET /user/notification-preferences",
+    "PATCH /user/notification-preferences",
   ],
   dashboard: [
     "GET /dashboard/overview",

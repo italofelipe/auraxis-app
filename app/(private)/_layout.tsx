@@ -25,6 +25,9 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "foco",
   "onboarding",
   "simulador-meta",
+  "lixeira-transacoes",
+  "simulador-salario",
+  "preferencias-notificacao",
 ];
 
 function PrivateLayoutContent(): ReactElement | null {

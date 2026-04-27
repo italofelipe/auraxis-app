@@ -49,6 +49,8 @@ import type {
   WalletOperationsListResponse,
   WalletOperationsPosition,
   WalletSummary,
+  WalletValuationHistoryQuery,
+  WalletValuationHistoryResponse,
   WalletValuationSummary,
 } from "@/features/wallet/contracts";
 import type {
@@ -88,6 +90,7 @@ import type {
 } from "@/features/shared-entries/contracts";
 import type {
   CreateTransactionCommand,
+  DeletedTransactionListResponse,
   TransactionCollection,
   TransactionListQuery,
   TransactionRecord,
@@ -96,6 +99,10 @@ import type {
   UpdateTransactionCommand,
 } from "@/features/transactions/contracts";
 import type {
+  NotificationPreferenceListResponse,
+  SalaryIncreaseSimulation,
+  SimulateSalaryIncreaseCommand,
+  UpdateNotificationPreferencesCommand,
   UpdateUserProfileCommand,
   UserProfile,
 } from "@/features/user-profile/contracts";
@@ -274,6 +281,36 @@ export const apiContractMap = {
     path: "/user/profile/questionnaire",
     authRequired: true,
   }),
+  userSimulateSalary: defineApiContract<
+    "POST",
+    "/user/simulate-salary-increase",
+    SimulateSalaryIncreaseCommand,
+    SalaryIncreaseSimulation
+  >({
+    method: "POST",
+    path: "/user/simulate-salary-increase",
+    authRequired: true,
+  }),
+  userNotificationPreferencesGet: defineApiContract<
+    "GET",
+    "/user/notification-preferences",
+    never,
+    NotificationPreferenceListResponse
+  >({
+    method: "GET",
+    path: "/user/notification-preferences",
+    authRequired: true,
+  }),
+  userNotificationPreferencesUpdate: defineApiContract<
+    "PATCH",
+    "/user/notification-preferences",
+    UpdateNotificationPreferencesCommand,
+    NotificationPreferenceListResponse
+  >({
+    method: "PATCH",
+    path: "/user/notification-preferences",
+    authRequired: true,
+  }),
   dashboardOverview: defineApiContract<
     "GET",
     "/dashboard/overview",
@@ -343,6 +380,26 @@ export const apiContractMap = {
   >({
     method: "DELETE",
     path: "/transactions/{transaction_id}",
+    authRequired: true,
+  }),
+  transactionsDeleted: defineApiContract<
+    "GET",
+    "/transactions/deleted",
+    never,
+    DeletedTransactionListResponse
+  >({
+    method: "GET",
+    path: "/transactions/deleted",
+    authRequired: true,
+  }),
+  transactionRestore: defineApiContract<
+    "PATCH",
+    "/transactions/restore/{transaction_id}",
+    never,
+    TransactionRecord
+  >({
+    method: "PATCH",
+    path: "/transactions/restore/{transaction_id}",
     authRequired: true,
   }),
   transactionsSummary: defineApiContract<
@@ -524,6 +581,17 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/wallet/valuation",
+    authRequired: true,
+  }),
+  walletValuationHistory: defineApiContract<
+    "GET",
+    "/wallet/valuation/history",
+    never,
+    WalletValuationHistoryResponse,
+    WalletValuationHistoryQuery
+  >({
+    method: "GET",
+    path: "/wallet/valuation/history",
     authRequired: true,
   }),
   alertsList: defineApiContract<"GET", "/alerts", never, AlertListResponse>({

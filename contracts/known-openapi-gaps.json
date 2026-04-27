@@ -45,6 +45,8 @@
     "GET /budgets/summary",
     "GET /budgets/{budget_id}",
     "PATCH /budgets/{budget_id}",
-    "DELETE /budgets/{budget_id}"
+    "DELETE /budgets/{budget_id}",
+    "GET /user/notification-preferences",
+    "PATCH /user/notification-preferences"
   ]
 }
