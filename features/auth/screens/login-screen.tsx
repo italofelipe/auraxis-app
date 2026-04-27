@@ -3,7 +3,11 @@ import type { ReactElement } from "react";
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
 import { Paragraph, YStack } from "tamagui";
 
-import { useLoginScreenController } from "@/features/auth/hooks/use-login-screen-controller";
+import { TurnstileChallenge } from "@/features/auth/components/turnstile-challenge";
+import {
+  useLoginScreenController,
+  type LoginScreenController,
+} from "@/features/auth/hooks/use-login-screen-controller";
 import type { LoginFormValues } from "@/features/auth/validators";
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
@@ -11,6 +15,7 @@ import { AppInputField } from "@/shared/components/app-input-field";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { AsyncStateNotice } from "@/shared/components/async-state-notice";
+import { useT } from "@/shared/i18n";
 
 interface SessionFailureNotice {
   readonly title: string;
@@ -44,6 +49,8 @@ export function LoginScreen(): ReactElement {
             control={controller.form.control}
             errors={controller.form.formState.errors}
           />
+
+          <CaptchaBlock controller={controller} />
 
           <AppButton
             onPress={() => {
@@ -136,6 +143,31 @@ function LoginFields({ control, errors }: LoginFieldsProps): ReactElement {
 interface SessionFailureNoticeBlockProps {
   readonly notice: SessionFailureNotice;
   readonly onDismiss: () => void;
+}
+
+interface CaptchaBlockProps {
+  readonly controller: LoginScreenController;
+}
+
+function CaptchaBlock({ controller }: CaptchaBlockProps): ReactElement | null {
+  const { t } = useT();
+  if (!controller.captcha.required) {
+    return null;
+  }
+  return (
+    <YStack gap="$2">
+      <TurnstileChallenge
+        onToken={controller.handleCaptchaToken}
+        onExpired={controller.handleCaptchaExpired}
+        testID="login-captcha"
+      />
+      {controller.captcha.missingChallenge ? (
+        <Paragraph color="$danger" fontFamily="$body" fontSize="$2">
+          {t("auth.captcha.missing")}
+        </Paragraph>
+      ) : null}
+    </YStack>
+  );
 }
 
 function SessionFailureNoticeBlock({
