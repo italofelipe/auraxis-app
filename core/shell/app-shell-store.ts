@@ -16,10 +16,24 @@ export type RuntimeDegradedReason =
   | "checkout-return-failed"
   | null;
 
+/**
+ * User preference for the colour scheme. `system` follows the device,
+ * `light` and `dark` pin the app regardless of the OS setting.
+ */
+export type ThemePreference = "system" | "light" | "dark";
+
+/**
+ * Two-letter ISO 639-1 codes the app supports today. Default is `pt`,
+ * `en` is the second supported locale (paridade com web).
+ */
+export type AppLocale = "pt" | "en";
+
 export interface AppShellState {
   readonly fontsReady: boolean;
   readonly reducedMotionEnabled: boolean;
   readonly hapticsEnabled: boolean;
+  readonly themePreference: ThemePreference;
+  readonly locale: AppLocale;
   readonly startupReady: boolean;
   readonly appState: RuntimeAppState;
   readonly connectivityStatus: RuntimeConnectivityStatus;
@@ -32,6 +46,8 @@ export interface AppShellState {
   setFontsReady: (value: boolean) => void;
   setReducedMotionEnabled: (value: boolean) => void;
   setHapticsEnabled: (value: boolean) => void;
+  setThemePreference: (value: ThemePreference) => void;
+  setLocale: (value: AppLocale) => void;
   setStartupReady: (value: boolean) => void;
   setAppState: (value: RuntimeAppState) => void;
   setConnectivityStatus: (value: RuntimeConnectivityStatus) => void;
@@ -48,6 +64,8 @@ export type AppShellStateSnapshot = Pick<
   | "fontsReady"
   | "reducedMotionEnabled"
   | "hapticsEnabled"
+  | "themePreference"
+  | "locale"
   | "startupReady"
   | "appState"
   | "connectivityStatus"
@@ -63,6 +81,8 @@ export const appShellStateDefaults: AppShellStateSnapshot = {
   fontsReady: false,
   reducedMotionEnabled: false,
   hapticsEnabled: true,
+  themePreference: "system",
+  locale: "pt",
   startupReady: false,
   appState: "unknown",
   connectivityStatus: "unknown",
@@ -84,6 +104,12 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   },
   setHapticsEnabled: (value: boolean): void => {
     set({ hapticsEnabled: value });
+  },
+  setThemePreference: (value: ThemePreference): void => {
+    set({ themePreference: value });
+  },
+  setLocale: (value: AppLocale): void => {
+    set({ locale: value });
   },
   setStartupReady: (value: boolean): void => {
     set({ startupReady: value });

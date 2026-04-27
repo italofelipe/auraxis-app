@@ -1,6 +1,11 @@
 import { colorPalette, fontSizes, radii, spacing } from "@/config/design-tokens";
 
-export const semanticColors = {
+/**
+ * Dark variant of the canonical Auraxis palette. Background is
+ * almost-black neutral, surfaces lift via slightly lighter neutrals,
+ * brand stays warm orange.
+ */
+export const darkSemanticColors = {
   background: colorPalette.neutral950,
   surface: colorPalette.neutral900,
   surfaceRaised: colorPalette.neutral700,
@@ -13,6 +18,32 @@ export const semanticColors = {
   success: "#4ade80",
   danger: colorPalette.danger500,
 } as const;
+
+/**
+ * Light variant of the canonical Auraxis palette. Background is
+ * paper white, surfaces lift via cool greys, brand stays warm orange
+ * but tones down on saturation for WCAG contrast against light fills.
+ */
+export const lightSemanticColors = {
+  background: "#ffffff",
+  surface: "#f7f7f8",
+  surfaceRaised: "#eef0f3",
+  foreground: "#1a1a1a",
+  mutedForeground: "#5a5a5a",
+  subduedForeground: "#8a8a8a",
+  primary: colorPalette.brand600,
+  secondary: colorPalette.brand500,
+  border: "#dcdfe5",
+  success: "#1f9d55",
+  danger: "#c53030",
+} as const;
+
+/**
+ * Default export — kept as `semanticColors` for backwards compatibility
+ * with consumers that read static colours outside the Tamagui theme
+ * resolver. Points to the dark variant to preserve historical visuals.
+ */
+export const semanticColors = darkSemanticColors;
 
 export const semanticTypography = {
   display: fontSizes["4xl"],

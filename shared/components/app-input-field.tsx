@@ -39,17 +39,27 @@ const AppInputFieldComponent = ({
   label,
   helperText,
   errorText,
+  accessibilityLabel,
+  accessibilityHint,
   ...rest
 }: AppInputFieldProps): ReactElement => {
   const resolvedHint = errorText ?? helperText;
   const hintTone = errorText ? "danger" : "muted";
+  const a11yLabel = accessibilityLabel ?? label;
+  const a11yHint = accessibilityHint ?? helperText;
 
   return (
     <YStack gap="$2">
       <Label htmlFor={id} color="$color" fontFamily="$body" fontSize="$3">
         {label}
       </Label>
-      <FieldInput id={id} {...rest} />
+      <FieldInput
+        id={id}
+        accessibilityLabel={a11yLabel}
+        accessibilityHint={a11yHint}
+        aria-invalid={Boolean(errorText)}
+        {...rest}
+      />
       {resolvedHint ? <AppFormMessage tone={hintTone} text={resolvedHint} /> : null}
     </YStack>
   );
