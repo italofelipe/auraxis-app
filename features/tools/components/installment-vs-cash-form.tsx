@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import { memo, useCallback, type ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
@@ -55,13 +55,17 @@ const OPPORTUNITY_RATE_TYPES: readonly {
   { value: "inflation_only", label: "Apenas inflacao" },
 ] as const;
 
-function InstallmentModeSelector({
-  value,
-  onChange,
-}: {
+interface InstallmentModeSelectorProps {
   readonly value: InstallmentInputMode;
   readonly onChange: (value: InstallmentInputMode) => void;
-}): ReactElement {
+}
+
+const InstallmentModeSelector = memo(function InstallmentModeSelector({
+  value,
+  onChange,
+}: InstallmentModeSelectorProps): ReactElement {
+  const handleTotal = useCallback(() => onChange("total"), [onChange]);
+  const handleAmount = useCallback(() => onChange("amount"), [onChange]);
   return (
     <YStack gap="$2">
       <Paragraph color="$color" fontFamily="$body" fontSize="$3">
@@ -71,27 +75,31 @@ function InstallmentModeSelector({
         <AppButton
           flex={1}
           tone={value === "total" ? "primary" : "secondary"}
-          onPress={() => onChange("total")}>
+          onPress={handleTotal}
+        >
           Total parcelado
         </AppButton>
         <AppButton
           flex={1}
           tone={value === "amount" ? "primary" : "secondary"}
-          onPress={() => onChange("amount")}>
+          onPress={handleAmount}
+        >
           Valor da parcela
         </AppButton>
       </XStack>
     </YStack>
   );
-}
+});
 
-function DelayPresetSelector({
-  value,
-  onChange,
-}: {
+interface DelayPresetSelectorProps {
   readonly value: InstallmentDelayPreset;
   readonly onChange: (value: InstallmentDelayPreset) => void;
-}): ReactElement {
+}
+
+const DelayPresetSelector = memo(function DelayPresetSelector({
+  value,
+  onChange,
+}: DelayPresetSelectorProps): ReactElement {
   return (
     <YStack gap="$2">
       <Paragraph color="$color" fontFamily="$body" fontSize="$3">
@@ -99,25 +107,49 @@ function DelayPresetSelector({
       </Paragraph>
       <XStack flexWrap="wrap" gap="$2">
         {DELAY_PRESETS.map((preset) => (
-          <AppButton
+          <DelayPresetButton
             key={preset.value}
-            tone={value === preset.value ? "primary" : "secondary"}
-            onPress={() => onChange(preset.value)}>
-            {preset.label}
-          </AppButton>
+            preset={preset.value}
+            label={preset.label}
+            isActive={value === preset.value}
+            onSelect={onChange}
+          />
         ))}
       </XStack>
     </YStack>
   );
+});
+
+interface DelayPresetButtonProps {
+  readonly preset: InstallmentDelayPreset;
+  readonly label: string;
+  readonly isActive: boolean;
+  readonly onSelect: (value: InstallmentDelayPreset) => void;
 }
 
-function OpportunityRateSelector({
-  value,
-  onChange,
-}: {
+const DelayPresetButton = memo(function DelayPresetButton({
+  preset,
+  label,
+  isActive,
+  onSelect,
+}: DelayPresetButtonProps): ReactElement {
+  const handlePress = useCallback(() => onSelect(preset), [onSelect, preset]);
+  return (
+    <AppButton tone={isActive ? "primary" : "secondary"} onPress={handlePress}>
+      {label}
+    </AppButton>
+  );
+});
+
+interface OpportunityRateSelectorProps {
   readonly value: OpportunityRateType;
   readonly onChange: (value: OpportunityRateType) => void;
-}): ReactElement {
+}
+
+const OpportunityRateSelector = memo(function OpportunityRateSelector({
+  value,
+  onChange,
+}: OpportunityRateSelectorProps): ReactElement {
   return (
     <YStack gap="$2">
       <Paragraph color="$color" fontFamily="$body" fontSize="$3">
@@ -125,19 +157,44 @@ function OpportunityRateSelector({
       </Paragraph>
       <XStack flexWrap="wrap" gap="$2">
         {OPPORTUNITY_RATE_TYPES.map((option) => (
-          <AppButton
+          <OpportunityRateButton
             key={option.value}
-            tone={value === option.value ? "primary" : "secondary"}
-            onPress={() => onChange(option.value)}>
-            {option.label}
-          </AppButton>
+            optionValue={option.value}
+            label={option.label}
+            isActive={value === option.value}
+            onSelect={onChange}
+          />
         ))}
       </XStack>
     </YStack>
   );
+});
+
+interface OpportunityRateButtonProps {
+  readonly optionValue: OpportunityRateType;
+  readonly label: string;
+  readonly isActive: boolean;
+  readonly onSelect: (value: OpportunityRateType) => void;
 }
 
-function FeesToggleField({
+const OpportunityRateButton = memo(function OpportunityRateButton({
+  optionValue,
+  label,
+  isActive,
+  onSelect,
+}: OpportunityRateButtonProps): ReactElement {
+  const handlePress = useCallback(
+    () => onSelect(optionValue),
+    [onSelect, optionValue],
+  );
+  return (
+    <AppButton tone={isActive ? "primary" : "secondary"} onPress={handlePress}>
+      {label}
+    </AppButton>
+  );
+});
+
+const FeesToggleField = memo(function FeesToggleField({
   enabled,
   onChange,
 }: {
@@ -152,19 +209,42 @@ function FeesToggleField({
       onCheckedChange={onChange}
     />
   );
-}
+});
 
-function ScenarioPricingFields({
-  draft,
-  errors,
-  onTextChange,
-  onInstallmentModeChange,
-}: {
+interface ScenarioPricingFieldsProps {
   readonly draft: InstallmentVsCashFormDraft;
   readonly errors: InstallmentVsCashFormErrors;
   readonly onTextChange: (field: TextFieldName, value: string) => void;
   readonly onInstallmentModeChange: (value: InstallmentInputMode) => void;
-}): ReactElement {
+}
+
+const ScenarioPricingFields = memo(function ScenarioPricingFields({
+  draft,
+  errors,
+  onTextChange,
+  onInstallmentModeChange,
+}: ScenarioPricingFieldsProps): ReactElement {
+  const onScenarioLabel = useCallback(
+    (v: string) => onTextChange("scenarioLabel", v),
+    [onTextChange],
+  );
+  const onCashPrice = useCallback(
+    (v: string) => onTextChange("cashPrice", v),
+    [onTextChange],
+  );
+  const onInstallmentCount = useCallback(
+    (v: string) => onTextChange("installmentCount", v),
+    [onTextChange],
+  );
+  const onInstallmentTotal = useCallback(
+    (v: string) => onTextChange("installmentTotal", v),
+    [onTextChange],
+  );
+  const onInstallmentAmount = useCallback(
+    (v: string) => onTextChange("installmentAmount", v),
+    [onTextChange],
+  );
+
   return (
     <>
       <AppInputField
@@ -172,7 +252,7 @@ function ScenarioPricingFields({
         label="Nome do cenario"
         helperText="Opcional, ajuda a reconhecer a simulacao no historico."
         value={draft.scenarioLabel}
-        onChangeText={(value) => onTextChange("scenarioLabel", value)}
+        onChangeText={onScenarioLabel}
       />
 
       <AppInputField
@@ -182,7 +262,7 @@ function ScenarioPricingFields({
         placeholder="Ex.: 3599,90"
         value={draft.cashPrice}
         errorText={errors.cashPrice}
-        onChangeText={(value) => onTextChange("cashPrice", value)}
+        onChangeText={onCashPrice}
       />
 
       <AppInputField
@@ -191,7 +271,7 @@ function ScenarioPricingFields({
         keyboardType="number-pad"
         value={draft.installmentCount}
         errorText={errors.installmentCount}
-        onChangeText={(value) => onTextChange("installmentCount", value)}
+        onChangeText={onInstallmentCount}
       />
 
       <InstallmentModeSelector
@@ -207,7 +287,7 @@ function ScenarioPricingFields({
           placeholder="Ex.: 3999,90"
           value={draft.installmentTotal}
           errorText={errors.installmentTotal}
-          onChangeText={(value) => onTextChange("installmentTotal", value)}
+          onChangeText={onInstallmentTotal}
         />
       ) : (
         <AppInputField
@@ -217,28 +297,47 @@ function ScenarioPricingFields({
           placeholder="Ex.: 333,25"
           value={draft.installmentAmount}
           errorText={errors.installmentAmount}
-          onChangeText={(value) => onTextChange("installmentAmount", value)}
+          onChangeText={onInstallmentAmount}
         />
       )}
     </>
   );
-}
+});
 
-function AssumptionsFields({
-  draft,
-  errors,
-  onTextChange,
-  onDelayPresetChange,
-  onOpportunityRateTypeChange,
-  onFeesEnabledChange,
-}: {
+interface AssumptionsFieldsProps {
   readonly draft: InstallmentVsCashFormDraft;
   readonly errors: InstallmentVsCashFormErrors;
   readonly onTextChange: (field: TextFieldName, value: string) => void;
   readonly onDelayPresetChange: (value: InstallmentDelayPreset) => void;
   readonly onOpportunityRateTypeChange: (value: OpportunityRateType) => void;
   readonly onFeesEnabledChange: (value: boolean) => void;
-}): ReactElement {
+}
+
+const AssumptionsFields = memo(function AssumptionsFields({
+  draft,
+  errors,
+  onTextChange,
+  onDelayPresetChange,
+  onOpportunityRateTypeChange,
+  onFeesEnabledChange,
+}: AssumptionsFieldsProps): ReactElement {
+  const onCustomDelay = useCallback(
+    (v: string) => onTextChange("customFirstPaymentDelayDays", v),
+    [onTextChange],
+  );
+  const onOpportunityRate = useCallback(
+    (v: string) => onTextChange("opportunityRateAnnual", v),
+    [onTextChange],
+  );
+  const onInflationRate = useCallback(
+    (v: string) => onTextChange("inflationRateAnnual", v),
+    [onTextChange],
+  );
+  const onFees = useCallback(
+    (v: string) => onTextChange("feesUpfront", v),
+    [onTextChange],
+  );
+
   return (
     <>
       <DelayPresetSelector
@@ -253,7 +352,7 @@ function AssumptionsFields({
           keyboardType="number-pad"
           value={draft.customFirstPaymentDelayDays}
           errorText={errors.customFirstPaymentDelayDays}
-          onChangeText={(value) => onTextChange("customFirstPaymentDelayDays", value)}
+          onChangeText={onCustomDelay}
         />
       ) : null}
 
@@ -269,7 +368,7 @@ function AssumptionsFields({
           keyboardType="decimal-pad"
           value={draft.opportunityRateAnnual}
           errorText={errors.opportunityRateAnnual}
-          onChangeText={(value) => onTextChange("opportunityRateAnnual", value)}
+          onChangeText={onOpportunityRate}
         />
       ) : null}
 
@@ -279,13 +378,10 @@ function AssumptionsFields({
         keyboardType="decimal-pad"
         value={draft.inflationRateAnnual}
         errorText={errors.inflationRateAnnual}
-        onChangeText={(value) => onTextChange("inflationRateAnnual", value)}
+        onChangeText={onInflationRate}
       />
 
-      <FeesToggleField
-        enabled={draft.feesEnabled}
-        onChange={onFeesEnabledChange}
-      />
+      <FeesToggleField enabled={draft.feesEnabled} onChange={onFeesEnabledChange} />
 
       {draft.feesEnabled ? (
         <AppInputField
@@ -294,12 +390,12 @@ function AssumptionsFields({
           keyboardType="decimal-pad"
           value={draft.feesUpfront}
           errorText={errors.feesUpfront}
-          onChangeText={(value) => onTextChange("feesUpfront", value)}
+          onChangeText={onFees}
         />
       ) : null}
     </>
   );
-}
+});
 
 export function InstallmentVsCashForm({
   draft,

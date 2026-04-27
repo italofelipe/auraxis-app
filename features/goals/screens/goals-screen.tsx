@@ -1,7 +1,10 @@
-import { useMemo, type ReactElement } from "react";
+import { useCallback, useMemo, type ReactElement } from "react";
 
+import { FlashList } from "@shopify/flash-list";
+import { RefreshControl } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { queryKeys } from "@/core/query/query-keys";
 import { GoalForm } from "@/features/goals/components/goal-form";
 import { GoalPlanCard } from "@/features/goals/components/goal-plan-card";
 import { GoalProjectionCard } from "@/features/goals/components/goal-projection-card";
@@ -16,12 +19,15 @@ import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { useListRefresh } from "@/shared/hooks/use-list-refresh";
 import { GoalListSkeleton } from "@/shared/skeletons";
 import { formatCurrency } from "@/shared/utils/formatters";
 
 interface GoalsListData {
   readonly goals: readonly { readonly id: string }[];
 }
+
+const GOALS_REFRESH_KEYS = [queryKeys.goals.list()] as const;
 
 const STATIC_GOALS_OPTIONS = {
   loading: {
@@ -37,6 +43,13 @@ const STATIC_GOALS_OPTIONS = {
     fallbackDescription: "Tente novamente em instantes.",
   },
 } as const;
+
+const extractGoalKey = (goal: GoalProgressView): string => goal.id;
+const listContainerStyle = { paddingBottom: 24 } as const;
+
+function ListSeparator(): ReactElement {
+  return <YStack height="$3" />;
+}
 
 /**
  * Canonical goals screen composition for the mobile app.
@@ -64,9 +77,11 @@ export function GoalsScreen(): ReactElement {
   }
 
   return (
-    <AppScreen>
+    <AppScreen scrollable={false}>
       <SummaryCard controller={controller} />
-      <GoalsListCard controller={controller} />
+      <YStack flex={1}>
+        <GoalsListCard controller={controller} />
+      </YStack>
     </AppScreen>
   );
 }
@@ -122,101 +137,152 @@ function GoalsListCard({ controller }: ControllerProps): ReactElement {
     [controller.goals.length],
   );
 
+  const emptyComponent = useMemo(
+    () => (
+      <AppEmptyState
+        illustration="goals"
+        title="Sem metas por aqui"
+        description="Defina sua primeira meta financeira para comecar a acompanhar seu progresso."
+        cta={{ label: "Nova meta", onPress: controller.handleOpenCreate }}
+      />
+    ),
+    [controller.handleOpenCreate],
+  );
+
   return (
-    <AppSurfaceCard
-      title="Lista"
-      description="Metas em andamento aparecem primeiro."
+    <AppQueryState
+      query={controller.goalsQuery}
+      options={queryStateOptions}
+      loadingComponent={<GoalListSkeleton rows={3} />}
+      emptyComponent={emptyComponent}
     >
-      <AppQueryState
-        query={controller.goalsQuery}
-        options={queryStateOptions}
-        loadingComponent={<GoalListSkeleton rows={3} />}
-        emptyComponent={
-          <AppEmptyState
-            illustration="goals"
-            title="Sem metas por aqui"
-            description="Defina sua primeira meta financeira para comecar a acompanhar seu progresso."
-            cta={{ label: "Nova meta", onPress: controller.handleOpenCreate }}
-          />
-        }
-      >
-        {() => (
-          <YStack gap="$3">
-            {controller.goals.map((goal) => (
-              <YStack key={goal.id} gap="$3">
-                <GoalRow
-                  goal={goal}
-                  isPlanOpen={controller.selectedPlanGoalId === goal.id}
-                  isDeleting={controller.deletingGoalId === goal.id}
-                  onEdit={() => controller.handleOpenEdit(goal)}
-                  onDelete={() => {
-                    void controller.handleDelete(goal.id);
-                  }}
-                  onTogglePlan={() => controller.handleTogglePlan(goal.id)}
-                />
-                {controller.selectedPlanGoalId === goal.id ? (
-                  <YStack gap="$3">
-                    <GoalPlanCard goalId={goal.id} />
-                    <GoalProjectionCard goalId={goal.id} />
-                  </YStack>
-                ) : null}
-              </YStack>
-            ))}
-          </YStack>
-        )}
-      </AppQueryState>
-    </AppSurfaceCard>
+      {() => <GoalsList controller={controller} />}
+    </AppQueryState>
   );
 }
 
-interface GoalRowProps {
+function GoalsList({ controller }: ControllerProps): ReactElement {
+  const { refreshing, onRefresh } = useListRefresh(GOALS_REFRESH_KEYS);
+
+  const handleEdit = useCallback(
+    (goal: GoalProgressView): void => {
+      controller.handleOpenEdit(goal);
+    },
+    [controller],
+  );
+
+  const handleDelete = useCallback(
+    (goalId: string): void => {
+      void controller.handleDelete(goalId);
+    },
+    [controller],
+  );
+
+  const handleTogglePlan = useCallback(
+    (goalId: string): void => {
+      controller.handleTogglePlan(goalId);
+    },
+    [controller],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { readonly item: GoalProgressView }) => (
+      <GoalItem
+        goal={item}
+        isPlanOpen={controller.selectedPlanGoalId === item.id}
+        isDeleting={controller.deletingGoalId === item.id}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onTogglePlan={handleTogglePlan}
+      />
+    ),
+    [
+      controller.deletingGoalId,
+      controller.selectedPlanGoalId,
+      handleDelete,
+      handleEdit,
+      handleTogglePlan,
+    ],
+  );
+
+  return (
+    <FlashList
+      data={controller.goals}
+      keyExtractor={extractGoalKey}
+      renderItem={renderItem}
+      contentContainerStyle={listContainerStyle}
+      ItemSeparatorComponent={ListSeparator}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      testID="goals-flashlist"
+    />
+  );
+}
+
+interface GoalItemProps {
   readonly goal: GoalProgressView;
   readonly isPlanOpen: boolean;
   readonly isDeleting: boolean;
-  readonly onEdit: () => void;
-  readonly onDelete: () => void;
-  readonly onTogglePlan: () => void;
+  readonly onEdit: (goal: GoalProgressView) => void;
+  readonly onDelete: (goalId: string) => void;
+  readonly onTogglePlan: (goalId: string) => void;
 }
 
-function GoalRow({
+const GoalItem = function GoalItem({
   goal,
   isPlanOpen,
   isDeleting,
   onEdit,
   onDelete,
   onTogglePlan,
-}: GoalRowProps): ReactElement {
+}: GoalItemProps): ReactElement {
+  const handleEdit = useCallback(() => onEdit(goal), [goal, onEdit]);
+  const handleDelete = useCallback(() => onDelete(goal.id), [goal.id, onDelete]);
+  const handleToggle = useCallback(
+    () => onTogglePlan(goal.id),
+    [goal.id, onTogglePlan],
+  );
+
   return (
-    <YStack gap="$2">
-      <AppKeyValueRow
-        label={goal.title}
-        value={
-          <YStack alignItems="flex-end" gap="$1">
-            <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-              {formatCurrency(goal.currentAmount)} /{" "}
-              {formatCurrency(goal.targetAmount)}
-            </Paragraph>
-            <Paragraph
-              color={goal.isCompleted ? "$success" : "$muted"}
-              fontFamily="$body"
-              fontSize="$3"
-            >
-              {goal.progress}%{goal.isCompleted ? " · concluida" : ""}
-            </Paragraph>
-          </YStack>
-        }
-      />
-      <XStack gap="$2" flexWrap="wrap">
-        <AppButton tone="secondary" onPress={onTogglePlan} disabled={isDeleting}>
-          {isPlanOpen ? "Ocultar plano" : "Ver plano"}
-        </AppButton>
-        <AppButton tone="secondary" onPress={onEdit} disabled={isDeleting}>
-          Editar
-        </AppButton>
-        <AppButton tone="secondary" onPress={onDelete} disabled={isDeleting}>
-          {isDeleting ? "Excluindo..." : "Excluir"}
-        </AppButton>
-      </XStack>
+    <YStack gap="$3">
+      <YStack gap="$2">
+        <AppKeyValueRow
+          label={goal.title}
+          value={
+            <YStack alignItems="flex-end" gap="$1">
+              <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+                {formatCurrency(goal.currentAmount)} /{" "}
+                {formatCurrency(goal.targetAmount)}
+              </Paragraph>
+              <Paragraph
+                color={goal.isCompleted ? "$success" : "$muted"}
+                fontFamily="$body"
+                fontSize="$3"
+              >
+                {goal.progress}%{goal.isCompleted ? " · concluida" : ""}
+              </Paragraph>
+            </YStack>
+          }
+        />
+        <XStack gap="$2" flexWrap="wrap">
+          <AppButton tone="secondary" onPress={handleToggle} disabled={isDeleting}>
+            {isPlanOpen ? "Ocultar plano" : "Ver plano"}
+          </AppButton>
+          <AppButton tone="secondary" onPress={handleEdit} disabled={isDeleting}>
+            Editar
+          </AppButton>
+          <AppButton tone="secondary" onPress={handleDelete} disabled={isDeleting}>
+            {isDeleting ? "Excluindo..." : "Excluir"}
+          </AppButton>
+        </XStack>
+      </YStack>
+      {isPlanOpen ? (
+        <YStack gap="$3">
+          <GoalPlanCard goalId={goal.id} />
+          <GoalProjectionCard goalId={goal.id} />
+        </YStack>
+      ) : null}
     </YStack>
   );
-}
+};
