@@ -8,6 +8,8 @@ import type {
   GoalPlan,
   GoalProjection,
   GoalRecord,
+  SimulateGoalPlanCommand,
+  SimulatedGoalPlan,
   UpdateGoalCommand,
 } from "@/features/goals/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
@@ -50,6 +52,39 @@ const buildUpdatePayload = (command: UpdateGoalCommand) => {
   if (command.targetDate !== undefined) {payload.target_date = command.targetDate;}
   if (command.status !== undefined) {payload.status = command.status;}
   return payload;
+};
+
+interface SimulatePlanPayload {
+  readonly goal_plan?: {
+    readonly monthly_contribution?: number;
+    readonly months_to_target?: number | null;
+    readonly recommended_savings_rate?: number | null;
+    readonly projected_finish_date?: string | null;
+    readonly disclaimer?: string | null;
+  };
+}
+
+const simulateGoalPlan = async (
+  client: AxiosInstance,
+  command: SimulateGoalPlanCommand,
+): Promise<SimulatedGoalPlan> => {
+  const response = await client.post(apiContractMap.goalsSimulate.path, {
+    target_amount: command.targetAmount,
+    current_amount: command.currentAmount,
+    target_date: command.targetDate ?? null,
+    monthly_income: command.monthlyIncome ?? null,
+    monthly_expenses: command.monthlyExpenses ?? null,
+    monthly_contribution: command.monthlyContribution ?? null,
+  });
+  const plan =
+    unwrapEnvelopeData<SimulatePlanPayload>(response.data).goal_plan ?? {};
+  return {
+    monthlyContribution: plan.monthly_contribution ?? 0,
+    monthsToTarget: plan.months_to_target ?? null,
+    recommendedSavingsRate: plan.recommended_savings_rate ?? null,
+    projectedFinishDate: plan.projected_finish_date ?? null,
+    disclaimer: plan.disclaimer ?? null,
+  };
 };
 
 export const createGoalsService = (client: AxiosInstance) => {
@@ -100,6 +135,8 @@ export const createGoalsService = (client: AxiosInstance) => {
         disclaimer: payload.disclaimer ?? null,
       };
     },
+    simulatePlan: (command: SimulateGoalPlanCommand): Promise<SimulatedGoalPlan> =>
+      simulateGoalPlan(client, command),
     getProjection: async (goalId: string): Promise<GoalProjection> => {
       const response = await client.get(
         resolveApiContractPath(apiContractMap.goalProjection.path, {

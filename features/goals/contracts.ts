@@ -50,3 +50,20 @@ export interface GoalProjection {
     readonly monthlyContribution: number | null;
   };
 }
+
+export interface SimulateGoalPlanCommand {
+  readonly targetAmount: number;
+  readonly currentAmount: number;
+  readonly targetDate?: string | null;
+  readonly monthlyIncome?: number | null;
+  readonly monthlyExpenses?: number | null;
+  readonly monthlyContribution?: number | null;
+}
+
+export interface SimulatedGoalPlan {
+  readonly monthlyContribution: number;
+  readonly monthsToTarget: number | null;
+  readonly recommendedSavingsRate: number | null;
+  readonly projectedFinishDate: string | null;
+  readonly disclaimer: string | null;
+}
