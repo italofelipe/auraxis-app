@@ -1,0 +1,73 @@
+# Cleanup duplicate files — auraxis-app
+#
+# Removes macOS Finder / iCloud "duplicate" artifacts that pollute the
+# working tree with a name pattern of "<name> <digit>.<ext>" (file) or
+# "<name> <digit>" (directory). These are never authored by humans.
+#
+# When something is found, opens a chore PR that deletes them. If nothing
+# is found, the workflow exits cleanly with no PR and no noise.
+
+name: Cleanup duplicate files
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC (~03:00 BRT) — outside business hours.
+    - cron: '0 6 * * 1'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  cleanup:
+    name: Scan and open cleanup PR if needed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run cleanup script
+        id: cleanup
+        run: |
+          chmod +x scripts/clean-duplicate-files.sh
+          bash scripts/clean-duplicate-files.sh
+          if [[ -n "$(git status --porcelain)" ]]; then
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open cleanup pull request
+        if: steps.cleanup.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: chore/auto-cleanup-duplicate-files
+          delete-branch: true
+          base: main
+          title: 'chore: cleanup duplicate files (auto)'
+          commit-message: 'chore: remove macOS/iCloud duplicate files'
+          body: |
+            Automated cleanup of macOS Finder / iCloud sync duplicate artifacts.
+
+            **Pattern matched**
+            - Files: `<name> <digit>.<ext>` (e.g. `foo 2.ts`, `report 3.md`)
+            - Directories: `<name> <digit>` (e.g. `components 2/`)
+
+            **Why this exists**
+            macOS Finder and iCloud Drive create these copies on rename
+            collisions or sync conflicts. They are never intentional
+            and break Expo's bundler auto-discovery when they land
+            inside `app/`, `features/`, or `components/`.
+
+            **Validation**
+            The cleanup script refuses to delete any path tracked by git,
+            so this PR is always safe to merge.
+
+            Triggered by `.github/workflows/cleanup-duplicate-files.yml`.
+          labels: |
+            chore
+            automation
