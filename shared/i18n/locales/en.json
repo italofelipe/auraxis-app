@@ -41,6 +41,12 @@
     }
   },
   "auth": {
+    "captcha": {
+      "label": "Security check",
+      "testKeyHint": "Development mode — Turnstile test key.",
+      "error": "Could not verify. Please try again shortly.",
+      "missing": "Complete the security check before continuing."
+    },
     "login": {
       "title": "Sign in",
       "emailLabel": "Email",
