@@ -3,6 +3,7 @@ import { queryKeys } from "@/core/query/query-keys";
 import type {
   WalletCollection,
   WalletListQuery,
+  WalletValuationSummary,
 } from "@/features/wallet/contracts";
 import { walletService } from "@/features/wallet/services/wallet-service";
 
@@ -10,5 +11,12 @@ export const useWalletEntriesQuery = (query: WalletListQuery = {}) => {
   return createApiQuery<WalletCollection>(
     [...queryKeys.wallet.root, "entries", query],
     () => walletService.listEntries(query),
+  );
+};
+
+export const useWalletValuationQuery = () => {
+  return createApiQuery<WalletValuationSummary>(
+    queryKeys.wallet.valuation(),
+    () => walletService.getValuation(),
   );
 };

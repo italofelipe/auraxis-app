@@ -14,6 +14,7 @@ import type {
   WalletOperationKind,
   WalletOperationsListResponse,
   WalletOperationsPosition,
+  WalletValuationSummary,
 } from "@/features/wallet/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
 import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-path";
@@ -112,6 +113,43 @@ const buildUpdatePayload = (command: UpdateWalletEntryCommand) => {
   return payload;
 };
 
+interface ValuationPayloadShape {
+  readonly summary?: {
+    readonly total_current_value?: number | string;
+    readonly total_invested_amount?: number | string;
+    readonly total_profit_loss_percent?: number | string;
+    readonly total_investments?: number;
+  };
+  readonly total_current_value?: number | string;
+  readonly total_invested_amount?: number | string;
+  readonly total_profit_loss_percent?: number | string;
+  readonly total_investments?: number;
+}
+
+const toNumeric = (value: number | string | undefined): number => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+  if (typeof value === "string") {
+    const parsed = Number.parseFloat(value);
+    return Number.isFinite(parsed) ? parsed : 0;
+  }
+  return 0;
+};
+
+const mapValuation = (data: unknown): WalletValuationSummary => {
+  const payload = unwrapEnvelopeData<ValuationPayloadShape>(
+    data as ValuationPayloadShape,
+  );
+  const summary = payload.summary ?? payload;
+  return {
+    totalCurrentValue: toNumeric(summary.total_current_value),
+    totalInvestedAmount: toNumeric(summary.total_invested_amount),
+    totalProfitLossPercent: toNumeric(summary.total_profit_loss_percent),
+    totalInvestments: summary.total_investments ?? 0,
+  };
+};
+
 const createEntriesService = (client: AxiosInstance) => ({
   listEntries: async (
     query: WalletListQuery = {},
@@ -197,6 +235,10 @@ const createOperationsService = (client: AxiosInstance) => ({
         operation_id: command.operationId,
       }),
     );
+  },
+  getValuation: async (): Promise<WalletValuationSummary> => {
+    const response = await client.get(apiContractMap.walletValuation.path);
+    return mapValuation(response.data);
   },
   getOperationsPosition: async (
     entryId: string,

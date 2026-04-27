@@ -5,6 +5,7 @@ import { Paragraph, XStack, YStack } from "tamagui";
 
 import { appRoutes } from "@/core/navigation/routes";
 import { WalletEntryForm } from "@/features/wallet/components/wallet-entry-form";
+import { WalletValuationCard } from "@/features/wallet/components/wallet-valuation-card";
 import {
   useWalletScreenController,
   type WalletScreenController,
@@ -51,6 +52,7 @@ export function WalletScreen(): ReactElement {
   return (
     <AppScreen>
       <SummaryCard controller={controller} />
+      <WalletValuationCard />
       <AssetsListCard
         controller={controller}
         onOpenOperations={handleOpenOperations}

@@ -53,6 +53,7 @@ export const queryKeys = {
     summary: () => ["wallet", "summary"] as const,
     operations: (entryId: string) => ["wallet", "operations", entryId] as const,
     position: (entryId: string) => ["wallet", "position", entryId] as const,
+    valuation: () => ["wallet", "valuation"] as const,
   },
   observability: {
     root: ["observability"] as const,
