@@ -1,4 +1,4 @@
-import type { ReactElement } from "react";
+import type { ReactElement, ReactNode } from "react";
 
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
@@ -20,6 +20,19 @@ export type AppAsyncStateValue =
 
 export interface AppAsyncStateProps {
   readonly state: AppAsyncStateValue;
+  /**
+   * Optional override rendered in place of the default skeleton block
+   * when the query is in `loading` state with `presentation: "skeleton"`.
+   * Use this to swap in a domain-specific skeleton (transaction list,
+   * goal cards, etc.) so the placeholder mimics the real layout.
+   */
+  readonly loadingComponent?: ReactNode;
+  /**
+   * Optional override rendered in place of the default empty notice when
+   * the query resolves to an empty result. Use this to render an
+   * illustrated `<AppEmptyState />` per domain.
+   */
+  readonly emptyComponent?: ReactNode;
 }
 
 /**
@@ -28,8 +41,15 @@ export interface AppAsyncStateProps {
  * @param props Discriminated async state produced by shared query composition or feature logic.
  * @returns A single canonical feedback surface for the current async state.
  */
-export function AppAsyncState({ state }: AppAsyncStateProps): ReactElement {
+export function AppAsyncState({
+  state,
+  loadingComponent,
+  emptyComponent,
+}: AppAsyncStateProps): ReactElement {
   if (state.kind === "loading") {
+    if (loadingComponent !== undefined) {
+      return <>{loadingComponent}</>;
+    }
     if (state.presentation === "skeleton") {
       return (
         <AppSkeletonBlock
@@ -55,6 +75,9 @@ export function AppAsyncState({ state }: AppAsyncStateProps): ReactElement {
   }
 
   if (state.kind === "empty") {
+    if (emptyComponent !== undefined) {
+      return <>{emptyComponent}</>;
+    }
     return <AsyncStateNotice kind="empty" title={state.title} description={state.description} />;
   }
 
