@@ -56,11 +56,32 @@ const defaultHapticTone = (
  * @param props Button content, tone, and optional haptic override.
  * @returns Primary or secondary mobile button.
  */
+const resolveAccessibilityLabel = (
+  explicit: string | undefined,
+  children: ReactNode,
+): string | undefined => {
+  if (explicit) {
+    return explicit;
+  }
+  if (typeof children === "string") {
+    return children;
+  }
+  if (typeof children === "number") {
+    return String(children);
+  }
+  return undefined;
+};
+
 export function AppButton({
   children,
   tone = "primary",
   hapticTone,
   onPressIn,
+  accessibilityLabel,
+  accessibilityRole,
+  accessibilityHint,
+  accessibilityState,
+  disabled,
   ...rest
 }: AppButtonProps): ReactElement {
   const resolvedHapticTone = hapticTone ?? defaultHapticTone(tone);
@@ -73,16 +94,39 @@ export function AppButton({
     [onPressIn, resolvedHapticTone],
   );
 
+  const a11yLabel = resolveAccessibilityLabel(accessibilityLabel, children);
+  const a11yRole = accessibilityRole ?? "button";
+  const a11yState = {
+    disabled: Boolean(disabled),
+    ...accessibilityState,
+  };
+
   if (tone === "secondary") {
     return (
-      <SecondaryButtonFrame {...rest} onPressIn={handlePressIn}>
+      <SecondaryButtonFrame
+        {...rest}
+        disabled={disabled}
+        accessibilityLabel={a11yLabel}
+        accessibilityRole={a11yRole}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={a11yState}
+        onPressIn={handlePressIn}
+      >
         {children}
       </SecondaryButtonFrame>
     );
   }
 
   return (
-    <PrimaryButtonFrame {...rest} onPressIn={handlePressIn}>
+    <PrimaryButtonFrame
+      {...rest}
+      disabled={disabled}
+      accessibilityLabel={a11yLabel}
+      accessibilityRole={a11yRole}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={a11yState}
+      onPressIn={handlePressIn}
+    >
       {children}
     </PrimaryButtonFrame>
   );

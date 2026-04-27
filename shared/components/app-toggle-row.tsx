@@ -54,7 +54,12 @@ export function AppToggleRow({
         checked={checked}
         disabled={disabled}
         testID={testID ? `${testID}-switch` : undefined}
-        onCheckedChange={handleCheckedChange}>
+        accessibilityLabel={label}
+        accessibilityHint={description}
+        accessibilityRole="switch"
+        accessibilityState={{ checked, disabled }}
+        onCheckedChange={handleCheckedChange}
+      >
         <Switch.Thumb />
       </Switch>
     </XStack>
