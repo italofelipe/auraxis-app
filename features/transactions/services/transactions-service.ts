@@ -4,6 +4,8 @@ import { unwrapEnvelopeData } from "@/core/http/contracts";
 import { httpClient } from "@/core/http/http-client";
 import type {
   CreateTransactionCommand,
+  DeletedTransactionListResponse,
+  DeletedTransactionRecord,
   TransactionCollection,
   TransactionListQuery,
   TransactionPagination,
@@ -42,31 +44,17 @@ interface TransactionPayload {
   readonly updated_at: string | null;
 }
 
-interface PaginationPayload {
-  readonly total?: number;
-  readonly page?: number;
-  readonly per_page?: number;
-  readonly pages?: number;
-  readonly has_next_page?: boolean;
-}
-
-interface TransactionEnvelopeWithMeta {
-  readonly data?: {
-    readonly transactions?: TransactionPayload[];
-    readonly transaction?: TransactionPayload;
-    readonly items?: TransactionPayload[];
-    readonly month?: string;
-    readonly income_total?: string;
-    readonly expense_total?: string;
-  };
-  readonly meta?: {
-    readonly pagination?: PaginationPayload;
-  };
-}
-
 const isRecord = (value: unknown): value is Record<string, unknown> => {
   return typeof value === "object" && value !== null;
 };
+
+const buildFallbackPagination = (totalFallback: number): TransactionPagination => ({
+  total: totalFallback,
+  page: 1,
+  perPage: totalFallback || 10,
+  pages: totalFallback > 0 ? 1 : 0,
+  hasNextPage: false,
+});
 
 const mapTransaction = (payload: TransactionPayload): TransactionRecord => {
   return {
@@ -97,42 +85,28 @@ const mapTransaction = (payload: TransactionPayload): TransactionRecord => {
   };
 };
 
+const extractPaginationRecord = (
+  rawEnvelope: unknown,
+): Record<string, unknown> | null => {
+  if (!isRecord(rawEnvelope)) {
+    return null;
+  }
+  const meta = rawEnvelope.meta;
+  if (!isRecord(meta)) {
+    return null;
+  }
+  const pagination = meta.pagination;
+  return isRecord(pagination) ? pagination : null;
+};
+
 const resolvePagination = (
   rawEnvelope: unknown,
   totalFallback: number,
 ): TransactionPagination => {
-  if (!isRecord(rawEnvelope)) {
-    return {
-      total: totalFallback,
-      page: 1,
-      perPage: totalFallback || 10,
-      pages: totalFallback > 0 ? 1 : 0,
-      hasNextPage: false,
-    };
+  const pagination = extractPaginationRecord(rawEnvelope);
+  if (!pagination) {
+    return buildFallbackPagination(totalFallback);
   }
-
-  const meta = rawEnvelope.meta;
-  if (!isRecord(meta)) {
-    return {
-      total: totalFallback,
-      page: 1,
-      perPage: totalFallback || 10,
-      pages: totalFallback > 0 ? 1 : 0,
-      hasNextPage: false,
-    };
-  }
-
-  const pagination = meta.pagination;
-  if (!isRecord(pagination)) {
-    return {
-      total: totalFallback,
-      page: 1,
-      perPage: totalFallback || 10,
-      pages: totalFallback > 0 ? 1 : 0,
-      hasNextPage: false,
-    };
-  }
-
   return {
     total: Number(pagination.total ?? totalFallback),
     page: Number(pagination.page ?? 1),
@@ -205,34 +179,98 @@ const extractTransactionFromMutation = (rawEnvelope: unknown): TransactionRecord
   throw new Error("Transaction mutation response without transaction payload.");
 };
 
+const fetchDeletedTransactions = async (
+  client: AxiosInstance,
+): Promise<DeletedTransactionListResponse> => {
+  const response = await client.get(apiContractMap.transactionsDeleted.path);
+  const payload = unwrapEnvelopeData<{
+    readonly transactions?: (TransactionPayload & { deleted_at?: string | null })[];
+  }>(response.data);
+  const transactions: readonly DeletedTransactionRecord[] = (
+    payload.transactions ?? []
+  ).map((item) => ({
+    ...mapTransaction(item),
+    deletedAt: item.deleted_at ?? null,
+  }));
+  return { transactions };
+};
+
+const restoreTransactionRequest = async (
+  client: AxiosInstance,
+  transactionId: string,
+): Promise<TransactionRecord> => {
+  const response = await client.patch(
+    resolveApiContractPath(apiContractMap.transactionRestore.path, {
+      transaction_id: transactionId,
+    }),
+  );
+  const payload = unwrapEnvelopeData<{
+    readonly transaction?: TransactionPayload;
+  }>(response.data);
+  if (!payload.transaction) {
+    throw new Error("Transacao restaurada veio sem payload.");
+  }
+  return mapTransaction(payload.transaction);
+};
+
+const listTransactionsRequest = async (
+  client: AxiosInstance,
+  query: TransactionListQuery,
+): Promise<TransactionCollection> => {
+  const response = await client.get(apiContractMap.transactionsList.path, {
+    params: {
+      page: query.page,
+      per_page: query.perPage,
+      type: query.type,
+      status: query.status,
+      start_date: query.startDate,
+      end_date: query.endDate,
+      tag_id: query.tagId,
+      account_id: query.accountId,
+      credit_card_id: query.creditCardId,
+    },
+  });
+  const payload = unwrapEnvelopeData<{ readonly transactions: TransactionPayload[] }>(
+    response.data,
+  );
+  const transactions = payload.transactions.map(mapTransaction);
+  return {
+    transactions,
+    pagination: resolvePagination(response.data, transactions.length),
+  };
+};
+
+const getSummaryRequest = async (
+  client: AxiosInstance,
+  query: TransactionSummaryQuery,
+): Promise<TransactionSummary> => {
+  const response = await client.get(apiContractMap.transactionsSummary.path, {
+    params: {
+      month: query.month,
+      page: query.page,
+      per_page: query.perPage,
+    },
+  });
+  const payload = unwrapEnvelopeData<{
+    readonly month: string;
+    readonly income_total: string;
+    readonly expense_total: string;
+    readonly items: TransactionPayload[];
+  }>(response.data);
+  const items = payload.items.map(mapTransaction);
+  return {
+    month: payload.month,
+    incomeTotal: payload.income_total,
+    expenseTotal: payload.expense_total,
+    items,
+    pagination: resolvePagination(response.data, items.length),
+  };
+};
+
 export const createTransactionsService = (client: AxiosInstance) => {
   return {
-    listTransactions: async (
-      query: TransactionListQuery = {},
-    ): Promise<TransactionCollection> => {
-      const response = await client.get(apiContractMap.transactionsList.path, {
-        params: {
-          page: query.page,
-          per_page: query.perPage,
-          type: query.type,
-          status: query.status,
-          start_date: query.startDate,
-          end_date: query.endDate,
-          tag_id: query.tagId,
-          account_id: query.accountId,
-          credit_card_id: query.creditCardId,
-        },
-      });
-
-      const payload = unwrapEnvelopeData<{ readonly transactions: TransactionPayload[] }>(
-        response.data,
-      );
-      const transactions = payload.transactions.map(mapTransaction);
-      return {
-        transactions,
-        pagination: resolvePagination(response.data, transactions.length),
-      };
-    },
+    listTransactions: (query: TransactionListQuery = {}) =>
+      listTransactionsRequest(client, query),
     getTransaction: async (transactionId: string): Promise<TransactionRecord> => {
       const response = await client.get(
         resolveApiContractPath(apiContractMap.transactionDetail.path, {
@@ -272,32 +310,11 @@ export const createTransactionsService = (client: AxiosInstance) => {
         }),
       );
     },
-    getSummary: async (
-      query: TransactionSummaryQuery,
-    ): Promise<TransactionSummary> => {
-      const response = await client.get(apiContractMap.transactionsSummary.path, {
-        params: {
-          month: query.month,
-          page: query.page,
-          per_page: query.perPage,
-        },
-      });
-      const payload = unwrapEnvelopeData<{
-        readonly month: string;
-        readonly income_total: string;
-        readonly expense_total: string;
-        readonly items: TransactionPayload[];
-      }>(response.data);
-      const items = payload.items.map(mapTransaction);
-
-      return {
-        month: payload.month,
-        incomeTotal: payload.income_total,
-        expenseTotal: payload.expense_total,
-        items,
-        pagination: resolvePagination(response.data, items.length),
-      };
-    },
+    getSummary: (query: TransactionSummaryQuery) =>
+      getSummaryRequest(client, query),
+    listDeleted: () => fetchDeletedTransactions(client),
+    restoreTransaction: (transactionId: string) =>
+      restoreTransactionRequest(client, transactionId),
   };
 };
 

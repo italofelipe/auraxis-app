@@ -9,15 +9,44 @@ import type {
 import { createTransactionsService } from "@/features/transactions/services/transactions-service";
 
 const createClient = (): jest.Mocked<
-  Pick<AxiosInstance, "get" | "post" | "put" | "delete">
+  Pick<AxiosInstance, "get" | "post" | "put" | "delete" | "patch">
 > => {
   return {
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
     delete: jest.fn(),
+    patch: jest.fn(),
   };
 };
+
+const buildTransactionPayload = (overrides: Record<string, unknown> = {}) => ({
+  id: "tx-1",
+  title: "Almoco",
+  amount: "50.00",
+  type: "expense",
+  due_date: "2026-04-10",
+  start_date: null,
+  end_date: null,
+  description: null,
+  observation: null,
+  is_recurring: false,
+  is_installment: false,
+  installment_count: null,
+  tag_id: null,
+  account_id: null,
+  credit_card_id: null,
+  status: "paid",
+  currency: "BRL",
+  source: "manual",
+  external_id: null,
+  bank_name: null,
+  installment_group_id: null,
+  paid_at: null,
+  created_at: null,
+  updated_at: null,
+  ...overrides,
+});
 
 describe("transactionsService", () => {
   it("lista transacoes e normaliza paginacao", async () => {
@@ -153,7 +182,9 @@ describe("transactionsService", () => {
       }),
     );
   });
+});
 
+describe("transactionsService - mutations", () => {
   it("cria e atualiza transacoes usando os dois formatos de resposta do backend", async () => {
     const client = createClient();
     client.post.mockResolvedValue({
@@ -271,7 +302,9 @@ describe("transactionsService", () => {
       }),
     );
   });
+});
 
+describe("transactionsService - pagination + summary", () => {
   it("usa os fallbacks de paginacao quando meta ou pagination nao existem", async () => {
     const client = createClient();
     client.get
@@ -389,7 +422,9 @@ describe("transactionsService", () => {
       },
     });
   });
+});
 
+describe("transactionsService - error paths and trash", () => {
   it("falha quando o backend retorna mutacao sem payload de transacao", async () => {
     const client = createClient();
     client.post.mockResolvedValue({
@@ -408,5 +443,60 @@ describe("transactionsService", () => {
         dueDate: "2026-04-30",
       }),
     ).rejects.toThrow("Transaction mutation response without transaction payload.");
+  });
+
+  it("listDeleted retorna lista mapeada com deletedAt", async () => {
+    const client = createClient();
+    client.get.mockResolvedValue({
+      data: {
+        data: {
+          transactions: [
+            buildTransactionPayload({ id: "tx-9", deleted_at: "2026-04-12" }),
+          ],
+        },
+      },
+    });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    const result = await service.listDeleted();
+
+    expect(client.get).toHaveBeenCalledWith("/transactions/deleted");
+    expect(result.transactions).toHaveLength(1);
+    expect(result.transactions[0].deletedAt).toBe("2026-04-12");
+    expect(result.transactions[0].id).toBe("tx-9");
+  });
+
+  it("listDeleted retorna lista vazia quando envelope vem sem dados", async () => {
+    const client = createClient();
+    client.get.mockResolvedValue({ data: { data: {} } });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    const result = await service.listDeleted();
+    expect(result.transactions).toEqual([]);
+  });
+
+  it("restoreTransaction faz PATCH e mapeia o payload", async () => {
+    const client = createClient();
+    client.patch.mockResolvedValue({
+      data: { data: { transaction: buildTransactionPayload({ id: "tx-1" }) } },
+    });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    const result = await service.restoreTransaction("tx-1");
+
+    expect(client.patch).toHaveBeenCalledWith(
+      "/transactions/restore/tx-1",
+    );
+    expect(result.id).toBe("tx-1");
+  });
+
+  it("restoreTransaction lanca erro quando payload nao volta", async () => {
+    const client = createClient();
+    client.patch.mockResolvedValue({ data: { data: {} } });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    await expect(service.restoreTransaction("tx-2")).rejects.toThrow(
+      "Transacao restaurada veio sem payload.",
+    );
   });
 });
