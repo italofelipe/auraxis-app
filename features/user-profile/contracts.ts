@@ -39,3 +39,29 @@ export interface UpdateUserProfileCommand {
 }
 
 export type UserProfile = UserProfileRecord;
+
+export interface SimulateSalaryIncreaseCommand {
+  readonly baseSalary: number;
+  readonly baseDate: string;
+  readonly discounts: number;
+  readonly targetRealIncrease: number;
+}
+
+export interface SalaryIncreaseSimulation {
+  readonly recomposition: number;
+  readonly target: number;
+}
+
+export interface NotificationPreference {
+  readonly category: string;
+  readonly enabled: boolean;
+  readonly globalOptOut: boolean;
+}
+
+export interface NotificationPreferenceListResponse {
+  readonly preferences: readonly NotificationPreference[];
+}
+
+export interface UpdateNotificationPreferencesCommand {
+  readonly preferences: readonly NotificationPreference[];
+}
