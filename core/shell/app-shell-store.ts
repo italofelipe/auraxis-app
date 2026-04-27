@@ -19,6 +19,7 @@ export type RuntimeDegradedReason =
 export interface AppShellState {
   readonly fontsReady: boolean;
   readonly reducedMotionEnabled: boolean;
+  readonly hapticsEnabled: boolean;
   readonly startupReady: boolean;
   readonly appState: RuntimeAppState;
   readonly connectivityStatus: RuntimeConnectivityStatus;
@@ -30,6 +31,7 @@ export interface AppShellState {
   readonly lastReachabilityCheckAt: string | null;
   setFontsReady: (value: boolean) => void;
   setReducedMotionEnabled: (value: boolean) => void;
+  setHapticsEnabled: (value: boolean) => void;
   setStartupReady: (value: boolean) => void;
   setAppState: (value: RuntimeAppState) => void;
   setConnectivityStatus: (value: RuntimeConnectivityStatus) => void;
@@ -45,6 +47,7 @@ export type AppShellStateSnapshot = Pick<
   AppShellState,
   | "fontsReady"
   | "reducedMotionEnabled"
+  | "hapticsEnabled"
   | "startupReady"
   | "appState"
   | "connectivityStatus"
@@ -59,6 +62,7 @@ export type AppShellStateSnapshot = Pick<
 export const appShellStateDefaults: AppShellStateSnapshot = {
   fontsReady: false,
   reducedMotionEnabled: false,
+  hapticsEnabled: true,
   startupReady: false,
   appState: "unknown",
   connectivityStatus: "unknown",
@@ -77,6 +81,9 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   },
   setReducedMotionEnabled: (value: boolean): void => {
     set({ reducedMotionEnabled: value });
+  },
+  setHapticsEnabled: (value: boolean): void => {
+    set({ hapticsEnabled: value });
   },
   setStartupReady: (value: boolean): void => {
     set({ startupReady: value });
