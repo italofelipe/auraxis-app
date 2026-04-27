@@ -95,3 +95,19 @@ export interface WalletValuationSummary {
   readonly totalProfitLossPercent: number;
   readonly totalInvestments: number;
 }
+
+export interface WalletValuationHistoryPoint {
+  readonly date: string;
+  readonly totalValue: number;
+  readonly investedAmount: number;
+  readonly profitLossPercent: number;
+}
+
+export interface WalletValuationHistoryResponse {
+  readonly history: readonly WalletValuationHistoryPoint[];
+}
+
+export interface WalletValuationHistoryQuery {
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
+}
