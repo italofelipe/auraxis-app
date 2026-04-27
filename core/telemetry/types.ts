@@ -23,6 +23,8 @@ export type AppTelemetryEvent =
   | "navigation.deep_link_deduplicated"
   | "navigation.deep_link_ignored"
   | "navigation.deep_link_handled"
+  | "navigation.deep_link_rejected"
+  | "navigation.deep_link_parse_failed"
   | "network.request_started"
   | "network.request_succeeded"
   | "network.request_failed"

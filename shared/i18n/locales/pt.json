@@ -29,6 +29,15 @@
       "description": "Escolha o idioma exibido em todo o app.",
       "pt": "Portugues",
       "en": "English"
+    },
+    "security": {
+      "title": "Seguranca",
+      "biometric": {
+        "label": "Bloqueio biometrico",
+        "description": "Exigir Face ID, Touch ID ou impressao digital ao reabrir o app e em acoes sensiveis.",
+        "unavailable": "Biometria indisponivel neste dispositivo.",
+        "notEnrolled": "Cadastre Face ID / Touch ID nas configuracoes do sistema para ativar."
+      }
     }
   },
   "auth": {

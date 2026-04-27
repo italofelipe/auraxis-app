@@ -6,14 +6,15 @@ import type {
 export interface AppEventLoggingPolicy {
   readonly level: AppLogLevel;
   readonly description: string;
-  readonly minimumContextKeys: ReadonlyArray<string>;
+  readonly minimumContextKeys: readonly string[];
   readonly consolePolicy: "dev-only" | "warn-and-error" | "never";
 }
 
+/* eslint-disable max-params */
 const createLoggingPolicy = (
   level: AppLogLevel,
   description: string,
-  minimumContextKeys: ReadonlyArray<string>,
+  minimumContextKeys: readonly string[],
   consolePolicy: AppEventLoggingPolicy["consolePolicy"],
 ): AppEventLoggingPolicy => {
   return {
@@ -23,10 +24,11 @@ const createLoggingPolicy = (
     consolePolicy,
   };
 };
+/* eslint-enable max-params */
 
 const devOnlyInfoPolicy = (
   description: string,
-  minimumContextKeys: ReadonlyArray<string>,
+  minimumContextKeys: readonly string[],
 ): AppEventLoggingPolicy => {
   return createLoggingPolicy(
     "info",
@@ -38,7 +40,7 @@ const devOnlyInfoPolicy = (
 
 const devOnlyDebugPolicy = (
   description: string,
-  minimumContextKeys: ReadonlyArray<string>,
+  minimumContextKeys: readonly string[],
 ): AppEventLoggingPolicy => {
   return createLoggingPolicy(
     "debug",
@@ -50,7 +52,7 @@ const devOnlyDebugPolicy = (
 
 const warnAndErrorInfoPolicy = (
   description: string,
-  minimumContextKeys: ReadonlyArray<string>,
+  minimumContextKeys: readonly string[],
 ): AppEventLoggingPolicy => {
   return createLoggingPolicy(
     "info",
@@ -62,7 +64,7 @@ const warnAndErrorInfoPolicy = (
 
 const warnAndErrorWarnPolicy = (
   description: string,
-  minimumContextKeys: ReadonlyArray<string>,
+  minimumContextKeys: readonly string[],
 ): AppEventLoggingPolicy => {
   return createLoggingPolicy(
     "warn",
@@ -74,7 +76,7 @@ const warnAndErrorWarnPolicy = (
 
 const warnAndErrorErrorPolicy = (
   description: string,
-  minimumContextKeys: ReadonlyArray<string>,
+  minimumContextKeys: readonly string[],
 ): AppEventLoggingPolicy => {
   return createLoggingPolicy(
     "error",
@@ -140,6 +142,14 @@ export const APP_EVENT_LOGGING_POLICY = Object.freeze({
   "navigation.deep_link_handled": devOnlyInfoPolicy(
     "Deep link válido processado pelo runtime.",
     ["url", "href"],
+  ),
+  "navigation.deep_link_rejected": warnAndErrorWarnPolicy(
+    "Deep link recusado por não estar na allowlist de rotas conhecidas.",
+    ["rawUrl", "path", "reason"],
+  ),
+  "navigation.deep_link_parse_failed": warnAndErrorWarnPolicy(
+    "Deep link recebeu URL mal-formada e não pôde ser interpretada.",
+    ["rawUrl"],
   ),
   "network.request_started": devOnlyDebugPolicy(
     "Requisição HTTP iniciada pelo cliente.",

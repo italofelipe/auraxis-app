@@ -5,6 +5,7 @@ import {
   type AppRoute,
   type PrivateAppRoute,
 } from "@/core/navigation/routes";
+import { navigationLogger } from "@/core/telemetry/domain-loggers";
 import { appRuntimeConfig } from "@/shared/config/runtime";
 
 export type CheckoutReturnStatus =
@@ -152,35 +153,64 @@ const buildCheckoutReturnIntent = (
   };
 };
 
+/**
+ * Parses an external URL into a typed `AppLinkIntent` that the
+ * navigation layer can act on safely.
+ *
+ * Allowlist contract: a URL is only resolved when its pathname matches
+ * one of the registered private or public routes (or a known checkout
+ * return). Anything outside that set returns `null` and emits a
+ * `deeplink.rejected` structured event so security monitoring can see
+ * malicious or stale link attempts. Query parameters with sensitive
+ * keys are always redacted from the logged URL.
+ *
+ * @param rawUrl Raw URL captured from the deep-link / universal-link
+ *               handler, the OS share sheet, or a notification tap.
+ * @returns Parsed intent, or `null` for any URL outside the allowlist.
+ */
 export const parseAppUrl = (rawUrl: string): AppLinkIntent | null => {
+  let url: URL;
   try {
-    const url = new URL(rawUrl);
-    const path = resolveUrlPath(url);
-
-    if (path === appRoutes.root) {
-      return {
-        kind: "route",
-        href: appRoutes.root,
-        rawUrl: sanitizeAppUrl(rawUrl),
-      };
-    }
-
-    if (isCheckoutReturnPath(path)) {
-      return buildCheckoutReturnIntent(rawUrl, path, url.searchParams);
-    }
-
-    if (isPrivateAppRoute(path) || isPublicAppRoute(path)) {
-      return {
-        kind: "route",
-        href: path,
-        rawUrl: sanitizeAppUrl(rawUrl),
-      };
-    }
-
-    return null;
+    url = new URL(rawUrl);
   } catch {
+    navigationLogger.log("navigation.deep_link_parse_failed", {
+      level: "warn",
+      context: { rawUrl: sanitizeAppUrl(rawUrl) },
+    });
     return null;
   }
+
+  const path = resolveUrlPath(url);
+
+  if (path === appRoutes.root) {
+    return {
+      kind: "route",
+      href: appRoutes.root,
+      rawUrl: sanitizeAppUrl(rawUrl),
+    };
+  }
+
+  if (isCheckoutReturnPath(path)) {
+    return buildCheckoutReturnIntent(rawUrl, path, url.searchParams);
+  }
+
+  if (isPrivateAppRoute(path) || isPublicAppRoute(path)) {
+    return {
+      kind: "route",
+      href: path,
+      rawUrl: sanitizeAppUrl(rawUrl),
+    };
+  }
+
+  navigationLogger.log("navigation.deep_link_rejected", {
+    level: "warn",
+    context: {
+      rawUrl: sanitizeAppUrl(rawUrl),
+      path,
+      reason: "path_not_in_allowlist",
+    },
+  });
+  return null;
 };
 
 export const buildAppUrl = (
