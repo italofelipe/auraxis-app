@@ -11,7 +11,9 @@ import {
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
+import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import { BudgetsListSkeleton } from "@/shared/skeletons";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
@@ -114,6 +116,15 @@ function BudgetsListCard({ controller }: ControllerProps): ReactElement {
           },
           isEmpty: () => controller.budgets.length === 0,
         }}
+        loadingComponent={<BudgetsListSkeleton rows={3} />}
+        emptyComponent={
+          <AppEmptyState
+            illustration="budgets"
+            title="Sem orcamentos ativos"
+            description="Crie um orcamento por categoria para acompanhar limites e gasto realizado."
+            cta={{ label: "Novo orcamento", onPress: controller.handleOpenCreate }}
+          />
+        }
       >
         {() => (
           <YStack gap="$3">

@@ -11,10 +11,12 @@ import {
 } from "@/features/transactions/hooks/use-transactions-screen-controller";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
+import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { TransactionListSkeleton } from "@/shared/skeletons";
 import { formatShortDate } from "@/shared/utils/formatters";
 
 const STATUS_TONE: Record<string, "default" | "primary" | "danger"> = {
@@ -121,6 +123,18 @@ function TransactionsListCard({ controller }: ControllerProps): ReactElement {
           },
           isEmpty: () => controller.transactions.length === 0,
         }}
+        loadingComponent={<TransactionListSkeleton rows={5} />}
+        emptyComponent={
+          <AppEmptyState
+            illustration="transactions"
+            title="Nenhuma transacao no filtro atual"
+            description="Crie uma nova transacao ou troque o filtro acima para visualizar movimentos."
+            cta={{
+              label: "Nova transacao",
+              onPress: controller.handleOpenCreate,
+            }}
+          />
+        }
       >
         {() => (
           <YStack gap="$3">

@@ -16,7 +16,13 @@ function RootLayoutContent() {
   }
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+        animationDuration: 220,
+      }}
+    >
       <Stack.Screen name="index" />
       <Stack.Screen name="(public)" />
       <Stack.Screen name="(private)" />

@@ -16,7 +16,15 @@ function PublicLayoutContent(): ReactElement | null {
     return <Redirect href={redirectTo} />;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        animation: "slide_from_right",
+        animationDuration: 220,
+      }}
+    />
+  );
 }
 
 export default function PublicLayout(): ReactElement {

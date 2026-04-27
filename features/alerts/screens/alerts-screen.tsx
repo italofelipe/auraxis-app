@@ -9,7 +9,9 @@ import {
 import { AlertPreferenceRow } from "@/features/alerts/components/alert-preference-row";
 import { AlertRecordCard } from "@/features/alerts/components/alert-record-card";
 import { AppButton } from "@/shared/components/app-button";
+import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import { AlertsListSkeleton } from "@/shared/skeletons";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
@@ -41,6 +43,14 @@ function AlertsFeedPanel({
         },
         isEmpty: (data) => data.alerts.length === 0,
       }}
+      loadingComponent={<AlertsListSkeleton rows={4} />}
+      emptyComponent={
+        <AppEmptyState
+          illustration="alerts"
+          title="Sem alertas no momento"
+          description="Quando houver vencimentos, limites ou eventos importantes, eles aparecem aqui."
+        />
+      }
     >
       {(data) => (
         <YStack gap="$3">
@@ -83,6 +93,7 @@ function AlertsPreferencesPanel({
         },
         isEmpty: (data) => data.preferences.length === 0,
       }}
+      loadingComponent={<AlertsListSkeleton rows={3} />}
     >
       {(data) => (
         <YStack gap="$3">

@@ -1,6 +1,8 @@
-import type { ReactElement } from "react";
+import { type ReactElement, useCallback } from "react";
 
 import { Paragraph, Switch, XStack, YStack } from "tamagui";
+
+import { triggerHapticImpact } from "@/shared/feedback/haptics";
 
 export interface AppToggleRowProps {
   readonly label: string;
@@ -12,7 +14,9 @@ export interface AppToggleRowProps {
 }
 
 /**
- * Shared labeled toggle row with optional support copy.
+ * Shared labeled toggle row with optional support copy. Fires a light
+ * haptic impact every time the toggle changes so the user gets a tactile
+ * confirmation alongside the visual switch animation.
  *
  * @param props Toggle state and descriptive copy.
  * @returns A reusable switch row aligned to the Tamagui theme.
@@ -25,6 +29,15 @@ export function AppToggleRow({
   testID,
   onCheckedChange,
 }: AppToggleRowProps): ReactElement {
+  const handleCheckedChange = useCallback(
+    (value: boolean | "indeterminate"): void => {
+      const next = Boolean(value);
+      triggerHapticImpact("light");
+      onCheckedChange(next);
+    },
+    [onCheckedChange],
+  );
+
   return (
     <XStack alignItems="center" justifyContent="space-between" gap="$3" testID={testID}>
       <YStack flex={1} gap="$1">
@@ -41,9 +54,7 @@ export function AppToggleRow({
         checked={checked}
         disabled={disabled}
         testID={testID ? `${testID}-switch` : undefined}
-        onCheckedChange={(value) => {
-          onCheckedChange(Boolean(value));
-        }}>
+        onCheckedChange={handleCheckedChange}>
         <Switch.Thumb />
       </Switch>
     </XStack>

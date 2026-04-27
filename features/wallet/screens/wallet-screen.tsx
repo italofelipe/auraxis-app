@@ -13,7 +13,9 @@ import {
 } from "@/features/wallet/hooks/use-wallet-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
+import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import { WalletEntryListSkeleton } from "@/shared/skeletons";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { formatCurrency, formatPercent } from "@/shared/utils/formatters";
@@ -113,6 +115,15 @@ function AssetsListCard({
           },
           isEmpty: () => controller.entries.length === 0,
         }}
+        loadingComponent={<WalletEntryListSkeleton rows={4} />}
+        emptyComponent={
+          <AppEmptyState
+            illustration="wallet"
+            title="Sua carteira esta vazia"
+            description="Adicione seus primeiros ativos para acompanhar evolucao patrimonial."
+            cta={{ label: "Adicionar ativo", onPress: controller.handleOpenCreate }}
+          />
+        }
       >
         {() => (
           <YStack gap="$3">

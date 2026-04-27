@@ -15,7 +15,9 @@ import {
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
+import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import { FiscalDocumentsSkeleton } from "@/shared/skeletons";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
@@ -126,6 +128,18 @@ function ReceivablesListCard({ controller }: ControllerProps): ReactElement {
           },
           isEmpty: (data) => data.receivables.length === 0,
         }}
+        loadingComponent={<FiscalDocumentsSkeleton rows={4} />}
+        emptyComponent={
+          <AppEmptyState
+            illustration="fiscal"
+            title="Nenhum recebivel cadastrado"
+            description="Cadastre o primeiro para acompanhar pagamentos esperados e recebidos."
+            cta={{
+              label: "Novo recebivel",
+              onPress: controller.handleOpenCreate,
+            }}
+          />
+        }
       >
         {(data) => (
           <YStack gap="$3">
