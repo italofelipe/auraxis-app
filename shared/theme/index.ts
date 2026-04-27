@@ -9,8 +9,10 @@ export {
   typography,
 } from "@/config/design-tokens";
 export {
+  darkSemanticColors,
   iconLibrary,
   iconSizes,
+  lightSemanticColors,
   semanticColors,
   semanticRadii,
   semanticShadows,

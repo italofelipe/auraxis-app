@@ -1,8 +1,9 @@
 import { createFont, createTamagui, createTokens } from "tamagui";
 
 import {
+  darkSemanticColors,
   fontSizes,
-  semanticColors,
+  lightSemanticColors,
   semanticRadii,
   semanticSpacing,
 } from "@/shared/theme";
@@ -70,20 +71,35 @@ const headingFont = createFont({
   },
 });
 
+// Token names are namespaced with -dark / -light suffixes so each Tamagui
+// theme can resolve a specific colour while components reference the
+// semantic Tamagui variable (e.g. `$background`).
 const tokens = createTokens({
   color: {
-    surfaceBase: semanticColors.background,
-    surfaceCard: semanticColors.surface,
-    surfaceRaised: semanticColors.surfaceRaised,
-    brandPrimary: semanticColors.primary,
-    brandSecondary: semanticColors.secondary,
-    brandHighlight: semanticColors.mutedForeground,
-    textPrimary: semanticColors.foreground,
-    textSecondary: semanticColors.mutedForeground,
-    textMuted: semanticColors.subduedForeground,
-    borderMuted: semanticColors.border,
-    success: semanticColors.success,
-    danger: semanticColors.danger,
+    // dark
+    surfaceBaseDark: darkSemanticColors.background,
+    surfaceCardDark: darkSemanticColors.surface,
+    surfaceRaisedDark: darkSemanticColors.surfaceRaised,
+    textPrimaryDark: darkSemanticColors.foreground,
+    textSecondaryDark: darkSemanticColors.mutedForeground,
+    textMutedDark: darkSemanticColors.subduedForeground,
+    borderMutedDark: darkSemanticColors.border,
+    successDark: darkSemanticColors.success,
+    dangerDark: darkSemanticColors.danger,
+    // light
+    surfaceBaseLight: lightSemanticColors.background,
+    surfaceCardLight: lightSemanticColors.surface,
+    surfaceRaisedLight: lightSemanticColors.surfaceRaised,
+    textPrimaryLight: lightSemanticColors.foreground,
+    textSecondaryLight: lightSemanticColors.mutedForeground,
+    textMutedLight: lightSemanticColors.subduedForeground,
+    borderMutedLight: lightSemanticColors.border,
+    successLight: lightSemanticColors.success,
+    dangerLight: lightSemanticColors.danger,
+    // brand (shared across modes)
+    brandPrimary: darkSemanticColors.primary,
+    brandSecondary: darkSemanticColors.secondary,
+    brandHighlight: darkSemanticColors.mutedForeground,
   },
   space: {
     0: 0,
@@ -122,32 +138,43 @@ const tokens = createTokens({
   },
 });
 
-const themes = {
-  auraxis: {
-    background: "$surfaceBase",
-    backgroundHover: "$surfaceCard",
-    backgroundPress: "$surfaceRaised",
-    backgroundFocus: "$surfaceRaised",
-    color: "$textPrimary",
-    colorHover: "$textPrimary",
-    colorPress: "$textPrimary",
-    colorFocus: "$textPrimary",
-    borderColor: "$borderMuted",
+const buildModeTheme = (mode: "dark" | "light") => {
+  const suffix = mode === "dark" ? "Dark" : "Light";
+  return {
+    background: `$surfaceBase${suffix}`,
+    backgroundHover: `$surfaceCard${suffix}`,
+    backgroundPress: `$surfaceRaised${suffix}`,
+    backgroundFocus: `$surfaceRaised${suffix}`,
+    color: `$textPrimary${suffix}`,
+    colorHover: `$textPrimary${suffix}`,
+    colorPress: `$textPrimary${suffix}`,
+    colorFocus: `$textPrimary${suffix}`,
+    borderColor: `$borderMuted${suffix}`,
     borderColorHover: "$brandSecondary",
     borderColorFocus: "$brandSecondary",
     borderColorPress: "$brandPrimary",
-    placeholderColor: "$textMuted",
+    placeholderColor: `$textMuted${suffix}`,
     outlineColor: "$brandPrimary",
     primary: "$brandPrimary",
     secondary: "$brandSecondary",
     accentColor: "$brandHighlight",
-    surfaceCard: "$surfaceCard",
-    surfaceRaised: "$surfaceRaised",
-    muted: "$textMuted",
-    success: "$success",
-    danger: "$danger",
-  },
+    surfaceCard: `$surfaceCard${suffix}`,
+    surfaceRaised: `$surfaceRaised${suffix}`,
+    muted: `$textMuted${suffix}`,
+    success: `$success${suffix}`,
+    danger: `$danger${suffix}`,
+  } as const;
+};
+
+const themes = {
+  // Default theme: dark, preserves historical visuals when nothing else
+  // resolves a preference.
+  auraxis: buildModeTheme("dark"),
+  auraxis_dark: buildModeTheme("dark"),
+  auraxis_light: buildModeTheme("light"),
 } as const;
+
+export type AuraxisThemeName = keyof typeof themes;
 
 export const tamaguiConfig = createTamagui({
   tokens,
@@ -156,11 +183,11 @@ export const tamaguiConfig = createTamagui({
     body: bodyFont,
     heading: headingFont,
   },
-  defaultTheme: "auraxis",
+  defaultTheme: "auraxis_dark",
   settings: {
     shouldAddPrefersColorThemes: false,
     allowedStyleValues: "somewhat-strict-web",
   },
 });
 
-export type AppTamaguiConfig = typeof tamaguiConfig
+export type AppTamaguiConfig = typeof tamaguiConfig;
