@@ -1,11 +1,12 @@
 import { Linking } from "react-native";
 
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 
 import { ApiError } from "@/core/http/api-error";
 import { appRoutes } from "@/core/navigation/routes";
+import { resolveTurnstilePolicy } from "@/core/security/turnstile-config";
 import {
   useLoginMutation,
   useRegisterMutation,
@@ -22,6 +23,13 @@ export interface RegisterScreenController {
   readonly form: UseFormReturn<RegisterFormValues>;
   readonly isSubmitting: boolean;
   readonly submitError: unknown | null;
+  readonly captcha: {
+    readonly required: boolean;
+    readonly token: string | null;
+    readonly missingChallenge: boolean;
+  };
+  readonly handleCaptchaToken: (token: string) => void;
+  readonly handleCaptchaExpired: () => void;
   readonly handleSubmit: () => Promise<void>;
   readonly dismissSubmitError: () => void;
   readonly handleBackToLogin: () => void;
@@ -39,12 +47,16 @@ export interface RegisterScreenController {
  *   `password` changes after `confirmPassword` was already touched, so the
  *   user cannot bypass the equality refinement by editing `password` last.
  */
+// eslint-disable-next-line max-lines-per-function
 export function useRegisterScreenController(
   dependencies: { readonly openUrl?: typeof Linking.openURL } = {},
 ): RegisterScreenController {
   const router = useRouter();
   const registerMutation = useRegisterMutation();
   const loginMutation = useLoginMutation();
+  const captchaPolicy = useMemo(() => resolveTurnstilePolicy(), []);
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null);
+  const [missingChallenge, setMissingChallenge] = useState<boolean>(false);
   const [submitError, setSubmitError] = useState<unknown | null>(null);
   const form = useAppForm<RegisterFormValues>(registerSchema, {
     defaultValues: {
@@ -67,19 +79,37 @@ export function useRegisterScreenController(
 
   const openUrl = dependencies.openUrl ?? Linking.openURL;
 
+  const handleCaptchaToken = useCallback((token: string): void => {
+    setCaptchaToken(token);
+    setMissingChallenge(false);
+  }, []);
+
+  const handleCaptchaExpired = useCallback((): void => {
+    setCaptchaToken(null);
+  }, []);
+
   const handleSubmit = form.handleSubmit(async (values) => {
     setSubmitError(null);
+
+    if (captchaPolicy.enabled && !captchaToken) {
+      setMissingChallenge(true);
+      return;
+    }
+
     try {
       await registerMutation.mutateAsync({
         name: values.name,
         email: values.email,
         password: values.password,
+        captchaToken: captchaToken ?? undefined,
       });
     } catch (error) {
       if (error instanceof ApiError) {
         applyApiFormErrors(error, form.setError);
       }
       setSubmitError(error);
+      // Token is single-use server-side; force a fresh challenge.
+      setCaptchaToken(null);
       return;
     }
 
@@ -87,6 +117,7 @@ export function useRegisterScreenController(
       await loginMutation.mutateAsync({
         email: values.email,
         password: values.password,
+        captchaToken: captchaToken ?? undefined,
       });
       router.replace(appRoutes.private.confirmEmailPending);
     } catch {
@@ -101,6 +132,13 @@ export function useRegisterScreenController(
     form,
     isSubmitting: registerMutation.isPending || loginMutation.isPending,
     submitError,
+    captcha: {
+      required: captchaPolicy.enabled,
+      token: captchaToken,
+      missingChallenge,
+    },
+    handleCaptchaToken,
+    handleCaptchaExpired,
     handleSubmit,
     dismissSubmitError: () => {
       registerMutation.reset();
