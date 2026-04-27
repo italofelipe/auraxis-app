@@ -26,6 +26,8 @@ import type {
   GoalPlan,
   GoalProjection,
   GoalRecord,
+  SimulateGoalPlanCommand,
+  SimulatedGoalPlan,
   UpdateGoalCommand,
 } from "@/features/goals/contracts";
 import type {
@@ -47,6 +49,7 @@ import type {
   WalletOperationsListResponse,
   WalletOperationsPosition,
   WalletSummary,
+  WalletValuationSummary,
 } from "@/features/wallet/contracts";
 import type {
   AlertListResponse,
@@ -418,6 +421,16 @@ export const apiContractMap = {
     path: "/goals/{goal_id}/projection",
     authRequired: true,
   }),
+  goalsSimulate: defineApiContract<
+    "POST",
+    "/goals/simulate",
+    SimulateGoalPlanCommand,
+    SimulatedGoalPlan
+  >({
+    method: "POST",
+    path: "/goals/simulate",
+    authRequired: true,
+  }),
   walletSummary: defineApiContract<"GET", "/wallet", never, WalletSummary>({
     method: "GET",
     path: "/wallet",
@@ -501,6 +514,16 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/wallet/{investment_id}/operations/position",
+    authRequired: true,
+  }),
+  walletValuation: defineApiContract<
+    "GET",
+    "/wallet/valuation",
+    never,
+    WalletValuationSummary
+  >({
+    method: "GET",
+    path: "/wallet/valuation",
     authRequired: true,
   }),
   alertsList: defineApiContract<"GET", "/alerts", never, AlertListResponse>({

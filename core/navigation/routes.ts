@@ -32,6 +32,9 @@ export const appRoutes = {
     accounts: "/contas",
     creditCards: "/cartoes",
     budgets: "/orcamentos",
+    focus: "/foco",
+    onboarding: "/onboarding",
+    goalSimulator: "/simulador-meta",
   },
 } as const;
 
@@ -249,6 +252,27 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "budgets",
     path: appRoutes.private.budgets,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "focus",
+    path: appRoutes.private.focus,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "onboarding",
+    path: appRoutes.private.onboarding,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "goalSimulator",
+    path: appRoutes.private.goalSimulator,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
