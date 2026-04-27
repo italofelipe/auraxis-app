@@ -22,6 +22,9 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "contas",
   "cartoes",
   "orcamentos",
+  "foco",
+  "onboarding",
+  "simulador-meta",
 ];
 
 function PrivateLayoutContent(): ReactElement | null {

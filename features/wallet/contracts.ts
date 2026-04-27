@@ -88,3 +88,10 @@ export interface DeleteWalletOperationCommand {
   readonly entryId: string;
   readonly operationId: string;
 }
+
+export interface WalletValuationSummary {
+  readonly totalCurrentValue: number;
+  readonly totalInvestedAmount: number;
+  readonly totalProfitLossPercent: number;
+  readonly totalInvestments: number;
+}
