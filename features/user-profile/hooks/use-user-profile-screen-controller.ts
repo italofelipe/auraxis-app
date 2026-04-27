@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 
 import { appRoutes } from "@/core/navigation/routes";
+import { useBiometricGate } from "@/core/security/use-biometric-gate";
 import { useLogoutMutation } from "@/features/auth/hooks/use-auth-mutations";
 import type { UserProfile } from "@/features/user-profile/contracts";
 import { useUpdateUserProfileMutation } from "@/features/user-profile/hooks/use-user-profile-mutations";
@@ -33,6 +34,7 @@ export function useUserProfileScreenController(): UserProfileScreenController {
   const profileQuery = useUserProfileQuery();
   const updateMutation = useUpdateUserProfileMutation();
   const logoutMutation = useLogoutMutation();
+  const requestBiometricGate = useBiometricGate();
   const [mode, setMode] = useState<UserProfileFormMode>("read");
   const [submitError, setSubmitError] = useState<unknown | null>(null);
 
@@ -49,6 +51,18 @@ export function useUserProfileScreenController(): UserProfileScreenController {
   };
 
   const handleLogout = async (): Promise<void> => {
+    // When the user has biometric lock enabled, force a fresh
+    // identity check before tearing the session down so a stolen
+    // unlocked device cannot sign the user out (and lose any
+    // unsynced state). Cancellations bail without touching the
+    // session — the user stays where they are.
+    const gate = await requestBiometricGate({
+      promptMessage: "Confirme para sair da conta",
+    });
+    if (!gate.authorised) {
+      return;
+    }
+
     try {
       await logoutMutation.mutateAsync();
     } finally {
