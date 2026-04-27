@@ -4,6 +4,7 @@ import { Paragraph, YStack } from "tamagui";
 
 import { AppearanceSection } from "@/features/user-profile/components/appearance-section";
 import { LanguageSection } from "@/features/user-profile/components/language-section";
+import { SecuritySection } from "@/features/user-profile/components/security-section";
 import { UserProfileForm } from "@/features/user-profile/components/user-profile-form";
 import type { UserProfile } from "@/features/user-profile/contracts";
 import {
@@ -53,6 +54,7 @@ export function UserProfileScreen(): ReactElement {
       <ProfileCard controller={controller} />
       <AppearanceSection />
       <LanguageSection />
+      <SecuritySection />
       <LogoutCard controller={controller} />
     </AppScreen>
   );

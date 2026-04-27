@@ -29,6 +29,15 @@
       "description": "Choose the language shown across the app.",
       "pt": "Portuguese",
       "en": "English"
+    },
+    "security": {
+      "title": "Security",
+      "biometric": {
+        "label": "Biometric lock",
+        "description": "Require Face ID, Touch ID or fingerprint when reopening the app and for sensitive actions.",
+        "unavailable": "Biometrics not available on this device.",
+        "notEnrolled": "Enroll Face ID / Touch ID in system settings to enable."
+      }
     }
   },
   "auth": {

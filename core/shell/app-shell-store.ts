@@ -28,12 +28,21 @@ export type ThemePreference = "system" | "light" | "dark";
  */
 export type AppLocale = "pt" | "en";
 
+/**
+ * User preference for biometric gate. When `true`, sensitive flows
+ * (account deletion, password change, checkout) prompt the OS
+ * biometric sheet via {@link requestBiometricAuth}. Defaults to
+ * `false` until the user explicitly enrolls.
+ */
+export type BiometricLockPreference = boolean;
+
 export interface AppShellState {
   readonly fontsReady: boolean;
   readonly reducedMotionEnabled: boolean;
   readonly hapticsEnabled: boolean;
   readonly themePreference: ThemePreference;
   readonly locale: AppLocale;
+  readonly biometricLockEnabled: BiometricLockPreference;
   readonly startupReady: boolean;
   readonly appState: RuntimeAppState;
   readonly connectivityStatus: RuntimeConnectivityStatus;
@@ -48,6 +57,7 @@ export interface AppShellState {
   setHapticsEnabled: (value: boolean) => void;
   setThemePreference: (value: ThemePreference) => void;
   setLocale: (value: AppLocale) => void;
+  setBiometricLockEnabled: (value: BiometricLockPreference) => void;
   setStartupReady: (value: boolean) => void;
   setAppState: (value: RuntimeAppState) => void;
   setConnectivityStatus: (value: RuntimeConnectivityStatus) => void;
@@ -66,6 +76,7 @@ export type AppShellStateSnapshot = Pick<
   | "hapticsEnabled"
   | "themePreference"
   | "locale"
+  | "biometricLockEnabled"
   | "startupReady"
   | "appState"
   | "connectivityStatus"
@@ -83,6 +94,7 @@ export const appShellStateDefaults: AppShellStateSnapshot = {
   hapticsEnabled: true,
   themePreference: "system",
   locale: "pt",
+  biometricLockEnabled: false,
   startupReady: false,
   appState: "unknown",
   connectivityStatus: "unknown",
@@ -110,6 +122,9 @@ export const useAppShellStore = create<AppShellState>((set) => ({
   },
   setLocale: (value: AppLocale): void => {
     set({ locale: value });
+  },
+  setBiometricLockEnabled: (value: BiometricLockPreference): void => {
+    set({ biometricLockEnabled: value });
   },
   setStartupReady: (value: boolean): void => {
     set({ startupReady: value });
