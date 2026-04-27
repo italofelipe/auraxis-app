@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactElement } from "react";
+import { memo, type ComponentProps, type ReactElement } from "react";
 
 import { Input, Label, YStack, styled } from "tamagui";
 
@@ -18,25 +18,29 @@ const FieldInput = styled(Input, {
 
 export interface AppInputFieldProps
   extends Omit<ComponentProps<typeof FieldInput>, "id"> {
-  readonly id: string
-  readonly label: string
-  readonly helperText?: string
-  readonly errorText?: string
+  readonly id: string;
+  readonly label: string;
+  readonly helperText?: string;
+  readonly errorText?: string;
 }
 
 /**
  * Shared labeled input with helper and error copy.
  *
+ * Memoised so unchanged fields skip render when sibling fields update —
+ * critical for large forms where a single keystroke would otherwise
+ * re-render every input on the page.
+ *
  * @param props Field props and support texts.
  * @returns A form field wrapper ready for mobile forms.
  */
-export function AppInputField({
+const AppInputFieldComponent = ({
   id,
   label,
   helperText,
   errorText,
   ...rest
-}: AppInputFieldProps): ReactElement {
+}: AppInputFieldProps): ReactElement => {
   const resolvedHint = errorText ?? helperText;
   const hintTone = errorText ? "danger" : "muted";
 
@@ -49,4 +53,6 @@ export function AppInputField({
       {resolvedHint ? <AppFormMessage tone={hintTone} text={resolvedHint} /> : null}
     </YStack>
   );
-}
+};
+
+export const AppInputField = memo(AppInputFieldComponent);
