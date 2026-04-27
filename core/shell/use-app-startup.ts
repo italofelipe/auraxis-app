@@ -17,6 +17,7 @@ import {
   performanceTracker,
   resetPerformanceTrackerForTests,
 } from "@/core/performance/performance-tracker";
+import { runDeviceIntegrityCheck } from "@/core/security/integrity-check";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useSessionStore } from "@/core/session/session-store";
 import { startupLogger } from "@/core/telemetry/domain-loggers";
@@ -25,6 +26,7 @@ import { initI18n } from "@/shared/i18n";
 let sentryInitialized = false;
 let splashScreenPrevented = false;
 let i18nInitialized = false;
+let integrityCheckDispatched = false;
 
 const ensureI18nInitialized = (initialLocale?: "pt" | "en"): void => {
   if (i18nInitialized) {
@@ -32,6 +34,15 @@ const ensureI18nInitialized = (initialLocale?: "pt" | "en"): void => {
   }
   i18nInitialized = true;
   void initI18n(initialLocale);
+};
+
+const ensureIntegrityCheckDispatched = (): void => {
+  if (integrityCheckDispatched) {
+    return;
+  }
+  integrityCheckDispatched = true;
+  // Fire-and-forget. Best-effort; never blocks the boot path.
+  void runDeviceIntegrityCheck();
 };
 
 const ensureSentryInitialized = (): void => {
@@ -56,6 +67,7 @@ export const resetAppStartupRuntimeForTests = (): void => {
   sentryInitialized = false;
   splashScreenPrevented = false;
   i18nInitialized = false;
+  integrityCheckDispatched = false;
   resetPerformanceTrackerForTests();
 };
 
@@ -81,6 +93,7 @@ export const useAppStartup = (): AppStartupState => {
     ensureSentryInitialized();
     ensureSplashScreenPrevented();
     ensureI18nInitialized(useAppShellStore.getState().locale);
+    ensureIntegrityCheckDispatched();
     if (!startupMeasurementStarted.current) {
       performanceTracker.start("startup.total");
       startupMeasurementStarted.current = true;

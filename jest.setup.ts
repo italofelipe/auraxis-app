@@ -62,6 +62,19 @@ jest.mock("react-native-reanimated", () => {
 });
 /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */
 
+// Default-mock jail-monkey: the native module ships ESM that jest does
+// not transform, and individual suites stub their own assertions.
+jest.mock("jail-monkey", () => ({
+  __esModule: true,
+  default: {
+    isJailBroken: jest.fn(() => false),
+    isDebuggedMode: jest.fn(() => false),
+    canMockLocation: jest.fn(() => false),
+    isOnExternalStorage: jest.fn(() => false),
+    hookDetected: jest.fn(() => false),
+  },
+}));
+
 // Mock global do expo-router (evita erros em testes unitários de componentes)
 jest.mock("expo-router", () => ({
   useRouter: () => ({
