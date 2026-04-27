@@ -35,6 +35,9 @@ export const appRoutes = {
     focus: "/foco",
     onboarding: "/onboarding",
     goalSimulator: "/simulador-meta",
+    transactionsTrash: "/lixeira-transacoes",
+    salarySimulator: "/simulador-salario",
+    notificationPreferences: "/preferencias-notificacao",
   },
 } as const;
 
@@ -273,6 +276,27 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "goalSimulator",
     path: appRoutes.private.goalSimulator,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "transactionsTrash",
+    path: appRoutes.private.transactionsTrash,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "salarySimulator",
+    path: appRoutes.private.salarySimulator,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "notificationPreferences",
+    path: appRoutes.private.notificationPreferences,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,

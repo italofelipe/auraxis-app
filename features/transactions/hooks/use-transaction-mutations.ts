@@ -47,3 +47,15 @@ export const useDeleteTransactionMutation = () => {
     },
   });
 };
+
+export const useRestoreTransactionMutation = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation<TransactionRecord, Error, string>({
+    mutationFn: (transactionId) =>
+      transactionsService.restoreTransaction(transactionId),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.transactions.root });
+    },
+  });
+};

@@ -98,3 +98,11 @@ export interface UpsertTransactionCommand {
 
 export type CreateTransactionCommand = UpsertTransactionCommand;
 export type UpdateTransactionCommand = Partial<UpsertTransactionCommand>;
+
+export interface DeletedTransactionRecord extends TransactionRecord {
+  readonly deletedAt: string | null;
+}
+
+export interface DeletedTransactionListResponse {
+  readonly transactions: readonly DeletedTransactionRecord[];
+}

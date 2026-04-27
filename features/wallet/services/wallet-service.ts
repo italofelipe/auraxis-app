@@ -14,6 +14,9 @@ import type {
   WalletOperationKind,
   WalletOperationsListResponse,
   WalletOperationsPosition,
+  WalletValuationHistoryPoint,
+  WalletValuationHistoryQuery,
+  WalletValuationHistoryResponse,
   WalletValuationSummary,
 } from "@/features/wallet/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
@@ -137,6 +140,46 @@ const toNumeric = (value: number | string | undefined): number => {
   return 0;
 };
 
+interface ValuationHistoryPointPayload {
+  readonly date?: string;
+  readonly total_value?: number | string;
+  readonly invested_amount?: number | string;
+  readonly profit_loss_percent?: number | string;
+}
+
+const mapHistoryPoint = (
+  payload: ValuationHistoryPointPayload,
+): WalletValuationHistoryPoint => ({
+  date: payload.date ?? "",
+  totalValue: toNumeric(payload.total_value),
+  investedAmount: toNumeric(payload.invested_amount),
+  profitLossPercent: toNumeric(payload.profit_loss_percent),
+});
+
+const mapValuationHistory = (
+  data: unknown,
+): WalletValuationHistoryResponse => {
+  const payload = unwrapEnvelopeData<{
+    readonly history?: ValuationHistoryPointPayload[];
+  }>(data as { readonly history?: ValuationHistoryPointPayload[] });
+  return {
+    history: (payload.history ?? []).map(mapHistoryPoint),
+  };
+};
+
+const fetchValuationHistory = async (
+  client: AxiosInstance,
+  query: WalletValuationHistoryQuery,
+): Promise<WalletValuationHistoryResponse> => {
+  const response = await client.get(apiContractMap.walletValuationHistory.path, {
+    params: {
+      start_date: query.startDate ?? undefined,
+      end_date: query.endDate ?? undefined,
+    },
+  });
+  return mapValuationHistory(response.data);
+};
+
 const mapValuation = (data: unknown): WalletValuationSummary => {
   const payload = unwrapEnvelopeData<ValuationPayloadShape>(
     data as ValuationPayloadShape,
@@ -240,6 +283,10 @@ const createOperationsService = (client: AxiosInstance) => ({
     const response = await client.get(apiContractMap.walletValuation.path);
     return mapValuation(response.data);
   },
+  getValuationHistory: (
+    query: WalletValuationHistoryQuery = {},
+  ): Promise<WalletValuationHistoryResponse> =>
+    fetchValuationHistory(client, query),
   getOperationsPosition: async (
     entryId: string,
   ): Promise<WalletOperationsPosition> => {

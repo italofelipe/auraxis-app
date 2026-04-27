@@ -3,6 +3,11 @@ import type { AxiosInstance } from "axios";
 import { unwrapEnvelopeData } from "@/core/http/contracts";
 import { httpClient } from "@/core/http/http-client";
 import type {
+  NotificationPreference,
+  NotificationPreferenceListResponse,
+  SalaryIncreaseSimulation,
+  SimulateSalaryIncreaseCommand,
+  UpdateNotificationPreferencesCommand,
   UpdateUserProfileCommand,
   UserProfile,
 } from "@/features/user-profile/contracts";
@@ -74,6 +79,28 @@ const buildProfilePayload = (
   };
 };
 
+interface NotificationPreferencePayload {
+  readonly category: string;
+  readonly enabled: boolean;
+  readonly global_opt_out: boolean;
+}
+
+const mapNotificationPreference = (
+  payload: NotificationPreferencePayload,
+): NotificationPreference => ({
+  category: payload.category,
+  enabled: payload.enabled,
+  globalOptOut: payload.global_opt_out,
+});
+
+const toNumeric = (value: number | string): number => {
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : 0;
+  }
+  const parsed = Number.parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
 export const createUserProfileService = (client: AxiosInstance) => {
   return {
     getProfile: async (): Promise<UserProfile> => {
@@ -94,6 +121,59 @@ export const createUserProfileService = (client: AxiosInstance) => {
         response.data,
       );
       return mapUserProfile(payload.user);
+    },
+    simulateSalaryIncrease: async (
+      command: SimulateSalaryIncreaseCommand,
+    ): Promise<SalaryIncreaseSimulation> => {
+      const response = await client.post(
+        apiContractMap.userSimulateSalary.path,
+        {
+          base_salary: command.baseSalary.toFixed(2),
+          base_date: command.baseDate,
+          discounts: command.discounts.toFixed(2),
+          target_real_increase: command.targetRealIncrease.toFixed(2),
+        },
+      );
+      const payload = unwrapEnvelopeData<{
+        readonly recomposition?: number | string;
+        readonly target?: number | string;
+      }>(response.data);
+      return {
+        recomposition: toNumeric(payload.recomposition ?? 0),
+        target: toNumeric(payload.target ?? 0),
+      };
+    },
+    listNotificationPreferences:
+      async (): Promise<NotificationPreferenceListResponse> => {
+        const response = await client.get(
+          apiContractMap.userNotificationPreferencesGet.path,
+        );
+        const payload = unwrapEnvelopeData<{
+          readonly preferences?: NotificationPreferencePayload[];
+        }>(response.data);
+        return {
+          preferences: (payload.preferences ?? []).map(mapNotificationPreference),
+        };
+      },
+    updateNotificationPreferences: async (
+      command: UpdateNotificationPreferencesCommand,
+    ): Promise<NotificationPreferenceListResponse> => {
+      const response = await client.patch(
+        apiContractMap.userNotificationPreferencesUpdate.path,
+        {
+          preferences: command.preferences.map((pref) => ({
+            category: pref.category,
+            enabled: pref.enabled,
+            global_opt_out: pref.globalOptOut,
+          })),
+        },
+      );
+      const payload = unwrapEnvelopeData<{
+        readonly preferences?: NotificationPreferencePayload[];
+      }>(response.data);
+      return {
+        preferences: (payload.preferences ?? []).map(mapNotificationPreference),
+      };
     },
   };
 };

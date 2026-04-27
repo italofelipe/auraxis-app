@@ -12,6 +12,7 @@ export const queryKeys = {
     list: () => ["transactions", "list"] as const,
     detail: (transactionId: string) => ["transactions", "detail", transactionId] as const,
     summary: () => ["transactions", "summary"] as const,
+    deleted: () => ["transactions", "deleted"] as const,
   },
   goals: {
     root: ["goals"] as const,
@@ -32,6 +33,8 @@ export const queryKeys = {
   userProfile: {
     root: ["user-profile"] as const,
     detail: () => ["user-profile", "detail"] as const,
+    notificationPreferences: () =>
+      ["user-profile", "notification-preferences"] as const,
   },
   questionnaire: {
     root: ["questionnaire"] as const,
@@ -54,6 +57,7 @@ export const queryKeys = {
     operations: (entryId: string) => ["wallet", "operations", entryId] as const,
     position: (entryId: string) => ["wallet", "position", entryId] as const,
     valuation: () => ["wallet", "valuation"] as const,
+    valuationHistory: () => ["wallet", "valuation", "history"] as const,
   },
   observability: {
     root: ["observability"] as const,
