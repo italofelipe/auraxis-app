@@ -40,6 +40,11 @@ interface SessionState {
     userName?: string,
   ) => Promise<void>;
   setSession: (session: StoredSession | null) => Promise<void>;
+  rotateTokens: (
+    accessToken: string,
+    refreshToken: string,
+    expiresAt?: string | null,
+  ) => Promise<void>;
   updateUser: (user: SessionUser) => void;
   markSessionValidated: (timestamp: string) => void;
   dismissAuthFailure: () => void;
@@ -145,6 +150,7 @@ const logSessionRehydrated = (context: Record<string, unknown>): void => {
 
 let bootstrapSessionPromise: Promise<void> | null = null;
 
+// eslint-disable-next-line max-lines-per-function
 export const useSessionStore = create<SessionState>((set, get) => ({
   ...sessionStateDefaults,
   bootstrapSession: async (): Promise<void> => {
@@ -237,6 +243,47 @@ export const useSessionStore = create<SessionState>((set, get) => ({
     const nextSession = withSessionMetadata(session);
     await persistStoredSession(nextSession);
     set(toState(nextSession));
+  },
+  rotateTokens: async (
+    accessToken: string,
+    refreshToken: string,
+    expiresAt: string | null = null,
+  ): Promise<void> => {
+    const state = get();
+    if (!state.user) {
+      // Refusing to rotate when there is no active session — the
+      // backend should never hand out a new refresh token without a
+      // logged-in user. Silent no-op rather than spreading a fake
+      // session across SecureStore.
+      authLogger.log("auth.session_invalidated", {
+        level: "warn",
+        context: { reason: "rotate_without_user" },
+      });
+      return;
+    }
+
+    const nextSession: StoredSession = {
+      accessToken,
+      refreshToken,
+      user: state.user,
+      authenticatedAt: state.authenticatedAt,
+      expiresAt: expiresAt ?? state.expiresAt,
+    };
+
+    // SecureStore writes the whole envelope in a single call so the
+    // pair (accessToken, refreshToken) is always durable together —
+    // never one without the other.
+    await persistStoredSession(nextSession);
+    set(toState(nextSession));
+
+    authLogger.log("auth.session_established", {
+      context: {
+        hasRefreshToken: refreshToken.length > 0,
+        emailConfirmed: state.user.emailConfirmed,
+        hasUserId: state.user.id !== null,
+        rotated: true,
+      },
+    });
   },
   updateUser: (user: SessionUser): void => {
     const state = get();

@@ -13,6 +13,7 @@ import {
 jest.mock("@/core/telemetry/app-logger", () => ({
   appLogger: {
     info: jest.fn(),
+    warn: jest.fn(),
   },
 }));
 
@@ -34,6 +35,7 @@ const mockLoadStoredSession = jest.mocked(loadStoredSession);
 const mockPersistStoredSession = jest.mocked(persistStoredSession);
 const mockClearStoredSession = jest.mocked(clearStoredSession);
 
+// eslint-disable-next-line max-lines-per-function
 describe("session store", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -299,6 +301,46 @@ describe("session store", () => {
     expect(useSessionStore.getState()).toMatchObject({
       isAuthenticated: false,
       authFailureReason: "manual",
+    });
+  });
+
+  describe("rotateTokens", () => {
+    it("persiste novos tokens atomicamente preservando o usuario", async () => {
+      const baseSession = makeStoredSession({
+        accessToken: "access-1",
+        refreshToken: "refresh-1",
+      });
+      mockLoadStoredSession.mockResolvedValue({
+        session: baseSession,
+        source: "canonical",
+        invalidStoredPayload: false,
+      });
+      await useSessionStore.getState().bootstrapSession();
+      mockPersistStoredSession.mockClear();
+
+      await useSessionStore
+        .getState()
+        .rotateTokens("access-2", "refresh-2", "2099-01-01T00:00:00.000Z");
+
+      expect(mockPersistStoredSession).toHaveBeenCalledTimes(1);
+      const persisted = mockPersistStoredSession.mock.calls[0]?.[0];
+      expect(persisted).toMatchObject({
+        accessToken: "access-2",
+        refreshToken: "refresh-2",
+        expiresAt: "2099-01-01T00:00:00.000Z",
+        user: baseSession.user,
+      });
+      expect(useSessionStore.getState()).toMatchObject({
+        accessToken: "access-2",
+        refreshToken: "refresh-2",
+        isAuthenticated: true,
+      });
+    });
+
+    it("recusa rotacao quando nao ha usuario na sessao", async () => {
+      await useSessionStore.getState().rotateTokens("access-2", "refresh-2");
+      expect(mockPersistStoredSession).not.toHaveBeenCalled();
+      expect(useSessionStore.getState().accessToken).toBeNull();
     });
   });
 });
