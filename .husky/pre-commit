@@ -1,1 +1,2 @@
+bash scripts/check-no-duplicate-files.sh
 npx lint-staged
