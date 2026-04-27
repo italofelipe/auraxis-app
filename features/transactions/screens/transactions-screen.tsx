@@ -1,7 +1,10 @@
-import type { ReactElement } from "react";
+import { useCallback, useMemo, type ReactElement } from "react";
 
+import { FlashList } from "@shopify/flash-list";
+import { RefreshControl } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { queryKeys } from "@/core/query/query-keys";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import {
   useTransactionsScreenController,
@@ -16,6 +19,7 @@ import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { useListRefresh } from "@/shared/hooks/use-list-refresh";
 import { TransactionListSkeleton } from "@/shared/skeletons";
 import { formatShortDate } from "@/shared/utils/formatters";
 
@@ -34,6 +38,11 @@ const FILTER_LABELS: Record<TransactionsTypeFilter, string> = {
 };
 
 const FILTER_ORDER: readonly TransactionsTypeFilter[] = ["all", "income", "expense"];
+
+const TRANSACTIONS_REFRESH_KEYS = [
+  queryKeys.transactions.list(),
+  queryKeys.transactions.summary(),
+] as const;
 
 /**
  * Canonical transactions screen composition for the mobile app.
@@ -63,9 +72,11 @@ export function TransactionsScreen(): ReactElement {
   }
 
   return (
-    <AppScreen>
+    <AppScreen scrollable={false}>
       <FilterHeader controller={controller} />
-      <TransactionsListCard controller={controller} />
+      <YStack flex={1}>
+        <TransactionsListCard controller={controller} />
+      </YStack>
     </AppScreen>
   );
 }
@@ -99,83 +110,131 @@ function FilterHeader({ controller }: ControllerProps): ReactElement {
 }
 
 function TransactionsListCard({ controller }: ControllerProps): ReactElement {
-  return (
-    <AppSurfaceCard
-      title="Lista"
-      description="Suas movimentacoes financeiras."
-    >
-      <AppQueryState
-        query={controller.transactionsQuery}
-        options={{
-          loading: {
-            title: "Carregando transacoes",
-            description: "Buscando suas movimentacoes.",
-          },
-          loadingPresentation: "skeleton",
-          empty: {
-            title: "Nenhuma transacao no filtro atual",
-            description:
-              "Crie uma nova transacao ou troque o filtro acima.",
-          },
-          error: {
-            fallbackTitle: "Nao foi possivel carregar as transacoes",
-            fallbackDescription: "Tente novamente em instantes.",
-          },
-          isEmpty: () => controller.transactions.length === 0,
-        }}
-        loadingComponent={<TransactionListSkeleton rows={5} />}
-        emptyComponent={
-          <AppEmptyState
-            illustration="transactions"
-            title="Nenhuma transacao no filtro atual"
-            description="Crie uma nova transacao ou troque o filtro acima para visualizar movimentos."
-            cta={{
-              label: "Nova transacao",
-              onPress: controller.handleOpenCreate,
-            }}
-          />
-        }
-      >
-        {() => (
-          <YStack gap="$3">
-            {controller.transactions.map((tx) => (
-              <TransactionRow
-                key={tx.id}
-                tx={tx}
-                isDeleting={controller.deletingTransactionId === tx.id}
-                onEdit={() => {
-                  const record = controller.transactionsQuery.data?.transactions.find(
-                    (item) => item.id === tx.id,
-                  );
-                  if (record) {
-                    controller.handleOpenEdit(record);
-                  }
-                }}
-                onDelete={() => {
-                  void controller.handleDelete(tx.id);
-                }}
-              />
-            ))}
-          </YStack>
-        )}
-      </AppQueryState>
-    </AppSurfaceCard>
+  const queryStateOptions = useMemo(
+    () => ({
+      loading: {
+        title: "Carregando transacoes",
+        description: "Buscando suas movimentacoes.",
+      },
+      loadingPresentation: "skeleton" as const,
+      empty: {
+        title: "Nenhuma transacao no filtro atual",
+        description: "Crie uma nova transacao ou troque o filtro acima.",
+      },
+      error: {
+        fallbackTitle: "Nao foi possivel carregar as transacoes",
+        fallbackDescription: "Tente novamente em instantes.",
+      },
+      isEmpty: () => controller.transactions.length === 0,
+    }),
+    [controller.transactions.length],
   );
+
+  const emptyComponent = useMemo(
+    () => (
+      <AppEmptyState
+        illustration="transactions"
+        title="Nenhuma transacao no filtro atual"
+        description="Crie uma nova transacao ou troque o filtro acima para visualizar movimentos."
+        cta={{
+          label: "Nova transacao",
+          onPress: controller.handleOpenCreate,
+        }}
+      />
+    ),
+    [controller.handleOpenCreate],
+  );
+
+  return (
+    <AppQueryState
+      query={controller.transactionsQuery}
+      options={queryStateOptions}
+      loadingComponent={<TransactionListSkeleton rows={5} />}
+      emptyComponent={emptyComponent}
+    >
+      {() => <TransactionsList controller={controller} />}
+    </AppQueryState>
+  );
+}
+
+function TransactionsList({ controller }: ControllerProps): ReactElement {
+  const { refreshing, onRefresh } = useListRefresh(TRANSACTIONS_REFRESH_KEYS);
+
+  const handleEdit = useCallback(
+    (txId: string): void => {
+      const record = controller.transactionsQuery.data?.transactions.find(
+        (item) => item.id === txId,
+      );
+      if (record) {
+        controller.handleOpenEdit(record);
+      }
+    },
+    [controller],
+  );
+
+  const handleDelete = useCallback(
+    (txId: string): void => {
+      void controller.handleDelete(txId);
+    },
+    [controller],
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { readonly item: TransactionViewModel }) => (
+      <TransactionRow
+        tx={item}
+        isDeleting={controller.deletingTransactionId === item.id}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    ),
+    [controller.deletingTransactionId, handleDelete, handleEdit],
+  );
+
+  return (
+    <FlashList
+      data={controller.transactions}
+      keyExtractor={extractTransactionKey}
+      renderItem={renderItem}
+      contentContainerStyle={listContainerStyle}
+      ItemSeparatorComponent={ListSeparator}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      testID="transactions-flashlist"
+    />
+  );
+}
+
+const extractTransactionKey = (item: TransactionViewModel): string => item.id;
+
+const listContainerStyle = { paddingBottom: 24 } as const;
+
+function ListSeparator(): ReactElement {
+  return <YStack height="$2" />;
 }
 
 interface TransactionRowProps {
   readonly tx: TransactionViewModel;
   readonly isDeleting: boolean;
-  readonly onEdit: () => void;
-  readonly onDelete: () => void;
+  readonly onEdit: (txId: string) => void;
+  readonly onDelete: (txId: string) => void;
 }
 
-function TransactionRow({
+const TransactionRow = function TransactionRow({
   tx,
   isDeleting,
   onEdit,
   onDelete,
 }: TransactionRowProps): ReactElement {
+  const handleEdit = useCallback(() => {
+    onEdit(tx.id);
+  }, [onEdit, tx.id]);
+
+  const handleDelete = useCallback(() => {
+    onDelete(tx.id);
+  }, [onDelete, tx.id]);
+
   return (
     <YStack gap="$2">
       <AppKeyValueRow
@@ -200,13 +259,13 @@ function TransactionRow({
         }
       />
       <XStack gap="$2" flexWrap="wrap">
-        <AppButton tone="secondary" onPress={onEdit} disabled={isDeleting}>
+        <AppButton tone="secondary" onPress={handleEdit} disabled={isDeleting}>
           Editar
         </AppButton>
-        <AppButton tone="secondary" onPress={onDelete} disabled={isDeleting}>
+        <AppButton tone="secondary" onPress={handleDelete} disabled={isDeleting}>
           {isDeleting ? "Excluindo..." : "Excluir"}
         </AppButton>
       </XStack>
     </YStack>
   );
-}
+};
