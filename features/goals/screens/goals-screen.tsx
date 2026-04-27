@@ -11,10 +11,12 @@ import {
 } from "@/features/goals/hooks/use-goals-screen-controller";
 import type { GoalProgressView } from "@/features/goals/services/goal-progress-calculator";
 import { AppButton } from "@/shared/components/app-button";
+import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { GoalListSkeleton } from "@/shared/skeletons";
 import { formatCurrency } from "@/shared/utils/formatters";
 
 interface GoalsListData {
@@ -125,7 +127,19 @@ function GoalsListCard({ controller }: ControllerProps): ReactElement {
       title="Lista"
       description="Metas em andamento aparecem primeiro."
     >
-      <AppQueryState query={controller.goalsQuery} options={queryStateOptions}>
+      <AppQueryState
+        query={controller.goalsQuery}
+        options={queryStateOptions}
+        loadingComponent={<GoalListSkeleton rows={3} />}
+        emptyComponent={
+          <AppEmptyState
+            illustration="goals"
+            title="Sem metas por aqui"
+            description="Defina sua primeira meta financeira para comecar a acompanhar seu progresso."
+            cta={{ label: "Nova meta", onPress: controller.handleOpenCreate }}
+          />
+        }
+      >
         {() => (
           <YStack gap="$3">
             {controller.goals.map((goal) => (

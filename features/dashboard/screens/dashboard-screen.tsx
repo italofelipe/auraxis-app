@@ -17,6 +17,7 @@ import type {
 } from "@/features/dashboard/services/savings-rate-calculator";
 import { AppButton } from "@/shared/components/app-button";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import { DashboardSkeleton, MetricGridSkeleton } from "@/shared/skeletons";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { formatCurrency } from "@/shared/utils/formatters";
@@ -110,6 +111,7 @@ function BalanceCard({ controller }: ControllerProps): ReactElement {
           },
           loadingPresentation: "skeleton",
         }}
+        loadingComponent={<DashboardSkeleton />}
       >
         {() => (
           <YStack gap="$1">
@@ -189,8 +191,9 @@ function MonthSnapshotCard({ controller }: ControllerProps): ReactElement {
             },
             isEmpty: (data) =>
               data.series.length === 0 || controller.monthSnapshot === null,
-            loadingPresentation: "notice",
+            loadingPresentation: "skeleton",
           }}
+          loadingComponent={<MetricGridSkeleton tiles={3} />}
         >
           {() => <MonthSnapshotValues controller={controller} />}
         </AppQueryState>
