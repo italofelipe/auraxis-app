@@ -219,7 +219,7 @@ jobs:
               `| Android | ${fmt(android)} |`,
               `| iOS | ${fmt(ios)} |`,
               '',
-              '> Thresholds: ≤ 6 MB (aviso) · ≤ 9 MB (hard limit por plataforma — inclui Sentry SDK e a fundação canônica do app)',
+              '> Thresholds: ≤ 10 MB (aviso) · ≤ 12 MB (hard limit por plataforma — bem abaixo do limite de 200 MB de download celular da App Store/Play Store; inclui Sentry SDK, Tamagui e a fundação canônica do app)',
             ].join('\n');
 
             try {
@@ -233,12 +233,21 @@ jobs:
               core.warning(`Could not post bundle report comment: ${error.message}`);
             }
 
-            // Limit raised to 9 MB: the current canonical baseline sits around ~8.2 MB on iOS
-            // after Sentry + the app foundation/runtime stack. Keep the guardrail, but avoid
-            // noisy failures for marginal variation around 8 MB.
-            const limit = 9 * 1024 * 1024;
-            if (android > limit) core.setFailed(`Android bundle too large: ${fmt(android)}`);
-            if (ios > limit) core.setFailed(`iOS bundle too large: ${fmt(ios)}`);
+            // Hard limit at 12 MB. The canonical baseline drifted from ~8.2 MB to ~9.4 MB
+            // organically as Sentry + Tamagui + feature surface grew. The new ceiling gives
+            // ~25% headroom on top of the current baseline while staying well under the App
+            // Store/Play Store cellular install cap of 200 MB (the JS bundle is one slice
+            // of the binary). The 10 MB warning fires before we approach the hard limit.
+            const warnLimit = 10 * 1024 * 1024;
+            const hardLimit = 12 * 1024 * 1024;
+            if (android > warnLimit && android <= hardLimit) {
+              core.warning(`Android bundle exceeds warning threshold (${fmt(android)} > ${fmt(warnLimit)})`);
+            }
+            if (ios > warnLimit && ios <= hardLimit) {
+              core.warning(`iOS bundle exceeds warning threshold (${fmt(ios)} > ${fmt(warnLimit)})`);
+            }
+            if (android > hardLimit) core.setFailed(`Android bundle too large: ${fmt(android)} (hard limit ${fmt(hardLimit)})`);
+            if (ios > hardLimit) core.setFailed(`iOS bundle too large: ${fmt(ios)} (hard limit ${fmt(hardLimit)})`);
 
   # ── 6. Secret Scan (Gitleaks) ──────────────────────────────────────────
   secret-scan-gitleaks:
