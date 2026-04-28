@@ -13,6 +13,7 @@ import {
 } from "@/features/transactions/validators";
 
 export type TransactionsTypeFilter = "all" | "income" | "expense";
+export type TransactionsViewMode = "list" | "calendar";
 
 export type TransactionFormMode =
   | { readonly kind: "closed" }
@@ -35,15 +36,19 @@ export interface TransactionsScreenController {
   readonly total: number;
   readonly typeFilter: TransactionsTypeFilter;
   readonly setTypeFilter: (filter: TransactionsTypeFilter) => void;
+  readonly viewMode: TransactionsViewMode;
+  readonly setViewMode: (mode: TransactionsViewMode) => void;
   readonly formMode: TransactionFormMode;
   readonly isSubmitting: boolean;
   readonly submitError: unknown | null;
   readonly deletingTransactionId: string | null;
+  readonly duplicatingTransactionId: string | null;
   readonly handleOpenCreate: () => void;
   readonly handleOpenEdit: (transaction: TransactionRecord) => void;
   readonly handleCloseForm: () => void;
   readonly handleSubmit: (values: CreateTransactionFormValues) => Promise<void>;
   readonly handleDelete: (transactionId: string) => Promise<void>;
+  readonly handleDuplicate: (transactionId: string) => Promise<void>;
   readonly dismissSubmitError: () => void;
 }
 
@@ -81,6 +86,7 @@ const buildSubmitPayload = (values: CreateTransactionFormValues) => ({
  * form state machine, the per-transaction delete tracker, the type filter
  * and the three mutations. The screen remains view-only.
  */
+// eslint-disable-next-line max-lines-per-function
 export function useTransactionsScreenController(): TransactionsScreenController {
   const transactionsQuery = useTransactionsQuery();
   const createMutation = useCreateTransactionMutation();
@@ -89,7 +95,9 @@ export function useTransactionsScreenController(): TransactionsScreenController 
   const [formMode, setFormMode] = useState<TransactionFormMode>({ kind: "closed" });
   const [submitError, setSubmitError] = useState<unknown | null>(null);
   const [deletingTransactionId, setDeletingTransactionId] = useState<string | null>(null);
+  const [duplicatingTransactionId, setDuplicatingTransactionId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<TransactionsTypeFilter>("all");
+  const [viewMode, setViewMode] = useState<TransactionsViewMode>("list");
 
   const transactions = useMemo<readonly TransactionViewModel[]>(() => {
     const records = transactionsQuery.data?.transactions ?? [];
@@ -127,16 +135,46 @@ export function useTransactionsScreenController(): TransactionsScreenController 
     }
   };
 
+  const handleDuplicate = async (transactionId: string): Promise<void> => {
+    const original = transactionsQuery.data?.transactions.find(
+      (item) => item.id === transactionId,
+    );
+    if (!original) {
+      return;
+    }
+    setDuplicatingTransactionId(transactionId);
+    setSubmitError(null);
+    try {
+      await createMutation.mutateAsync({
+        title: original.title,
+        amount: original.amount,
+        type: original.type,
+        // Date the copy with today so the user can spot it immediately
+        // and so the duplicate doesn't land in the past by surprise.
+        dueDate: new Date().toISOString().slice(0, 10),
+        description: original.description ?? null,
+        isRecurring: original.isRecurring,
+      });
+    } catch (error) {
+      setSubmitError(error);
+    } finally {
+      setDuplicatingTransactionId(null);
+    }
+  };
+
   return {
     transactionsQuery,
     transactions,
     total: transactionsQuery.data?.pagination.total ?? 0,
     typeFilter,
     setTypeFilter,
+    viewMode,
+    setViewMode,
     formMode,
     isSubmitting: createMutation.isPending || updateMutation.isPending,
     submitError,
     deletingTransactionId,
+    duplicatingTransactionId,
     handleOpenCreate: () => {
       setSubmitError(null);
       setFormMode({ kind: "create" });
@@ -151,6 +189,7 @@ export function useTransactionsScreenController(): TransactionsScreenController 
     },
     handleSubmit,
     handleDelete,
+    handleDuplicate,
     dismissSubmitError: () => {
       setSubmitError(null);
       createMutation.reset();
