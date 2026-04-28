@@ -71,6 +71,34 @@
       "title": "Definir nova senha",
       "submit": "Salvar nova senha",
       "submitting": "Salvando..."
+    },
+    "resendConfirmation": {
+      "title": "Reenviar e-mail de confirmacao",
+      "description": "Vamos enviar um novo link de confirmacao para o e-mail abaixo.",
+      "emailLabel": "E-mail",
+      "submit": "Reenviar agora",
+      "submitting": "Reenviando...",
+      "success": "Pronto! Cheque sua caixa de entrada e a pasta de spam.",
+      "rateLimited": "Aguarde {{seconds}}s antes de reenviar novamente.",
+      "backToLogin": "Voltar para o login"
+    }
+  },
+  "checkout": {
+    "success": {
+      "title": "Pagamento confirmado!",
+      "description": "Seu plano foi ativado e ja esta liberado. Bem-vindo ao Auraxis Premium.",
+      "features": {
+        "tools": "Acesso a todas as ferramentas",
+        "wallet": "Carteira sem limite de ativos",
+        "support": "Suporte prioritario"
+      },
+      "cta": "Explorar o app"
+    },
+    "cancel": {
+      "title": "Pagamento nao concluido",
+      "description": "Sua assinatura nao foi ativada. Voce pode tentar novamente quando quiser.",
+      "retry": "Tentar novamente",
+      "back": "Voltar"
     }
   },
   "dashboard": {

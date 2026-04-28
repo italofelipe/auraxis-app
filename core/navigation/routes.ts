@@ -12,6 +12,7 @@ export const appRoutes = {
     register: "/register",
     forgotPassword: "/forgot-password",
     resetPassword: "/reset-password",
+    resendConfirmation: "/resend-confirmation",
   },
   private: {
     dashboard: "/dashboard",
@@ -129,6 +130,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "resetPassword",
     path: appRoutes.public.resetPassword,
+    access: "public",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "resendConfirmation",
+    path: appRoutes.public.resendConfirmation,
     access: "public",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
