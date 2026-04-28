@@ -18,8 +18,8 @@ const createValidRuntimeInputs = () => {
       ".github/workflows/store-release.yml": "with:\n  node-version-file: .nvmrc\n",
     },
     ciLocalScript: [
-      'NODE_VERSION_FILE="$ROOT_DIR/.nvmrc"',
-      'NODE_DOCKER_IMAGE="node:${NODE_VERSION}-bookworm"',
+      "NODE_VERSION_FILE=\"$ROOT_DIR/.nvmrc\"",
+      "NODE_DOCKER_IMAGE=\"node:${NODE_VERSION}-bookworm\"",
     ].join("\n"),
     qualityGatesDoc: "nvm use 25\n# Paridade CI local (ambiente dockerizado Node 25, igual ao runner Linux):",
     steeringDoc: "| Toolchain | Node.js | 25 LTS |",
@@ -157,15 +157,15 @@ describe("check-runtime-release-governance", () => {
     expect(
       validateBundleGovernance({
         ciWorkflow: [
-          "> Thresholds: ≤ 6 MB (aviso) · ≤ 9 MB",
-          "const limit = 9 * 1024 * 1024;",
+          "> Thresholds: ≤ 10 MB (aviso) · ≤ 12 MB",
+          "const hardLimit = 12 * 1024 * 1024;",
         ].join("\n"),
         qualityGatesDoc: [
-          "| Android | > 6 MB | > 9 MB |",
-          "| iOS | > 6 MB | > 9 MB |",
+          "| Android | > 10 MB | > 12 MB |",
+          "| iOS | > 10 MB | > 12 MB |",
         ].join("\n"),
-        steeringDoc: "bundle Android/iOS ≤ 9 MB (hard limit no CI), com alerta operacional a partir de 6 MB.",
-        codingStandardsDoc: "bundle-analysis   (comenta tamanho no PR; hard limit 9 MB)",
+        steeringDoc: "bundle Android/iOS ≤ 12 MB (hard limit no CI), com alerta operacional a partir de 10 MB.",
+        codingStandardsDoc: "bundle-analysis   (comenta tamanho no PR; hard limit 12 MB)",
       }),
     ).toEqual([]);
   });
