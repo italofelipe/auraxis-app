@@ -86,6 +86,7 @@ const tokens = createTokens({
     borderMutedDark: darkSemanticColors.border,
     successDark: darkSemanticColors.success,
     dangerDark: darkSemanticColors.danger,
+    dangerStrongDark: darkSemanticColors.dangerStrong,
     // light
     surfaceBaseLight: lightSemanticColors.background,
     surfaceCardLight: lightSemanticColors.surface,
@@ -96,6 +97,7 @@ const tokens = createTokens({
     borderMutedLight: lightSemanticColors.border,
     successLight: lightSemanticColors.success,
     dangerLight: lightSemanticColors.danger,
+    dangerStrongLight: lightSemanticColors.dangerStrong,
     // brand (shared across modes)
     brandPrimary: darkSemanticColors.primary,
     brandSecondary: darkSemanticColors.secondary,
@@ -163,6 +165,7 @@ const buildModeTheme = (mode: "dark" | "light") => {
     muted: `$textMuted${suffix}`,
     success: `$success${suffix}`,
     danger: `$danger${suffix}`,
+    dangerStrong: `$dangerStrong${suffix}`,
   } as const;
 };
 

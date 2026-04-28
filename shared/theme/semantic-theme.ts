@@ -17,6 +17,7 @@ export const darkSemanticColors = {
   border: colorPalette.neutral700,
   success: "#4ade80",
   danger: colorPalette.danger500,
+  dangerStrong: colorPalette.danger700,
 } as const;
 
 /**
@@ -36,6 +37,7 @@ export const lightSemanticColors = {
   border: "#dcdfe5",
   success: "#1f9d55",
   danger: "#c53030",
+  dangerStrong: "#9b2424",
 } as const;
 
 /**

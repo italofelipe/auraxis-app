@@ -27,23 +27,38 @@ const SecondaryButtonFrame = styled(Button, {
   },
 });
 
+const DangerButtonFrame = styled(Button, {
+  backgroundColor: "$danger",
+  borderRadius: "$1",
+  pressStyle: {
+    backgroundColor: "$dangerStrong",
+  },
+});
+
 type FrameProps = ComponentProps<typeof PrimaryButtonFrame>;
+
+export type AppButtonTone = "primary" | "secondary" | "danger";
 
 export interface AppButtonProps extends Omit<FrameProps, "children"> {
   readonly children: ReactNode;
-  readonly tone?: "primary" | "secondary";
+  readonly tone?: AppButtonTone;
   /**
    * Tactile feedback fired on press-in. Defaults to `"light"` for primary
-   * tone and `"none"` for secondary, matching mobile UX conventions
-   * (primary CTA = strongest signal). Pass `"none"` to opt out.
+   * tone, `"medium"` for danger and `"none"` for secondary — matching
+   * mobile UX conventions (primary CTA = strongest signal, destructive
+   * action = stronger). Pass `"none"` to opt out.
    */
   readonly hapticTone?: HapticImpactTone;
 }
 
-const defaultHapticTone = (
-  tone: "primary" | "secondary",
-): HapticImpactTone => {
-  return tone === "primary" ? "light" : "none";
+const defaultHapticTone = (tone: AppButtonTone): HapticImpactTone => {
+  if (tone === "primary") {
+    return "light";
+  }
+  if (tone === "danger") {
+    return "medium";
+  }
+  return "none";
 };
 
 /**
@@ -114,6 +129,22 @@ export function AppButton({
       >
         {children}
       </SecondaryButtonFrame>
+    );
+  }
+
+  if (tone === "danger") {
+    return (
+      <DangerButtonFrame
+        {...rest}
+        disabled={disabled}
+        accessibilityLabel={a11yLabel}
+        accessibilityRole={a11yRole}
+        accessibilityHint={accessibilityHint}
+        accessibilityState={a11yState}
+        onPressIn={handlePressIn}
+      >
+        {children}
+      </DangerButtonFrame>
     );
   }
 
