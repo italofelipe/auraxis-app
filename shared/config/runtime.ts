@@ -15,6 +15,8 @@ export interface AppRuntimeConfig {
   readonly observabilityExportEnabled: boolean;
   readonly observabilityExportPublicKey: string | null;
   readonly mockLatencyMs: number;
+  readonly brapiToken: string | null;
+  readonly brapiBaseUrl: string;
 }
 
 const DEFAULT_API_BASE_URL = "http://localhost:5000";
@@ -26,6 +28,7 @@ const DEFAULT_SESSION_EXPIRY_LEEWAY_MS = 30_000;
 const DEFAULT_MOCK_LATENCY_MS = 150;
 const DEFAULT_APP_SCHEME = "auraxisapp";
 const DEFAULT_CHECKOUT_RETURN_PATH = "/assinatura";
+const DEFAULT_BRAPI_BASE_URL = "https://brapi.dev/api";
 
 const expoExtra = (Constants.expoConfig?.extra ?? {}) as Record<string, unknown>;
 
@@ -41,38 +44,30 @@ type RuntimeEnvKey =
   | "EXPO_PUBLIC_CHECKOUT_RETURN_PATH"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY"
-  | "EXPO_PUBLIC_API_MOCK_LATENCY_MS";
+  | "EXPO_PUBLIC_API_MOCK_LATENCY_MS"
+  | "EXPO_PUBLIC_BRAPI_API_KEY"
+  | "EXPO_PUBLIC_BRAPI_BASE_URL";
 
-const readExpoEnv = (envKey: RuntimeEnvKey): string | undefined => {
-  switch (envKey) {
-    case "EXPO_PUBLIC_API_URL":
-      return process.env.EXPO_PUBLIC_API_URL;
-    case "EXPO_PUBLIC_API_MODE":
-      return process.env.EXPO_PUBLIC_API_MODE;
-    case "EXPO_PUBLIC_API_CONTRACT_VERSION":
-      return process.env.EXPO_PUBLIC_API_CONTRACT_VERSION;
-    case "EXPO_PUBLIC_API_TIMEOUT_MS":
-      return process.env.EXPO_PUBLIC_API_TIMEOUT_MS;
-    case "EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS":
-      return process.env.EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS;
-    case "EXPO_PUBLIC_REACHABILITY_PROBE_PATH":
-      return process.env.EXPO_PUBLIC_REACHABILITY_PROBE_PATH;
-    case "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS":
-      return process.env.EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS;
-    case "EXPO_PUBLIC_APP_SCHEME":
-      return process.env.EXPO_PUBLIC_APP_SCHEME;
-    case "EXPO_PUBLIC_CHECKOUT_RETURN_PATH":
-      return process.env.EXPO_PUBLIC_CHECKOUT_RETURN_PATH;
-    case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED":
-      return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED;
-    case "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY":
-      return process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY;
-    case "EXPO_PUBLIC_API_MOCK_LATENCY_MS":
-      return process.env.EXPO_PUBLIC_API_MOCK_LATENCY_MS;
-    default:
-      return undefined;
-  }
+const RUNTIME_ENV_READERS: Readonly<Record<RuntimeEnvKey, () => string | undefined>> = {
+  EXPO_PUBLIC_API_URL: () => process.env.EXPO_PUBLIC_API_URL,
+  EXPO_PUBLIC_API_MODE: () => process.env.EXPO_PUBLIC_API_MODE,
+  EXPO_PUBLIC_API_CONTRACT_VERSION: () => process.env.EXPO_PUBLIC_API_CONTRACT_VERSION,
+  EXPO_PUBLIC_API_TIMEOUT_MS: () => process.env.EXPO_PUBLIC_API_TIMEOUT_MS,
+  EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS: () =>
+    process.env.EXPO_PUBLIC_REACHABILITY_PROBE_TIMEOUT_MS,
+  EXPO_PUBLIC_REACHABILITY_PROBE_PATH: () => process.env.EXPO_PUBLIC_REACHABILITY_PROBE_PATH,
+  EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS: () => process.env.EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS,
+  EXPO_PUBLIC_APP_SCHEME: () => process.env.EXPO_PUBLIC_APP_SCHEME,
+  EXPO_PUBLIC_CHECKOUT_RETURN_PATH: () => process.env.EXPO_PUBLIC_CHECKOUT_RETURN_PATH,
+  EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED: () =>
+    process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED,
+  EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY: () => process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY,
+  EXPO_PUBLIC_API_MOCK_LATENCY_MS: () => process.env.EXPO_PUBLIC_API_MOCK_LATENCY_MS,
+  EXPO_PUBLIC_BRAPI_API_KEY: () => process.env.EXPO_PUBLIC_BRAPI_API_KEY,
+  EXPO_PUBLIC_BRAPI_BASE_URL: () => process.env.EXPO_PUBLIC_BRAPI_BASE_URL,
 };
+
+const readExpoEnv = (envKey: RuntimeEnvKey): string | undefined => RUNTIME_ENV_READERS[envKey]();
 
 const readString = (
   envKey: RuntimeEnvKey,
@@ -101,10 +96,10 @@ const readOptionalString = (
 };
 
 const readOptionalStringFromAliases = (
-  aliases: ReadonlyArray<{
+  aliases: readonly {
     readonly envKey: RuntimeEnvKey;
     readonly extraKey: string;
-  }>,
+  }[],
 ): string | null => {
   for (const alias of aliases) {
     const resolved = readOptionalString(alias.envKey, alias.extraKey);
@@ -210,5 +205,13 @@ export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
     "EXPO_PUBLIC_API_MOCK_LATENCY_MS",
     "apiMockLatencyMs",
     DEFAULT_MOCK_LATENCY_MS,
+  ),
+  brapiToken: readOptionalString("EXPO_PUBLIC_BRAPI_API_KEY", "brapiToken"),
+  brapiBaseUrl: normalizeBaseUrl(
+    readString(
+      "EXPO_PUBLIC_BRAPI_BASE_URL",
+      "brapiBaseUrl",
+      DEFAULT_BRAPI_BASE_URL,
+    ),
   ),
 });
