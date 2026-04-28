@@ -1,8 +1,11 @@
 import type { ReactElement } from "react";
 
+import { useRouter } from "expo-router";
 import { Paragraph, YStack } from "tamagui";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { BillingPlanCard } from "@/features/subscription/components/billing-plan-card";
+import { CheckoutOutcomeCard } from "@/features/subscription/components/checkout-outcome-card";
 import {
   useSubscriptionScreenController,
   type SubscriptionScreenController,
@@ -175,6 +178,7 @@ function TrialCallout({ controller }: ControllerProps): ReactElement | null {
 }
 
 function CheckoutFeedback({ controller }: ControllerProps): ReactElement | null {
+  const router = useRouter();
   const outcome = controller.lastCheckoutOutcome;
   if (controller.checkoutError) {
     return (
@@ -188,11 +192,37 @@ function CheckoutFeedback({ controller }: ControllerProps): ReactElement | null 
     );
   }
 
-  if (!outcome || !(outcome in SUCCESS_NOTICE)) {
-    return null;
+  if (outcome === "opened" && SUCCESS_NOTICE.opened) {
+    const copy = SUCCESS_NOTICE.opened;
+    return (
+      <AsyncStateNotice kind="empty" title={copy.title} description={copy.description} />
+    );
   }
-  const copy = SUCCESS_NOTICE[outcome];
-  return <AsyncStateNotice kind="empty" title={copy.title} description={copy.description} />;
+
+  if (outcome === "completed") {
+    return (
+      <CheckoutOutcomeCard
+        outcome="completed"
+        onPrimaryAction={() => {
+          router.replace(appRoutes.private.dashboard);
+        }}
+      />
+    );
+  }
+
+  if (outcome === "canceled" || outcome === "dismissed") {
+    return (
+      <CheckoutOutcomeCard
+        outcome={outcome}
+        onPrimaryAction={controller.dismissCheckoutError}
+        onSecondaryAction={() => {
+          router.back();
+        }}
+      />
+    );
+  }
+
+  return null;
 }
 
 function PlansCard({ controller }: ControllerProps): ReactElement {
