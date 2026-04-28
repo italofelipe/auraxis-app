@@ -1,7 +1,9 @@
+import { useRouter } from "expo-router";
 import type { ReactElement } from "react";
 
 import { Paragraph, YStack } from "tamagui";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { AppearanceSection } from "@/features/user-profile/components/appearance-section";
 import { LanguageSection } from "@/features/user-profile/components/language-section";
 import { SecuritySection } from "@/features/user-profile/components/security-section";
@@ -56,7 +58,31 @@ export function UserProfileScreen(): ReactElement {
       <LanguageSection />
       <SecuritySection />
       <LogoutCard controller={controller} />
+      <DangerZoneCta />
     </AppScreen>
+  );
+}
+
+function DangerZoneCta(): ReactElement {
+  const router = useRouter();
+  return (
+    <AppSurfaceCard
+      title="Configuracoes avancadas"
+      description="Acoes irreversiveis para sua conta."
+    >
+      <YStack gap="$3">
+        <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+          Excluir sua conta apaga permanentemente todos os seus dados (LGPD).
+        </Paragraph>
+        <AppButton
+          tone="secondary"
+          onPress={() => router.push(appRoutes.private.dangerZone)}
+          testID="profile-open-danger-zone"
+        >
+          Excluir conta
+        </AppButton>
+      </YStack>
+    </AppSurfaceCard>
   );
 }
 
