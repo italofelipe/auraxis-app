@@ -71,6 +71,34 @@
       "title": "Set new password",
       "submit": "Save new password",
       "submitting": "Saving..."
+    },
+    "resendConfirmation": {
+      "title": "Resend confirmation email",
+      "description": "We will send a new confirmation link to the email below.",
+      "emailLabel": "Email",
+      "submit": "Resend now",
+      "submitting": "Resending...",
+      "success": "Done! Check your inbox and spam folder.",
+      "rateLimited": "Wait {{seconds}}s before resending again.",
+      "backToLogin": "Back to sign in"
+    }
+  },
+  "checkout": {
+    "success": {
+      "title": "Payment confirmed!",
+      "description": "Your plan is active. Welcome to Auraxis Premium.",
+      "features": {
+        "tools": "Access to all tools",
+        "wallet": "Unlimited assets in your wallet",
+        "support": "Priority support"
+      },
+      "cta": "Explore the app"
+    },
+    "cancel": {
+      "title": "Payment not completed",
+      "description": "Your subscription was not activated. You can try again whenever you like.",
+      "retry": "Try again",
+      "back": "Back"
     }
   },
   "dashboard": {
