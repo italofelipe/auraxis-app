@@ -90,7 +90,7 @@ export const useBrapiCurrenciesQuery = (
   deps?: BrapiQueryDeps,
 ): UseQueryResult<BrapiCurrencyQuote[], ApiError> => {
   const service = resolveService(deps);
-  const sortedPairs = [...pairs].sort();
+  const sortedPairs = [...pairs].sort((a, b) => a.localeCompare(b));
   return useQuery<BrapiCurrencyQuote[], ApiError>({
     queryKey: queryKeys.brapi.currencies(sortedPairs),
     queryFn: () => service.getCurrencies(sortedPairs),
