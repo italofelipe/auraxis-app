@@ -2,9 +2,12 @@ import { fireEvent, render } from "@testing-library/react-native";
 
 import { AppProviders } from "@/core/providers/app-providers";
 import { DangerZoneScreen } from "@/features/user-profile/screens/danger-zone-screen";
-import { useDangerZoneScreenController } from "@/features/user-profile/hooks/use-danger-zone-screen-controller";
+import {
+  useDangerZoneScreenController,
+  type DangerZoneScreenController,
+} from "@/features/user-profile/hooks/use-danger-zone-screen-controller";
 
-const mockController = {
+const mockController: DangerZoneScreenController = {
   consent: false,
   confirmPhrase: "",
   password: "",
@@ -29,7 +32,7 @@ jest.mock(
 const mockedUseController = jest.mocked(useDangerZoneScreenController);
 
 const renderScreen = (
-  override: Partial<typeof mockController> = {},
+  override: Partial<DangerZoneScreenController> = {},
 ): ReturnType<typeof render> => {
   mockedUseController.mockReturnValue({ ...mockController, ...override });
   return render(
