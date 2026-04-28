@@ -44,6 +44,7 @@ const QUERY_POLICY_BY_ROOT: Record<string, QueryCachePolicy> = {
   tools: createPolicy(LONG_STALE_TIME_MS, STATIC_GC_TIME_MS),
   simulations: createPolicy(DEFAULT_STALE_TIME_MS),
   observability: createPolicy(FAST_STALE_TIME_MS),
+  brapi: createPolicy(SLOW_STALE_TIME_MS),
 };
 
 const resolveRootKey = (queryKey: QueryKey): string | null => {

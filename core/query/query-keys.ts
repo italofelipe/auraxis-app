@@ -93,4 +93,14 @@ export const queryKeys = {
     summary: () => ["budgets", "summary"] as const,
     detail: (budgetId: string) => ["budgets", "detail", budgetId] as const,
   },
+  brapi: {
+    root: ["brapi"] as const,
+    tickerSearch: (query: string) => ["brapi", "tickers", "search", query] as const,
+    currentQuote: (ticker: string) => ["brapi", "quote", "current", ticker] as const,
+    historicalPrices: (ticker: string, range: string) =>
+      ["brapi", "quote", "historical", ticker, range] as const,
+    fiiQuote: (ticker: string) => ["brapi", "fii", ticker] as const,
+    currencies: (pairs: readonly string[]) =>
+      ["brapi", "currencies", [...pairs].sort().join(",")] as const,
+  },
 } as const;

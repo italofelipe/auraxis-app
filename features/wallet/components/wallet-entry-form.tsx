@@ -10,6 +10,7 @@ import {
 } from "react-hook-form";
 import { YStack } from "tamagui";
 
+import { TickerAutocomplete } from "@/features/wallet/components/ticker-autocomplete";
 import type { WalletEntry } from "@/features/wallet/contracts";
 import {
   createWalletEntrySchema,
@@ -201,15 +202,14 @@ function TickerField({ control, errors }: WalletEntryFieldsProps): ReactElement 
     <Controller
       control={control}
       name="ticker"
-      render={({ field: { onChange, onBlur, value } }) => (
-        <AppInputField
+      render={({ field: { onChange, value } }) => (
+        <TickerAutocomplete
           id="wallet-ticker"
           label="Ticker (opcional)"
           placeholder="Ex: PETR4"
-          autoCapitalize="characters"
           value={value ?? ""}
-          onBlur={onBlur}
-          onChangeText={(text) => onChange(text.length > 0 ? text : null)}
+          onChange={(text) => onChange(text.length > 0 ? text : null)}
+          onSelect={(result) => onChange(result.stock)}
           errorText={errors.ticker?.message}
         />
       )}

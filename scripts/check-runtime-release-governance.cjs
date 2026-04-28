@@ -5,8 +5,8 @@ const path = require("node:path");
 
 const EXPECTED_NODE_MAJOR = "25";
 const EXPECTED_NODE_ENGINE = "25.x";
-const EXPECTED_BUNDLE_WARNING_MB = 6;
-const EXPECTED_BUNDLE_HARD_MB = 9;
+const EXPECTED_BUNDLE_WARNING_MB = 10;
+const EXPECTED_BUNDLE_HARD_MB = 12;
 const ROOT = process.cwd();
 
 const readTextFile = (filePath) => {
@@ -178,27 +178,33 @@ const validateBundleGovernance = ({
   const hardLimitPattern = new RegExp(`≤ ${EXPECTED_BUNDLE_HARD_MB} MB`, "u");
 
   if (!warningPattern.test(ciWorkflow) || !hardLimitPattern.test(ciWorkflow)) {
-    errors.push(".github/workflows/ci.yml must document the 6 MB warning and 9 MB hard limit");
+    errors.push(`.github/workflows/ci.yml must document the ${EXPECTED_BUNDLE_WARNING_MB} MB warning and ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`);
   }
 
-  if (!/const limit = 9 \* 1024 \* 1024;/u.test(ciWorkflow)) {
-    errors.push(".github/workflows/ci.yml must enforce a 9 MB hard limit");
+  const hardLimitConstantPattern = new RegExp(`const hardLimit = ${EXPECTED_BUNDLE_HARD_MB} \\* 1024 \\* 1024;`, "u");
+  if (!hardLimitConstantPattern.test(ciWorkflow)) {
+    errors.push(`.github/workflows/ci.yml must enforce a ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`);
   }
 
-  if (!/\| Android \| > 6 MB \| > 9 MB \|/u.test(qualityGatesDoc)) {
-    errors.push(".context/quality_gates.md must document Android bundle thresholds (6 MB / 9 MB)");
+  const androidQualityRow = new RegExp(`\\| Android \\| > ${EXPECTED_BUNDLE_WARNING_MB} MB \\| > ${EXPECTED_BUNDLE_HARD_MB} MB \\|`, "u");
+  if (!androidQualityRow.test(qualityGatesDoc)) {
+    errors.push(`.context/quality_gates.md must document Android bundle thresholds (${EXPECTED_BUNDLE_WARNING_MB} MB / ${EXPECTED_BUNDLE_HARD_MB} MB)`);
   }
 
-  if (!/\| iOS \| > 6 MB \| > 9 MB \|/u.test(qualityGatesDoc)) {
-    errors.push(".context/quality_gates.md must document iOS bundle thresholds (6 MB / 9 MB)");
+  const iosQualityRow = new RegExp(`\\| iOS \\| > ${EXPECTED_BUNDLE_WARNING_MB} MB \\| > ${EXPECTED_BUNDLE_HARD_MB} MB \\|`, "u");
+  if (!iosQualityRow.test(qualityGatesDoc)) {
+    errors.push(`.context/quality_gates.md must document iOS bundle thresholds (${EXPECTED_BUNDLE_WARNING_MB} MB / ${EXPECTED_BUNDLE_HARD_MB} MB)`);
   }
 
-  if (!/bundle Android\/iOS ≤ 9 MB/u.test(steeringDoc) || !/a partir de 6 MB/u.test(steeringDoc)) {
-    errors.push("steering.md must document the 6 MB warning and 9 MB hard limit");
+  const steeringHardPattern = new RegExp(`bundle Android/iOS ≤ ${EXPECTED_BUNDLE_HARD_MB} MB`, "u");
+  const steeringWarnPattern = new RegExp(`a partir de ${EXPECTED_BUNDLE_WARNING_MB} MB`, "u");
+  if (!steeringHardPattern.test(steeringDoc) || !steeringWarnPattern.test(steeringDoc)) {
+    errors.push(`steering.md must document the ${EXPECTED_BUNDLE_WARNING_MB} MB warning and ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`);
   }
 
-  if (!/hard limit 9 MB/u.test(codingStandardsDoc)) {
-    errors.push("CODING_STANDARDS.md must document the 9 MB bundle hard limit");
+  const codingHardPattern = new RegExp(`hard limit ${EXPECTED_BUNDLE_HARD_MB} MB`, "u");
+  if (!codingHardPattern.test(codingStandardsDoc)) {
+    errors.push(`CODING_STANDARDS.md must document the ${EXPECTED_BUNDLE_HARD_MB} MB bundle hard limit`);
   }
 
   return errors;

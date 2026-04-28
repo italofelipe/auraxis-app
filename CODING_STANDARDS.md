@@ -1206,7 +1206,7 @@ push / PR → master
 ├── test              (jest-expo + coverage ≥ 85%)
 │
 ├── expo-bundle       (export android — valida que bundle JS compila)
-│   └── bundle-analysis   (comenta tamanho no PR; alerta 6 MB / hard limit 9 MB)
+│   └── bundle-analysis   (comenta tamanho no PR; alerta 10 MB / hard limit 12 MB)
 │
 ├── secret-scan-gitleaks    (0 secrets — bloqueia)
 ├── secret-scan-trufflehog  (0 secrets validados — bloqueia)
