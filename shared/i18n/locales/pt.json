@@ -83,6 +83,33 @@
       "backToLogin": "Voltar para o login"
     }
   },
+  "transactions": {
+    "view": {
+      "list": "Lista",
+      "calendar": "Calendario"
+    },
+    "calendar": {
+      "dayTitle": "Movimentacoes do dia",
+      "empty": "Nenhuma movimentacao neste dia.",
+      "close": "Fechar"
+    },
+    "actions": {
+      "duplicate": "Duplicar",
+      "duplicateDescription": "Cria uma copia com a data de hoje.",
+      "title": "Acoes"
+    },
+    "export": {
+      "title": "Exportar transacoes",
+      "description": "Escolha o formato; geramos o arquivo e abrimos o compartilhamento.",
+      "csv": "CSV",
+      "pdf": "PDF",
+      "submit": "Exportar agora",
+      "submitting": "Gerando arquivo...",
+      "success": "Pronto! Use o compartilhamento para enviar ou salvar.",
+      "errorTitle": "Nao foi possivel exportar",
+      "errorDescription": "Tente novamente em instantes."
+    }
+  },
   "checkout": {
     "success": {
       "title": "Pagamento confirmado!",

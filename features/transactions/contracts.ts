@@ -142,3 +142,18 @@ export interface DueRangeFilters {
   readonly page?: number;
   readonly perPage?: number;
 }
+
+export type TransactionExportFormat = "csv" | "pdf";
+
+export interface TransactionExportFilters {
+  readonly format: TransactionExportFormat;
+  readonly startDate?: string;
+  readonly endDate?: string;
+}
+
+export interface TransactionExportBlob {
+  /** Base64-encoded payload, ready to write to disk on RN. */
+  readonly base64: string;
+  readonly filename: string;
+  readonly contentType: string;
+}

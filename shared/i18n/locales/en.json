@@ -83,6 +83,33 @@
       "backToLogin": "Back to sign in"
     }
   },
+  "transactions": {
+    "view": {
+      "list": "List",
+      "calendar": "Calendar"
+    },
+    "calendar": {
+      "dayTitle": "Transactions for the day",
+      "empty": "Nothing on this day.",
+      "close": "Close"
+    },
+    "actions": {
+      "duplicate": "Duplicate",
+      "duplicateDescription": "Creates a copy dated today.",
+      "title": "Actions"
+    },
+    "export": {
+      "title": "Export transactions",
+      "description": "Pick a format; we generate the file and open share.",
+      "csv": "CSV",
+      "pdf": "PDF",
+      "submit": "Export now",
+      "submitting": "Generating file...",
+      "success": "Ready! Use share to send or save.",
+      "errorTitle": "Could not export",
+      "errorDescription": "Please try again shortly."
+    }
+  },
   "checkout": {
     "success": {
       "title": "Payment confirmed!",
