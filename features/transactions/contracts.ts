@@ -106,3 +106,39 @@ export interface DeletedTransactionRecord extends TransactionRecord {
 export interface DeletedTransactionListResponse {
   readonly transactions: readonly DeletedTransactionRecord[];
 }
+
+/** Single item returned by GET /transactions/due-range. */
+export interface DueTransactionRecord {
+  readonly id: string;
+  readonly title: string;
+  readonly amount: string;
+  readonly type: "income" | "expense";
+  readonly dueDate: string;
+  readonly status: "pending" | "paid" | "overdue" | "postponed" | "cancelled";
+  readonly tagId: string | null;
+  readonly accountId: string | null;
+  readonly creditCardId: string | null;
+  readonly isRecurring: boolean;
+}
+
+export interface DueRangeCounts {
+  readonly total: number;
+  readonly overdue: number;
+  readonly pending: number;
+}
+
+export interface DueRangeResponse {
+  readonly transactions: DueTransactionRecord[];
+  readonly total: number;
+  readonly page: number;
+  readonly perPage: number;
+  readonly counts: DueRangeCounts;
+}
+
+export interface DueRangeFilters {
+  readonly startDate?: string;
+  readonly endDate?: string;
+  readonly orderBy?: "overdue_first" | "date" | "title";
+  readonly page?: number;
+  readonly perPage?: number;
+}

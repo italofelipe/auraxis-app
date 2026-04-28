@@ -91,6 +91,8 @@ import type {
 import type {
   CreateTransactionCommand,
   DeletedTransactionListResponse,
+  DueRangeFilters,
+  DueRangeResponse,
   TransactionCollection,
   TransactionListQuery,
   TransactionRecord,
@@ -411,6 +413,17 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/transactions/summary",
+    authRequired: true,
+  }),
+  transactionsDueRange: defineApiContract<
+    "GET",
+    "/transactions/due-range",
+    never,
+    DueRangeResponse,
+    DueRangeFilters
+  >({
+    method: "GET",
+    path: "/transactions/due-range",
     authRequired: true,
   }),
   goalsList: defineApiContract<"GET", "/goals", never, GoalListResponse>({

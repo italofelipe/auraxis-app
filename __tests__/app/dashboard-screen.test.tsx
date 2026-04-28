@@ -102,6 +102,12 @@ describe("DashboardScreen", () => {
         level: "excellent",
         summary: "Excelente taxa de poupanca!",
       },
+      comparison: {
+        current: null,
+        previous: null,
+        delta: null,
+        percent: null,
+      },
       greetingName: "Italo",
       setSelectedMonth: jest.fn(),
     });
