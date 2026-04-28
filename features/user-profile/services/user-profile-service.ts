@@ -3,6 +3,8 @@ import type { AxiosInstance } from "axios";
 import { unwrapEnvelopeData } from "@/core/http/contracts";
 import { httpClient } from "@/core/http/http-client";
 import type {
+  AccountDeletionResult,
+  DeleteAccountCommand,
   NotificationPreference,
   NotificationPreferenceListResponse,
   SalaryIncreaseSimulation,
@@ -101,6 +103,22 @@ const toNumeric = (value: number | string): number => {
   return Number.isFinite(parsed) ? parsed : 0;
 };
 
+const buildDeleteAccount = (
+  client: AxiosInstance,
+) => async (
+  command: DeleteAccountCommand,
+): Promise<AccountDeletionResult> => {
+  const response = await client.delete(apiContractMap.userAccountDelete.path, {
+    data: { password: command.password },
+  });
+  const payload = unwrapEnvelopeData<{
+    readonly user?: { readonly deleted_at?: string | null };
+    readonly deleted_at?: string | null;
+  }>(response.data);
+  const deletedAt = payload.user?.deleted_at ?? payload.deleted_at ?? null;
+  return { deletedAt };
+};
+
 export const createUserProfileService = (client: AxiosInstance) => {
   return {
     getProfile: async (): Promise<UserProfile> => {
@@ -175,6 +193,7 @@ export const createUserProfileService = (client: AxiosInstance) => {
         preferences: (payload.preferences ?? []).map(mapNotificationPreference),
       };
     },
+    deleteAccount: buildDeleteAccount(client),
   };
 };
 

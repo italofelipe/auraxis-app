@@ -162,6 +162,8 @@ const config = {
     "features/wallet/hooks/use-brapi-queries.ts",
     "features/wallet/hooks/use-wallet-live-quotes.ts",
     "features/wallet/components/ticker-autocomplete.tsx",
+    "features/user-profile/hooks/use-danger-zone-screen-controller.ts",
+    "features/user-profile/screens/danger-zone-screen.tsx",
     "features/tags/validators.ts",
     "features/tags/hooks/use-tags-mutations.ts",
     "features/tags/hooks/use-tags-screen-controller.ts",

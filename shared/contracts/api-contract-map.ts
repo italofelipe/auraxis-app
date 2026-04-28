@@ -101,6 +101,8 @@ import type {
   UpdateTransactionCommand,
 } from "@/features/transactions/contracts";
 import type {
+  AccountDeletionResult,
+  DeleteAccountCommand,
   NotificationPreferenceListResponse,
   SalaryIncreaseSimulation,
   SimulateSalaryIncreaseCommand,
@@ -301,6 +303,16 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/user/notification-preferences",
+    authRequired: true,
+  }),
+  userAccountDelete: defineApiContract<
+    "DELETE",
+    "/user/me",
+    DeleteAccountCommand,
+    AccountDeletionResult
+  >({
+    method: "DELETE",
+    path: "/user/me",
     authRequired: true,
   }),
   userNotificationPreferencesUpdate: defineApiContract<

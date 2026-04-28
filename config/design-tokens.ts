@@ -7,6 +7,7 @@ export const colorPalette = {
   brand600: "#ffab1a",
   white: "#ffffff",
   danger500: "#d64545",
+  danger700: "#a52d2d",
 } as const;
 
 export const typography = {

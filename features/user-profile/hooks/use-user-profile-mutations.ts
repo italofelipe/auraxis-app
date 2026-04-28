@@ -2,6 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { queryKeys } from "@/core/query/query-keys";
 import type {
+  AccountDeletionResult,
+  DeleteAccountCommand,
   UpdateUserProfileCommand,
   UserProfile,
 } from "@/features/user-profile/contracts";
@@ -16,5 +18,11 @@ export const useUpdateUserProfileMutation = () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.userProfile.root });
       await queryClient.invalidateQueries({ queryKey: queryKeys.bootstrap.root });
     },
+  });
+};
+
+export const useDeleteAccountMutation = () => {
+  return useMutation<AccountDeletionResult, Error, DeleteAccountCommand>({
+    mutationFn: (command) => userProfileService.deleteAccount(command),
   });
 };

@@ -65,3 +65,11 @@ export interface NotificationPreferenceListResponse {
 export interface UpdateNotificationPreferencesCommand {
   readonly preferences: readonly NotificationPreference[];
 }
+
+export interface DeleteAccountCommand {
+  readonly password: string;
+}
+
+export interface AccountDeletionResult {
+  readonly deletedAt: string | null;
+}

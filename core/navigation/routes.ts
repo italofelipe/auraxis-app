@@ -39,6 +39,7 @@ export const appRoutes = {
     transactionsTrash: "/lixeira-transacoes",
     salarySimulator: "/simulador-salario",
     notificationPreferences: "/preferencias-notificacao",
+    dangerZone: "/perfil-zona-de-perigo",
   },
 } as const;
 
