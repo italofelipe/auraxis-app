@@ -5,6 +5,7 @@ import {
   useDeleteWalletEntryMutation,
   useUpdateWalletEntryMutation,
 } from "@/features/wallet/hooks/use-wallet-mutations";
+import { useWalletLiveQuotes } from "@/features/wallet/hooks/use-wallet-live-quotes";
 import { useWalletEntriesQuery } from "@/features/wallet/hooks/use-wallet-query";
 import { useWalletScreenController } from "@/features/wallet/hooks/use-wallet-screen-controller";
 
@@ -16,11 +17,24 @@ jest.mock("@/features/wallet/hooks/use-wallet-mutations", () => ({
   useUpdateWalletEntryMutation: jest.fn(),
   useDeleteWalletEntryMutation: jest.fn(),
 }));
+jest.mock("@/features/wallet/hooks/use-wallet-live-quotes", () => ({
+  useWalletLiveQuotes: jest.fn(),
+}));
 
 const mockedUseQuery = jest.mocked(useWalletEntriesQuery);
 const mockedUseCreate = jest.mocked(useCreateWalletEntryMutation);
 const mockedUseUpdate = jest.mocked(useUpdateWalletEntryMutation);
 const mockedUseDelete = jest.mocked(useDeleteWalletEntryMutation);
+const mockedUseLiveQuotes = jest.mocked(useWalletLiveQuotes);
+
+const buildLiveQuotesStub = (overrides: Partial<ReturnType<typeof useWalletLiveQuotes>> = {}) => ({
+  byTicker: new Map(),
+  liveTotal: null,
+  hasAnyError: false,
+  isFetching: false,
+  refetch: jest.fn().mockResolvedValue(undefined),
+  ...overrides,
+});
 
 const buildMutationStub = () => ({
   mutateAsync: jest.fn().mockResolvedValue(undefined),
@@ -55,6 +69,7 @@ beforeEach(() => {
   mockedUseCreate.mockReturnValue(createStub as never);
   mockedUseUpdate.mockReturnValue(updateStub as never);
   mockedUseDelete.mockReturnValue(deleteStub as never);
+  mockedUseLiveQuotes.mockReturnValue(buildLiveQuotesStub() as never);
 });
 
 describe("useWalletScreenController data projection", () => {
@@ -79,6 +94,65 @@ describe("useWalletScreenController data projection", () => {
     } as never);
     const { result } = renderHook(() => useWalletScreenController());
     expect(result.current.assets[0].allocation).toBe(0);
+  });
+
+  it("usa cotacoes live no liveTotal e expoe metricas por ativo", () => {
+    mockedUseQuery.mockReturnValue({
+      data: { items: [buildEntry({ ticker: "PETR4", quantity: 10, value: 380 })], total: 380 },
+      refetch: jest.fn().mockResolvedValue(undefined),
+    } as never);
+    const refetch = jest.fn().mockResolvedValue(undefined);
+    mockedUseLiveQuotes.mockReturnValue(
+      buildLiveQuotesStub({
+        liveTotal: 410,
+        byTicker: new Map([
+          [
+            "PETR4",
+            {
+              ticker: "PETR4",
+              quote: {
+                ticker: "PETR4",
+                shortName: "PETR",
+                price: 41,
+                change: 1,
+                changePercent: 2.5,
+                currency: "BRL",
+                logo: null,
+              },
+              isLoading: false,
+              isError: false,
+            },
+          ],
+        ]),
+        refetch,
+      }) as never,
+    );
+
+    const { result } = renderHook(() => useWalletScreenController());
+
+    expect(result.current.liveTotal).toBe(410);
+    expect(result.current.assets[0].liveAmount).toBe(410);
+    expect(result.current.assets[0].liveChangePercent).toBe(2.5);
+  });
+
+  it("handleRefreshQuotes encadeia refetch da carteira e das cotacoes", async () => {
+    const walletRefetch = jest.fn().mockResolvedValue(undefined);
+    const quotesRefetch = jest.fn().mockResolvedValue(undefined);
+    mockedUseQuery.mockReturnValue({
+      data: { items: [], total: 0 },
+      refetch: walletRefetch,
+    } as never);
+    mockedUseLiveQuotes.mockReturnValue(
+      buildLiveQuotesStub({ refetch: quotesRefetch }) as never,
+    );
+
+    const { result } = renderHook(() => useWalletScreenController());
+    await act(async () => {
+      await result.current.handleRefreshQuotes();
+    });
+
+    expect(walletRefetch).toHaveBeenCalledTimes(1);
+    expect(quotesRefetch).toHaveBeenCalledTimes(1);
   });
 });
 
