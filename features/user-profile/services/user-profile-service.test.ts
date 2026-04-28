@@ -3,13 +3,14 @@ import type { AxiosInstance } from "axios";
 import { createUserProfileService } from "@/features/user-profile/services/user-profile-service";
 
 const createClient = (): jest.Mocked<
-  Pick<AxiosInstance, "get" | "put" | "post" | "patch">
+  Pick<AxiosInstance, "get" | "put" | "post" | "patch" | "delete">
 > => {
   return {
     get: jest.fn(),
     put: jest.fn(),
     post: jest.fn(),
     patch: jest.fn(),
+    delete: jest.fn(),
   };
 };
 
@@ -235,5 +236,48 @@ describe("userProfileService - notification preferences", () => {
       preferences: [],
     });
     expect(result.preferences).toEqual([]);
+  });
+
+  it("deleta a conta enviando senha como body do DELETE /user/me", async () => {
+    const client = createClient();
+    client.delete.mockResolvedValue({
+      data: {
+        data: {
+          user: { deleted_at: "2026-04-28T18:00:00Z" },
+        },
+      },
+    });
+
+    const service = createUserProfileService(client as unknown as AxiosInstance);
+    const result = await service.deleteAccount({ password: "S3nhaForte!" });
+
+    expect(client.delete).toHaveBeenCalledWith("/user/me", {
+      data: { password: "S3nhaForte!" },
+    });
+    expect(result).toEqual({ deletedAt: "2026-04-28T18:00:00Z" });
+  });
+
+  it("deleteAccount lê deleted_at do envelope plano quando user nao vem", async () => {
+    const client = createClient();
+    client.delete.mockResolvedValue({
+      data: {
+        data: { deleted_at: "2026-04-28T19:00:00Z" },
+      },
+    });
+
+    const service = createUserProfileService(client as unknown as AxiosInstance);
+    const result = await service.deleteAccount({ password: "x" });
+
+    expect(result.deletedAt).toBe("2026-04-28T19:00:00Z");
+  });
+
+  it("deleteAccount retorna deletedAt null quando backend nao envia", async () => {
+    const client = createClient();
+    client.delete.mockResolvedValue({ data: { data: {} } });
+
+    const service = createUserProfileService(client as unknown as AxiosInstance);
+    const result = await service.deleteAccount({ password: "x" });
+
+    expect(result.deletedAt).toBeNull();
   });
 });
