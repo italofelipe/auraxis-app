@@ -144,6 +144,8 @@ import type {
   InstallmentVsCashHistoryQuery,
   InstallmentVsCashHistoryResponseDto,
   InstallmentVsCashSaveResponseDto,
+  SimulationListQuery,
+  SimulationListResponse,
 } from "@/features/tools/contracts";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -876,6 +878,27 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/simulations",
+    authRequired: true,
+  }),
+  simulationsList: defineApiContract<
+    "GET",
+    "/simulations",
+    never,
+    SimulationListResponse,
+    SimulationListQuery
+  >({
+    method: "GET",
+    path: "/simulations",
+    authRequired: true,
+  }),
+  simulationDelete: defineApiContract<
+    "DELETE",
+    "/simulations/{simulation_id}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/simulations/{simulation_id}",
     authRequired: true,
   }),
   installmentVsCashGoalBridge: defineApiContract<
