@@ -4,10 +4,14 @@ import { unwrapEnvelopeData } from "@/core/http/contracts";
 import { httpClient } from "@/core/http/http-client";
 import type {
   DeleteSimulationCommand,
+  SaveSimulationCommand,
+  SaveSimulationRequestBody,
   SimulationListPagination,
   SimulationListQuery,
   SimulationListResponse,
+  SimulationMetadata,
   SimulationRecord,
+  SimulationRecordResponseEnvelope,
 } from "@/features/tools/contracts";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
 import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-path";
@@ -18,6 +22,7 @@ interface SimulationRecordPayload {
   readonly rule_version: string;
   readonly inputs?: Record<string, unknown>;
   readonly result?: Record<string, unknown>;
+  readonly metadata?: SimulationMetadata | null;
   readonly saved?: boolean;
   readonly goal_id?: string | null;
   readonly created_at: string;
@@ -42,9 +47,20 @@ const mapRecord = (raw: SimulationRecordPayload): SimulationRecord => ({
   ruleVersion: raw.rule_version,
   inputs: raw.inputs ?? {},
   result: raw.result ?? {},
+  metadata: raw.metadata ?? null,
   saved: raw.saved ?? false,
   goalId: raw.goal_id ?? null,
   createdAt: raw.created_at,
+});
+
+const buildSaveBody = (
+  command: SaveSimulationCommand,
+): SaveSimulationRequestBody => ({
+  tool_id: command.toolId,
+  rule_version: command.ruleVersion,
+  inputs: command.inputs,
+  result: command.result,
+  ...(command.metadata !== undefined && { metadata: command.metadata }),
 });
 
 const pickNumber = (
@@ -106,10 +122,26 @@ const buildDeleteSimulation = (
   );
 };
 
+const buildSaveSimulation = (
+  client: AxiosInstance,
+) => async (command: SaveSimulationCommand): Promise<SimulationRecord> => {
+  const response = await client.post(
+    apiContractMap.simulationsSave.path,
+    buildSaveBody(command),
+  );
+  const payload = unwrapEnvelopeData<SimulationRecordResponseEnvelope>(
+    response.data as SimulationRecordResponseEnvelope,
+  );
+  return mapRecord(payload.simulation as SimulationRecordPayload);
+};
+
 export interface SimulationsService {
   readonly listSimulations: (
     query?: SimulationListQuery,
   ) => Promise<SimulationListResponse>;
+  readonly saveSimulation: (
+    command: SaveSimulationCommand,
+  ) => Promise<SimulationRecord>;
   readonly deleteSimulation: (command: DeleteSimulationCommand) => Promise<void>;
 }
 
@@ -117,6 +149,7 @@ export const createSimulationsService = (
   client: AxiosInstance,
 ): SimulationsService => ({
   listSimulations: buildListSimulations(client),
+  saveSimulation: buildSaveSimulation(client),
   deleteSimulation: buildDeleteSimulation(client),
 });
 
