@@ -2,8 +2,11 @@ import type { AxiosInstance } from "axios";
 
 import { createSimulationsService } from "@/features/tools/services/simulations-service";
 
-const createClient = (): jest.Mocked<Pick<AxiosInstance, "get" | "delete">> => ({
+const createClient = (): jest.Mocked<
+  Pick<AxiosInstance, "get" | "post" | "delete">
+> => ({
   get: jest.fn(),
+  post: jest.fn(),
   delete: jest.fn(),
 });
 
@@ -113,5 +116,110 @@ describe("simulationsService deleteSimulation", () => {
     await service.deleteSimulation({ simulationId: "sim-99" });
 
     expect(client.delete).toHaveBeenCalledWith("/simulations/sim-99");
+  });
+});
+
+describe("simulationsService saveSimulation", () => {
+  const envelope = (record: Record<string, unknown>): { data: unknown } => ({
+    data: { data: { simulation: record } },
+  });
+
+  it("envia o body canônico em snake_case e desempacota o envelope v2", async () => {
+    const client = createClient();
+    client.post.mockResolvedValue(
+      envelope({
+        id: "sim-new",
+        user_id: "user-1",
+        tool_id: "compound-interest",
+        rule_version: "2026.04",
+        inputs: { initial: 1000 },
+        result: { final: 1500 },
+        metadata: { label: "Cenário 1" },
+        saved: true,
+        created_at: "2026-04-29T00:00:00Z",
+      }),
+    );
+
+    const service = createSimulationsService(client as unknown as AxiosInstance);
+    const record = await service.saveSimulation({
+      toolId: "compound-interest",
+      ruleVersion: "2026.04",
+      inputs: { initial: 1000 },
+      result: { final: 1500 },
+      metadata: { label: "Cenário 1" },
+    });
+
+    expect(client.post).toHaveBeenCalledWith("/simulations", {
+      tool_id: "compound-interest",
+      rule_version: "2026.04",
+      inputs: { initial: 1000 },
+      result: { final: 1500 },
+      metadata: { label: "Cenário 1" },
+    });
+    expect(record).toEqual({
+      id: "sim-new",
+      toolId: "compound-interest",
+      ruleVersion: "2026.04",
+      inputs: { initial: 1000 },
+      result: { final: 1500 },
+      metadata: { label: "Cenário 1" },
+      saved: true,
+      goalId: null,
+      createdAt: "2026-04-29T00:00:00Z",
+    });
+  });
+
+  it("omite metadata do body quando não informado", async () => {
+    const client = createClient();
+    client.post.mockResolvedValue(
+      envelope({
+        id: "sim-2",
+        user_id: "user-1",
+        tool_id: "cdb-lci-lca",
+        rule_version: "2026.04",
+        inputs: {},
+        result: {},
+        metadata: null,
+        saved: true,
+        created_at: "2026-04-29T00:00:00Z",
+      }),
+    );
+
+    const service = createSimulationsService(client as unknown as AxiosInstance);
+    await service.saveSimulation({
+      toolId: "cdb-lci-lca",
+      ruleVersion: "2026.04",
+      inputs: {},
+      result: {},
+    });
+
+    const body = client.post.mock.calls[0]?.[1] as Record<string, unknown>;
+    expect(body).not.toHaveProperty("metadata");
+  });
+
+  it("normaliza metadata=null no record retornado", async () => {
+    const client = createClient();
+    client.post.mockResolvedValue(
+      envelope({
+        id: "sim-3",
+        user_id: "user-1",
+        tool_id: "compound-interest",
+        rule_version: "2026.04",
+        inputs: {},
+        result: {},
+        saved: true,
+        created_at: "2026-04-29T00:00:00Z",
+      }),
+    );
+
+    const service = createSimulationsService(client as unknown as AxiosInstance);
+    const record = await service.saveSimulation({
+      toolId: "compound-interest",
+      ruleVersion: "2026.04",
+      inputs: {},
+      result: {},
+    });
+
+    expect(record.metadata).toBeNull();
   });
 });
