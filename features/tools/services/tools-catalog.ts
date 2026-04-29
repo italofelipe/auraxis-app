@@ -22,8 +22,9 @@ const FUNCTIONAL_ROUTES: ReadonlyMap<string, string> = new Map([
   ["goal-simulator", "/simulador-meta"],
 ]);
 
-const PREMIUM_TOOLS: ReadonlySet<string> = new Set<string>();
-
+// No tool is premium-gated yet. Premium gating returns when the first
+// paywalled tool ships — the contract's optional `requiresPremium`
+// field stays open for it.
 const buildTool = (
   category: ToolCategory,
   seed: ToolSeed,
@@ -38,7 +39,6 @@ const buildTool = (
     category,
     enabled: route !== undefined,
     ...(route !== undefined && { route }),
-    ...(PREMIUM_TOOLS.has(id) && { requiresPremium: true }),
   };
 };
 
