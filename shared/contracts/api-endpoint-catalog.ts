@@ -101,6 +101,7 @@ export const apiEndpointCatalog = {
   ],
   simulations: [
     "GET /simulations",
+    "DELETE /simulations/{simulation_id}",
     "POST /simulations/installment-vs-cash",
     "POST /simulations/installment-vs-cash/calculate",
     "POST /simulations/{simulation_id}/goal",

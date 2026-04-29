@@ -75,6 +75,13 @@ export const queryKeys = {
     catalog: () => ["tools", "catalog"] as const,
     simulationHistory: (toolId: string) => ["simulations", toolId] as const,
   },
+  simulations: {
+    root: ["simulations"] as const,
+    list: (page: number, perPage: number) =>
+      ["simulations", "list", page, perPage] as const,
+    detail: (simulationId: string) =>
+      ["simulations", "detail", simulationId] as const,
+  },
   tags: {
     root: ["tags"] as const,
     list: () => ["tags", "list"] as const,

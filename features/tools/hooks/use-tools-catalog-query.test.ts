@@ -16,9 +16,11 @@ jest.mock("@/features/tools/services/tools-service", () => ({
   toolsPlaceholder: {
     tools: [
       {
-        id: "raise-calculator",
+        id: "salary-raise",
+        slug: "pedir-aumento",
         name: "Pedir aumento",
         description: "Placeholder",
+        category: "salary-and-work",
         enabled: false,
       },
     ],
@@ -29,23 +31,30 @@ jest.mock("@/features/tools/services/tools-service", () => ({
 describe("useToolsCatalogQuery", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseQuery.mockImplementation((options: { readonly queryFn: () => Promise<ToolsCatalog> }) => options);
+    mockUseQuery.mockImplementation(
+      (options: { readonly queryFn: () => Promise<ToolsCatalog> }) => options,
+    );
   });
 
   it("retorna catalogo remoto quando backend responde com sucesso", async () => {
     const remoteCatalog: ToolsCatalog = {
       tools: [
         {
-          id: "raise-calculator",
+          id: "salary-raise",
+          slug: "pedir-aumento",
           name: "Pedir aumento",
           description: "Remoto",
+          category: "salary-and-work",
           enabled: true,
+          route: "/pedir-aumento",
         },
       ],
     };
     mockGetCatalog.mockResolvedValue(remoteCatalog);
 
-    const query = useToolsCatalogQuery() as unknown as { readonly queryFn: () => Promise<ToolsCatalog> };
+    const query = useToolsCatalogQuery() as unknown as {
+      readonly queryFn: () => Promise<ToolsCatalog>;
+    };
     const result = await query.queryFn();
 
     expect(result).toEqual(remoteCatalog);
@@ -56,9 +65,11 @@ describe("useToolsCatalogQuery", () => {
     const flaggedPlaceholder: ToolsCatalog = {
       tools: [
         {
-          id: "raise-calculator",
+          id: "salary-raise",
+          slug: "pedir-aumento",
           name: "Pedir aumento",
           description: "Placeholder",
+          category: "salary-and-work",
           enabled: true,
         },
       ],
@@ -66,7 +77,9 @@ describe("useToolsCatalogQuery", () => {
     mockGetCatalog.mockRejectedValue(new Error("backend down"));
     mockApplyToolsFlags.mockResolvedValue(flaggedPlaceholder);
 
-    const query = useToolsCatalogQuery() as unknown as { readonly queryFn: () => Promise<ToolsCatalog> };
+    const query = useToolsCatalogQuery() as unknown as {
+      readonly queryFn: () => Promise<ToolsCatalog>;
+    };
     const result = await query.queryFn();
 
     expect(mockApplyToolsFlags).toHaveBeenCalledTimes(1);

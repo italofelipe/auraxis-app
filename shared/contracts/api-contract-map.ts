@@ -141,9 +141,9 @@ import type {
   CreatePlannedExpenseFromInstallmentVsCashResponseDto,
   InstallmentVsCashCalculationRequestDto,
   InstallmentVsCashCalculationResponseDto,
-  InstallmentVsCashHistoryQuery,
-  InstallmentVsCashHistoryResponseDto,
   InstallmentVsCashSaveResponseDto,
+  SimulationListQuery,
+  SimulationListResponse,
 } from "@/features/tools/contracts";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -867,15 +867,25 @@ export const apiContractMap = {
     path: "/simulations/installment-vs-cash",
     authRequired: true,
   }),
-  installmentVsCashHistory: defineApiContract<
+  simulationsList: defineApiContract<
     "GET",
     "/simulations",
     never,
-    InstallmentVsCashHistoryResponseDto,
-    InstallmentVsCashHistoryQuery
+    SimulationListResponse,
+    SimulationListQuery
   >({
     method: "GET",
     path: "/simulations",
+    authRequired: true,
+  }),
+  simulationDelete: defineApiContract<
+    "DELETE",
+    "/simulations/{simulation_id}",
+    never,
+    void
+  >({
+    method: "DELETE",
+    path: "/simulations/{simulation_id}",
     authRequired: true,
   }),
   installmentVsCashGoalBridge: defineApiContract<

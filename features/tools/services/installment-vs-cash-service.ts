@@ -262,7 +262,7 @@ export const createInstallmentVsCashService = (
       perPage = 10,
     ): Promise<readonly InstallmentVsCashSavedSimulation[]> => {
       const response = await client.get<InstallmentVsCashHistoryResponseDto>(
-        apiContractMap.installmentVsCashHistory.path,
+        apiContractMap.simulationsList.path,
         {
           params: {
             page,

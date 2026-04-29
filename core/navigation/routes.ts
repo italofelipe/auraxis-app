@@ -40,6 +40,7 @@ export const appRoutes = {
     salarySimulator: "/simulador-salario",
     notificationPreferences: "/preferencias-notificacao",
     dangerZone: "/perfil-zona-de-perigo",
+    simulationsHistory: "/simulacoes",
   },
 } as const;
 
