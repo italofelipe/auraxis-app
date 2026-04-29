@@ -141,8 +141,6 @@ import type {
   CreatePlannedExpenseFromInstallmentVsCashResponseDto,
   InstallmentVsCashCalculationRequestDto,
   InstallmentVsCashCalculationResponseDto,
-  InstallmentVsCashHistoryQuery,
-  InstallmentVsCashHistoryResponseDto,
   InstallmentVsCashSaveResponseDto,
   SimulationListQuery,
   SimulationListResponse,
@@ -867,17 +865,6 @@ export const apiContractMap = {
   >({
     method: "POST",
     path: "/simulations/installment-vs-cash",
-    authRequired: true,
-  }),
-  installmentVsCashHistory: defineApiContract<
-    "GET",
-    "/simulations",
-    never,
-    InstallmentVsCashHistoryResponseDto,
-    InstallmentVsCashHistoryQuery
-  >({
-    method: "GET",
-    path: "/simulations",
     authRequired: true,
   }),
   simulationsList: defineApiContract<
