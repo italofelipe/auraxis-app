@@ -20,6 +20,7 @@ const buildSim = (overrides: Partial<SimulationRecord> = {}): SimulationRecord =
   ruleVersion: overrides.ruleVersion ?? "v1",
   inputs: overrides.inputs ?? {},
   result: overrides.result ?? {},
+  metadata: overrides.metadata ?? null,
   saved: overrides.saved ?? true,
   goalId: overrides.goalId ?? null,
   createdAt: overrides.createdAt ?? "2026-04-28T12:00:00Z",
