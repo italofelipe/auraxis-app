@@ -115,9 +115,10 @@ export const calculateCdbLciLca = (inputs: CdbLciLcaInputs): CdbLciLcaResult => 
   const cdb = computeProduct("cdb", inputs, annualRate);
   const lci = computeProduct("lci", inputs, annualRate);
   const lca = computeProduct("lca", inputs, annualRate);
-  const products: CdbLciLcaProductResult[] = [cdb, lci, lca];
-  const best = products.reduce((acc, candidate) =>
-    candidate.netYield > acc.netYield ? candidate : acc,
+  const products: readonly CdbLciLcaProductResult[] = [cdb, lci, lca];
+  const best = products.reduce<CdbLciLcaProductResult>(
+    (acc, candidate) => (candidate.netYield > acc.netYield ? candidate : acc),
+    cdb,
   );
   return { cdb, lci, lca, bestProduct: best.product };
 };
