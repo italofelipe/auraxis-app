@@ -51,6 +51,14 @@ export const appRoutes = {
   },
 } as const;
 
+/**
+ * Builds the dynamic per-goal scenario sandbox route for a given id.
+ * @param goalId Goal id from the goals list.
+ * @returns Expo Router-compatible path under /metas.
+ */
+export const buildGoalScenarioPath = (goalId: string): string =>
+  `/metas/${goalId}/simular`;
+
 export type PublicAppRoute =
   (typeof appRoutes.public)[keyof typeof appRoutes.public];
 export type PrivateAppRoute =
