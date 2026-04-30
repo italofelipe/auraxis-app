@@ -48,7 +48,7 @@ describe("getSimulationTitle", () => {
   });
 });
 
-describe("getSimulationSummary", () => {
+describe("getSimulationSummary — investimentos", () => {
   it("formata o montante final do compound-interest em BRL", () => {
     const summary = getSimulationSummary(
       baseRecord({
@@ -105,6 +105,9 @@ describe("getSimulationSummary", () => {
     ).toBeNull();
   });
 
+});
+
+describe("getSimulationSummary — dia a dia", () => {
   it("emergency-fund formata meta + meses restantes", () => {
     const summary = getSimulationSummary(
       baseRecord({
@@ -188,6 +191,191 @@ describe("getSimulationSummary", () => {
       getSimulationSummary(
         baseRecord({ toolId: "currency-converter", result: {} }),
       ),
+    ).toBeNull();
+  });
+
+});
+
+describe("getSimulationSummary — salário e trabalho", () => {
+  it("fgts-balance formata saldo + saque", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "fgts-balance",
+        result: { projectedBalance: 24500, withdrawableAmount: 35000 },
+      }),
+    );
+    expect(summary).toContain("Saldo");
+    expect(summary).toContain("saque");
+  });
+
+  it("fgts-balance mostra só saldo quando não pode sacar", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "fgts-balance",
+        result: { projectedBalance: 8000 },
+      }),
+    );
+    expect(summary).toContain("Saldo");
+  });
+
+  it("fgts-balance sem campos cai para fallback", () => {
+    expect(
+      getSimulationSummary(
+        baseRecord({ toolId: "fgts-balance", result: {} }),
+      ),
+    ).toBeNull();
+  });
+
+});
+
+describe("getSimulationSummary — investimentos extras", () => {
+  it("treasury formata líquido + rentabilidade anualizada", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "treasury",
+        result: { netAmount: 12340, annualizedNetReturn: 0.108 },
+      }),
+    );
+    expect(summary).toContain("Líquido");
+    expect(summary).toContain("10.80%");
+  });
+
+  it("treasury sem campos cai para fallback", () => {
+    expect(getSimulationSummary(baseRecord({ toolId: "treasury", result: {} }))).toBeNull();
+  });
+
+  it("fii formata DY + renda mensal", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "fii",
+        result: { dividendYield: 9.5, monthlyIncome: 800 },
+      }),
+    );
+    expect(summary).toContain("DY 9.50%");
+    expect(summary).toContain("/mês");
+  });
+
+  it("fii formata só DY quando não há cotas", () => {
+    const summary = getSimulationSummary(
+      baseRecord({ toolId: "fii", result: { dividendYield: 7.2, monthlyIncome: null } }),
+    );
+    expect(summary).toContain("DY 7.20%");
+  });
+
+  it("fii sem DY cai para fallback", () => {
+    expect(getSimulationSummary(baseRecord({ toolId: "fii", result: {} }))).toBeNull();
+  });
+
+});
+
+describe("getSimulationSummary — dívidas e imóvel", () => {
+  it("cet-calculator formata CET anual + total pago", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "cet-calculator",
+        result: { cetAnnualPct: 36.5, totalPaid: 14500 },
+      }),
+    );
+    expect(summary).toContain("CET 36.50%");
+  });
+
+  it("cet sem campos cai para fallback", () => {
+    expect(
+      getSimulationSummary(baseRecord({ toolId: "cet-calculator", result: {} })),
+    ).toBeNull();
+  });
+
+  it("mortgage formata valor financiado + 1ª SAC", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "mortgage",
+        result: { loanAmount: 400000, sac: { firstPayment: 4500 } },
+      }),
+    );
+    expect(summary).toContain("financiado");
+    expect(summary).toContain("1ª SAC");
+  });
+
+  it("mortgage sem sac cai para fallback", () => {
+    expect(
+      getSimulationSummary(baseRecord({ toolId: "mortgage", result: { loanAmount: 1000 } })),
+    ).toBeNull();
+  });
+
+  it("debt-payoff exibe total + estratégia vencedora", () => {
+    const snowball = getSimulationSummary(
+      baseRecord({
+        toolId: "debt-payoff",
+        result: { totalDebt: 50000, bestStrategy: "snowball" },
+      }),
+    );
+    const avalanche = getSimulationSummary(
+      baseRecord({
+        toolId: "debt-payoff",
+        result: { totalDebt: 50000, bestStrategy: "avalanche" },
+      }),
+    );
+    expect(snowball).toContain("bola de neve");
+    expect(avalanche).toContain("avalanche");
+  });
+
+  it("debt-payoff sem campos cai para fallback", () => {
+    expect(getSimulationSummary(baseRecord({ toolId: "debt-payoff", result: {} }))).toBeNull();
+  });
+
+  it("rent-vs-buy mostra vereditto + break-even", () => {
+    const buy = getSimulationSummary(
+      baseRecord({
+        toolId: "rent-vs-buy",
+        result: { buyIsBetter: true, breakEvenYear: 12 },
+      }),
+    );
+    const rent = getSimulationSummary(
+      baseRecord({
+        toolId: "rent-vs-buy",
+        result: { buyIsBetter: false, breakEvenYear: null },
+      }),
+    );
+    expect(buy).toContain("comprar vence");
+    expect(buy).toContain("12a");
+    expect(rent).toContain("alugar vence");
+  });
+
+  it("rent-vs-buy sem buyIsBetter cai para fallback", () => {
+    expect(getSimulationSummary(baseRecord({ toolId: "rent-vs-buy", result: {} }))).toBeNull();
+  });
+
+});
+
+describe("getSimulationSummary — convivência e estilo de vida", () => {
+  it("split-bill mostra total + valor por pessoa", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "split-bill",
+        result: { totalWithFees: 320, perPersonEqual: 80 },
+      }),
+    );
+    expect(summary).toContain("/pessoa");
+  });
+
+  it("split-bill sem campos cai para fallback", () => {
+    expect(getSimulationSummary(baseRecord({ toolId: "split-bill", result: {} }))).toBeNull();
+  });
+
+  it("cost-of-lifestyle formata custo mensal + custo de oportunidade", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "cost-of-lifestyle",
+        result: { totalMonthlyCost: 850, totalOpportunityCost: 250000 },
+      }),
+    );
+    expect(summary).toContain("/mês");
+    expect(summary).toContain("custo");
+  });
+
+  it("cost-of-lifestyle sem campos cai para fallback", () => {
+    expect(
+      getSimulationSummary(baseRecord({ toolId: "cost-of-lifestyle", result: {} })),
     ).toBeNull();
   });
 });

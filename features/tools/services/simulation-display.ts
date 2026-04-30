@@ -19,6 +19,15 @@ const TOOL_LABELS: Readonly<Record<string, string>> = {
   "emergency-fund": "Reserva de emergência",
   "fifty-thirty-twenty": "Orçamento 50-30-20",
   "currency-converter": "Conversor de moedas",
+  "fgts-balance": "FGTS",
+  treasury: "Tesouro Direto",
+  fii: "FII",
+  "cet-calculator": "CET",
+  mortgage: "Financiamento imobiliário",
+  "debt-payoff": "Quitação de dívidas",
+  "rent-vs-buy": "Alugar vs comprar",
+  "split-bill": "Dividir conta",
+  "cost-of-lifestyle": "Custo do estilo de vida",
 };
 
 const formatBrl = (value: number): string =>
@@ -98,12 +107,113 @@ const summarizeCurrencyConverter = (result: ResultBag): string | null => {
   return `${from} → ${to} · ${amount}`;
 };
 
+const summarizeFgts = (result: ResultBag): string | null => {
+  const balance = result["projectedBalance"];
+  const withdrawable = result["withdrawableAmount"];
+  if (typeof balance === "number") {
+    if (typeof withdrawable === "number") {
+      return `Saldo ${formatBrl(balance)} · saque ${formatBrl(withdrawable)}`;
+    }
+    return `Saldo ${formatBrl(balance)}`;
+  }
+  return null;
+};
+
+const summarizeTreasury = (result: ResultBag): string | null => {
+  const net = result["netAmount"];
+  const annualized = result["annualizedNetReturn"];
+  if (typeof net === "number" && typeof annualized === "number") {
+    return `Líquido ${formatBrl(net)} · ${(annualized * 100).toFixed(2)}% a.a.`;
+  }
+  return null;
+};
+
+const summarizeFii = (result: ResultBag): string | null => {
+  const dy = result["dividendYield"];
+  const monthly = result["monthlyIncome"];
+  if (typeof dy !== "number") {
+    return null;
+  }
+  if (typeof monthly === "number") {
+    return `DY ${dy.toFixed(2)}% · ${formatBrl(monthly)}/mês`;
+  }
+  return `DY ${dy.toFixed(2)}%`;
+};
+
+const summarizeCet = (result: ResultBag): string | null => {
+  const cetAnnual = result["cetAnnualPct"];
+  const totalPaid = result["totalPaid"];
+  if (typeof cetAnnual === "number" && typeof totalPaid === "number") {
+    return `CET ${cetAnnual.toFixed(2)}% a.a. · ${formatBrl(totalPaid)}`;
+  }
+  return null;
+};
+
+const summarizeMortgage = (result: ResultBag): string | null => {
+  const loan = result["loanAmount"];
+  const sac = result["sac"] as ResultBag | undefined;
+  const sacFirst = sac?.["firstPayment"];
+  if (typeof loan === "number" && typeof sacFirst === "number") {
+    return `${formatBrl(loan)} financiado · 1ª SAC ${formatBrl(sacFirst)}`;
+  }
+  return null;
+};
+
+const summarizeDebtPayoff = (result: ResultBag): string | null => {
+  const total = result["totalDebt"];
+  const best = result["bestStrategy"];
+  if (typeof total === "number" && typeof best === "string") {
+    return `${formatBrl(total)} · ${best === "snowball" ? "bola de neve" : "avalanche"}`;
+  }
+  return null;
+};
+
+const summarizeRentVsBuy = (result: ResultBag): string | null => {
+  const buyIsBetter = result["buyIsBetter"];
+  const breakEven = result["breakEvenYear"];
+  if (typeof buyIsBetter !== "boolean") {
+    return null;
+  }
+  const verdict = buyIsBetter ? "comprar vence" : "alugar vence";
+  if (typeof breakEven === "number") {
+    return `${verdict} · break-even ${breakEven}a`;
+  }
+  return verdict;
+};
+
+const summarizeSplitBill = (result: ResultBag): string | null => {
+  const total = result["totalWithFees"];
+  const perPerson = result["perPersonEqual"];
+  if (typeof total === "number" && typeof perPerson === "number") {
+    return `${formatBrl(total)} · ${formatBrl(perPerson)}/pessoa`;
+  }
+  return null;
+};
+
+const summarizeCostOfLifestyle = (result: ResultBag): string | null => {
+  const monthly = result["totalMonthlyCost"];
+  const opportunity = result["totalOpportunityCost"];
+  if (typeof monthly === "number" && typeof opportunity === "number") {
+    return `${formatBrl(monthly)}/mês · custo ${formatBrl(opportunity)}`;
+  }
+  return null;
+};
+
 const SUMMARIZERS: Readonly<Record<string, (result: ResultBag) => string | null>> = {
   "compound-interest": summarizeCompoundInterest,
   "cdb-lci-lca": summarizeCdbLciLca,
   "emergency-fund": summarizeEmergencyFund,
   "fifty-thirty-twenty": summarizeFiftyThirtyTwenty,
   "currency-converter": summarizeCurrencyConverter,
+  "fgts-balance": summarizeFgts,
+  treasury: summarizeTreasury,
+  fii: summarizeFii,
+  "cet-calculator": summarizeCet,
+  mortgage: summarizeMortgage,
+  "debt-payoff": summarizeDebtPayoff,
+  "rent-vs-buy": summarizeRentVsBuy,
+  "split-bill": summarizeSplitBill,
+  "cost-of-lifestyle": summarizeCostOfLifestyle,
 };
 
 const fallbackSummary = (result: ResultBag): string | null => {
