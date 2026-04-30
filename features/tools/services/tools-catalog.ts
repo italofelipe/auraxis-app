@@ -32,6 +32,17 @@ const FUNCTIONAL_ROUTES: ReadonlyMap<string, string> = new Map([
   ["emergency-fund", "/reserva-emergencia"],
   ["fifty-thirty-twenty", "/orcamento-50-30-20"],
   ["currency-converter", "/conversor-moedas"],
+  ["vacation", "/ferias"],
+  ["fgts-balance", "/fgts"],
+  ["treasury", "/tesouro-direto"],
+  ["fii", "/fii"],
+  ["fire", "/fire"],
+  ["cet-calculator", "/cet"],
+  ["mortgage", "/financiamento-imovel"],
+  ["debt-payoff", "/quitacao-dividas"],
+  ["rent-vs-buy", "/alugar-vs-comprar"],
+  ["split-bill", "/dividir-conta"],
+  ["cost-of-lifestyle", "/custo-estilo-de-vida"],
 ]);
 
 // No tool is premium-gated yet. Premium gating returns when the first
