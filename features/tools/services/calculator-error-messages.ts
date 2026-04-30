@@ -29,6 +29,14 @@ const MESSAGES: Readonly<Record<string, string>> = {
   "errors.daysWorkedInLastMonthInvalid": "Dias trabalhados no último mês deve estar entre 0 e 30.",
   "errors.overtimeAverageNegative": "Média de horas extras não pode ser negativa.",
   "errors.fgtsBalanceNegative": "Saldo do FGTS não pode ser negativo.",
+  // reserva-emergencia
+  "errors.expensesRequired": "Informe seus gastos mensais.",
+  "errors.contributionRequired": "Informe quanto pretende aportar por mês.",
+  // orcamento-50-30-20
+  "errors.incomeRequired": "Informe sua renda líquida mensal.",
+  // conversor-moeda
+  "errors.amountRequired": "Informe um valor maior que zero.",
+  "errors.rateRequired": "Informe a taxa manual ou aguarde a cotação.",
 };
 
 /**
