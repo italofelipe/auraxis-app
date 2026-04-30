@@ -7,7 +7,7 @@ const resolveWebBaseUrl = (): string => {
 
 const WEB_BASE_URL = resolveWebBaseUrl();
 
-export const TERMS_URL = `${WEB_BASE_URL}/termos` as const;
-export const PRIVACY_URL = `${WEB_BASE_URL}/privacidade` as const;
+export const TERMS_URL = `${WEB_BASE_URL}/terms-of-service` as const;
+export const PRIVACY_URL = `${WEB_BASE_URL}/privacy-policy` as const;
 export const PLANS_URL = `${WEB_BASE_URL}/planos` as const;
 export const MANAGE_SUBSCRIPTION_URL = `${WEB_BASE_URL}/conta/assinatura` as const;

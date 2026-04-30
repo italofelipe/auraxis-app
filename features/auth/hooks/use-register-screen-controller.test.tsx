@@ -11,10 +11,11 @@ import {
 } from "@/features/auth/hooks/use-register-screen-controller";
 
 const mockReplace = jest.fn();
+const mockPush = jest.fn();
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({
-    push: jest.fn(),
+    push: mockPush,
     replace: mockReplace,
     back: jest.fn(),
     canGoBack: jest.fn(() => false),
@@ -68,6 +69,7 @@ describe("useRegisterScreenController", () => {
 
   beforeEach(() => {
     mockReplace.mockReset();
+    mockPush.mockReset();
     registerStub = buildMutationStub();
     loginStub = buildMutationStub();
     mockedUseRegisterMutation.mockReturnValue(registerStub as never);
@@ -174,19 +176,17 @@ describe("useRegisterScreenController", () => {
     expect(mockReplace).toHaveBeenCalledWith("/login");
   });
 
-  it("usa openUrl injetado para abrir Termos e Privacidade", async () => {
-    const openUrl = jest.fn().mockResolvedValue(true);
-    const { result } = renderHook(() =>
-      useRegisterScreenController({ openUrl }),
-    );
+  it("navega para os documentos legais in-app ao chamar handleOpenTerms / handleOpenPrivacy", () => {
+    const { result } = renderHook(() => useRegisterScreenController());
 
-    await act(async () => {
-      await result.current.handleOpenTerms();
+    act(() => {
+      result.current.handleOpenTerms();
     });
-    await act(async () => {
-      await result.current.handleOpenPrivacy();
-    });
+    expect(mockPush).toHaveBeenCalledWith("/terms-of-service");
 
-    expect(openUrl).toHaveBeenCalledTimes(2);
+    act(() => {
+      result.current.handleOpenPrivacy();
+    });
+    expect(mockPush).toHaveBeenCalledWith("/privacy-policy");
   });
 });

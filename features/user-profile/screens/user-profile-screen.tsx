@@ -58,8 +58,36 @@ export function UserProfileScreen(): ReactElement {
       <LanguageSection />
       <SecuritySection />
       <LogoutCard controller={controller} />
+      <LegalSection />
       <DangerZoneCta />
     </AppScreen>
+  );
+}
+
+function LegalSection(): ReactElement {
+  const router = useRouter();
+  return (
+    <AppSurfaceCard
+      title="Documentos legais"
+      description="Política de Privacidade e Termos de Uso vigentes."
+    >
+      <YStack gap="$2">
+        <AppButton
+          tone="secondary"
+          onPress={() => router.push(appRoutes.legal.privacyPolicy)}
+          testID="profile-open-privacy-policy"
+        >
+          Política de Privacidade
+        </AppButton>
+        <AppButton
+          tone="secondary"
+          onPress={() => router.push(appRoutes.legal.termsOfService)}
+          testID="profile-open-terms-of-service"
+        >
+          Termos de Uso
+        </AppButton>
+      </YStack>
+    </AppSurfaceCard>
   );
 }
 

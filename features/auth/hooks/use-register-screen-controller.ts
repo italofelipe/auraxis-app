@@ -1,5 +1,3 @@
-import { Linking } from "react-native";
-
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
@@ -15,7 +13,6 @@ import {
   registerSchema,
   type RegisterFormValues,
 } from "@/features/auth/validators";
-import { PRIVACY_URL, TERMS_URL } from "@/shared/config/web-urls";
 import { applyApiFormErrors } from "@/shared/forms/apply-api-form-errors";
 import { useAppForm } from "@/shared/forms/use-app-form";
 
@@ -33,8 +30,8 @@ export interface RegisterScreenController {
   readonly handleSubmit: () => Promise<void>;
   readonly dismissSubmitError: () => void;
   readonly handleBackToLogin: () => void;
-  readonly handleOpenTerms: () => Promise<void>;
-  readonly handleOpenPrivacy: () => Promise<void>;
+  readonly handleOpenTerms: () => void;
+  readonly handleOpenPrivacy: () => void;
 }
 
 /**
@@ -48,9 +45,7 @@ export interface RegisterScreenController {
  *   user cannot bypass the equality refinement by editing `password` last.
  */
 // eslint-disable-next-line max-lines-per-function
-export function useRegisterScreenController(
-  dependencies: { readonly openUrl?: typeof Linking.openURL } = {},
-): RegisterScreenController {
+export function useRegisterScreenController(): RegisterScreenController {
   const router = useRouter();
   const registerMutation = useRegisterMutation();
   const loginMutation = useLoginMutation();
@@ -76,8 +71,6 @@ export function useRegisterScreenController(
     });
     return () => subscription.unsubscribe();
   }, [watch, getFieldState, trigger]);
-
-  const openUrl = dependencies.openUrl ?? Linking.openURL;
 
   const handleCaptchaToken = useCallback((token: string): void => {
     setCaptchaToken(token);
@@ -125,8 +118,12 @@ export function useRegisterScreenController(
     }
   });
 
-  const handleOpenTerms = useCallback(async () => openUrl(TERMS_URL), [openUrl]);
-  const handleOpenPrivacy = useCallback(async () => openUrl(PRIVACY_URL), [openUrl]);
+  const handleOpenTerms = useCallback((): void => {
+    router.push(appRoutes.legal.termsOfService);
+  }, [router]);
+  const handleOpenPrivacy = useCallback((): void => {
+    router.push(appRoutes.legal.privacyPolicy);
+  }, [router]);
 
   return {
     form,
