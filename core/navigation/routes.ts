@@ -7,6 +7,10 @@ type MaterialCommunityIconName =
 
 export const appRoutes = {
   root: "/",
+  legal: {
+    privacyPolicy: "/privacy-policy",
+    termsOfService: "/terms-of-service",
+  },
   public: {
     login: "/login",
     register: "/register",
@@ -48,9 +52,15 @@ export type PublicAppRoute =
   (typeof appRoutes.public)[keyof typeof appRoutes.public];
 export type PrivateAppRoute =
   (typeof appRoutes.private)[keyof typeof appRoutes.private];
-export type AppRoute = typeof appRoutes.root | PublicAppRoute | PrivateAppRoute;
+export type LegalAppRoute =
+  (typeof appRoutes.legal)[keyof typeof appRoutes.legal];
+export type AppRoute =
+  | typeof appRoutes.root
+  | PublicAppRoute
+  | PrivateAppRoute
+  | LegalAppRoute;
 
-export type AppRouteAccess = "root" | "public" | "private";
+export type AppRouteAccess = "root" | "public" | "private" | "legal";
 
 export interface AppRouteDefinition {
   readonly key: string;
@@ -311,6 +321,20 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
   },
+  {
+    key: "privacyPolicy",
+    path: appRoutes.legal.privacyPolicy,
+    access: "legal",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "termsOfService",
+    path: appRoutes.legal.termsOfService,
+    access: "legal",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
 ] as const;
 
 const privateRouteSet = new Set<PrivateAppRoute>(
@@ -325,10 +349,20 @@ const publicRouteSet = new Set<PublicAppRoute>(
     .map((route) => route.path as PublicAppRoute),
 );
 
+const legalRouteSet = new Set<LegalAppRoute>(
+  appRouteRegistry
+    .filter((route) => route.access === "legal")
+    .map((route) => route.path as LegalAppRoute),
+);
+
 export const isPrivateAppRoute = (route: string): route is PrivateAppRoute => {
   return privateRouteSet.has(route as PrivateAppRoute);
 };
 
 export const isPublicAppRoute = (route: string): route is PublicAppRoute => {
   return publicRouteSet.has(route as PublicAppRoute);
+};
+
+export const isLegalAppRoute = (route: string): route is LegalAppRoute => {
+  return legalRouteSet.has(route as LegalAppRoute);
 };

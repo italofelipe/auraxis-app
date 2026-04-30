@@ -1,5 +1,3 @@
-import { Linking } from "react-native";
-
 import { useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
@@ -13,7 +11,6 @@ import {
   loginSchema,
   type LoginFormValues,
 } from "@/features/auth/validators";
-import { PRIVACY_URL, TERMS_URL } from "@/shared/config/web-urls";
 import { useAppForm } from "@/shared/forms/use-app-form";
 
 export interface LoginScreenController {
@@ -37,21 +34,16 @@ export interface LoginScreenController {
   readonly dismissSessionFailureNotice: () => void;
   readonly handleForgotPassword: () => void;
   readonly handleRegister: () => void;
-  readonly handleOpenTerms: () => Promise<void>;
-  readonly handleOpenPrivacy: () => Promise<void>;
+  readonly handleOpenTerms: () => void;
+  readonly handleOpenPrivacy: () => void;
 }
 
 /**
  * Creates the canonical controller for the login screen.
  *
- * @param dependencies Optional side-effect overrides for tests.
  * @returns View-only bindings for the login route.
  */
-export function useLoginScreenController(
-  dependencies: {
-    readonly openUrl?: typeof Linking.openURL;
-  } = {},
-): LoginScreenController {
+export function useLoginScreenController(): LoginScreenController {
   const router = useRouter();
   const loginMutation = useLoginMutation();
   const consumeRedirect = useAuthRedirectStore((state) => state.consume);
@@ -66,7 +58,6 @@ export function useLoginScreenController(
     },
   });
 
-  const openUrl = dependencies.openUrl ?? Linking.openURL;
 
   const handleCaptchaToken = useCallback((token: string): void => {
     setCaptchaToken(token);
@@ -98,8 +89,12 @@ export function useLoginScreenController(
     router.replace(intended ?? appRoutes.private.dashboard);
   });
 
-  const handleOpenTerms = useCallback(async () => openUrl(TERMS_URL), [openUrl]);
-  const handleOpenPrivacy = useCallback(async () => openUrl(PRIVACY_URL), [openUrl]);
+  const handleOpenTerms = useCallback((): void => {
+    router.push(appRoutes.legal.termsOfService);
+  }, [router]);
+  const handleOpenPrivacy = useCallback((): void => {
+    router.push(appRoutes.legal.privacyPolicy);
+  }, [router]);
 
   return {
     form,
