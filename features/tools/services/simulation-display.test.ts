@@ -88,4 +88,106 @@ describe("getSimulationSummary", () => {
   it("retorna null quando não há nada para mostrar", () => {
     expect(getSimulationSummary(baseRecord({ toolId: "x" }))).toBeNull();
   });
+
+  it("compound-interest sem finalAmount cai para fallback", () => {
+    expect(
+      getSimulationSummary(
+        baseRecord({ toolId: "compound-interest", result: {} }),
+      ),
+    ).toBeNull();
+  });
+
+  it("cdb-lci-lca sem bestProduct cai para fallback", () => {
+    expect(
+      getSimulationSummary(
+        baseRecord({ toolId: "cdb-lci-lca", result: { lci: { netAmount: 100 } } }),
+      ),
+    ).toBeNull();
+  });
+
+  it("emergency-fund formata meta + meses restantes", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "emergency-fund",
+        result: { targetAmount: 18000, monthsToTarget: 24 },
+      }),
+    );
+    expect(summary).toContain("Meta");
+    expect(summary).toContain("24 meses");
+  });
+
+  it("emergency-fund sinaliza quando a meta já foi alcançada", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "emergency-fund",
+        result: { targetAmount: 12000, monthsToTarget: 0 },
+      }),
+    );
+    expect(summary).toContain("alcançada");
+  });
+
+  it("emergency-fund sem campos válidos cai para fallback", () => {
+    expect(
+      getSimulationSummary(
+        baseRecord({ toolId: "emergency-fund", result: {} }),
+      ),
+    ).toBeNull();
+  });
+
+  it("fifty-thirty-twenty formata renda + sobra positiva", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "fifty-thirty-twenty",
+        result: { netIncome: 10000, surplus: 1500 },
+      }),
+    );
+    expect(summary).toContain("sobra");
+  });
+
+  it("fifty-thirty-twenty marca déficit quando surplus negativo", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "fifty-thirty-twenty",
+        result: { netIncome: 5000, surplus: -1000 },
+      }),
+    );
+    expect(summary).toContain("déficit");
+  });
+
+  it("fifty-thirty-twenty mostra só renda quando surplus ausente (modo simples)", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "fifty-thirty-twenty",
+        result: { netIncome: 7500 },
+      }),
+    );
+    expect(summary).toContain("Renda");
+  });
+
+  it("fifty-thirty-twenty sem renda cai para fallback", () => {
+    expect(
+      getSimulationSummary(
+        baseRecord({ toolId: "fifty-thirty-twenty", result: {} }),
+      ),
+    ).toBeNull();
+  });
+
+  it("currency-converter formata pares estrangeiros com 4 casas", () => {
+    const summary = getSimulationSummary(
+      baseRecord({
+        toolId: "currency-converter",
+        result: { convertedAmount: 198.0198, fromCurrency: "BRL", toCurrency: "USD" },
+      }),
+    );
+    expect(summary).toContain("BRL → USD");
+    expect(summary).toContain("198");
+  });
+
+  it("currency-converter sem campos cai para fallback", () => {
+    expect(
+      getSimulationSummary(
+        baseRecord({ toolId: "currency-converter", result: {} }),
+      ),
+    ).toBeNull();
+  });
 });

@@ -29,6 +29,9 @@ const FUNCTIONAL_ROUTES: ReadonlyMap<string, string> = new Map([
   ["mei-monthly", "/mei"],
   ["clt-vs-pj", "/clt-vs-pj"],
   ["termination", "/rescisao"],
+  ["emergency-fund", "/reserva-emergencia"],
+  ["fifty-thirty-twenty", "/orcamento-50-30-20"],
+  ["currency-converter", "/conversor-moedas"],
 ]);
 
 // No tool is premium-gated yet. Premium gating returns when the first
@@ -107,7 +110,7 @@ const DAILY_LIFE: readonly ToolSeed[] = [
   ["installment-vs-cash", "parcelado-vs-a-vista", "Parcelado vs à vista", "Vale a pena parcelar ou à vista com desconto?"],
   ["salary-simulator", "simulador-salario", "Simulador de salário (em /perfil)", "Reajuste salarial considerando inflação e ganho real."],
   ["goal-simulator", "simulador-meta", "Simulador de meta", "Quanto guardar por mês para atingir uma meta no prazo."],
-  ["fifty-thirty-twenty", "alocacao-50-30-20", "Alocação 50-30-20", "Distribua sua renda em essenciais, desejos e investimentos."],
+  ["fifty-thirty-twenty", "orcamento-50-30-20", "Orçamento 50-30-20", "Distribua sua renda em essenciais, desejos e investimentos."],
   ["emergency-fund", "reserva-emergencia", "Reserva de emergência", "Quanto você precisa para 3, 6 ou 12 meses de despesas."],
   ["currency-converter", "conversor-moedas", "Conversor de moedas", "Cotação ao vivo via BRAPI para USD, EUR e mais."],
   ["split-bill", "dividir-conta", "Dividir conta", "Rateio justo entre amigos com gorjeta e pesos."],
