@@ -20,6 +20,8 @@ const FUNCTIONAL_ROUTES: ReadonlyMap<string, string> = new Map([
   ["installment-vs-cash", "/installment-vs-cash"],
   ["salary-simulator", "/simulador-salario"],
   ["goal-simulator", "/simulador-meta"],
+  ["compound-interest", "/juros-compostos"],
+  ["cdb-lci-lca", "/cdb-lci-lca"],
 ]);
 
 // No tool is premium-gated yet. Premium gating returns when the first

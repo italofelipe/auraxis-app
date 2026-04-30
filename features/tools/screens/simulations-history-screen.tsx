@@ -7,6 +7,10 @@ import {
   useSimulationsHistoryScreenController,
   type SimulationsHistoryScreenController,
 } from "@/features/tools/hooks/use-simulations-history-screen-controller";
+import {
+  getSimulationSummary,
+  getSimulationTitle,
+} from "@/features/tools/services/simulation-display";
 import { AppButton } from "@/shared/components/app-button";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
@@ -132,13 +136,19 @@ function SimulationRow({
   isDeleting,
   onDelete,
 }: SimulationRowProps): ReactElement {
+  const summary = getSimulationSummary(simulation);
   return (
     <AppSurfaceCard
       backgroundColor="$surfaceRaised"
-      title={simulation.toolId}
+      title={getSimulationTitle(simulation)}
       description={`Salva em ${formatDate(simulation.createdAt)} · regra ${simulation.ruleVersion}`}
     >
       <YStack gap="$2">
+        {summary !== null ? (
+          <Paragraph color="$color" fontFamily="$body" fontSize="$3">
+            {summary}
+          </Paragraph>
+        ) : null}
         {simulation.goalId ? (
           <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
             Vinculada a uma meta.

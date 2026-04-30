@@ -142,8 +142,10 @@ import type {
   InstallmentVsCashCalculationRequestDto,
   InstallmentVsCashCalculationResponseDto,
   InstallmentVsCashSaveResponseDto,
+  SaveSimulationRequestBody,
   SimulationListQuery,
   SimulationListResponse,
+  SimulationRecordResponseEnvelope,
 } from "@/features/tools/contracts";
 
 export type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
@@ -875,6 +877,16 @@ export const apiContractMap = {
     SimulationListQuery
   >({
     method: "GET",
+    path: "/simulations",
+    authRequired: true,
+  }),
+  simulationsSave: defineApiContract<
+    "POST",
+    "/simulations",
+    SaveSimulationRequestBody,
+    SimulationRecordResponseEnvelope
+  >({
+    method: "POST",
     path: "/simulations",
     authRequired: true,
   }),
