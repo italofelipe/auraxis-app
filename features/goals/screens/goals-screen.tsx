@@ -1,9 +1,11 @@
 import { useCallback, useMemo, type ReactElement } from "react";
 
 import { FlashList } from "@shopify/flash-list";
+import { useRouter } from "expo-router";
 import { RefreshControl } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { buildGoalScenarioPath } from "@/core/navigation/routes";
 import { queryKeys } from "@/core/query/query-keys";
 import { GoalForm } from "@/features/goals/components/goal-form";
 import { GoalPlanCard } from "@/features/goals/components/goal-plan-card";
@@ -162,6 +164,7 @@ function GoalsListCard({ controller }: ControllerProps): ReactElement {
 }
 
 function GoalsList({ controller }: ControllerProps): ReactElement {
+  const router = useRouter();
   const { refreshing, onRefresh } = useListRefresh(GOALS_REFRESH_KEYS);
 
   const handleEdit = useCallback(
@@ -185,6 +188,13 @@ function GoalsList({ controller }: ControllerProps): ReactElement {
     [controller],
   );
 
+  const handleSimulate = useCallback(
+    (goalId: string): void => {
+      router.push(buildGoalScenarioPath(goalId));
+    },
+    [router],
+  );
+
   const renderItem = useCallback(
     ({ item }: { readonly item: GoalProgressView }) => (
       <GoalItem
@@ -194,6 +204,7 @@ function GoalsList({ controller }: ControllerProps): ReactElement {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onTogglePlan={handleTogglePlan}
+        onSimulate={handleSimulate}
       />
     ),
     [
@@ -201,6 +212,7 @@ function GoalsList({ controller }: ControllerProps): ReactElement {
       controller.selectedPlanGoalId,
       handleDelete,
       handleEdit,
+      handleSimulate,
       handleTogglePlan,
     ],
   );
@@ -227,6 +239,7 @@ interface GoalItemProps {
   readonly onEdit: (goal: GoalProgressView) => void;
   readonly onDelete: (goalId: string) => void;
   readonly onTogglePlan: (goalId: string) => void;
+  readonly onSimulate: (goalId: string) => void;
 }
 
 const GoalItem = function GoalItem({
@@ -236,12 +249,17 @@ const GoalItem = function GoalItem({
   onEdit,
   onDelete,
   onTogglePlan,
+  onSimulate,
 }: GoalItemProps): ReactElement {
   const handleEdit = useCallback(() => onEdit(goal), [goal, onEdit]);
   const handleDelete = useCallback(() => onDelete(goal.id), [goal.id, onDelete]);
   const handleToggle = useCallback(
     () => onTogglePlan(goal.id),
     [goal.id, onTogglePlan],
+  );
+  const handleSimulate = useCallback(
+    () => onSimulate(goal.id),
+    [goal.id, onSimulate],
   );
 
   return (
@@ -268,6 +286,9 @@ const GoalItem = function GoalItem({
         <XStack gap="$2" flexWrap="wrap">
           <AppButton tone="secondary" onPress={handleToggle} disabled={isDeleting}>
             {isPlanOpen ? "Ocultar plano" : "Ver plano"}
+          </AppButton>
+          <AppButton tone="secondary" onPress={handleSimulate} disabled={isDeleting}>
+            Simular
           </AppButton>
           <AppButton tone="secondary" onPress={handleEdit} disabled={isDeleting}>
             Editar
