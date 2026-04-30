@@ -26,6 +26,7 @@ function RootLayoutContent() {
       <Stack.Screen name="index" />
       <Stack.Screen name="(public)" />
       <Stack.Screen name="(private)" />
+      <Stack.Screen name="(legal)" />
     </Stack>
   );
 }
