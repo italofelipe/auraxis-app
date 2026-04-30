@@ -81,6 +81,19 @@
       "success": "Pronto! Cheque sua caixa de entrada e a pasta de spam.",
       "rateLimited": "Aguarde {{seconds}}s antes de reenviar novamente.",
       "backToLogin": "Voltar para o login"
+    },
+    "confirmEmail": {
+      "confirming": "Confirmando seu e-mail...",
+      "wait": "Estamos validando o link de confirmacao. Pode levar alguns segundos.",
+      "successTitle": "E-mail confirmado!",
+      "successDescription": "Sua conta esta liberada. Bem-vindo ao Auraxis.",
+      "errorTitle": "Nao conseguimos confirmar",
+      "errorDescription": "O link pode ter expirado ou ja ter sido utilizado. Pedir um novo costuma resolver.",
+      "noTokenTitle": "Token de confirmacao ausente",
+      "noTokenDescription": "Esta tela e aberta automaticamente quando voce clica no link enviado por e-mail. Use o botao abaixo para receber um novo.",
+      "cta": "Ir para o app",
+      "resendCta": "Reenviar e-mail",
+      "backToLogin": "Voltar para o login"
     }
   },
   "transactions": {
