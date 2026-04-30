@@ -99,4 +99,40 @@ describe("deep linking", () => {
       "auraxisapp://login?email=%3Credacted%3E&password=%3Credacted%3E&auth_code=%3Credacted%3E",
     );
   });
+
+  it("reconhece /checkout/success como retorno e infere status sem querystring", () => {
+    expect(
+      parseAppUrl("auraxisapp://checkout/success?provider=asaas"),
+    ).toEqual({
+      kind: "checkout-return",
+      href: appRoutes.private.checkoutSuccess,
+      rawUrl: "auraxisapp://checkout/success?provider=asaas",
+      status: "success",
+      provider: "asaas",
+      planSlug: null,
+      externalReference: null,
+    });
+  });
+
+  it("reconhece /checkout/cancel como retorno mesmo sem status query", () => {
+    expect(parseAppUrl("auraxisapp://checkout/cancel")).toEqual({
+      kind: "checkout-return",
+      href: appRoutes.private.checkoutCancel,
+      rawUrl: "auraxisapp://checkout/cancel",
+      status: "cancel",
+      provider: null,
+      planSlug: null,
+      externalReference: null,
+    });
+  });
+
+  it("status explicito do query sobrescreve a inferencia pelo path", () => {
+    expect(
+      parseAppUrl("auraxisapp://checkout/success?status=pending"),
+    ).toMatchObject({
+      kind: "checkout-return",
+      href: appRoutes.private.checkoutSuccess,
+      status: "pending",
+    });
+  });
 });

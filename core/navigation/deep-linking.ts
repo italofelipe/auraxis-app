@@ -50,17 +50,14 @@ const configuredCheckoutReturnPath = normalizeRoutePath(
 
 const resolveUrlPath = (url: URL): string => {
   const pathname = normalizeRoutePath(url.pathname);
+  const isAppScheme =
+    url.protocol !== "http:" && url.protocol !== "https:" && url.host.length > 0;
 
-  if (pathname !== appRoutes.root) {
-    return pathname;
-  }
-
-  if (
-    url.protocol !== "http:" &&
-    url.protocol !== "https:" &&
-    url.host.length > 0
-  ) {
-    return normalizeRoutePath(url.host);
+  if (isAppScheme) {
+    if (pathname === appRoutes.root) {
+      return normalizeRoutePath(url.host);
+    }
+    return normalizeRoutePath(`${url.host}${pathname}`);
   }
 
   return pathname;
@@ -124,8 +121,20 @@ const normalizeCheckoutStatus = (
 const isCheckoutReturnPath = (path: string): path is PrivateAppRoute => {
   return (
     path === appRoutes.private.subscription ||
+    path === appRoutes.private.checkoutSuccess ||
+    path === appRoutes.private.checkoutCancel ||
     path === configuredCheckoutReturnPath
   );
+};
+
+const inferStatusFromPath = (path: string): string | null => {
+  if (path === appRoutes.private.checkoutSuccess) {
+    return "success";
+  }
+  if (path === appRoutes.private.checkoutCancel) {
+    return "cancel";
+  }
+  return null;
 };
 
 const buildCheckoutReturnIntent = (
@@ -136,7 +145,8 @@ const buildCheckoutReturnIntent = (
   const rawStatus =
     readQueryValue(searchParams, "checkout_status") ??
     readQueryValue(searchParams, "status") ??
-    readQueryValue(searchParams, "result");
+    readQueryValue(searchParams, "result") ??
+    inferStatusFromPath(href);
 
   return {
     kind: "checkout-return",

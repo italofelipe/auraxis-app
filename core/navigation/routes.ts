@@ -45,6 +45,8 @@ export const appRoutes = {
     notificationPreferences: "/preferencias-notificacao",
     dangerZone: "/perfil-zona-de-perigo",
     simulationsHistory: "/simulacoes",
+    checkoutSuccess: "/checkout/success",
+    checkoutCancel: "/checkout/cancel",
   },
 } as const;
 
@@ -320,6 +322,20 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "checkoutSuccess",
+    path: appRoutes.private.checkoutSuccess,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: true,
+  },
+  {
+    key: "checkoutCancel",
+    path: appRoutes.private.checkoutCancel,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: true,
   },
   {
     key: "privacyPolicy",

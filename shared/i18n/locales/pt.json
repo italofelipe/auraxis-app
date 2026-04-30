@@ -126,6 +126,10 @@
       "description": "Sua assinatura nao foi ativada. Voce pode tentar novamente quando quiser.",
       "retry": "Tentar novamente",
       "back": "Voltar"
+    },
+    "return": {
+      "pendingNotice": "Estamos confirmando o pagamento com a operadora. A liberacao pode levar alguns minutos.",
+      "errorNotice": "O processador retornou um erro. Tente novamente em instantes ou contate o suporte."
     }
   },
   "dashboard": {
