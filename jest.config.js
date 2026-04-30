@@ -204,6 +204,8 @@ const config = {
     "features/checkout/hooks/use-checkout-return-controller.ts",
     "features/checkout/screens/checkout-success-screen.tsx",
     "features/checkout/screens/checkout-cancel-screen.tsx",
+    "features/auth/hooks/use-confirm-email-screen-controller.ts",
+    "features/auth/screens/confirm-email-screen.tsx",
     "features/tools/hooks/use-save-simulation-mutation.ts",
     "features/tools/hooks/use-calculator-controller.ts",
     "features/tools/hooks/use-simulations-query.ts",
