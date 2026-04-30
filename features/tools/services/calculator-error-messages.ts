@@ -37,6 +37,43 @@ const MESSAGES: Readonly<Record<string, string>> = {
   // conversor-moeda
   "errors.amountRequired": "Informe um valor maior que zero.",
   "errors.rateRequired": "Informe a taxa manual ou aguarde a cotação.",
+  // cet
+  "errors.loanAmountRequired": "Informe o valor do empréstimo.",
+  "errors.termRequired": "Informe o prazo em meses.",
+  // financiamento-imobiliario
+  "errors.propertyValueRequired": "Informe o valor do imóvel.",
+  "errors.annualRateRequired": "Informe a taxa anual de juros.",
+  "errors.downPaymentPctRange": "Entrada deve ficar entre 0% e 95%.",
+  "errors.termMonthsRange": "Prazo deve ficar entre 1 e 360 meses.",
+  // aluguel-vs-compra
+  "errors.monthlyRentRequired": "Informe o aluguel mensal.",
+  "errors.downPaymentRequired": "Informe a entrada disponível.",
+  // tesouro-direto
+  "errors.taxaIndicativaRequired": "Informe a taxa indicativa do título.",
+  "errors.termDaysRequired": "Informe o prazo em dias.",
+  // fire
+  "errors.retirementAgeAfterCurrent": "Idade de aposentadoria precisa ser maior que a atual.",
+  "errors.returnRequired": "Informe a rentabilidade esperada.",
+  // fgts (yearsOfServiceInvalid já registrado acima para rescisão)
+  "errors.monthsOfServiceInvalid": "Meses extras precisam estar entre 0 e 11.",
+  "errors.currentBalanceInvalid": "Saldo atual não pode ser negativo.",
+  // ferias
+  "errors.abonoRequiresMinRestDays": "Abono pecuniário exige no mínimo 20 dias de descanso.",
+  // fii
+  "errors.tickerRequired": "Informe o ticker do FII.",
+  "errors.historyMonthsOutOfRange": "Meses do histórico devem ficar entre 1 e 24.",
+  // dividir-conta
+  "errors.totalRequired": "Informe o valor total da conta.",
+  "errors.minPeople": "Conta precisa ser dividida entre pelo menos 2 pessoas.",
+  "errors.allAmountsRequired": "Informe o consumo de cada pessoa.",
+  "errors.invalidFee": "Taxa de serviço deve ficar entre 0% e 100%.",
+  "errors.invalidTip": "Gorjeta deve ficar entre 0% e 100%.",
+  // quitacao-dividas
+  "errors.atLeastOneDebtRequired": "Adicione pelo menos uma dívida.",
+  "errors.minTwoDebts": "Adicione pelo menos duas dívidas para comparar estratégias.",
+  // custo-estilo-vida
+  "errors.atLeastOneExpenseRequired": "Adicione pelo menos uma despesa.",
+  "errors.horizonRequired": "Informe o horizonte em anos.",
 };
 
 /**
