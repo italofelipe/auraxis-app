@@ -10,6 +10,7 @@ export const appRoutes = {
   legal: {
     privacyPolicy: "/privacy-policy",
     termsOfService: "/terms-of-service",
+    confirmEmail: "/confirm-email",
   },
   public: {
     login: "/login",
@@ -347,6 +348,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "termsOfService",
     path: appRoutes.legal.termsOfService,
+    access: "legal",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "confirmEmail",
+    path: appRoutes.legal.confirmEmail,
     access: "legal",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,

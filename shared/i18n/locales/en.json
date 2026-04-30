@@ -81,6 +81,19 @@
       "success": "Done! Check your inbox and spam folder.",
       "rateLimited": "Wait {{seconds}}s before resending again.",
       "backToLogin": "Back to sign in"
+    },
+    "confirmEmail": {
+      "confirming": "Confirming your email...",
+      "wait": "We're validating the confirmation link. This may take a few seconds.",
+      "successTitle": "Email confirmed!",
+      "successDescription": "Your account is ready. Welcome to Auraxis.",
+      "errorTitle": "We couldn't confirm",
+      "errorDescription": "The link may have expired or already been used. Asking for a new one usually fixes it.",
+      "noTokenTitle": "Missing confirmation token",
+      "noTokenDescription": "This page opens automatically when you tap the link in the email we sent you. Tap below to receive a new one.",
+      "cta": "Open the app",
+      "resendCta": "Resend email",
+      "backToLogin": "Back to sign in"
     }
   },
   "transactions": {
