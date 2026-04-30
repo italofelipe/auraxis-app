@@ -126,6 +126,10 @@
       "description": "Your subscription was not activated. You can try again whenever you like.",
       "retry": "Try again",
       "back": "Back"
+    },
+    "return": {
+      "pendingNotice": "We are confirming the payment with the gateway. Activation may take a few minutes.",
+      "errorNotice": "The processor returned an error. Try again shortly or contact support."
     }
   },
   "dashboard": {
