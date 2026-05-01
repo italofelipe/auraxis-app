@@ -28,6 +28,8 @@ const TOOL_LABELS: Readonly<Record<string, string>> = {
   "rent-vs-buy": "Alugar vs comprar",
   "split-bill": "Dividir conta",
   "cost-of-lifestyle": "Custo do estilo de vida",
+  aposentadoria: "Aposentadoria",
+  "desconto-markup": "Desconto, markup e margem",
 };
 
 const formatBrl = (value: number): string =>
@@ -199,6 +201,27 @@ const summarizeCostOfLifestyle = (result: ResultBag): string | null => {
   return null;
 };
 
+const summarizeAposentadoria = (result: ResultBag): string | null => {
+  const required = result["requiredPatrimony"];
+  const monthly = result["requiredMonthlyContribution"];
+  if (typeof required === "number" && typeof monthly === "number") {
+    return `Alvo ${formatBrl(required)} · ${formatBrl(monthly)}/mês`;
+  }
+  return null;
+};
+
+const summarizeDescontoMarkup = (result: ResultBag): string | null => {
+  const value = result["calculatedValue"];
+  const mode = result["mode"];
+  if (typeof value !== "number" || typeof mode !== "string") {
+    return null;
+  }
+  if (mode === "margem") {
+    return `Margem ${value.toFixed(2)}%`;
+  }
+  return `${mode} · ${formatBrl(value)}`;
+};
+
 const SUMMARIZERS: Readonly<Record<string, (result: ResultBag) => string | null>> = {
   "compound-interest": summarizeCompoundInterest,
   "cdb-lci-lca": summarizeCdbLciLca,
@@ -214,6 +237,8 @@ const SUMMARIZERS: Readonly<Record<string, (result: ResultBag) => string | null>
   "rent-vs-buy": summarizeRentVsBuy,
   "split-bill": summarizeSplitBill,
   "cost-of-lifestyle": summarizeCostOfLifestyle,
+  aposentadoria: summarizeAposentadoria,
+  "desconto-markup": summarizeDescontoMarkup,
 };
 
 const fallbackSummary = (result: ResultBag): string | null => {

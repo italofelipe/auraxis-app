@@ -43,6 +43,8 @@ const FUNCTIONAL_ROUTES: ReadonlyMap<string, string> = new Map([
   ["rent-vs-buy", "/alugar-vs-comprar"],
   ["split-bill", "/dividir-conta"],
   ["cost-of-lifestyle", "/custo-estilo-de-vida"],
+  ["aposentadoria", "/aposentadoria"],
+  ["desconto-markup", "/desconto-markup"],
 ]);
 
 // No tool is premium-gated yet. Premium gating returns when the first
@@ -93,6 +95,7 @@ const INVESTMENTS: readonly ToolSeed[] = [
   ["fii", "fii", "FII (Fundos imobiliários)", "Yield, distribuição e rendimento mensal estimado."],
   ["etf", "etf", "ETF", "Custo médio, taxas e impacto da bolsa."],
   ["fire", "fire", "FIRE", "Quando seu patrimônio paga seu custo de vida."],
+  ["aposentadoria", "aposentadoria", "Aposentadoria", "Quanto guardar por mês para se aposentar com a renda desejada."],
   ["ipca-correction", "correcao-ipca", "Correção IPCA", "Atualize valores antigos pela inflação acumulada."],
   ["broker-fees", "custos-corretagem", "Custos de corretagem", "Estime spreads, IRs e taxa de custódia por estratégia."],
 ];
@@ -128,6 +131,7 @@ const DAILY_LIFE: readonly ToolSeed[] = [
   ["monthly-fuel", "combustivel-mensal", "Combustível mensal", "Estime gasto de combustível por preço, KM e consumo."],
   ["subscription-audit", "auditoria-assinaturas", "Auditoria de assinaturas", "Liste todas as assinaturas recorrentes e o impacto anual."],
   ["cost-of-lifestyle", "custo-estilo-de-vida", "Custo do estilo de vida", "Quanto custa o padrão de vida que você quer ter."],
+  ["desconto-markup", "desconto-markup", "Desconto, markup e margem", "Calcule preço final, lucro, margem ou recupere o valor antes do desconto."],
 ];
 
 const CANONICAL_CATALOG: ToolsCatalog = {
