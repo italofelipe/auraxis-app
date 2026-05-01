@@ -123,6 +123,52 @@
       "errorDescription": "Please try again shortly."
     }
   },
+  "plans": {
+    "title": "Auraxis plans",
+    "subtitle": "Pick the one that fits your financial journey.",
+    "cycle": {
+      "monthly": "Monthly",
+      "annual": "Annual"
+    },
+    "tier": {
+      "free": {
+        "description": "Great to start organising your money."
+      },
+      "premium": {
+        "description": "Everything in Free plus advanced tools and priority support."
+      }
+    },
+    "feature": {
+      "transactions": "Unlimited transactions",
+      "goals": "Financial goals",
+      "basicReports": "Basic reports",
+      "advancedReports": "Advanced reports (MoM, projections, BRAPI)",
+      "simulations": "Premium simulators and calculators",
+      "sharedEntries": "Shared entries (family)",
+      "support": "Priority support"
+    },
+    "priceCaption": {
+      "monthly": "per month, monthly billing",
+      "annualBilledMonthly": "per month, annual billing",
+      "totalAnnual": "Total annual: {{total}}"
+    },
+    "cta": {
+      "free": "Start for free",
+      "premium": "Subscribe to Premium"
+    },
+    "loading": {
+      "title": "Loading plans",
+      "description": "Fetching the latest pricing."
+    },
+    "error": {
+      "title": "Couldn't load plans",
+      "description": "Please try again shortly."
+    },
+    "empty": {
+      "title": "No plans available",
+      "description": "Come back later — we're refreshing the catalog."
+    }
+  },
   "checkout": {
     "success": {
       "title": "Payment confirmed!",
