@@ -123,6 +123,52 @@
       "errorDescription": "Tente novamente em instantes."
     }
   },
+  "plans": {
+    "title": "Planos Auraxis",
+    "subtitle": "Escolha o que faz mais sentido pra sua jornada financeira.",
+    "cycle": {
+      "monthly": "Mensal",
+      "annual": "Anual"
+    },
+    "tier": {
+      "free": {
+        "description": "Bom pra comecar a organizar suas financas."
+      },
+      "premium": {
+        "description": "Tudo do Free + ferramentas avancadas e suporte prioritario."
+      }
+    },
+    "feature": {
+      "transactions": "Transacoes ilimitadas",
+      "goals": "Metas financeiras",
+      "basicReports": "Relatorios basicos",
+      "advancedReports": "Relatorios avancados (MoM, projecoes, BRAPI)",
+      "simulations": "Simuladores e calculadoras premium",
+      "sharedEntries": "Compartilhamento de entradas (familia)",
+      "support": "Suporte prioritario"
+    },
+    "priceCaption": {
+      "monthly": "por mes, cobranca mensal",
+      "annualBilledMonthly": "por mes, cobranca anual",
+      "totalAnnual": "Total anual: {{total}}"
+    },
+    "cta": {
+      "free": "Comecar gratis",
+      "premium": "Assinar Premium"
+    },
+    "loading": {
+      "title": "Carregando planos",
+      "description": "Buscando precos atualizados."
+    },
+    "error": {
+      "title": "Nao foi possivel carregar os planos",
+      "description": "Tente novamente em alguns instantes."
+    },
+    "empty": {
+      "title": "Nenhum plano disponivel",
+      "description": "Volte mais tarde — estamos atualizando o catalogo."
+    }
+  },
   "checkout": {
     "success": {
       "title": "Pagamento confirmado!",
