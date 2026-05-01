@@ -60,6 +60,14 @@ export const appRoutes = {
 export const buildGoalScenarioPath = (goalId: string): string =>
   `/metas/${goalId}/simular`;
 
+/**
+ * Builds the dynamic ticker detail route (price chart + position).
+ * @param ticker BRAPI ticker symbol (case-insensitive — normalized here).
+ * @returns Expo Router-compatible path under /carteira.
+ */
+export const buildTickerDetailPath = (ticker: string): string =>
+  `/carteira/${ticker.trim().toUpperCase()}`;
+
 export type PublicAppRoute =
   (typeof appRoutes.public)[keyof typeof appRoutes.public];
 export type PrivateAppRoute =

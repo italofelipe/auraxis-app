@@ -3,7 +3,7 @@ import type { ReactElement } from "react";
 
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { appRoutes } from "@/core/navigation/routes";
+import { appRoutes, buildTickerDetailPath } from "@/core/navigation/routes";
 import { WalletEntryForm } from "@/features/wallet/components/wallet-entry-form";
 import { WalletValuationCard } from "@/features/wallet/components/wallet-valuation-card";
 import { WalletValuationHistoryCard } from "@/features/wallet/components/wallet-valuation-history-card";
@@ -40,6 +40,9 @@ export function WalletScreen(): ReactElement {
       params: { entryId },
     });
   };
+  const handleOpenTicker = (ticker: string): void => {
+    router.push(buildTickerDetailPath(ticker));
+  };
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -66,6 +69,7 @@ export function WalletScreen(): ReactElement {
       <AssetsListCard
         controller={controller}
         onOpenOperations={handleOpenOperations}
+        onOpenTicker={handleOpenTicker}
       />
     </AppScreen>
   );
@@ -120,11 +124,13 @@ function SummaryCard({ controller }: ControllerProps): ReactElement {
 
 interface AssetsListCardProps extends ControllerProps {
   readonly onOpenOperations: (entryId: string) => void;
+  readonly onOpenTicker: (ticker: string) => void;
 }
 
 function AssetsListCard({
   controller,
   onOpenOperations,
+  onOpenTicker,
 }: AssetsListCardProps): ReactElement {
   return (
     <AppSurfaceCard
@@ -175,6 +181,11 @@ function AssetsListCard({
                     void controller.handleDelete(asset.id);
                   }}
                   onOpenOperations={() => onOpenOperations(asset.id)}
+                  onOpenTicker={
+                    asset.ticker
+                      ? () => onOpenTicker(asset.ticker as string)
+                      : undefined
+                  }
                 />
               );
             })}
@@ -191,6 +202,7 @@ interface WalletAssetRowProps {
   readonly onEdit: () => void;
   readonly onDelete: () => void;
   readonly onOpenOperations: () => void;
+  readonly onOpenTicker?: () => void;
 }
 
 function WalletAssetRow({
@@ -199,6 +211,7 @@ function WalletAssetRow({
   onEdit,
   onDelete,
   onOpenOperations,
+  onOpenTicker,
 }: WalletAssetRowProps): ReactElement {
   const liveAmount = asset.liveAmount;
   const showLiveAmount = liveAmount !== null;
@@ -219,6 +232,11 @@ function WalletAssetRow({
       />
       <TickerLine asset={asset} />
       <XStack gap="$2" flexWrap="wrap">
+        {onOpenTicker ? (
+          <AppButton onPress={onOpenTicker} disabled={isDeleting}>
+            Ver detalhes
+          </AppButton>
+        ) : null}
         <AppButton tone="secondary" onPress={onOpenOperations} disabled={isDeleting}>
           Ver operacoes
         </AppButton>
