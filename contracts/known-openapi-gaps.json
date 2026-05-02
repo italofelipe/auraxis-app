@@ -27,7 +27,6 @@
     "GET /fiscal/receivables/summary",
     "GET /fiscal/fiscal-documents",
     "POST /fiscal/fiscal-documents",
-    "GET /goals/{goal_id}/projection",
     "GET /tags",
     "POST /tags",
     "PUT /tags/{tag_id}",
@@ -39,14 +38,6 @@
     "GET /credit-cards",
     "POST /credit-cards",
     "PUT /credit-cards/{credit_card_id}",
-    "DELETE /credit-cards/{credit_card_id}",
-    "GET /budgets",
-    "POST /budgets",
-    "GET /budgets/summary",
-    "GET /budgets/{budget_id}",
-    "PATCH /budgets/{budget_id}",
-    "DELETE /budgets/{budget_id}",
-    "GET /user/notification-preferences",
-    "PATCH /user/notification-preferences"
+    "DELETE /credit-cards/{credit_card_id}"
   ]
 }
