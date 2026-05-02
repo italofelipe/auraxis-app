@@ -162,6 +162,7 @@ const config = {
     "features/wallet/hooks/use-brapi-queries.ts",
     "features/wallet/hooks/use-wallet-live-quotes.ts",
     "features/wallet/components/ticker-autocomplete.tsx",
+    "app/(legal)/dev-catalog.tsx",
     "features/wallet/components/ticker-price-chart.tsx",
     "features/wallet/components/ticker-range-selector.tsx",
     "features/wallet/hooks/use-ticker-detail-screen-controller.ts",
