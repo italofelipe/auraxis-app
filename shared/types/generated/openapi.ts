@@ -813,8 +813,11 @@ export interface paths {
          *     - Cada uso invalida o refresh token anterior (replay attack prevention).
          *     - O novo refresh token tem TTL de 7 dias a partir da emissão.
          *
+         *     Fontes aceitas para o refresh token (SEC-GAP-01):
+         *     - Cookie httpOnly `auraxis_refresh` (recomendado, clientes novos).
+         *     - Header `Authorization: Bearer <refresh_token>` (legado).
+         *
          *     Headers:
-         *     - `Authorization: Bearer <refresh_token>` (obrigatório)
          *     - `X-API-Contract`: opcional; `v2` padroniza o envelope.
          */
         post: {
@@ -1082,6 +1085,327 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/sessions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: never;
+        };
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: never;
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/auth/sessions/{session_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    session_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: never;
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/budgets": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Lista todos os orçamentos ativos do usuário com valor gasto no período. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Lista de orçamentos com gasto por período */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** @description Cria um novo orçamento para o usuário autenticado. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Orçamento criado com sucesso */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/budgets/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retorna total orçado vs total gasto no período atual (orçamentos ativos). */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo de orçamentos vs gastos */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/budgets/{budget_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retorna um orçamento específico do usuário com valor gasto no período. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    budget_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Orçamento encontrado */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Orçamento não encontrado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        /** @description Remove um orçamento específico do usuário autenticado. */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    budget_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Orçamento removido */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Orçamento não encontrado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        /** @description Atualiza parcialmente um orçamento do usuário autenticado. */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    budget_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Orçamento atualizado */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Orçamento não encontrado */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
     "/dashboard/overview": {
         parameters: {
             query?: never;
@@ -1260,6 +1584,124 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dashboard/survival-index": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Índice de sobrevivência financeira (burn rate)
+         * @description Calcula quantos meses o patrimônio atual sustenta o custo de vida médio. Patrimônio = soma das entradas de carteira (should_be_on_wallet=True). Custo médio = média de despesas pagas nos últimos 3 meses completos.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Índice de sobrevivência calculado */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "avg_monthly_expense": 5000,
+                         *         "classification": "comfortable",
+                         *         "period_analyzed_months": 3,
+                         *         "survival_months": 8.5,
+                         *         "total_assets": 42500
+                         *       },
+                         *       "message": "Índice de sobrevivência calculado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao calcular índice de sobrevivência",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/dashboard/trends": {
         parameters: {
             query?: never;
@@ -1393,6 +1835,196 @@ export interface paths {
                          * @example {
                          *       "code": "INTERNAL_ERROR",
                          *       "message": "Erro ao calcular tendências do dashboard",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dashboard/weekly-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Resumo semanal com comparativo (semana atual vs anterior)
+         * @description Retorna os totais da semana atual e da semana anterior (receita, despesa, saldo, contagem de transações pagas), o comparativo com deltas absolutos e percentuais, e uma série temporal para alimentar gráficos. Granularidade: diária quando period ≤ 31 dias, semanal caso contrário.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /**
+                     * @description Data inicial para período customizado (YYYY-MM-DD)
+                     * @example 2026-03-01
+                     */
+                    start_date?: string;
+                    /**
+                     * @description Preset de período da série: 1m (padrão), 3m, 6m
+                     * @example 1m
+                     */
+                    period?: string;
+                    /**
+                     * @description Data final para período customizado (YYYY-MM-DD)
+                     * @example 2026-04-19
+                     */
+                    end_date?: string;
+                };
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo semanal calculado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "comparison": {
+                         *           "balance_delta": 2800,
+                         *           "balance_delta_percent": null,
+                         *           "expense_delta": -300,
+                         *           "expense_delta_percent": -14.29,
+                         *           "income_delta": 2500,
+                         *           "income_delta_percent": null
+                         *         },
+                         *         "current_week": {
+                         *           "balance": 700,
+                         *           "end": "2026-04-20",
+                         *           "expense": 1800,
+                         *           "income": 2500,
+                         *           "start": "2026-04-14",
+                         *           "transaction_count": 8
+                         *         },
+                         *         "period": "1m",
+                         *         "previous_week": {
+                         *           "balance": -2100,
+                         *           "end": "2026-04-13",
+                         *           "expense": 2100,
+                         *           "income": 0,
+                         *           "start": "2026-04-07",
+                         *           "transaction_count": 5
+                         *         },
+                         *         "series": [
+                         *           {
+                         *             "balance": -200,
+                         *             "date": "2026-03-20",
+                         *             "expense": 200,
+                         *             "income": 0
+                         *           }
+                         *         ],
+                         *         "series_end": "2026-04-19",
+                         *         "series_start": "2026-03-20"
+                         *       },
+                         *       "message": "Resumo semanal calculado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Parâmetro inválido */
+                422: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Período inválido. Use 1m, 3m, 6m ou forneça start_date e end_date.",
+                         *       "status_code": 422
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao calcular resumo semanal",
                          *       "status_code": 500
                          *     }
                          */
@@ -1928,6 +2560,63 @@ export interface paths {
             requestBody?: never;
             responses: {
                 /** @description Planejamento calculado com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/goals/{goal_id}/projection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retorna a projeção de conclusão da meta com base na taxa de retorno do portfólio do usuário e no aporte mensal configurado. Usa juros compostos para calcular o prazo e o aporte sugerido. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    goal_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Projeção calculada com sucesso */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -3662,6 +4351,135 @@ export interface paths {
                          *       "code": "INTERNAL_ERROR",
                          *       "message": "Erro ao listar despesas por período",
                          *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/transactions/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Exportar transações (CSV ou PDF)
+         * @description Gera um arquivo com as transações do usuário no formato solicitado.
+         *
+         *     **Requer entitlement `export_pdf` (plano Premium ou Trial).**
+         *
+         *     Parâmetros:
+         *     - `format`: `csv` (padrão) ou `pdf`
+         *     - `start_date` / `end_date`: intervalo de `due_date` (YYYY-MM-DD)
+         *     - `type`: `income` | `expense`
+         *     - `status`: `paid` | `pending` | `cancelled` | `postponed` | `overdue`
+         *
+         *     CSV: streamed via chunked transfer — sem limite de linhas.
+         *     PDF: materializado em memória (limitado pela RAM do servidor).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Arquivo CSV ou PDF com as transações */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/pdf": unknown;
+                        "text/csv": unknown;
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Parâmetro 'format' inválido.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token ausente ou inválido */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token ausente",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Entitlement insuficiente — plano Premium necessário */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "ENTITLEMENT_REQUIRED",
+                         *       "message": "Feature 'export_pdf' requires an active entitlement.",
+                         *       "status_code": 403
                          *     }
                          */
                         "application/json": {
@@ -5601,6 +6419,79 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user/notification-preferences": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Lista as preferências de notificação do usuário autenticado. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Preferências retornadas com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido ou expirado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Atualiza as preferências de notificação do usuário autenticado. Aceita uma lista de preferências para upsert. */
+        patch: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Preferências atualizadas com sucesso */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido ou expirado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        trace?: never;
+    };
     "/user/profile": {
         parameters: {
             query?: never;
@@ -6447,20 +7338,20 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Data final (YYYY-MM-DD). Opcional. */
-                    end_date?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `start_date`.
                      */
                     startDate?: string;
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `end_date`.
                      */
                     finalDate?: string;
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    start_date?: string;
+                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    end_date?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -6521,20 +7412,20 @@ export interface paths {
         options: {
             parameters: {
                 query?: {
-                    /** @description Data final (YYYY-MM-DD). Opcional. */
-                    end_date?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `start_date`.
                      */
                     startDate?: string;
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `end_date`.
                      */
                     finalDate?: string;
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    start_date?: string;
+                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    end_date?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -7496,10 +8387,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID da operação */
-                    operation_id: string;
                     /** @description ID do investimento */
                     investment_id: string;
+                    /** @description ID da operação */
+                    operation_id: string;
                 };
                 cookie?: never;
             };
@@ -7552,10 +8443,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID da operação */
-                    operation_id: string;
                     /** @description ID do investimento */
                     investment_id: string;
+                    /** @description ID da operação */
+                    operation_id: string;
                 };
                 cookie?: never;
             };
@@ -7600,10 +8491,10 @@ export interface paths {
                     "X-API-Contract"?: string;
                 };
                 path: {
-                    /** @description ID da operação */
-                    operation_id: string;
                     /** @description ID do investimento */
                     investment_id: string;
+                    /** @description ID da operação */
+                    operation_id: string;
                 };
                 cookie?: never;
             };
