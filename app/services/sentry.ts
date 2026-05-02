@@ -110,10 +110,37 @@ export const syncSentryOperationalContext = (
   setSentryTagIfPresent("connectivity_status", runtime?.connectivityStatus);
 };
 
+/**
+ * Resolve the Sentry DSN at runtime.
+ *
+ * Prefer the EAS-managed `EXPO_PUBLIC_SENTRY_DSN` build-time env (inlined
+ * by Expo at bundle time), falling back to `expoConfig.extra.sentryDsn`
+ * for legacy local builds. Never hard-code the DSN in `app.json` —
+ * production secrets must live in EAS secrets and not in source.
+ */
+const resolveSentryDsn = (): string | undefined => {
+  const fromEnv = process.env.EXPO_PUBLIC_SENTRY_DSN;
+  if (typeof fromEnv === "string" && fromEnv.length > 0) {
+    return fromEnv;
+  }
+  const legacy = Constants.expoConfig?.extra?.sentryDsn;
+  return typeof legacy === "string" && legacy.length > 0 ? legacy : undefined;
+};
+
+const resolveSentryEnvironment = (): string => {
+  const fromEnv = process.env.EXPO_PUBLIC_APP_ENV;
+  if (typeof fromEnv === "string" && fromEnv.length > 0) {
+    return fromEnv;
+  }
+  const legacy = Constants.expoConfig?.extra?.appEnv;
+  return typeof legacy === "string" && legacy.length > 0
+    ? legacy
+    : "development";
+};
+
 export function initSentry(): void {
-  const dsn = Constants.expoConfig?.extra?.sentryDsn as string | undefined;
-  const environment =
-    (Constants.expoConfig?.extra?.appEnv as string) ?? "development";
+  const dsn = resolveSentryDsn();
+  const environment = resolveSentryEnvironment();
 
   if (!dsn) {
     sentryEnabled = false;
