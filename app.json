@@ -8,6 +8,7 @@
     "scheme": "auraxisapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "jsEngine": "hermes",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sensoriumit.auraxis",
@@ -53,9 +54,7 @@
       "router": {},
       "eas": {
         "projectId": "f775e10b-89c3-4bb9-8af1-5073e68ac2ce"
-      },
-      "sentryDsn": "",
-      "appEnv": "development"
+      }
     },
     "owner": "italofelipe"
   }
