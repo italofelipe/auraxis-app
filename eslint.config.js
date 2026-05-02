@@ -64,6 +64,26 @@ module.exports = defineConfig([
         "error",
         { prefer: "type-imports", fixStyle: "inline-type-imports" },
       ],
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "react-native",
+              importNames: ["Image", "ImageBackground"],
+              message:
+                "Use AppImage from @/shared/components/app-image (wraps expo-image with cache + transition).",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // The AppImage wrapper itself imports expo-image directly.
+    files: ["shared/components/app-image.tsx"],
+    rules: {
+      "no-restricted-imports": "off",
     },
   },
   {
