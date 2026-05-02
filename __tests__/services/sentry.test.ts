@@ -36,10 +36,24 @@ const mockSetContext = Sentry.setContext as jest.Mock;
 const mockSetTag = Sentry.setTag as jest.Mock;
 
 describe("initSentry", () => {
+  const originalDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+  const originalAppEnv = process.env.EXPO_PUBLIC_APP_ENV;
+
   beforeEach(() => {
     jest.clearAllMocks();
     resetSentryRuntimeForTests();
     expoConfigMock.extra = {};
+    delete process.env.EXPO_PUBLIC_SENTRY_DSN;
+    delete process.env.EXPO_PUBLIC_APP_ENV;
+  });
+
+  afterAll(() => {
+    if (originalDsn !== undefined) {
+      process.env.EXPO_PUBLIC_SENTRY_DSN = originalDsn;
+    }
+    if (originalAppEnv !== undefined) {
+      process.env.EXPO_PUBLIC_APP_ENV = originalAppEnv;
+    }
   });
 
   it("does nothing when DSN is empty", () => {
@@ -73,6 +87,36 @@ describe("initSentry", () => {
         dsn: "https://test-dsn@o0.ingest.sentry.io/0",
         environment: "production",
         sendDefaultPii: false,
+      }),
+    );
+  });
+
+  it("resolves DSN from EXPO_PUBLIC_SENTRY_DSN env var", () => {
+    process.env.EXPO_PUBLIC_SENTRY_DSN = "https://env-dsn@o0.ingest.sentry.io/0";
+    process.env.EXPO_PUBLIC_APP_ENV = "preview";
+
+    initSentry();
+
+    expect(mockSentryInit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dsn: "https://env-dsn@o0.ingest.sentry.io/0",
+        environment: "preview",
+      }),
+    );
+  });
+
+  it("env var DSN takes precedence over expoConfig.extra.sentryDsn", () => {
+    process.env.EXPO_PUBLIC_SENTRY_DSN = "https://winner@o0.ingest.sentry.io/0";
+    expoConfigMock.extra = {
+      sentryDsn: "https://loser@o0.ingest.sentry.io/0",
+      appEnv: "production",
+    };
+
+    initSentry();
+
+    expect(mockSentryInit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dsn: "https://winner@o0.ingest.sentry.io/0",
       }),
     );
   });
@@ -113,6 +157,29 @@ describe("initSentry", () => {
       "X-Observability-Key": "<redacted>",
       Cookie: "<redacted>",
     });
+  });
+
+});
+
+describe("sentry runtime helpers", () => {
+  const originalDsn = process.env.EXPO_PUBLIC_SENTRY_DSN;
+  const originalAppEnv = process.env.EXPO_PUBLIC_APP_ENV;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resetSentryRuntimeForTests();
+    expoConfigMock.extra = {};
+    delete process.env.EXPO_PUBLIC_SENTRY_DSN;
+    delete process.env.EXPO_PUBLIC_APP_ENV;
+  });
+
+  afterAll(() => {
+    if (originalDsn !== undefined) {
+      process.env.EXPO_PUBLIC_SENTRY_DSN = originalDsn;
+    }
+    if (originalAppEnv !== undefined) {
+      process.env.EXPO_PUBLIC_APP_ENV = originalAppEnv;
+    }
   });
 
   it("nao registra breadcrumb quando o sentry ainda nao foi inicializado", () => {
