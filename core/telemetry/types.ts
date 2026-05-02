@@ -28,6 +28,7 @@ export type AppTelemetryEvent =
   | "network.request_started"
   | "network.request_succeeded"
   | "network.request_failed"
+  | "network.canonical_request_violation"
   | "auth.session_established"
   | "auth.session_invalidated"
   | "checkout.return_received"

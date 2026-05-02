@@ -1,5 +1,6 @@
 import axios, {
   isAxiosError,
+  type AxiosError,
   type AxiosInstance,
   type AxiosRequestHeaders,
   type AxiosResponse,
@@ -8,6 +9,8 @@ import axios, {
 } from "axios";
 
 import { toApiError } from "@/core/http/api-error";
+import { sanitizeAppUrl } from "@/core/navigation/deep-linking";
+import { verifyCanonicalRequest } from "@/core/security/ssl-pinning";
 import {
   isStoredSessionExpired,
   resolveSessionInvalidationReason,
@@ -15,9 +18,8 @@ import {
 import { useSessionStore } from "@/core/session/session-store";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { networkLogger } from "@/core/telemetry/domain-loggers";
-import { createMockApiAdapter } from "@/shared/mocks/api/router";
 import { appRuntimeConfig, normalizeBaseUrl } from "@/shared/config/runtime";
-import { sanitizeAppUrl } from "@/core/navigation/deep-linking";
+import { createMockApiAdapter } from "@/shared/mocks/api/router";
 
 interface RequestTelemetryMetadata {
   readonly startedAt: number;
@@ -152,6 +154,28 @@ const shouldLogSuccessfulRequest = (
   );
 };
 
+const reportCanonicalRequestViolation = (
+  config: InternalAxiosRequestConfig,
+  reason: string,
+): void => {
+  // Defensive layer: pinning nativo (iOS NSPinnedDomains / Android
+  // network-security-config) é a barreira real durante o TLS handshake.
+  // Aqui apenas observamos quando o JS ousa originar um request fora do
+  // envelope canonico — sinal de bug em config (apiBaseUrl errado) ou
+  // de dependencia chamando host arbitrario. Nao bloqueamos para evitar
+  // breakage em mock mode / dev local; nativo decide a real-rede.
+  if (appRuntimeConfig.apiMode === "mock") {
+    return;
+  }
+  networkLogger.log("network.canonical_request_violation", {
+    level: "warn",
+    context: {
+      method: (config.method ?? "get").toUpperCase(),
+      reason,
+    },
+  });
+};
+
 const attachAuthHeaders = async (
   config: InternalAxiosRequestConfig,
 ): Promise<InternalAxiosRequestConfig> => {
@@ -165,6 +189,20 @@ const attachAuthHeaders = async (
     method,
     path: requestPath,
   };
+
+  try {
+    const fullUrl = new URL(
+      config.url ?? "",
+      normalizeBaseUrl(appRuntimeConfig.apiBaseUrl),
+    ).toString();
+    const verdict = verifyCanonicalRequest(fullUrl);
+    if (verdict.kind === "blocked") {
+      reportCanonicalRequestViolation(config, verdict.reason);
+    }
+  } catch {
+    // URL composition failed (e.g., empty url + invalid baseURL). Native
+    // adapter will surface the real error; nothing to report here.
+  }
 
   const sessionState = useSessionStore.getState();
   const accessToken = sessionState.accessToken;
@@ -219,49 +257,95 @@ const handleFulfilledResponse = (
   return response;
 };
 
+interface AxiosFailureContext {
+  readonly method: string;
+  readonly path: string;
+  readonly status: number;
+  readonly code: string | undefined;
+  readonly durationMs: number;
+  readonly invalidationReason: string | null;
+}
+
+interface ApiErrorLike {
+  readonly status: number;
+  readonly code?: string | undefined;
+}
+
+const isCriticalFailure = (apiError: ApiErrorLike): boolean => {
+  return apiError.status >= 500 || apiError.status === 0;
+};
+
+const buildAxiosFailureContext = (
+  error: AxiosError,
+  apiError: ApiErrorLike,
+  reason: string | null,
+): AxiosFailureContext => {
+  const metadata = (error.config as InstrumentedRequestConfig | undefined)
+    ?.auraxisTelemetry;
+  return {
+    method: metadata?.method ?? (error.config?.method ?? "get").toUpperCase(),
+    path: metadata?.path ?? toSanitizedRequestPath(error.config?.url),
+    status: apiError.status,
+    code: apiError.code,
+    durationMs:
+      typeof metadata?.startedAt === "number"
+        ? Date.now() - metadata.startedAt
+        : 0,
+    invalidationReason: reason,
+  };
+};
+
+const maybeInvalidateSession = async (
+  error: AxiosError,
+): Promise<string | null> => {
+  const reason = resolveSessionInvalidationReason(error.response?.status ?? 0);
+  if (!reason) {
+    return null;
+  }
+  const authorizationHeader = readHeader(error.config?.headers, "Authorization");
+  if (!authorizationHeader || !useSessionStore.getState().isAuthenticated) {
+    return reason;
+  }
+  await useSessionStore.getState().invalidateSession(reason);
+  return reason;
+};
+
+const handleAxiosFailure = async (
+  error: AxiosError,
+  apiError: ApiErrorLike,
+): Promise<void> => {
+  if (apiError.status === 0) {
+    markConnectivityOffline();
+  }
+  const reason = await maybeInvalidateSession(error);
+  const context = buildAxiosFailureContext(error, apiError, reason);
+  const critical = isCriticalFailure(apiError);
+  networkLogger.log("network.request_failed", {
+    level: critical ? "error" : "warn",
+    context: { ...context },
+    error,
+    captureInSentry: critical,
+  });
+};
+
+const handleNonAxiosFailure = (apiError: ApiErrorLike, error: unknown): void => {
+  networkLogger.log("network.request_failed", {
+    level: "error",
+    context: {
+      status: apiError.status,
+      code: apiError.code,
+    },
+    error,
+  });
+};
+
 const handleRejectedResponse = async (error: unknown): Promise<never> => {
   const apiError = toApiError(error);
-
   if (isAxiosError(error)) {
-    if (apiError.status === 0) {
-      markConnectivityOffline();
-    }
-    const reason = resolveSessionInvalidationReason(error.response?.status ?? 0);
-    const authorizationHeader = readHeader(error.config?.headers, "Authorization");
-    const metadata = (error.config as InstrumentedRequestConfig | undefined)
-      ?.auraxisTelemetry;
-
-    if (reason && authorizationHeader && useSessionStore.getState().isAuthenticated) {
-      await useSessionStore.getState().invalidateSession(reason);
-    }
-
-    networkLogger.log("network.request_failed", {
-      level: apiError.status >= 500 || apiError.status === 0 ? "error" : "warn",
-      context: {
-        method: metadata?.method ?? (error.config?.method ?? "get").toUpperCase(),
-        path: metadata?.path ?? toSanitizedRequestPath(error.config?.url),
-        status: apiError.status,
-        code: apiError.code,
-        durationMs:
-          typeof metadata?.startedAt === "number"
-            ? Date.now() - metadata.startedAt
-            : 0,
-        invalidationReason: reason,
-      },
-      error,
-      captureInSentry: apiError.status >= 500 || apiError.status === 0,
-    });
+    await handleAxiosFailure(error, apiError);
   } else {
-    networkLogger.log("network.request_failed", {
-      level: "error",
-      context: {
-        status: apiError.status,
-        code: apiError.code,
-      },
-      error,
-    });
+    handleNonAxiosFailure(apiError, error);
   }
-
   return Promise.reject(apiError);
 };
 
