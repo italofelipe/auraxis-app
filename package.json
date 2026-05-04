@@ -39,7 +39,7 @@
     "@sentry/react-native": "^8.9.2",
     "@shopify/flash-list": "2.0.2",
     "@tanstack/react-query": "^5.99.0",
-    "axios": "^1.15.2",
+    "axios": "^1.16.0",
     "expo": "~54.0.34",
     "expo-constants": "~18.0.13",
     "expo-file-system": "~19.0.22",
