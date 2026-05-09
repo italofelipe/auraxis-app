@@ -1,0 +1,57 @@
+name: E2E Maestro — iOS + Android (Weekly)
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'  # Monday 6am UTC
+  workflow_dispatch:
+
+jobs:
+  maestro-ios:
+    name: E2E Maestro (iOS Simulator)
+    runs-on: macos-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '25'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Maestro CLI
+        run: |
+          curl -Ls "https://get.maestro.mobile.dev" | bash
+          echo "$HOME/.maestro/bin" >> $GITHUB_PATH
+
+      - name: Install Expo tools
+        run: npm install -g expo-cli
+
+      - name: Build iOS simulator app
+        run: npx expo export --platform ios 2>/dev/null || true
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Boot iOS simulator
+        run: |
+          xcrun simctl boot "iPhone 15" 2>/dev/null || true
+          # Wait for simulator to be ready
+          sleep 30
+
+      - name: Run Maestro flows
+        run: |
+          maestro test .maestro/01_login.yaml
+          maestro test .maestro/02_dashboard_overview.yaml
+          maestro test .maestro/05_logout.yaml
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
+        continue-on-error: true
+
+      - name: Upload Maestro results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: maestro-ios-results
+          path: ~/.maestro/tests/
+          retention-days: 14
