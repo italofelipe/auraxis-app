@@ -39,6 +39,12 @@
 **Decisão:** Tokens JWT e dados sensíveis em `expo-secure-store`.
 **Motivo:** AsyncStorage é plaintext — risco de vazamento em jailbroken devices.
 
+### ADR-008: TDD como prática canônica para lógica de negócio
+**Decisão:** Screen controllers, services e validators devem ter teste escrito antes da implementação.
+**Motivo:** Agentes escrevem testes que validam a implementação incorreta (não o comportamento esperado). TDD inverte essa ordem.
+**Exceções:** Componentes puramente visuais, tipos TypeScript puros, configurações.
+**Consequência:** `npm test` deve falhar antes de implementar, verde após.
+
 ---
 
 ## Base canônica cross-platform

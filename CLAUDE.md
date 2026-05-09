@@ -100,6 +100,49 @@ Sempre rode `npm run quality-check` antes de abrir PR. O CI executa exatamente e
 - Commitar direto em `master`
 - Expor secrets ou chaves de API em código
 
+## TDD — obrigatório para lógica de negócio
+
+Antes de implementar qualquer screen controller, service ou validator, escreva o teste que vai falhar primeiro.
+
+### Fluxo obrigatório
+
+1. Leia os critérios de aceite da issue
+2. Escreva o teste (deve falhar com `npm test`)
+3. Implemente o mínimo para o teste passar
+4. Refatore mantendo o teste verde
+
+### Onde TDD é obrigatório
+
+- `features/*/hooks/use-*-screen-controller.ts` — toda lógica derivada
+- `features/*/services/*-service.ts` — toda chamada HTTP e transformação
+- `features/*/validators.ts` — todo schema Zod
+- `shared/*/` — todo utilitário e helper compartilhado
+
+### Onde TDD é recomendado (não obrigatório)
+
+- Componentes React Native puros (`.tsx`) sem lógica de negócio
+- Telas de composição (`.screen.tsx`)
+
+### Onde TDD não se aplica
+
+- Arquivos de configuração e constantes
+- Tipos TypeScript puros
+- Mocks e factories de teste
+
+### Exemplo
+
+```typescript
+// ✅ CORRETO — teste primeiro
+// features/transactions/validators.test.ts
+it('rejects transaction with negative amount', () => {
+  const result = transactionSchema.safeParse({ amount: -100, description: 'test' })
+  expect(result.success).toBe(false)
+})
+// → implementar transactionSchema para passar
+
+// ❌ ERRADO — implementar primeiro
+```
+
 ## Integração com platform
 
 Este repo é orchestrado por `auraxis-platform`.
