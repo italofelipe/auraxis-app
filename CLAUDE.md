@@ -59,7 +59,22 @@ npm run web
 
 # Lint
 npm run lint
+
+# Verificação de qualidade completa (paridade com CI)
+npm run quality-check
 ```
+
+## Quality gates
+
+`npm run quality-check` é o comando canônico de CI-parity. Ele executa, em sequência:
+
+1. **lint** — ESLint com `--max-warnings 0`
+2. **typecheck** — `tsc --noEmit` (TypeScript strict)
+3. **policy:check** — governance scripts (frontend, contracts, route boundaries, secret hygiene, sonar config, runtime release, client security, client logging)
+4. **contracts:check** — validação dos contratos de API contra o OpenAPI snapshot
+5. **test:coverage** — Jest com threshold de cobertura ≥ 85%
+
+Sempre rode `npm run quality-check` antes de abrir PR. O CI executa exatamente essa sequência.
 
 ## Convenções
 
