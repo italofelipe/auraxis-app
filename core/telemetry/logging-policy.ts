@@ -163,6 +163,10 @@ export const APP_EVENT_LOGGING_POLICY = Object.freeze({
     "Requisição HTTP falhou no cliente.",
     ["method", "path", "status", "code"],
   ),
+  "network.canonical_request_violation": warnAndErrorWarnPolicy(
+    "Request iniciado fora do envelope canônico *.auraxis.com.br ou sem HTTPS — pinning nativo deve bloquear; sinal de bug em config.",
+    ["method", "reason"],
+  ),
   "auth.session_established": devOnlyInfoPolicy(
     "Sessão autenticada foi persistida/estabelecida.",
     ["hasRefreshToken", "emailConfirmed", "hasUserId"],

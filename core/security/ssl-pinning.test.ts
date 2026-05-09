@@ -1,6 +1,7 @@
 import {
   isSslPinningEnforced,
   resolveSslPinningPolicy,
+  verifyCanonicalRequest,
 } from "@/core/security/ssl-pinning";
 
 const setEnv = (
@@ -60,5 +61,54 @@ describe("ssl-pinning policy", () => {
       "sha256/AAA===",
       "sha256/BBB===",
     ]);
+  });
+});
+
+describe("verifyCanonicalRequest", () => {
+  it("aceita HTTPS para o host canonico", () => {
+    expect(verifyCanonicalRequest("https://api.auraxis.com.br/foo")).toEqual({
+      kind: "ok",
+    });
+    expect(verifyCanonicalRequest("https://auraxis.com.br/")).toEqual({
+      kind: "ok",
+    });
+    expect(verifyCanonicalRequest("https://cdn.auraxis.com.br/avatar.png")).toEqual({
+      kind: "ok",
+    });
+  });
+
+  it("bloqueia esquemas nao-HTTPS", () => {
+    expect(verifyCanonicalRequest("http://api.auraxis.com.br/foo")).toEqual({
+      kind: "blocked",
+      reason: "non_https_scheme",
+    });
+  });
+
+  it("bloqueia hosts nao-canonicos", () => {
+    expect(verifyCanonicalRequest("https://api.attacker.com/foo")).toEqual({
+      kind: "blocked",
+      reason: "non_canonical_host",
+    });
+    expect(verifyCanonicalRequest("https://api.auraxis.com.br.attacker.com/")).toEqual({
+      kind: "blocked",
+      reason: "non_canonical_host",
+    });
+  });
+
+  it("bloqueia URLs invalidas", () => {
+    expect(verifyCanonicalRequest("not a url")).toEqual({
+      kind: "blocked",
+      reason: "invalid_url",
+    });
+    expect(verifyCanonicalRequest("")).toEqual({
+      kind: "blocked",
+      reason: "invalid_url",
+    });
+  });
+
+  it("e case-insensitive no host", () => {
+    expect(verifyCanonicalRequest("https://API.AURAXIS.COM.BR/")).toEqual({
+      kind: "ok",
+    });
   });
 });

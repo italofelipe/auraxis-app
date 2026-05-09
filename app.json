@@ -12,7 +12,18 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sensoriumit.auraxis",
-      "buildNumber": "1"
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSAppTransportSecurity": {
+          "NSAllowsArbitraryLoads": false,
+          "NSPinnedDomains": {
+            "auraxis.com.br": {
+              "NSIncludesSubdomains": true,
+              "NSPinnedCAIdentities": []
+            }
+          }
+        }
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +35,8 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.sensoriumit.auraxis",
-      "versionCode": 1
+      "versionCode": 1,
+      "networkSecurityConfig": "./assets/network-security-config.xml"
     },
     "web": {
       "output": "static",

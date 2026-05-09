@@ -1,25 +1,46 @@
 /**
- * SSL pinning scaffolding for the Auraxis app.
+ * SSL pinning policy + defensive runtime helpers for the Auraxis app.
  *
- * Posture today:
- * - Runtime config exposes `sslPinningEnabled` and a list of expected
- *   SHA-256 fingerprints. Both are read from env so production builds
- *   can enable pinning without an OTA being able to disable it
- *   (`EXPO_PUBLIC_SSL_PINNING_ENABLED` is set at build time).
- * - This module owns the canonical "should pinning enforce now?"
- *   decision so call sites never have to assemble the predicate.
+ * Two-layer enforcement:
  *
- * Native enforcement (Android networkSecurityConfig + iOS ATS) lands
- * in a follow-up release that ties the certificate fingerprint to the
- * production deploy. Until then, the helper still returns a coherent
- * snapshot that future axios / fetch adapters can call into without
- * reshaping their wiring.
+ * 1. **Native (primary)** — pins live in the native build:
+ *    - iOS: `app.json ios.infoPlist.NSAppTransportSecurity.NSPinnedDomains`
+ *      (`NSIncludesSubdomains` + `NSPinnedCAIdentities`).
+ *    - Android: `assets/network-security-config.xml`
+ *      (`<domain-config>` + `<pin-set>` per host).
+ *    The OS/framework rejects mismatched certificates during the TLS
+ *    handshake, before any JS runs. JS cannot opt out — pinning is
+ *    immutable for the installed binary until the next store update.
+ *
+ * 2. **Defensive (this module)** — runtime predicates the HTTP layer
+ *    can call to ensure outbound requests target the canonical
+ *    `*.auraxis.com.br` envelope and use HTTPS. This catches developer
+ *    errors (typos, dev-only bypass URLs, http://) before they reach
+ *    the network — a small belt-and-braces step on top of the native
+ *    layer.
+ *
+ * The runtime config (`EXPO_PUBLIC_SSL_PINNING_ENABLED` +
+ * `EXPO_PUBLIC_SSL_PINNING_FINGERPRINTS`) is preserved for two
+ * purposes:
+ *
+ * - Telemetry / observability: ops dashboards check whether the
+ *   build was promoted with pinning intent.
+ * - Future native bridge: if we ever adopt a native pinning library
+ *   that consumes JS-side pin hashes, the same policy plumbing
+ *   already exists.
+ *
+ * Native enforcement IS active when the build ships; do not confuse
+ * "policy disabled" (env flag off) with "no pinning". The flag only
+ * controls this defensive module's posture.
  */
 
 interface RawEnvSnapshot {
   readonly enabled: string | undefined;
   readonly fingerprints: string | undefined;
 }
+
+const CANONICAL_HOST_SUFFIX = ".auraxis.com.br";
+const ROOT_HOST = "auraxis.com.br";
 
 const readEnv = (): RawEnvSnapshot => {
   return {
@@ -49,19 +70,16 @@ const parseFingerprints = (raw: string | undefined): readonly string[] => {
 export interface SslPinningPolicy {
   readonly enabled: boolean;
   /**
-   * Expected SHA-256 fingerprints, in the form
-   * `sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`.
-   * Two are recommended (current + next) so a certificate roll
-   * does not cause a forced app update.
+   * Expected SHA-256 SPKI fingerprints, in the form
+   * `sha256/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=`. These
+   * mirror the native pin sets (iOS `NSPinnedCAIdentities`, Android
+   * `<pin>`) and exist for telemetry parity. Two are recommended
+   * (current + next) so a certificate roll does not require a forced
+   * app update.
    */
   readonly expectedFingerprints: readonly string[];
 }
 
-/**
- * Resolves the active SSL pinning policy from runtime env. Returns a
- * disabled policy when the flag is off or no fingerprints are
- * configured — the caller decides whether to fail-closed.
- */
 export const resolveSslPinningPolicy = (): SslPinningPolicy => {
   const env = readEnv();
   const enabled = parseEnabled(env.enabled);
@@ -80,4 +98,46 @@ export const resolveSslPinningPolicy = (): SslPinningPolicy => {
  */
 export const isSslPinningEnforced = (): boolean => {
   return resolveSslPinningPolicy().enabled;
+};
+
+export type RequestVerdict =
+  | { readonly kind: "ok" }
+  | { readonly kind: "blocked"; readonly reason: BlockedReason };
+
+export type BlockedReason =
+  | "non_https_scheme"
+  | "non_canonical_host"
+  | "invalid_url";
+
+const isCanonicalHost = (hostname: string): boolean => {
+  const normalized = hostname.trim().toLowerCase();
+  return (
+    normalized === ROOT_HOST || normalized.endsWith(CANONICAL_HOST_SUFFIX)
+  );
+};
+
+/**
+ * Validates that an outbound request URL targets the canonical
+ * `*.auraxis.com.br` envelope and uses HTTPS. Returns a discriminated
+ * verdict so callers (HTTP client interceptor, fetch wrapper) can
+ * react appropriately — typically blocking the request and reporting
+ * to telemetry.
+ *
+ * This is a JS-side defensive check; native pinning is the primary
+ * line of defense and runs unconditionally during the TLS handshake.
+ */
+export const verifyCanonicalRequest = (rawUrl: string): RequestVerdict => {
+  let parsed: URL;
+  try {
+    parsed = new URL(rawUrl);
+  } catch {
+    return { kind: "blocked", reason: "invalid_url" };
+  }
+  if (parsed.protocol !== "https:") {
+    return { kind: "blocked", reason: "non_https_scheme" };
+  }
+  if (!isCanonicalHost(parsed.hostname)) {
+    return { kind: "blocked", reason: "non_canonical_host" };
+  }
+  return { kind: "ok" };
 };

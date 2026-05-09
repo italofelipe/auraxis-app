@@ -79,6 +79,89 @@ throw new Error("sentry-smoketest");
 `Sentry.init({ enabled: !__DEV__ })` mantém o SDK silencioso durante
 `expo start`. Só builds de preview/production reportam.
 
+## SSL pinning
+
+Pinning é aplicado em duas camadas:
+
+### 1. Nativo (primário)
+
+**iOS** — `app.json` declara `expo.ios.infoPlist.NSAppTransportSecurity`:
+
+```jsonc
+"NSAppTransportSecurity": {
+  "NSAllowsArbitraryLoads": false,
+  "NSPinnedDomains": {
+    "auraxis.com.br": {
+      "NSIncludesSubdomains": true,
+      "NSPinnedCAIdentities": []  // populado por ops antes de promover a prod
+    }
+  }
+}
+```
+
+**Android** — `app.json` aponta `expo.android.networkSecurityConfig` para
+`assets/network-security-config.xml`. Hoje o XML aplica baseline (cleartext
+bloqueado, system trust apenas). O bloco `<domain-config>` com `<pin-set>`
+entra quando ops popular as hashes SPKI.
+
+### 2. Defensivo (JS, este módulo)
+
+`core/security/ssl-pinning.ts::verifyCanonicalRequest(url)` valida que
+toda chamada outbound:
+
+- Usa `https://` (rejeita `http://`).
+- Tem hostname dentro de `*.auraxis.com.br` (rejeita typos, dev-only
+  bypass URLs, exfil para hosts arbitrários).
+
+Retorna `{ kind: "ok" }` ou `{ kind: "blocked", reason: ... }`. O HTTP
+client integra esse predicate antes de despachar a request — é
+belt-and-braces sobre o pinning nativo.
+
+### Geração e rotação dos pins SPKI
+
+```bash
+# 1. Baixar o cert público da raiz canônica
+openssl s_client -connect api.auraxis.com.br:443 -servername api.auraxis.com.br \
+  </dev/null 2>/dev/null | openssl x509 -outform PEM > /tmp/api-cert.pem
+
+# 2. Extrair o SPKI hash (formato Apple/Android)
+openssl x509 -in /tmp/api-cert.pem -pubkey -noout \
+  | openssl pkey -pubin -outform der \
+  | openssl dgst -sha256 -binary \
+  | openssl enc -base64
+
+# Saída: hash base64 — usar como pin atual.
+# Repetir com a CA de backup (próxima rotação) para o pin secundário.
+```
+
+**Política de pins:**
+
+- Sempre dois pins: **atual** + **backup** (próximo). Nunca um só, ou um
+  pin roll forçaria atualização da app store antes do cert vencer.
+- Validade dos pins documentada no XML/Info.plist com expiração explícita
+  no XML Android (`<pin-set expiration="YYYY-MM-DD">`).
+- Rotação a cada 90 dias (alinhado ao ACM auto-renew).
+
+### Smoke tests pós-build (manuais)
+
+```bash
+# 1. Build de preview com pinning
+EXPO_PUBLIC_SSL_PINNING_ENABLED=true \
+EXPO_PUBLIC_SSL_PINNING_FINGERPRINTS="sha256/<hash1>,sha256/<hash2>" \
+eas build --profile preview
+
+# 2. Cert válido → request OK (esperado)
+# 3. Proxiar via mitmproxy/Charles com cert custom → request bloqueado (TLS handshake fail)
+```
+
+### Posture do flag `EXPO_PUBLIC_SSL_PINNING_ENABLED`
+
+Esse flag NÃO controla o pinning nativo (que é imutável uma vez que a
+app é instalada). Ele controla a **postura defensiva JS**: telemetria,
+breadcrumbs Sentry, e dashboards de ops que verificam se a build foi
+promovida com intenção de pinning. Native pinning é always-on quando
+o `app.json` declara as estruturas.
+
 ## Component dev catalog
 
 Galeria interna de componentes em `app/(legal)/dev-catalog.tsx`,
