@@ -143,6 +143,19 @@ it('rejects transaction with negative amount', () => {
 // ❌ ERRADO — implementar primeiro
 ```
 
+## Mutation testing (on-demand, Stryker)
+
+Verifica se os testes existentes detectam mutações no código. Complementar ao TDD.
+
+```bash
+npm run test:mutation                  # run completo
+npm run test:mutation:features         # apenas features/** (mais rápido)
+```
+
+Score alvo: >= 70%. Rodar semanalmente ou antes de merge de validators/calculators/services.
+Relatório HTML gerado em `reports/mutation/index.html`.
+Config em `stryker.config.mjs` — foca em validators, calculators e shared/utils.
+
 ## Integração com platform
 
 Este repo é orchestrado por `auraxis-platform`.
