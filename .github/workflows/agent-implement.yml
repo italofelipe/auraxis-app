@@ -98,12 +98,12 @@ jobs:
 
             Do NOT push if any gate fails. Fix the failure first.
 
-            ## Step 6 — Open PR
+            ## Step 6 — Open PR and enable auto-merge
 
             ```bash
             git push -u origin <branch>
 
-            gh pr create \
+            PR_URL=$(gh pr create \
               --title "feat(<scope>): <description>" \
               --body "## What changes
             <screens/components implemented>
@@ -117,7 +117,13 @@ jobs:
             - [x] tests + coverage ≥ 85%: PASS
 
             ## Risk
-            <LOW/MEDIUM/HIGH> — <one-line justification>"
+            <LOW/MEDIUM/HIGH> — <one-line justification>")
+
+            # Enable auto-merge so PR merges as soon as CI passes
+            gh pr merge --auto --merge "$PR_URL"
+
+            # Add QA label to trigger qa-agent review
+            gh pr edit "$PR_URL" --add-label "needs-qa"
             ```
 
             ## Step 7 — Update issue
@@ -125,7 +131,7 @@ jobs:
             ```bash
             gh issue comment ${{ github.event.issue.number }} \
               --repo ${{ github.repository }} \
-              --body "Implementation complete. PR: <PR_URL>"
+              --body "Implementation complete. PR: $PR_URL"
 
             gh issue edit ${{ github.event.issue.number }} \
               --repo ${{ github.repository }} \
@@ -152,6 +158,18 @@ jobs:
 
             git push -u origin <branch>
             ```
+
+      - name: Enable auto-merge (fallback if agent did not)
+        if: success()
+        run: |
+          PR=$(gh pr list --search "head:feat/${{ github.event.issue.number }}" \
+            --json number --jq '.[0].number // empty')
+          if [ -n "$PR" ]; then
+            gh pr merge --auto --merge "$PR" 2>/dev/null || true
+            gh pr edit "$PR" --add-label "needs-qa" 2>/dev/null || true
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.TOKEN_GITHUB_ADMIN }}
 
       - name: Fallback — add blocked label if run failed
         if: failure()
