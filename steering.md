@@ -6,6 +6,41 @@
 
 ---
 
+## Decisões de arquitetura (ADRs)
+
+### ADR-001: Screen Controller Pattern
+**Decisão:** Toda lógica de tela fica em `use-<domain>-screen-controller.ts`, não no componente de tela.
+**Motivo:** Testabilidade — controllers são hooks puros, testáveis sem render.
+**Consequência:** Screens são "dumb" — apenas composição visual.
+
+### ADR-002: TanStack Query como server state
+**Decisão:** Todo estado vindo da API é gerenciado por TanStack Query.
+**Motivo:** Cache automático, retry, stale-while-revalidate, invalidação tipada.
+**Consequência:** Nunca sincronize manualmente server state com useState.
+
+### ADR-003: Expo Router como única abstração de navegação
+**Decisão:** Usar Expo Router (file-based) exclusivamente. Não usar react-navigation diretamente.
+**Motivo:** Consistência, deep links automáticos, type-safe routing.
+
+### ADR-004: TypeScript strict em todo o codebase
+**Decisão:** `strict: true` no tsconfig. Sem `any` implícito.
+**Motivo:** Segurança em refatorações, documentação via tipos.
+
+### ADR-005: Zod para validação de formulários e contratos
+**Decisão:** Toda validação usa Zod schemas.
+**Motivo:** Runtime safety + type inference automática.
+
+### ADR-006: Tamagui como fundação única de UI
+**Decisão:** Usar Tamagui como único runtime de UI. Tailwind não é permitido.
+**Motivo:** Tokens semânticos, performance cross-platform, troca de tema sem reescrita.
+**Consequência:** Nunca usar valores literais de cor, spacing, radius, font-size.
+
+### ADR-007: expo-secure-store para tokens (nunca AsyncStorage)
+**Decisão:** Tokens JWT e dados sensíveis em `expo-secure-store`.
+**Motivo:** AsyncStorage é plaintext — risco de vazamento em jailbroken devices.
+
+---
+
 ## Base canônica cross-platform
 
 Este repositório deve seguir os mesmos conceitos de engenharia frontend do web,

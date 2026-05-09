@@ -106,6 +106,88 @@ Este repo é orchestrado por `auraxis-platform`.
 Handoffs e decisões de arquitetura ficam em `auraxis-platform/.context/`.
 Contratos de API são definidos em `auraxis-api`.
 
+## Arquitetura de navegação (Expo Router)
+
+- Rotas em `app/` seguem file-based routing: `app/(tabs)/dashboard.tsx` → `/dashboard`
+- Stack navigators via `app/(stack)/` quando há fluxo de sub-telas
+- Rotas protegidas: middleware em `app/_layout.tsx` redireciona para `/login` se sem sessão
+- Deep links configurados em `app.json` sob `expo.scheme`
+- **Nunca** use `react-navigation` diretamente — o Expo Router é a abstração canônica
+
+## Mapa de estado
+
+| Responsabilidade | Solução | Localização |
+|------------------|---------|-------------|
+| Server state (API data) | TanStack Query | `features/*/hooks/use-*-query.ts` |
+| Session / auth | Session store | `core/session/` |
+| UI global (toasts, modais) | Providers | `core/providers/` |
+| Feature-local UI | `useState` / `useReducer` | dentro do screen controller |
+| Persistência offline | AsyncStorage via query | `core/query/` |
+
+**Regra:** nunca sincronizar manualmente server state com estado local.
+Use `queryClient.invalidateQueries()` após mutações.
+
+## Design system — shared/components disponíveis
+
+Antes de criar um novo componente, verifique `shared/components/`:
+- `shared/skeletons/` — loading placeholders para todas as telas principais
+- `shared/feedback/` — estados de erro, empty state, success
+- `shared/forms/` — inputs, selects, form wrappers com validação Zod
+- `shared/animations/` — wrappers de Reanimated para transições padrão
+- `shared/theme/` — tokens de cor, tipografia, espaçamento (via Tamagui)
+
+**Sempre reutilize. Nunca crie duplicata de componente existente.**
+
+## Gotchas de React Native / Expo
+
+### Dependências nativas
+- Adicionar dependência com módulo nativo (`expo-camera`, `expo-*`, libs com código Swift/Kotlin) **exige rebuild** do app
+- Para expo-managed workflow: `npx expo install <dep>` (não `npm install`) garante versão compatível com SDK 54
+- Após adicionar dep nativa: comunicar ao usuário que é necessário novo build (`eas build --profile development`)
+
+### Não fazer em CI / agente
+- `expo prebuild` — regenera `ios/` e `android/`, pode sobrescrever customizações
+- `eas build` — builds levam 10-30 min e consomem créditos EAS
+
+### Bridge e código nativo
+- Nunca escrever código Swift/Kotlin/Objective-C sem instrução explícita do usuário
+- Módulos nativos customizados ficam em `modules/` (Expo Modules API)
+
+### app.json / eas.json
+- Modificações em `app.json` afetam o bundle ID, permissões e configurações de store
+- **Sempre perguntar antes de modificar `app.json` ou `eas.json`**
+
+## CI — gotchas conhecidos
+
+- O CI usa `npm ci --ignore-scripts` (sem scripts de install)
+- Jest roda com `--testEnvironment node` para testes de service/hook
+- Não há E2E automatizado em CI ainda — testes manuais via Expo Go ou dev client
+- Arquivo `.env.test` pode ser necessário para testes de integração local — não commitar
+
+## Limites operacionais (detalhado)
+
+### Pode fazer autonomamente
+- Criar/editar componentes, telas, hooks, services, validators
+- Adicionar testes unitários e de integração
+- Atualizar i18n (`shared/i18n/`)
+- Criar branches e commits convencionais
+- Rodar `npm run quality-check`
+- Criar/atualizar feature flags em `shared/feature-flags/`
+
+### DEVE perguntar antes
+- Adicionar qualquer dependência com código nativo
+- Modificar `app.json`, `app.config.js`, `eas.json`
+- Adicionar nova rota em `app/` que mude a estrutura de navegação
+- Modificar `core/providers/` (afeta toda a app)
+- Mudanças que afetem contratos com auraxis-api
+
+### NUNCA fazer
+- `git add .` ou `git add -A`
+- Commitar direto em main
+- Expor tokens, segredos ou chaves em código
+- Modificar `node_modules/` diretamente
+- Rodar `expo prebuild` ou `eas build` sem instrução explícita
+
 ## SDD (obrigatório para features)
 
 - Antes de codar: garantir que a task/issue no GitHub Projects tenha critérios de aceite claros.
