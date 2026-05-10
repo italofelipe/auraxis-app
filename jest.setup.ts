@@ -156,3 +156,10 @@ afterEach(() => {
   jest.clearAllMocks();
   jest.restoreAllMocks();
 });
+
+// MSW server lifecycle for E2E integration tests
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { server } = require("./__mocks__/msw-server");
+beforeAll(() => server.listen({ onUnhandledRequest: "warn" }));
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());

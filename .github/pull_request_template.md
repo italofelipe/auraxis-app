@@ -1,31 +1,39 @@
-## Summary
+## Descrição
 
-<!-- What changed and why -->
+<!-- Explique o que foi implementado e por quê. -->
 
-## Task Reference
+Closes #<!-- número da issue -->
 
-- Task ID: `APPx` / `PLTx` / `Bxx` (if integration)
-- GitHub Projects card updated (Status/Progress/Commit/Updated At): [ ] yes
+## Tipo de mudança
 
-## Validation
+- [ ] Feature nova
+- [ ] Bug fix
+- [ ] Refactor
+- [ ] Documentação / infraestrutura
+- [ ] Outros: ___
 
-- [ ] `npm run quality-check`
-- [ ] `npm run contracts:check`
-- [ ] `npm run test:coverage`
+## Checklist de qualidade
 
-## Frontend Governance (Mandatory)
+- [ ] `npm run quality-check` passou localmente
+- [ ] Coverage **não** regrediu abaixo de 85%
+- [ ] Testes unitários criados/atualizados para o código novo
+- [ ] Screen controllers e services têm teste escrito (TDD)
 
-- [ ] No `.js/.jsx` introduced in product code.
-- [ ] All styling uses tokens/theme (no arbitrary literals).
-- [ ] Reusable code moved to `shared/*`.
-- [ ] React Native Paper-first approach respected (wrappers/components before raw primitives).
+## Checklist de dependências nativas
 
-## Contract Integration (Mandatory when backend contract changed)
+- [ ] **Não adicionei dependência nativa** — OU —
+- [ ] Adicionei dependência nativa via `npx expo install <dep>` (não npm install) E documentei a necessidade de novo build nativo no corpo do PR
 
-- [ ] Read `Feature Contract Pack` (`.context/feature_contracts/<TASK_ID>.md`).
-- [ ] Updated `contracts/feature-contract-baseline.json` (if new/changed pack).
-- [ ] Regenerated OpenAPI types (`npm run contracts:sync`) and reviewed diff.
+## Checklist de feature flags
 
-## Risks / Follow-ups
+- [ ] **Não criei feature nova** — OU —
+- [ ] Feature nova está atrás de flag em `shared/feature-flags/` e `config/feature-flags.json`
 
-<!-- Residual risk, technical debt, and next action -->
+## Checklist de contratos
+
+- [ ] Nenhum endpoint novo consumido — OU —
+- [ ] `npm run contracts:check` passou com o novo endpoint
+
+## Screenshots / evidência (se UI)
+
+<!-- Screenshot ou vídeo da mudança visual — obrigatório para mudanças de tela -->

@@ -156,6 +156,7 @@ Score alvo: >= 70%. Rodar semanalmente ou antes de merge de validators/calculato
 Relatório HTML gerado em `reports/mutation/index.html`.
 Config em `stryker.config.mjs` — foca em validators, calculators e shared/utils.
 
+
 ## Integração com platform
 
 Este repo é orchestrado por `auraxis-platform`.
