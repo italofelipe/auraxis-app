@@ -8,10 +8,14 @@ const config = {
 
   testPathIgnorePatterns: [
     "/node_modules/",
-    "/e2e/",
+    // Only ignore the root-level /e2e/ dir (Maestro tests), not __tests__/e2e/
+    "<rootDir>/e2e/",
     "/.expo/",
     "<rootDir>/_worktrees/",
     "<rootDir>/repos/",
+    // E2E utility files (not test files themselves)
+    "<rootDir>/__tests__/e2e/handlers/",
+    "<rootDir>/__tests__/e2e/render-helpers.tsx",
   ],
 
   // Transformações: jest-expo já configura babel-jest para RN
@@ -30,6 +34,17 @@ const config = {
     "^@sentry/react-native$": "<rootDir>/__mocks__/sentryReactNativeMock.ts",
     "^@/(.*)$": "<rootDir>/$1",
     "^~/(.*)$": "<rootDir>/$1",
+    // MSW v2: jest-expo uses react-native condition, but msw has ESM-only
+    // transitive deps (rettime). Map to CJS builds + stub rettime for Jest.
+    // msw/node uses msw/native in React Native test environments.
+    "^msw/node$": "<rootDir>/node_modules/msw/lib/native/index.js",
+    "^msw$": "<rootDir>/node_modules/msw/lib/core/index.js",
+    // ESM-only transitive deps of MSW v2; provide CJS stubs for Jest.
+    "^rettime$": "<rootDir>/__mocks__/rettime.js",
+    "^until-async$": "<rootDir>/__mocks__/until-async.js",
+    "^@open-draft/deferred-promise$": "<rootDir>/__mocks__/@open-draft/deferred-promise.js",
+    // headers-polyfill: use the existing CJS build directly.
+    "^headers-polyfill$": "<rootDir>/node_modules/headers-polyfill/lib/index.cjs",
   },
 
   // Setup files: configura @testing-library/jest-native matchers
