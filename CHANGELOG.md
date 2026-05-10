@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.0](https://github.com/italofelipe/auraxis-app/compare/v1.4.0...v1.5.0) (2026-05-10)
+
+
+### Features
+
+* **dx:** E2E RNTL + MSW + feature flag governance ([#381](https://github.com/italofelipe/auraxis-app/issues/381)) ([0e9449d](https://github.com/italofelipe/auraxis-app/commit/0e9449d657763aab3b560f31d6901db833c12597)), closes [#377](https://github.com/italofelipe/auraxis-app/issues/377)
+* **dx:** Stryker mutation testing para auraxis-app ([#380](https://github.com/italofelipe/auraxis-app/issues/380)) ([9a77065](https://github.com/italofelipe/auraxis-app/commit/9a77065055f24a303cad45cdc4857a9d215e3e8d))
+
 ## [1.4.0](https://github.com/italofelipe/auraxis-app/compare/v1.3.0...v1.4.0) (2026-05-09)
 
 
