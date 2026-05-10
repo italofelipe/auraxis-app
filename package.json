@@ -63,7 +63,7 @@
     "i18next": "^26.0.8",
     "jail-monkey": "^2.8.5",
     "react": "19.1.6",
-    "react-dom": "19.1.6",
+    "react-dom": "19.2.6",
     "react-hook-form": "^7.75.0",
     "react-i18next": "^17.0.6",
     "react-native": "0.81.6",
