@@ -51,3 +51,7 @@ designs/
 # Local git worktrees (never commit checkouts of other branches)
 _worktrees/
 repos/
+
+# Stryker mutation testing artifacts
+reports/mutation/
+.stryker-tmp/

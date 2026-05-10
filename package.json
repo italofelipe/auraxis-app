@@ -25,6 +25,8 @@
     "quality-check": "npm run lint && npm run typecheck && npm run policy:check && npm run contracts:check && npm run test:coverage",
     "test:e2e": "jest --testPathPattern='__tests__/e2e'",
     "test:watch": "jest --watchAll",
+    "test:mutation": "stryker run",
+    "test:mutation:features": "stryker run --mutate 'features/**/*.ts'",
     "ci:local": "bash scripts/run_ci_like_actions_local.sh",
     "e2e": "maestro test .maestro/",
     "e2e:login": "maestro test .maestro/01_login.yaml"
@@ -79,6 +81,8 @@
   "devDependencies": {
     "@commitlint/cli": "^20.4.2",
     "@commitlint/config-conventional": "^20.4.2",
+    "@stryker-mutator/core": "^9.6.1",
+    "@stryker-mutator/jest-runner": "^9.6.1",
     "@testing-library/jest-native": "^5.4.3",
     "@testing-library/react-native": "^13.3.3",
     "@types/jest": "^30.0.0",
