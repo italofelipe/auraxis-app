@@ -13,6 +13,8 @@ module.exports = defineConfig([
       "_worktrees/**",
       "**/_worktrees/**",
       "repos/**",
+      // Auto-generated GraphQL types — format is owned by graphql-codegen
+      "shared/types/generated/**",
     ],
   },
   {
