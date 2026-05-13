@@ -121,12 +121,32 @@ jobs:
       - name: Validate generated OpenAPI types and contract pack baseline
         run: npm run contracts:check
 
+  # ── 4.2 GraphQL Codegen Check ──────────────────────────────────────────
+  graphql-codegen:
+    name: GraphQL Types (codegen check)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Check GraphQL types are in sync with schema
+        run: npm run codegen:check
+        env:
+          # Pulls schema from the committed schema.graphql in auraxis-api (master branch).
+          # Update this URL when migrating to a different branch or registry.
+          GRAPHQL_SCHEMA_PATH: https://raw.githubusercontent.com/italofelipe/auraxis-api/master/schema.graphql
+
   # ── 5. Expo JS Bundle Check ────────────────────────────────────────────
   # Verifica que o bundle JS compila sem erros (não requer macOS).
   expo-bundle:
     name: Expo JS Bundle Check
     runs-on: ubuntu-latest
-    needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test, contract-smoke]
+    needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test, contract-smoke, graphql-codegen]
     outputs:
       enabled: ${{ steps.capability.outputs.enabled }}
     permissions:
