@@ -67,4 +67,24 @@ describe("tools catalog", () => {
     expect(ids.has("salary-simulator")).toBe(true);
     expect(ids.has("goal-simulator")).toBe(true);
   });
+
+  it("marca como premium as ferramentas avançadas equivalentes ao web", () => {
+    const catalog = getCanonicalToolsCatalog();
+    const premiumIds = new Set([
+      "installment-vs-cash",
+      "compound-interest",
+      "emergency-fund",
+      "fifty-thirty-twenty",
+      "debt-payoff",
+      "split-bill",
+      "cost-of-lifestyle",
+      "desconto-markup",
+    ]);
+
+    for (const tool of catalog.tools) {
+      if (premiumIds.has(tool.id)) {
+        expect(tool.requiresPremium).toBe(true);
+      }
+    }
+  });
 });

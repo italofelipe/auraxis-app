@@ -4,6 +4,7 @@ import { Paragraph, XStack, YStack } from "tamagui";
 
 import { SharedEntryCard } from "@/features/shared-entries/components/shared-entry-card";
 import { SharedInvitationCard } from "@/features/shared-entries/components/shared-invitation-card";
+import { PaywallGate } from "@/features/entitlements/components/paywall-gate";
 import {
   useSharedEntriesScreenController,
   type SharedEntriesScreenController,
@@ -32,27 +33,29 @@ export function SharedEntriesScreen(): ReactElement {
   const controller = useSharedEntriesScreenController();
 
   return (
-    <AppScreen>
-      <TabSelector controller={controller} />
-      {controller.lastError ? (
-        <AppErrorNotice
-          error={controller.lastError}
-          fallbackTitle="Algo deu errado"
-          fallbackDescription="Tente novamente em instantes."
-          secondaryActionLabel="Fechar"
-          onSecondaryAction={controller.dismissError}
-        />
-      ) : null}
-      {controller.selectedTab === "invitations" ? (
-        <InvitationsTab controller={controller} />
-      ) : null}
-      {controller.selectedTab === "byMe" ? (
-        <ByMeTab controller={controller} />
-      ) : null}
-      {controller.selectedTab === "withMe" ? (
-        <WithMeTab controller={controller} />
-      ) : null}
-    </AppScreen>
+    <PaywallGate featureKey="shared_entries">
+      <AppScreen>
+        <TabSelector controller={controller} />
+        {controller.lastError ? (
+          <AppErrorNotice
+            error={controller.lastError}
+            fallbackTitle="Algo deu errado"
+            fallbackDescription="Tente novamente em instantes."
+            secondaryActionLabel="Fechar"
+            onSecondaryAction={controller.dismissError}
+          />
+        ) : null}
+        {controller.selectedTab === "invitations" ? (
+          <InvitationsTab controller={controller} />
+        ) : null}
+        {controller.selectedTab === "byMe" ? (
+          <ByMeTab controller={controller} />
+        ) : null}
+        {controller.selectedTab === "withMe" ? (
+          <WithMeTab controller={controller} />
+        ) : null}
+      </AppScreen>
+    </PaywallGate>
   );
 }
 

@@ -27,9 +27,9 @@ const SUCCESS_NOTICE: Record<string, { title: string; description: string }> = {
       "Recebemos a confirmacao do pagamento. Pode levar alguns segundos para a UI atualizar.",
   },
   opened: {
-    title: "Checkout aberto no navegador",
+    title: "Checkout aberto",
     description:
-      "Conclua o pagamento na janela do navegador e volte ao app para ver o estado atualizado.",
+      "Conclua o pagamento e volte ao app para ver o estado atualizado.",
   },
 };
 
@@ -131,7 +131,7 @@ function SubscriptionDetails({
         }}
         testID="manage-subscription-button"
       >
-        Gerenciar pelo navegador
+        Gerenciar assinatura
       </AppButton>
     </YStack>
   );
@@ -149,8 +149,8 @@ function TrialCallout({ controller }: ControllerProps): ReactElement | null {
     >
       <YStack gap="$3">
         <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-          Sem cobranca no trial. Cancele a qualquer momento pelo Gerenciar pelo
-          navegador.
+          Sem cobranca no trial. Cancele a qualquer momento em Gerenciar
+          assinatura.
         </Paragraph>
         {controller.trialError ? (
           <AppErrorNotice
@@ -263,7 +263,7 @@ function PlansCard({ controller }: ControllerProps): ReactElement {
             ))}
             {controller.isStartingCheckout ? (
               <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-                Abrindo checkout no navegador...
+                Abrindo checkout...
               </Paragraph>
             ) : null}
           </YStack>
@@ -272,4 +272,3 @@ function PlansCard({ controller }: ControllerProps): ReactElement {
     </AppSurfaceCard>
   );
 }
-
