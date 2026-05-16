@@ -15,6 +15,7 @@ import {
   useDashboardScreenController,
   type DashboardScreenController,
 } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
+import { WeeklyInsightCard } from "@/features/insights/components/weekly-insight-card";
 import { useUserProfileQuery } from "@/features/user-profile/hooks/use-user-profile-query";
 import type {
   SavingsRateAssessment,
@@ -53,6 +54,7 @@ export function DashboardScreen(): ReactElement {
   return (
     <AppScreen>
       <BalanceCard controller={controller} />
+      <DashboardWeeklyInsightCard controller={controller} />
       {controller.monthSnapshot ? (
         <DashboardComparisonCard
           title="Saldo"
@@ -165,6 +167,17 @@ function BalanceCard({ controller }: ControllerProps): ReactElement {
         )}
       </AppQueryState>
     </AppSurfaceCard>
+  );
+}
+
+function DashboardWeeklyInsightCard({ controller }: ControllerProps): ReactElement {
+  return (
+    <WeeklyInsightCard
+      insight={controller.weeklyInsight.insight}
+      isLoading={controller.weeklyInsight.isLoading}
+      isNew={controller.weeklyInsight.isNew}
+      onMarkAsRead={controller.weeklyInsight.markAsRead}
+    />
   );
 }
 

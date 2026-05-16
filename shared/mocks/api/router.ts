@@ -11,6 +11,7 @@ import {
   dashboardOverviewFixture,
   dashboardTrendsFixture,
 } from "@/features/dashboard/mocks";
+import { weeklyInsightFixture } from "@/features/insights/mocks";
 import { goalListFixture } from "@/features/goals/mocks";
 import {
   observabilitySnapshotFixture,
@@ -321,6 +322,21 @@ const serializeDashboardOverview = (): Record<string, unknown> => {
   };
 };
 
+const serializeWeeklyInsight = (): Record<string, unknown> => {
+  return {
+    insight: {
+      id: weeklyInsightFixture.id,
+      content: weeklyInsightFixture.content,
+      key_metric: weeklyInsightFixture.keyMetric,
+      period_start: weeklyInsightFixture.periodStart,
+      period_end: weeklyInsightFixture.periodEnd,
+      status: weeklyInsightFixture.status,
+      generated_at: weeklyInsightFixture.generatedAt,
+      read_at: weeklyInsightFixture.readAt,
+    },
+  };
+};
+
 const serializeWalletCollection = (): Record<string, unknown> => {
   return {
     items: walletCollectionFixture.items.map((item) => ({
@@ -500,6 +516,22 @@ const handleDashboardRoutes: MockRouteHandler = (context) => {
   return null;
 };
 
+const handleInsightRoutes: MockRouteHandler = (context) => {
+  if (context.method === "GET" && context.pathname === "/v1/insights/latest") {
+    return ok(serializeWeeklyInsight());
+  }
+
+  if (
+    context.method === "POST" &&
+    context.pathname.startsWith("/v1/insights/") &&
+    context.pathname.endsWith("/read")
+  ) {
+    return ok({});
+  }
+
+  return null;
+};
+
 const handleWalletRoute: MockRouteHandler = (context) => {
   if (context.method !== "GET" || context.pathname !== "/wallet") {
     return null;
@@ -587,6 +619,7 @@ const routeHandlers: MockRouteHandler[] = [
   handleEntitlementRoutes,
   handleSubscriptionRoutes,
   handleDashboardRoutes,
+  handleInsightRoutes,
   handleWalletRoute,
   handleGoalRoute,
   handleAlertRoutes,

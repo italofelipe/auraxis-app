@@ -25,6 +25,10 @@ export const apiEndpointCatalog = {
     "GET /dashboard/overview",
     "GET /dashboard/trends",
   ],
+  insights: [
+    "GET /v1/insights/latest",
+    "POST /v1/insights/{insight_id}/read",
+  ],
   goals: [
     "GET /goals",
     "POST /goals",

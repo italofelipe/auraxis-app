@@ -13,6 +13,10 @@ import {
   savingsRateCalculator,
   type SavingsRateAssessment,
 } from "@/features/dashboard/services/savings-rate-calculator";
+import {
+  useWeeklyInsight,
+  type WeeklyInsightState,
+} from "@/features/insights/hooks/use-weekly-insight-query";
 
 export interface DashboardMonthOption {
   readonly value: string;
@@ -35,6 +39,7 @@ export interface DashboardScreenController {
   readonly currentBalance: number;
   readonly savingsRate: SavingsRateAssessment | null;
   readonly comparison: PeriodComparison;
+  readonly weeklyInsight: WeeklyInsightState;
   readonly greetingName: string;
   readonly setSelectedMonth: (month: string) => void;
 }
@@ -69,6 +74,7 @@ export function useDashboardScreenController(): DashboardScreenController {
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth);
   const overviewQuery = useDashboardOverviewQuery({ month: selectedMonth });
   const trendsQuery = useDashboardTrendsQuery(6);
+  const weeklyInsight = useWeeklyInsight();
 
   const monthOptions = useMemo<DashboardMonthOption[]>(() => {
     return (
@@ -125,6 +131,7 @@ export function useDashboardScreenController(): DashboardScreenController {
     currentBalance: overviewQuery.data?.totals.balance ?? 0,
     savingsRate,
     comparison,
+    weeklyInsight,
     greetingName: firstName(userName),
     setSelectedMonth,
   };

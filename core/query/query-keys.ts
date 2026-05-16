@@ -7,6 +7,10 @@ export const queryKeys = {
     root: ["dashboard"] as const,
     overview: () => ["dashboard", "overview"] as const,
   },
+  insights: {
+    root: ["insights"] as const,
+    latest: () => ["insights", "latest"] as const,
+  },
   transactions: {
     root: ["transactions"] as const,
     list: () => ["transactions", "list"] as const,
