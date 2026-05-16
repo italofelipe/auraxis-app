@@ -3,7 +3,8 @@ export type FeatureKey =
   | "advanced_simulations"
   | "export_pdf"
   | "shared_entries"
-  | "wallet_read";
+  | "wallet_read"
+  | "focus_mode";
 
 export interface EntitlementCheckQuery {
   readonly featureKey: FeatureKey;

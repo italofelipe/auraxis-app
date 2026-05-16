@@ -1,4 +1,5 @@
 import { fireEvent, render } from "@testing-library/react-native";
+import type { ReactNode } from "react";
 
 import { AppProviders } from "@/core/providers/app-providers";
 import type { SimulationRecord } from "@/features/tools/contracts";
@@ -11,6 +12,26 @@ jest.mock(
     useSimulationsHistoryScreenController: jest.fn(),
   }),
 );
+
+jest.mock("@/features/entitlements/components/paywall-gate", () => {
+  const ReactInner = jest.requireActual("react");
+  const ReactNative = jest.requireActual("react-native");
+
+  return {
+    PaywallGate: ({
+      featureKey,
+      children,
+    }: {
+      readonly featureKey: string;
+      readonly children: ReactNode;
+    }) =>
+      ReactInner.createElement(
+        ReactNative.View,
+        { testID: `paywall-${featureKey}` },
+        children,
+      ),
+  };
+});
 
 const mockedUseController = jest.mocked(useSimulationsHistoryScreenController);
 
@@ -68,6 +89,11 @@ describe("SimulationsHistoryScreen", () => {
     const { getByText, getByTestId } = renderWithProviders(buildController());
     expect(getByText("Voltar")).toBeTruthy();
     expect(getByTestId("simulations-refresh")).toBeTruthy();
+  });
+
+  it("protege o historico com entitlement advanced_simulations", () => {
+    const { getByTestId } = renderWithProviders(buildController());
+    expect(getByTestId("paywall-advanced_simulations")).toBeTruthy();
   });
 
   it("encaminha refresh para o controller", () => {

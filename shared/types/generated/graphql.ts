@@ -361,6 +361,37 @@ export type DeleteWalletEntryMutation = {
   ok: Scalars['Boolean']['output'];
 };
 
+export type FiscalDocumentListType = {
+  __typename?: 'FiscalDocumentListType';
+  fiscalDocuments: Array<FiscalDocumentType>;
+  total: Scalars['Int']['output'];
+};
+
+export type FiscalDocumentPayload = {
+  __typename?: 'FiscalDocumentPayload';
+  data?: Maybe<FiscalDocumentType>;
+  /** Field-level validation errors (empty on success). */
+  errors: Array<ValidationError>;
+  /** Human-readable status message. */
+  message: Scalars['String']['output'];
+  /** True when the mutation completed without errors. */
+  ok: Scalars['Boolean']['output'];
+};
+
+export type FiscalDocumentType = {
+  __typename?: 'FiscalDocumentType';
+  counterparty: Scalars['String']['output'];
+  createdAt: Scalars['String']['output'];
+  currency: Scalars['String']['output'];
+  description?: Maybe<Scalars['String']['output']>;
+  externalId: Scalars['String']['output'];
+  grossAmount: Scalars['DecimalScalar']['output'];
+  id: Scalars['ID']['output'];
+  issuedAt: Scalars['String']['output'];
+  status: Scalars['String']['output'];
+  type: Scalars['String']['output'];
+};
+
 export type GoalListPayloadType = {
   __typename?: 'GoalListPayloadType';
   items: Array<Maybe<GoalTypeObject>>;
@@ -614,6 +645,8 @@ export type Mutation = {
   addTicker?: Maybe<AddTickerPayload>;
   /** @deprecated ADR-0002: use POST /wallet */
   addWalletEntry?: Maybe<AddWalletEntryMutation>;
+  /** @deprecated ADR-0002: use DELETE /fiscal/receivables/{id} */
+  cancelReceivable?: Maybe<ReceivablePayload>;
   /** @deprecated ADR-0004: use POST /subscription/cancel */
   cancelSubscription?: Maybe<CancelSubscriptionMutation>;
   /**
@@ -632,10 +665,14 @@ export type Mutation = {
   createBudget?: Maybe<CreateBudgetMutation>;
   /** @deprecated ADR-0004: use POST /subscription/checkout */
   createCheckoutSession?: Maybe<CreateCheckoutSessionMutation>;
+  /** @deprecated ADR-0002: use POST /fiscal/fiscal-documents */
+  createFiscalDocument?: Maybe<FiscalDocumentPayload>;
   /** @deprecated ADR-0002: use POST /goals */
   createGoal?: Maybe<CreateGoalMutation>;
   createGoalFromInstallmentVsCashSimulation?: Maybe<CreateGoalFromInstallmentVsCashSimulationMutation>;
   createPlannedExpenseFromInstallmentVsCashSimulation?: Maybe<CreatePlannedExpenseFromInstallmentVsCashSimulationMutation>;
+  /** @deprecated ADR-0002: use POST /fiscal/receivables */
+  createReceivable?: Maybe<ReceivablePayload>;
   createTag?: Maybe<TagPayload>;
   /** @deprecated ADR-0002: use POST /transactions */
   createTransaction?: Maybe<CreateTransactionMutation>;
@@ -655,6 +692,8 @@ export type Mutation = {
   forgotPassword?: Maybe<AuthPayloadType>;
   login?: Maybe<AuthPayloadType>;
   logout?: Maybe<LogoutMutation>;
+  /** @deprecated ADR-0002: use PATCH /fiscal/receivables/{id}/receive */
+  markReceivableReceived?: Maybe<ReceivablePayload>;
   /**
    * Parse a bank statement text and return a deduplication preview.
    *
@@ -719,6 +758,11 @@ export type MutationAddWalletEntryArgs = {
 };
 
 
+export type MutationCancelReceivableArgs = {
+  entryId: Scalars['UUID']['input'];
+};
+
+
 export type MutationConfirmBankImportArgs = {
   bankName: Scalars['String']['input'];
   mode: Scalars['String']['input'];
@@ -754,6 +798,15 @@ export type MutationCreateBudgetArgs = {
 export type MutationCreateCheckoutSessionArgs = {
   billingCycle?: InputMaybe<BillingCycle>;
   planSlug: Scalars['String']['input'];
+};
+
+
+export type MutationCreateFiscalDocumentArgs = {
+  amount: Scalars['String']['input'];
+  counterpartName?: InputMaybe<Scalars['String']['input']>;
+  externalId?: InputMaybe<Scalars['String']['input']>;
+  issuedAt: Scalars['String']['input'];
+  type: Scalars['String']['input'];
 };
 
 
@@ -795,6 +848,14 @@ export type MutationCreatePlannedExpenseFromInstallmentVsCashSimulationArgs = {
   tagId?: InputMaybe<Scalars['UUID']['input']>;
   title: Scalars['String']['input'];
   upfrontDueDate?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationCreateReceivableArgs = {
+  amount: Scalars['String']['input'];
+  category?: InputMaybe<Scalars['String']['input']>;
+  description: Scalars['String']['input'];
+  expectedDate: Scalars['String']['input'];
 };
 
 
@@ -875,6 +936,13 @@ export type MutationForgotPasswordArgs = {
 export type MutationLoginArgs = {
   email: Scalars['String']['input'];
   password: Scalars['String']['input'];
+};
+
+
+export type MutationMarkReceivableReceivedArgs = {
+  entryId: Scalars['UUID']['input'];
+  receivedAmount?: InputMaybe<Scalars['String']['input']>;
+  receivedDate: Scalars['String']['input'];
 };
 
 
@@ -1146,6 +1214,7 @@ export type Query = {
   budgetSummary?: Maybe<BudgetSummaryType>;
   budgets?: Maybe<BudgetListPayloadType>;
   dashboardOverview?: Maybe<TransactionDashboardPayloadType>;
+  fiscalDocuments?: Maybe<FiscalDocumentListType>;
   goal?: Maybe<GoalTypeObject>;
   goalPlan?: Maybe<GoalPlanType>;
   goals?: Maybe<GoalListPayloadType>;
@@ -1160,6 +1229,8 @@ export type Query = {
   notificationPreferences?: Maybe<NotificationPreferencesType>;
   portfolioValuation?: Maybe<PortfolioValuationPayloadType>;
   portfolioValuationHistory?: Maybe<PortfolioHistoryPayloadType>;
+  receivables?: Maybe<ReceivableListType>;
+  receivablesSummary?: Maybe<ReceivableSummaryType>;
   simulation?: Maybe<SimulationType>;
   simulations: SimulationListPayloadType;
   tag?: Maybe<TagType>;
@@ -1195,6 +1266,11 @@ export type QueryBudgetArgs = {
 
 export type QueryDashboardOverviewArgs = {
   month: Scalars['String']['input'];
+};
+
+
+export type QueryFiscalDocumentsArgs = {
+  type?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1261,6 +1337,11 @@ export type QueryInvestmentValuationArgs = {
 export type QueryPortfolioValuationHistoryArgs = {
   finalDate?: InputMaybe<Scalars['String']['input']>;
   startDate?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type QueryReceivablesArgs = {
+  status?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1346,6 +1427,52 @@ export type QueryWeeklySummaryArgs = {
   endDate?: InputMaybe<Scalars['String']['input']>;
   period?: InputMaybe<Scalars['String']['input']>;
   startDate?: InputMaybe<Scalars['String']['input']>;
+};
+
+/**
+ * IMPORTANT: expected_net_amount is advisory-only. Clients MUST display
+ * the ``disclaimer`` field alongside any monetary value derived from it.
+ */
+export type ReceivableEntryType = {
+  __typename?: 'ReceivableEntryType';
+  createdAt: Scalars['String']['output'];
+  disclaimer: Scalars['String']['output'];
+  expectedNetAmount?: Maybe<Scalars['DecimalScalar']['output']>;
+  fiscalDocumentId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  outstandingAmount?: Maybe<Scalars['DecimalScalar']['output']>;
+  receivedAmount?: Maybe<Scalars['DecimalScalar']['output']>;
+  receivedAt?: Maybe<Scalars['String']['output']>;
+  reconciliationStatus: Scalars['String']['output'];
+};
+
+export type ReceivableListType = {
+  __typename?: 'ReceivableListType';
+  receivables: Array<ReceivableEntryType>;
+  total: Scalars['Int']['output'];
+};
+
+export type ReceivablePayload = {
+  __typename?: 'ReceivablePayload';
+  data?: Maybe<ReceivableEntryType>;
+  /** Field-level validation errors (empty on success). */
+  errors: Array<ValidationError>;
+  /** Human-readable status message. */
+  message: Scalars['String']['output'];
+  /** True when the mutation completed without errors. */
+  ok: Scalars['Boolean']['output'];
+};
+
+/**
+ * IMPORTANT: all monetary values are advisory-only estimates.
+ * Always display the ``disclaimer`` field.
+ */
+export type ReceivableSummaryType = {
+  __typename?: 'ReceivableSummaryType';
+  disclaimer: Scalars['String']['output'];
+  expectedTotal: Scalars['String']['output'];
+  pendingTotal: Scalars['String']['output'];
+  receivedTotal: Scalars['String']['output'];
 };
 
 /** Revoke all active sessions — global logout (#1028). */

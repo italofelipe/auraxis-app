@@ -79,6 +79,20 @@ throw new Error("sentry-smoketest");
 `Sentry.init({ enabled: !__DEV__ })` mantém o SDK silencioso durante
 `expo start`. Só builds de preview/production reportam.
 
+## Checkout provider
+
+`EXPO_PUBLIC_CHECKOUT_PROVIDER` controla o provider de compra usado pela
+tela canonica de assinatura:
+
+| Valor | Uso |
+|---|---|
+| `hosted` | Default. Usa o checkout hospedado retornado por `/subscriptions/checkout`; recomendado para dev, preview e canais internos. |
+| `store` | Canal de App Store / Play Store. Nao abre checkout externo; enquanto StoreKit/Play Billing nao estiverem configurados, retorna erro seguro `STORE_CHECKOUT_UNCONFIGURED`. |
+
+Esse valor e publico e nao deve conter segredo. A decisao de entitlement e
+subscription continua no backend; o app apenas escolhe o provider de compra por
+canal e invalida `subscription`/`entitlements` depois do retorno.
+
 ## SSL pinning
 
 Pinning é aplicado em duas camadas:

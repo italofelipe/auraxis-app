@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import type { SimulationRecord } from "@/features/tools/contracts";
+import { PaywallGate } from "@/features/entitlements/components/paywall-gate";
 import {
   useSimulationsHistoryScreenController,
   type SimulationsHistoryScreenController,
@@ -44,10 +45,12 @@ const formatDate = (iso: string): string => {
 export function SimulationsHistoryScreen(): ReactElement {
   const controller = useSimulationsHistoryScreenController();
   return (
-    <AppScreen>
-      <HeaderCard controller={controller} />
-      <HistoryBody controller={controller} />
-    </AppScreen>
+    <PaywallGate featureKey="advanced_simulations">
+      <AppScreen>
+        <HeaderCard controller={controller} />
+        <HistoryBody controller={controller} />
+      </AppScreen>
+    </PaywallGate>
   );
 }
 

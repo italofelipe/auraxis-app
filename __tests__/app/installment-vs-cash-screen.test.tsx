@@ -5,12 +5,22 @@ import type {
   InstallmentVsCashCalculation,
   InstallmentVsCashSavedSimulation,
 } from "@/features/tools/contracts";
+import type { ReactNode } from "react";
 import type { UseMutationResult, UseQueryResult } from "@tanstack/react-query";
 import { TestProviders } from "@/shared/testing/test-providers";
 
 jest.mock("@/features/tools/hooks/use-installment-vs-cash-screen-controller", () => ({
   useInstallmentVsCashScreenController: jest.fn(),
 }));
+
+jest.mock("@/features/entitlements/components/paywall-gate", () => {
+  const ReactInner = jest.requireActual("react");
+
+  return {
+    PaywallGate: ({ children }: { readonly children: ReactNode }) =>
+      ReactInner.createElement(ReactInner.Fragment, null, children),
+  };
+});
 
 const mockedUseInstallmentVsCashScreenController = jest.mocked(
   useInstallmentVsCashScreenController,

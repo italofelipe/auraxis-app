@@ -444,6 +444,7 @@ const handleEntitlementRoutes: MockRouteHandler = (context) => {
     "export_pdf",
     "shared_entries",
     "wallet_read",
+    "focus_mode",
   ]);
 
   return ok({

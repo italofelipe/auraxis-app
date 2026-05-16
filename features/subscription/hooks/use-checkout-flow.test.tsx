@@ -6,6 +6,7 @@ import { ApiError } from "@/core/http/api-error";
 import type { CheckoutSession } from "@/features/subscription/contracts";
 import { useCheckoutFlow } from "@/features/subscription/hooks/use-checkout-flow";
 import { useCreateCheckoutMutation } from "@/features/subscription/hooks/use-subscription-mutations";
+import type { CheckoutProvider } from "@/features/subscription/services/checkout-provider-service";
 
 jest.mock("@/features/subscription/hooks/use-subscription-mutations", () => ({
   useCreateCheckoutMutation: jest.fn(),
@@ -32,26 +33,33 @@ const wrapper = (client: QueryClient) => {
   return Provider;
 };
 
-describe("useCheckoutFlow", () => {
-  let mutateAsync: jest.Mock;
-  let reset: jest.Mock;
-  let openCheckout: jest.Mock;
-  let client: QueryClient;
+type CheckoutFlowTestState = {
+  readonly mutateAsync: jest.Mock;
+  readonly reset: jest.Mock;
+  readonly openCheckout: jest.Mock;
+  readonly client: QueryClient;
+};
 
-  beforeEach(() => {
-    mutateAsync = jest.fn().mockResolvedValue(buildSession());
-    reset = jest.fn();
-    openCheckout = jest.fn().mockResolvedValue({ type: "success", returnUrl: "x://" });
-    mockedUseCreate.mockReturnValue({
+const setupCheckoutFlowTest = (): CheckoutFlowTestState => {
+  jest.clearAllMocks();
+  const mutateAsync = jest.fn().mockResolvedValue(buildSession());
+  const reset = jest.fn();
+  const openCheckout = jest
+    .fn()
+    .mockResolvedValue({ type: "success", returnUrl: "x://" });
+  mockedUseCreate.mockReturnValue({
       mutateAsync,
       reset,
       isPending: false,
       error: null,
     } as never);
-    client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  });
+  const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+  return { mutateAsync, reset, openCheckout, client };
+};
 
+describe("useCheckoutFlow", () => {
   it("invalida subscription e entitlements em sucesso e retorna completed", async () => {
+    const { client, mutateAsync, openCheckout } = setupCheckoutFlowTest();
     const invalidateSpy = jest.spyOn(client, "invalidateQueries");
     const { result } = renderHook(
       () =>
@@ -79,6 +87,7 @@ describe("useCheckoutFlow", () => {
   });
 
   it("nao invalida estado quando o usuario cancelou", async () => {
+    const { client, openCheckout } = setupCheckoutFlowTest();
     openCheckout.mockResolvedValueOnce({ type: "cancel", returnUrl: "x://" });
     const invalidateSpy = jest.spyOn(client, "invalidateQueries");
 
@@ -101,6 +110,7 @@ describe("useCheckoutFlow", () => {
   });
 
   it("captura erro quando createCheckout falha e nao abre browser", async () => {
+    const { client, mutateAsync, openCheckout } = setupCheckoutFlowTest();
     mutateAsync.mockRejectedValueOnce(
       new ApiError({ message: "checkout offline", status: 503 }),
     );
@@ -124,7 +134,46 @@ describe("useCheckoutFlow", () => {
     expect(result.current.lastError).toBeInstanceOf(ApiError);
   });
 
+  it("usa provider store sem criar checkout hospedado nem abrir browser externo", async () => {
+    const { client, mutateAsync, openCheckout } = setupCheckoutFlowTest();
+    const storeError = new ApiError({
+      message: "Compras pela loja ainda nao configuradas.",
+      status: 503,
+      code: "STORE_CHECKOUT_UNCONFIGURED",
+    });
+    const storeProvider: CheckoutProvider = {
+      kind: "store",
+      requiresCheckoutSession: false,
+      openCheckout: jest.fn().mockRejectedValue(storeError),
+      dismissCheckout: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const { result } = renderHook(
+      () =>
+        useCheckoutFlow({
+          checkoutProvider: storeProvider,
+        }),
+      { wrapper: wrapper(client) },
+    );
+
+    const outcomeRef: { current: { outcome: string } | null } = { current: null };
+    await act(async () => {
+      outcomeRef.current = await result.current.start({ planSlug: "premium-monthly" });
+    });
+    const outcome = outcomeRef.current;
+
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(openCheckout).not.toHaveBeenCalled();
+    expect(storeProvider.openCheckout).toHaveBeenCalledWith({
+      command: { planSlug: "premium-monthly" },
+      session: null,
+    });
+    expect(outcome?.outcome).toBe("unavailable");
+    expect(result.current.lastError).toBe(storeError);
+  });
+
   it("registra erro quando o session nao tem checkoutUrl", async () => {
+    const { client, mutateAsync, openCheckout } = setupCheckoutFlowTest();
     mutateAsync.mockResolvedValueOnce(buildSession({ checkoutUrl: null }));
 
     const { result } = renderHook(
@@ -147,6 +196,7 @@ describe("useCheckoutFlow", () => {
   });
 
   it("resetError limpa lastError e a mutation", async () => {
+    const { client, mutateAsync, openCheckout, reset } = setupCheckoutFlowTest();
     mutateAsync.mockRejectedValueOnce(new ApiError({ message: "x", status: 500 }));
     const { result } = renderHook(
       () =>

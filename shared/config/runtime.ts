@@ -1,5 +1,10 @@
 import Constants from "expo-constants";
 
+import {
+  normalizeCheckoutProviderChannel,
+  type CheckoutProviderChannel,
+} from "@/shared/config/checkout-provider-channel";
+
 export type ApiMode = "live" | "mock";
 
 export interface AppRuntimeConfig {
@@ -12,6 +17,7 @@ export interface AppRuntimeConfig {
   readonly sessionExpiryLeewayMs: number;
   readonly appScheme: string;
   readonly checkoutReturnPath: string;
+  readonly checkoutProviderChannel: CheckoutProviderChannel;
   readonly observabilityExportEnabled: boolean;
   readonly observabilityExportPublicKey: string | null;
   readonly mockLatencyMs: number;
@@ -42,6 +48,7 @@ type RuntimeEnvKey =
   | "EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS"
   | "EXPO_PUBLIC_APP_SCHEME"
   | "EXPO_PUBLIC_CHECKOUT_RETURN_PATH"
+  | "EXPO_PUBLIC_CHECKOUT_PROVIDER"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED"
   | "EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY"
   | "EXPO_PUBLIC_API_MOCK_LATENCY_MS"
@@ -59,6 +66,7 @@ const RUNTIME_ENV_READERS: Readonly<Record<RuntimeEnvKey, () => string | undefin
   EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS: () => process.env.EXPO_PUBLIC_SESSION_EXPIRY_LEEWAY_MS,
   EXPO_PUBLIC_APP_SCHEME: () => process.env.EXPO_PUBLIC_APP_SCHEME,
   EXPO_PUBLIC_CHECKOUT_RETURN_PATH: () => process.env.EXPO_PUBLIC_CHECKOUT_RETURN_PATH,
+  EXPO_PUBLIC_CHECKOUT_PROVIDER: () => process.env.EXPO_PUBLIC_CHECKOUT_PROVIDER,
   EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED: () =>
     process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED,
   EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY: () => process.env.EXPO_PUBLIC_OBSERVABILITY_EXPORT_KEY,
@@ -189,6 +197,9 @@ export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
     "EXPO_PUBLIC_CHECKOUT_RETURN_PATH",
     "checkoutReturnPath",
     DEFAULT_CHECKOUT_RETURN_PATH,
+  ),
+  checkoutProviderChannel: normalizeCheckoutProviderChannel(
+    readString("EXPO_PUBLIC_CHECKOUT_PROVIDER", "checkoutProvider", "hosted"),
   ),
   observabilityExportEnabled: readBoolean(
     "EXPO_PUBLIC_OBSERVABILITY_EXPORT_ENABLED",

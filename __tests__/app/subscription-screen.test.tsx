@@ -96,6 +96,6 @@ describe("SubscriptionScreen", () => {
     );
 
     expect(getByText("Sua assinatura")).toBeTruthy();
-    expect(getByText("Gerenciar pelo navegador")).toBeTruthy();
+    expect(getByText("Gerenciar assinatura")).toBeTruthy();
   });
 });

@@ -7,6 +7,7 @@ import {
   useFocusScreenController,
   type FocusScreenController,
 } from "@/features/focus/hooks/use-focus-screen-controller";
+import { PaywallGate } from "@/features/entitlements/components/paywall-gate";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
@@ -40,10 +41,12 @@ const formatTrend = (metric: FocusMetric): string | null => {
 export function FocusScreen(): ReactElement {
   const controller = useFocusScreenController();
   return (
-    <AppScreen>
-      <SelectorCard controller={controller} />
-      <MetricCard metric={controller.metric} />
-    </AppScreen>
+    <PaywallGate featureKey="focus_mode">
+      <AppScreen>
+        <SelectorCard controller={controller} />
+        <MetricCard metric={controller.metric} />
+      </AppScreen>
+    </PaywallGate>
   );
 }
 

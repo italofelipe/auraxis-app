@@ -47,9 +47,17 @@ const FUNCTIONAL_ROUTES: ReadonlyMap<string, string> = new Map([
   ["desconto-markup", "/desconto-markup"],
 ]);
 
-// No tool is premium-gated yet. Premium gating returns when the first
-// paywalled tool ships — the contract's optional `requiresPremium`
-// field stays open for it.
+const PREMIUM_TOOL_IDS = new Set([
+  "installment-vs-cash",
+  "compound-interest",
+  "emergency-fund",
+  "fifty-thirty-twenty",
+  "debt-payoff",
+  "split-bill",
+  "cost-of-lifestyle",
+  "desconto-markup",
+]);
+
 const buildTool = (
   category: ToolCategory,
   seed: ToolSeed,
@@ -63,6 +71,7 @@ const buildTool = (
     description,
     category,
     enabled: route !== undefined,
+    ...(PREMIUM_TOOL_IDS.has(id) && { requiresPremium: true }),
     ...(route !== undefined && { route }),
   };
 };

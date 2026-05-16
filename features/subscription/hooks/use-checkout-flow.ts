@@ -9,9 +9,16 @@ import type {
 } from "@/features/subscription/contracts";
 import { useCreateCheckoutMutation } from "@/features/subscription/hooks/use-subscription-mutations";
 import {
-  hostedCheckoutService,
+  type hostedCheckoutService,
   type HostedCheckoutResultType,
 } from "@/features/subscription/services/hosted-checkout-service";
+import {
+  checkoutProviderResolver,
+  createHostedCheckoutProvider,
+  type CheckoutProvider,
+  type CheckoutProviderInput,
+  type CheckoutProviderResolver,
+} from "@/features/subscription/services/checkout-provider-service";
 
 export type CheckoutOutcome =
   | "completed"
@@ -53,12 +60,14 @@ const RESULT_OUTCOME: Record<HostedCheckoutResultType, CheckoutOutcome> = {
 export function useCheckoutFlow(
   dependencies: {
     readonly checkoutService?: typeof hostedCheckoutService;
+    readonly checkoutProvider?: CheckoutProvider;
+    readonly checkoutProviderResolver?: CheckoutProviderResolver;
   } = {},
 ): CheckoutFlowController {
   const queryClient = useQueryClient();
   const createCheckout = useCreateCheckoutMutation();
   const [lastError, setLastError] = useState<unknown | null>(null);
-  const checkoutService = dependencies.checkoutService ?? hostedCheckoutService;
+  const checkoutProvider = resolveCheckoutProvider(dependencies);
 
   const invalidateBillingState = (): void => {
     void queryClient.invalidateQueries({ queryKey: queryKeys.subscription.root });
@@ -70,18 +79,25 @@ export function useCheckoutFlow(
   ): Promise<CheckoutFlowResult> => {
     setLastError(null);
 
-    const session = await safeCreateCheckout(command, createCheckout, setLastError);
-    if (!session) {
-      return { outcome: "unavailable", session: null };
-    }
-    if (!session.checkoutUrl) {
-      setLastError(
-        new ApiError({ message: "Checkout indisponivel no momento.", status: 503 }),
-      );
-      return { outcome: "unavailable", session };
+    let session: CheckoutSession | null = null;
+    if (checkoutProvider.requiresCheckoutSession) {
+      session = await safeCreateCheckout(command, createCheckout, setLastError);
+      if (!session) {
+        return { outcome: "unavailable", session: null };
+      }
+      if (!session.checkoutUrl) {
+        setLastError(
+          new ApiError({ message: "Checkout indisponivel no momento.", status: 503 }),
+        );
+        return { outcome: "unavailable", session };
+      }
     }
 
-    const outcome = await safeOpenCheckout(session, checkoutService, setLastError);
+    const outcome = await safeOpenCheckout(
+      { command, session },
+      checkoutProvider,
+      setLastError,
+    );
     if (!outcome) {
       return { outcome: "unavailable", session };
     }
@@ -104,6 +120,25 @@ export function useCheckoutFlow(
   };
 }
 
+const resolveCheckoutProvider = (
+  dependencies: {
+    readonly checkoutService?: typeof hostedCheckoutService;
+    readonly checkoutProvider?: CheckoutProvider;
+    readonly checkoutProviderResolver?: CheckoutProviderResolver;
+  },
+): CheckoutProvider => {
+  if (dependencies.checkoutProvider) {
+    return dependencies.checkoutProvider;
+  }
+
+  if (dependencies.checkoutService) {
+    return createHostedCheckoutProvider(dependencies.checkoutService);
+  }
+
+  return (dependencies.checkoutProviderResolver ?? checkoutProviderResolver)
+    .resolveProvider();
+};
+
 const safeCreateCheckout = async (
   command: CreateCheckoutCommand,
   createCheckout: ReturnType<typeof useCreateCheckoutMutation>,
@@ -118,12 +153,12 @@ const safeCreateCheckout = async (
 };
 
 const safeOpenCheckout = async (
-  session: CheckoutSession,
-  checkoutService: typeof hostedCheckoutService,
+  input: CheckoutProviderInput,
+  checkoutProvider: CheckoutProvider,
   onError: (error: unknown) => void,
 ): Promise<CheckoutOutcome | null> => {
   try {
-    const result = await checkoutService.openCheckout(session);
+    const result = await checkoutProvider.openCheckout(input);
     return RESULT_OUTCOME[result.type] ?? "dismissed";
   } catch (error) {
     onError(error);
