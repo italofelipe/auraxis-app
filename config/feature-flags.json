@@ -29,6 +29,16 @@
       "status": "enabled-dev",
       "description": "Controla o registro de push notifications nativas no app.",
       "repositories": ["auraxis-app", "auraxis-api"]
+    },
+    {
+      "key": "app.observability.analytics",
+      "owner": "platform",
+      "createdAt": "2026-05-17",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "draft",
+      "description": "Controla a coleta de analytics de produto no app enquanto o provider PostHog e opt-out LGPD sao integrados.",
+      "repositories": ["auraxis-app"]
     }
   ]
 }
