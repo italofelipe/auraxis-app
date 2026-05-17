@@ -13,7 +13,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 
 import { initSentry } from "@/app/services/sentry";
-import { initPostHog } from "@/app/services/posthog";
+import { initPostHog } from "@/core/observability/posthog-service";
 import {
   performanceTracker,
   resetPerformanceTrackerForTests,

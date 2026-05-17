@@ -81,7 +81,7 @@ throw new Error("sentry-smoketest");
 
 ## PostHog — product analytics
 
-`app/services/posthog.ts::initPostHog()` roda no startup logo depois de
+`core/observability/posthog-service.ts::initPostHog()` roda no startup logo depois de
 `initSentry()`. O provider so inicializa quando:
 
 1. a flag `app.observability.analytics` esta habilitada;

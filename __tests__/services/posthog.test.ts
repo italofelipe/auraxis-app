@@ -11,7 +11,7 @@ import {
   createPostHogAnalyticsClient,
   initPostHog,
   resetPostHogRuntimeForTests,
-} from "@/app/services/posthog";
+} from "@/core/observability/posthog-service";
 
 jest.mock("posthog-react-native", () => jest.fn());
 jest.mock("@/core/observability/analytics-preferences", () => ({
