@@ -1,4 +1,5 @@
-import axios, {
+import {
+  create as createAxios,
   isAxiosError,
   type AxiosError,
   type AxiosInstance,
@@ -9,6 +10,7 @@ import axios, {
 } from "axios";
 
 import { toApiError } from "@/core/http/api-error";
+import { unwrapEnvelopeData } from "@/core/http/contracts";
 import { sanitizeAppUrl } from "@/core/navigation/deep-linking";
 import { verifyCanonicalRequest } from "@/core/security/ssl-pinning";
 import {
@@ -19,6 +21,7 @@ import { useSessionStore } from "@/core/session/session-store";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { networkLogger } from "@/core/telemetry/domain-loggers";
 import { appRuntimeConfig, normalizeBaseUrl } from "@/shared/config/runtime";
+import { apiContractMap } from "@/shared/contracts/api-contract-map";
 import { createMockApiAdapter } from "@/shared/mocks/api/router";
 
 interface RequestTelemetryMetadata {
@@ -29,7 +32,17 @@ interface RequestTelemetryMetadata {
 
 type InstrumentedRequestConfig = InternalAxiosRequestConfig & {
   auraxisTelemetry?: RequestTelemetryMetadata;
+  auraxisAuthRetry?: boolean;
+  auraxisSkipAccessToken?: boolean;
 };
+
+interface AuthRefreshPayload {
+  readonly token?: unknown;
+  readonly refresh_token?: unknown;
+  readonly expires_at?: unknown;
+}
+
+type RefreshSession = () => Promise<string>;
 
 const LIVE_API_ADAPTER_PRIORITY: NonNullable<
   CreateAxiosDefaults["adapter"]
@@ -76,6 +89,10 @@ const setHeaderValue = (
   config.headers = nextHeaders;
 };
 
+const shouldSkipAccessToken = (config: InternalAxiosRequestConfig): boolean => {
+  return (config as InstrumentedRequestConfig).auraxisSkipAccessToken === true;
+};
+
 const invalidateExpiredSessionIfNeeded = async (): Promise<void> => {
   const sessionState = useSessionStore.getState();
   if (
@@ -89,6 +106,16 @@ const invalidateExpiredSessionIfNeeded = async (): Promise<void> => {
   }
 
   await sessionState.invalidateSession("expired");
+};
+
+const invalidateExpiredSessionForRequest = async (
+  config: InternalAxiosRequestConfig,
+): Promise<void> => {
+  if (shouldSkipAccessToken(config)) {
+    return;
+  }
+
+  await invalidateExpiredSessionIfNeeded();
 };
 
 const markConnectivityOnline = (): void => {
@@ -176,10 +203,26 @@ const reportCanonicalRequestViolation = (
   });
 };
 
+const attachObservabilityHeaders = (
+  config: InternalAxiosRequestConfig,
+): void => {
+  if (
+    (config.url ?? "").startsWith("/ops/") &&
+    appRuntimeConfig.observabilityExportEnabled &&
+    appRuntimeConfig.observabilityExportPublicKey
+  ) {
+    setHeaderValue(
+      config,
+      "X-Observability-Key",
+      appRuntimeConfig.observabilityExportPublicKey,
+    );
+  }
+};
+
 const attachAuthHeaders = async (
   config: InternalAxiosRequestConfig,
 ): Promise<InternalAxiosRequestConfig> => {
-  await invalidateExpiredSessionIfNeeded();
+  await invalidateExpiredSessionForRequest(config);
 
   const instrumentedConfig = config as InstrumentedRequestConfig;
   const requestPath = toSanitizedRequestPath(config.url);
@@ -215,22 +258,11 @@ const attachAuthHeaders = async (
     },
   });
 
-  if (accessToken) {
+  if (accessToken && !shouldSkipAccessToken(config)) {
     setHeaderValue(config, "Authorization", `Bearer ${accessToken}`);
   }
 
-  if (
-    (config.url ?? "").startsWith("/ops/") &&
-    appRuntimeConfig.observabilityExportEnabled &&
-    appRuntimeConfig.observabilityExportPublicKey
-  ) {
-    setHeaderValue(
-      config,
-      "X-Observability-Key",
-      appRuntimeConfig.observabilityExportPublicKey,
-    );
-  }
-
+  attachObservabilityHeaders(config);
   return config;
 };
 
@@ -339,7 +371,139 @@ const handleNonAxiosFailure = (apiError: ApiErrorLike, error: unknown): void => 
   });
 };
 
-const handleRejectedResponse = async (error: unknown): Promise<never> => {
+const readRefreshToken = (): string => {
+  const sessionState = useSessionStore.getState();
+  if (!sessionState.isAuthenticated || !sessionState.refreshToken) {
+    throw new Error("missing_refresh_token");
+  }
+
+  return sessionState.refreshToken;
+};
+
+const readRequiredString = (
+  payload: AuthRefreshPayload,
+  key: keyof AuthRefreshPayload,
+): string => {
+  const value = payload[key];
+  if (typeof value !== "string" || value.length === 0) {
+    throw new Error(`invalid_refresh_payload:${String(key)}`);
+  }
+
+  return value;
+};
+
+const readOptionalString = (
+  payload: AuthRefreshPayload,
+  key: keyof AuthRefreshPayload,
+): string | null => {
+  const value = payload[key];
+  return typeof value === "string" && value.length > 0 ? value : null;
+};
+
+const requestSessionRefresh = async (
+  client: AxiosInstance,
+): Promise<string> => {
+  const refreshToken = readRefreshToken();
+  const refreshConfig = {
+    headers: {
+      Authorization: `Bearer ${refreshToken}`,
+    },
+    auraxisAuthRetry: true,
+    auraxisSkipAccessToken: true,
+  };
+
+  const response = await client.post(
+    apiContractMap.authRefresh.path,
+    undefined,
+    refreshConfig,
+  );
+  const payload = unwrapEnvelopeData<AuthRefreshPayload>(response.data);
+  const accessToken = readRequiredString(payload, "token");
+  const nextRefreshToken = readRequiredString(payload, "refresh_token");
+
+  await useSessionStore
+    .getState()
+    .rotateTokens(accessToken, nextRefreshToken, readOptionalString(payload, "expires_at"));
+
+  return accessToken;
+};
+
+const createRefreshSession = (client: AxiosInstance): RefreshSession => {
+  let refreshPromise: Promise<string> | null = null;
+
+  return async (): Promise<string> => {
+    if (!refreshPromise) {
+      refreshPromise = requestSessionRefresh(client).finally(() => {
+        refreshPromise = null;
+      });
+    }
+
+    return refreshPromise;
+  };
+};
+
+const shouldAttemptSessionRefresh = (error: AxiosError): boolean => {
+  const config = error.config as InstrumentedRequestConfig | undefined;
+  const sessionState = useSessionStore.getState();
+
+  return (
+    error.response?.status === 401 &&
+    Boolean(config) &&
+    config?.auraxisAuthRetry !== true &&
+    config?.auraxisSkipAccessToken !== true &&
+    Boolean(readHeader(config?.headers, "Authorization")) &&
+    sessionState.isAuthenticated &&
+    Boolean(sessionState.refreshToken)
+  );
+};
+
+const retryRequestWithAccessToken = (
+  client: AxiosInstance,
+  error: AxiosError,
+  accessToken: string,
+): Promise<AxiosResponse> | null => {
+  const config = error.config as InstrumentedRequestConfig | undefined;
+  if (!config) {
+    return null;
+  }
+
+  config.auraxisAuthRetry = true;
+  setHeaderValue(config, "Authorization", `Bearer ${accessToken}`);
+  return client.request(config);
+};
+
+const refreshAndRetryIfPossible = async (
+  client: AxiosInstance,
+  refreshSession: RefreshSession,
+  error: AxiosError,
+): Promise<AxiosResponse | null> => {
+  if (!shouldAttemptSessionRefresh(error)) {
+    return null;
+  }
+
+  try {
+    const accessToken = await refreshSession();
+    return retryRequestWithAccessToken(client, error, accessToken);
+  } catch {
+    return null;
+  }
+};
+
+const createRejectedResponseHandler = (
+  client: AxiosInstance,
+  refreshSession: RefreshSession,
+) => async (error: unknown): Promise<AxiosResponse> => {
+  if (isAxiosError(error)) {
+    const retriedResponse = await refreshAndRetryIfPossible(
+      client,
+      refreshSession,
+      error,
+    );
+    if (retriedResponse) {
+      return retriedResponse;
+    }
+  }
+
   const apiError = toApiError(error);
   if (isAxiosError(error)) {
     await handleAxiosFailure(error, apiError);
@@ -350,7 +514,7 @@ const handleRejectedResponse = async (error: unknown): Promise<never> => {
 };
 
 export const createHttpClient = (baseUrl: string): AxiosInstance => {
-  const client = axios.create({
+  const client = createAxios({
     baseURL: normalizeBaseUrl(baseUrl),
     timeout: appRuntimeConfig.requestTimeoutMs,
     headers: {
@@ -362,10 +526,12 @@ export const createHttpClient = (baseUrl: string): AxiosInstance => {
         : LIVE_API_ADAPTER_PRIORITY,
   });
 
+  const refreshSession = createRefreshSession(client);
+
   client.interceptors.request.use(attachAuthHeaders);
   client.interceptors.response.use(
     handleFulfilledResponse,
-    handleRejectedResponse,
+    createRejectedResponseHandler(client, refreshSession),
   );
 
   return client;

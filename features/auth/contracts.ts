@@ -36,6 +36,12 @@ export interface AuthActionResult {
   readonly message: string;
 }
 
+export interface AuthRefreshResult {
+  readonly accessToken: string;
+  readonly refreshToken: string;
+  readonly expiresAt?: string | null;
+}
+
 export interface AuthSession {
   readonly accessToken: string;
   readonly refreshToken: string | null;
