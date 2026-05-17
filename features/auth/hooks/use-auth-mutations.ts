@@ -1,4 +1,5 @@
 import { createApiMutation } from "@/core/query/create-api-mutation";
+import { useAnalytics } from "@/core/observability/use-analytics";
 import { useSessionStore } from "@/core/session/session-store";
 import type {
   AuthActionResult,
@@ -12,6 +13,7 @@ import type {
 import { authService } from "@/features/auth/services/auth-service";
 
 export const useLoginMutation = () => {
+  const analytics = useAnalytics();
   const signIn = useSessionStore((state) => state.signIn);
 
   return createApiMutation<AuthSession, LoginCommand>(authService.login, {
@@ -26,23 +28,44 @@ export const useLoginMutation = () => {
           emailConfirmed: session.user.emailConfirmed,
         },
       });
+      analytics.identify(session.user.id, {
+        emailConfirmed: session.user.emailConfirmed,
+      });
+      analytics.capture("auth.login.success", {
+        method: "password",
+        emailConfirmed: session.user.emailConfirmed,
+      });
     },
   });
 };
 
 export const useLogoutMutation = () => {
+  const analytics = useAnalytics();
   const signOut = useSessionStore((state) => state.signOut);
 
   return createApiMutation<void, void>(() => authService.logout(), {
     onSettled: async () => {
+      analytics.capture("auth.logout", {
+        reason: "manual",
+      });
+      analytics.reset();
       await signOut();
     },
   });
 };
 
 export const useRegisterMutation = () => {
+  const analytics = useAnalytics();
+
   return createApiMutation<AuthActionResult, RegisterCommand>(
     authService.register,
+    {
+      onSuccess: () => {
+        analytics.capture("auth.register.completed", {
+          emailConfirmed: false,
+        });
+      },
+    },
   );
 };
 
