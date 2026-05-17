@@ -1,5 +1,7 @@
 import {
   appRoutes,
+  appRouteRegistry,
+  isLegalAppRoute,
   isPrivateAppRoute,
   isPublicAppRoute,
   type AppRoute,
@@ -35,6 +37,17 @@ export type AppLinkIntent = RouteLinkIntent | CheckoutReturnIntent;
 
 type QueryValue = string | null;
 
+export const ALLOWED_DEEP_LINK_PATHS: readonly AppRoute[] = Object.freeze(
+  appRouteRegistry.map((route) => route.path),
+);
+
+const ALLOWED_DEEP_LINK_PATH_SET = new Set<AppRoute>(ALLOWED_DEEP_LINK_PATHS);
+const TRUSTED_UNIVERSAL_LINK_HOSTS = new Set(["auraxis.app", "www.auraxis.app"]);
+
+const isAllowedDeepLinkPath = (path: string): path is AppRoute => {
+  return ALLOWED_DEEP_LINK_PATH_SET.has(path as AppRoute);
+};
+
 const normalizeRoutePath = (path: string): string => {
   if (path.length === 0 || path === "/") {
     return appRoutes.root;
@@ -50,10 +63,9 @@ const configuredCheckoutReturnPath = normalizeRoutePath(
 
 const resolveUrlPath = (url: URL): string => {
   const pathname = normalizeRoutePath(url.pathname);
-  const isAppScheme =
-    url.protocol !== "http:" && url.protocol !== "https:" && url.host.length > 0;
+  const isAppScheme = url.protocol === `${appRuntimeConfig.appScheme}:`;
 
-  if (isAppScheme) {
+  if (isAppScheme && url.host.length > 0) {
     if (pathname === appRoutes.root) {
       return normalizeRoutePath(url.host);
     }
@@ -61,6 +73,18 @@ const resolveUrlPath = (url: URL): string => {
   }
 
   return pathname;
+};
+
+const isTrustedIncomingUrl = (url: URL): boolean => {
+  if (url.protocol === `${appRuntimeConfig.appScheme}:`) {
+    return true;
+  }
+
+  if (url.protocol !== "https:") {
+    return false;
+  }
+
+  return TRUSTED_UNIVERSAL_LINK_HOSTS.has(url.hostname.toLowerCase());
 };
 
 const readQueryValue = (
@@ -190,6 +214,18 @@ export const parseAppUrl = (rawUrl: string): AppLinkIntent | null => {
     return null;
   }
 
+  if (!isTrustedIncomingUrl(url)) {
+    navigationLogger.log("navigation.deep_link_rejected", {
+      level: "warn",
+      context: {
+        rawUrl: sanitizeAppUrl(rawUrl),
+        path: normalizeRoutePath(url.pathname),
+        reason: "untrusted_scheme_or_host",
+      },
+    });
+    return null;
+  }
+
   const path = resolveUrlPath(url);
 
   if (path === appRoutes.root) {
@@ -204,7 +240,12 @@ export const parseAppUrl = (rawUrl: string): AppLinkIntent | null => {
     return buildCheckoutReturnIntent(rawUrl, path, url.searchParams);
   }
 
-  if (isPrivateAppRoute(path) || isPublicAppRoute(path)) {
+  if (
+    isAllowedDeepLinkPath(path) ||
+    isPrivateAppRoute(path) ||
+    isPublicAppRoute(path) ||
+    isLegalAppRoute(path)
+  ) {
     return {
       kind: "route",
       href: path,
@@ -221,6 +262,12 @@ export const parseAppUrl = (rawUrl: string): AppLinkIntent | null => {
     },
   });
   return null;
+};
+
+export const resolveDeepLinkFallbackRoute = (
+  isAuthenticated: boolean,
+): PrivateAppRoute | (typeof appRoutes.public.login) => {
+  return isAuthenticated ? appRoutes.private.dashboard : appRoutes.public.login;
 };
 
 export const buildAppUrl = (

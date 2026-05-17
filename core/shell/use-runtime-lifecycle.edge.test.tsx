@@ -5,6 +5,7 @@ import { AppState, type AppStateStatus } from "react-native";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { reachabilityService } from "@/core/shell/reachability-service";
 import { useRuntimeLifecycle } from "@/core/shell/use-runtime-lifecycle";
+import { appRoutes } from "@/core/navigation/routes";
 import {
   makeAppShellState,
   makeSessionState,
@@ -18,6 +19,16 @@ const mockRevalidate = jest.fn().mockResolvedValue({
   signedOut: false,
   entitlementsVersion: 4,
 });
+const mockRouterReplace = jest.fn();
+
+jest.mock("expo-router", () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: mockRouterReplace,
+    back: jest.fn(),
+    canGoBack: jest.fn(() => false),
+  }),
+}));
 
 jest.mock("expo-linking", () => ({
   getInitialURL: jest.fn(),
@@ -44,6 +55,7 @@ const createLinkingSubscription = (): ReturnType<
   } as unknown as ReturnType<typeof Linking.addEventListener>;
 };
 
+// eslint-disable-next-line max-lines-per-function
 describe("useRuntimeLifecycle - edge cases", () => {
   let appStateListener: ((state: AppStateStatus) => void) | null;
 
@@ -87,7 +99,7 @@ describe("useRuntimeLifecycle - edge cases", () => {
     });
   });
 
-  it("ignora links invalidos e nao duplica o processamento do mesmo retorno", async () => {
+  it("redireciona link inicial invalido e nao duplica o processamento do mesmo retorno", async () => {
     const urlListenerRef: {
       current: ((event: { readonly url: string }) => void) | null;
     } = {
@@ -112,8 +124,11 @@ describe("useRuntimeLifecycle - edge cases", () => {
     });
 
     await waitFor(() => {
-      expect(useAppShellStore.getState().lastHandledUrl).toBeNull();
+      expect(useAppShellStore.getState().lastHandledUrl).toBe(
+        "auraxisapp://desconhecido",
+      );
     });
+    expect(mockRouterReplace).toHaveBeenCalledWith(appRoutes.private.dashboard);
 
     urlListenerRef.current?.({
       url: "auraxisapp://assinatura?status=success&provider=asaas",
@@ -127,6 +142,62 @@ describe("useRuntimeLifecycle - edge cases", () => {
     });
 
     expect(mockRevalidate).toHaveBeenCalledTimes(1);
+  });
+
+  it("redireciona deep link invalido para dashboard quando a sessao esta autenticada", async () => {
+    jest.mocked(Linking.getInitialURL).mockResolvedValue("auraxisapp://admin");
+    jest.mocked(Linking.addEventListener).mockImplementation(
+      ((..._args) => createLinkingSubscription()) as typeof Linking.addEventListener,
+    );
+
+    renderHook(() => useRuntimeLifecycle(), {
+      wrapper: createTestHookWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(mockRouterReplace).toHaveBeenCalledWith(appRoutes.private.dashboard);
+    });
+  });
+
+  it("redireciona deep link invalido para login quando a sessao nao esta autenticada", async () => {
+    const urlListenerRef: {
+      current: ((event: { readonly url: string }) => void) | null;
+    } = {
+      current: null,
+    };
+
+    resetRuntimeStores({
+      appShell: makeAppShellState({
+        fontsReady: true,
+        startupReady: true,
+      }),
+      session: makeSessionState({
+        hydrated: true,
+        isAuthenticated: false,
+      }),
+    });
+    jest.mocked(Linking.getInitialURL).mockResolvedValue(null);
+    jest.mocked(Linking.addEventListener).mockImplementation(
+      ((event, listener) => {
+        if (event === "url") {
+          urlListenerRef.current = listener as unknown as (
+            event: { readonly url: string },
+          ) => void;
+        }
+
+        return createLinkingSubscription();
+      }) as typeof Linking.addEventListener,
+    );
+
+    renderHook(() => useRuntimeLifecycle(), {
+      wrapper: createTestHookWrapper(),
+    });
+
+    urlListenerRef.current?.({ url: "https://evil.example/dashboard" });
+
+    await waitFor(() => {
+      expect(mockRouterReplace).toHaveBeenCalledWith(appRoutes.public.login);
+    });
   });
 
   it("nao sincroniza quando o app muda para inactive sem voltar ao foreground", async () => {

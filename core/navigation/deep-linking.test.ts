@@ -1,12 +1,22 @@
 import {
+  ALLOWED_DEEP_LINK_PATHS,
   buildAppUrl,
   buildCheckoutReturnUrl,
   parseAppUrl,
   sanitizeAppUrl,
 } from "@/core/navigation/deep-linking";
-import { appRoutes } from "@/core/navigation/routes";
+import { appRouteRegistry, appRoutes } from "@/core/navigation/routes";
 
+// eslint-disable-next-line max-lines-per-function
 describe("deep linking", () => {
+  it("mantem a allowlist explicita sincronizada com o registry canonico", () => {
+    const registeredPaths = appRouteRegistry
+      .map((route) => route.path)
+      .toSorted();
+
+    expect([...ALLOWED_DEEP_LINK_PATHS].toSorted()).toEqual(registeredPaths);
+  });
+
   it("resolve rotas publicas a partir do scheme do app", () => {
     expect(parseAppUrl("auraxisapp://login")).toEqual({
       kind: "route",
@@ -54,6 +64,19 @@ describe("deep linking", () => {
     });
   });
 
+  it("aceita rotas legais por scheme e universal link confiavel", () => {
+    expect(parseAppUrl("auraxisapp://privacy-policy")).toEqual({
+      kind: "route",
+      href: appRoutes.legal.privacyPolicy,
+      rawUrl: "auraxisapp://privacy-policy",
+    });
+    expect(parseAppUrl("https://auraxis.app/terms-of-service")).toEqual({
+      kind: "route",
+      href: appRoutes.legal.termsOfService,
+      rawUrl: "https://auraxis.app/terms-of-service",
+    });
+  });
+
   it("normaliza status desconhecido e ignora rotas invalidas", () => {
     expect(
       parseAppUrl("auraxisapp://assinatura?result=unexpected"),
@@ -63,6 +86,11 @@ describe("deep linking", () => {
     });
     expect(parseAppUrl("auraxisapp://rota-inexistente")).toBeNull();
     expect(parseAppUrl("nao-e-uma-url")).toBeNull();
+  });
+
+  it("rejeita universal links fora dos hosts confiaveis", () => {
+    expect(parseAppUrl("https://evil.example/dashboard")).toBeNull();
+    expect(parseAppUrl("http://auraxis.app/dashboard")).toBeNull();
   });
 
   it("gera URLs internas com e sem querystring", () => {
