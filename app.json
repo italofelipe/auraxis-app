@@ -56,7 +56,15 @@
           }
         }
       ],
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-notifications",
+        {
+          "defaultChannel": "auraxis-default",
+          "mode": "production",
+          "color": "#2F80ED"
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

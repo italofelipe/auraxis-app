@@ -7,9 +7,11 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AppErrorBoundary } from "@/core/errors/app-error-boundary";
 import { AppProviders } from "@/core/providers/app-providers";
 import { useAppStartup } from "@/core/shell/use-app-startup";
+import { usePushNotificationListener } from "@/core/notifications/listener";
 
 function RootLayoutContent() {
   const { ready } = useAppStartup();
+  usePushNotificationListener();
 
   if (!ready) {
     return null;

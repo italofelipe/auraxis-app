@@ -9,6 +9,8 @@ import { privateTabDefinitions } from "@/core/navigation/routes";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
 import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
+import { WEEKLY_INSIGHT_FEATURE_FLAG_KEY } from "@/features/insights/weekly-insight-config";
+import { isFeatureEnabled } from "@/shared/feature-flags";
 
 const HIDDEN_TAB_NAMES: readonly string[] = [
   "installment-vs-cash",
@@ -33,7 +35,10 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
 
 function PrivateLayoutContent(): ReactElement | null {
   const { ready, redirectTo } = usePrivateRouteGuard();
-  const weeklyInsight = useWeeklyInsight({ enabled: ready && !redirectTo });
+  const weeklyInsightEnabled = isFeatureEnabled(WEEKLY_INSIGHT_FEATURE_FLAG_KEY);
+  const weeklyInsight = useWeeklyInsight({
+    enabled: weeklyInsightEnabled && ready && !redirectTo,
+  });
   useEntitlementsForegroundRefresh();
 
   if (!ready) {
@@ -59,7 +64,9 @@ function PrivateLayoutContent(): ReactElement | null {
             options={{
               title: tab.title,
               tabBarBadge:
-                tab.name === "dashboard" && weeklyInsight.isNew ? "1" : undefined,
+                tab.name === "dashboard" && weeklyInsightEnabled && weeklyInsight.isNew
+                  ? "1"
+                  : undefined,
               tabBarIcon: ({ color, size }) => {
                 return (
                   <MaterialCommunityIcons name={tab.icon} color={color} size={size} />

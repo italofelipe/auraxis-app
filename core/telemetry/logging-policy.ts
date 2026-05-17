@@ -195,6 +195,14 @@ export const APP_EVENT_LOGGING_POLICY = Object.freeze({
     "Budget de performance excedido no cliente.",
     ["metric", "durationMs", "budgetMs", "exceeded"],
   ),
+  "push.delivered": devOnlyInfoPolicy(
+    "Notificação push recebida em foreground pelo app.",
+    ["channelId", "hasDeeplink", "type"],
+  ),
+  "push.tapped": devOnlyInfoPolicy(
+    "Notificação push acionada pelo usuário.",
+    ["channelId", "hasDeeplink", "type"],
+  ),
 } satisfies Record<AppTelemetryEvent, AppEventLoggingPolicy>);
 
 export const getAppEventLoggingPolicy = (

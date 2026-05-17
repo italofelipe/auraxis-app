@@ -77,6 +77,11 @@ import type {
 } from "@/features/fiscal/contracts";
 import type { LatestInsightResponse } from "@/features/insights/contracts";
 import type {
+  PushSubscriptionCommand,
+  PushSubscriptionRecord,
+  PushUnsubscribeCommand,
+} from "@/features/notifications/contracts";
+import type {
   QuestionnaireCollection,
   QuestionnaireResult,
   SubmitQuestionnaireCommand,
@@ -366,6 +371,26 @@ export const apiContractMap = {
   >({
     method: "POST",
     path: "/v1/insights/{insight_id}/read",
+    authRequired: true,
+  }),
+  notificationsSubscribe: defineApiContract<
+    "POST",
+    "/notifications/subscribe",
+    PushSubscriptionCommand,
+    PushSubscriptionRecord
+  >({
+    method: "POST",
+    path: "/notifications/subscribe",
+    authRequired: true,
+  }),
+  notificationsUnsubscribe: defineApiContract<
+    "POST",
+    "/notifications/unsubscribe",
+    PushUnsubscribeCommand,
+    void
+  >({
+    method: "POST",
+    path: "/notifications/unsubscribe",
     authRequired: true,
   }),
   transactionsList: defineApiContract<

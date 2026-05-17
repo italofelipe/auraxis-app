@@ -44,6 +44,10 @@ export interface DashboardScreenController {
   readonly setSelectedMonth: (month: string) => void;
 }
 
+export interface DashboardScreenControllerOptions {
+  readonly weeklyInsightEnabled?: boolean;
+}
+
 const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
   month: "long",
   year: "numeric",
@@ -69,12 +73,16 @@ const firstName = (fullName: string | null | undefined): string => {
  *
  * @returns Normalized dashboard bindings for view-only consumption.
  */
-export function useDashboardScreenController(): DashboardScreenController {
+export function useDashboardScreenController(
+  options: DashboardScreenControllerOptions = {},
+): DashboardScreenController {
   const userName = useSessionStore((state) => state.user?.name ?? null);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth);
   const overviewQuery = useDashboardOverviewQuery({ month: selectedMonth });
   const trendsQuery = useDashboardTrendsQuery(6);
-  const weeklyInsight = useWeeklyInsight();
+  const weeklyInsight = useWeeklyInsight({
+    enabled: options.weeklyInsightEnabled ?? true,
+  });
 
   const monthOptions = useMemo<DashboardMonthOption[]>(() => {
     return (

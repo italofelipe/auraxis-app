@@ -5,6 +5,7 @@ import { render } from "@testing-library/react-native";
 import PrivateLayout from "@/app/(private)/_layout";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
+import { isFeatureEnabled } from "@/shared/feature-flags";
 
 const mockTabsScreens: {
   name: string;
@@ -52,8 +53,13 @@ jest.mock("@/features/insights/hooks/use-weekly-insight-query", () => ({
   useWeeklyInsight: jest.fn(),
 }));
 
+jest.mock("@/shared/feature-flags", () => ({
+  isFeatureEnabled: jest.fn(),
+}));
+
 const mockedUsePrivateRouteGuard = jest.mocked(usePrivateRouteGuard);
 const mockedUseWeeklyInsight = jest.mocked(useWeeklyInsight);
+const mockedIsFeatureEnabled = jest.mocked(isFeatureEnabled);
 
 const buildInsightState = (isNew: boolean): ReturnType<typeof useWeeklyInsight> =>
   ({
@@ -70,6 +76,7 @@ describe("PrivateLayout", () => {
     mockTabsScreens.length = 0;
     mockedUsePrivateRouteGuard.mockReturnValue({ ready: true, redirectTo: null });
     mockedUseWeeklyInsight.mockReturnValue(buildInsightState(false));
+    mockedIsFeatureEnabled.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -91,6 +98,17 @@ describe("PrivateLayout", () => {
     render(<PrivateLayout />);
 
     const dashboardScreen = mockTabsScreens.find((screen) => screen.name === "dashboard");
+    expect(dashboardScreen?.options?.tabBarBadge).toBeUndefined();
+  });
+
+  it("desativa query e badge do insight semanal quando a feature flag esta desligada", () => {
+    mockedIsFeatureEnabled.mockReturnValue(false);
+    mockedUseWeeklyInsight.mockReturnValue(buildInsightState(true));
+
+    render(<PrivateLayout />);
+
+    const dashboardScreen = mockTabsScreens.find((screen) => screen.name === "dashboard");
+    expect(mockedUseWeeklyInsight).toHaveBeenCalledWith({ enabled: false });
     expect(dashboardScreen?.options?.tabBarBadge).toBeUndefined();
   });
 });
