@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { Paragraph, YStack } from "tamagui";
 
 import { appRoutes } from "@/core/navigation/routes";
+import { PRIVACY_CENTER_FEATURE_FLAG_KEY } from "@/features/legal/privacy-center-config";
 import { AppearanceSection } from "@/features/user-profile/components/appearance-section";
 import { LanguageSection } from "@/features/user-profile/components/language-section";
 import { SecuritySection } from "@/features/user-profile/components/security-section";
@@ -18,6 +19,7 @@ import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { isFeatureEnabled } from "@/shared/feature-flags";
 import { formatCurrency } from "@/shared/utils/formatters";
 
 const formatNullable = (value: string | number | null | undefined): string => {
@@ -66,12 +68,21 @@ export function UserProfileScreen(): ReactElement {
 
 function LegalSection(): ReactElement {
   const router = useRouter();
+  const privacyCenterEnabled = isFeatureEnabled(PRIVACY_CENTER_FEATURE_FLAG_KEY);
   return (
     <AppSurfaceCard
-      title="Documentos legais"
-      description="Política de Privacidade e Termos de Uso vigentes."
+      title="Privacidade e documentos"
+      description="Política de Privacidade, Termos de Uso e direitos LGPD."
     >
       <YStack gap="$2">
+        {privacyCenterEnabled ? (
+          <AppButton
+            onPress={() => router.push(appRoutes.private.privacyCenter)}
+            testID="profile-open-privacy-center"
+          >
+            Central de privacidade
+          </AppButton>
+        ) : null}
         <AppButton
           tone="secondary"
           onPress={() => router.push(appRoutes.legal.privacyPolicy)}
