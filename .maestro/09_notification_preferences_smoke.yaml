@@ -1,0 +1,8 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp
+- runFlow: 01_login.yaml
+- openLink: auraxisapp://preferencias-notificacao
+- assertVisible: "Preferencias de notificacao"
+- assertVisible: "Push notifications"
+- assertVisible: "Salvar preferencias"

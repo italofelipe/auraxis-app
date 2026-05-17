@@ -3,5 +3,7 @@ appId: com.sensoriumit.auraxis
 - launchApp
 - runFlow: 01_login.yaml
 - tapOn: "Ferramentas"
-- assertVisible: "Ferramentas"
 - assertVisible: "Buscar ferramenta"
+- tapOn: "Parcelado vs à vista"
+- assertVisible: "Parcelado vs à vista"
+- assertVisible: "Configure o cenário"

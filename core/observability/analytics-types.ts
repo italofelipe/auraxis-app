@@ -51,7 +51,7 @@ export interface ToolUsedAnalyticsProperties extends AnalyticsProperties {
 
 export interface SubscriptionCheckoutAnalyticsProperties
   extends AnalyticsProperties {
-  readonly provider?: "hosted" | "store" | "unknown";
+  readonly provider?: string;
   readonly planId?: string;
   readonly status?: "opened" | "completed" | "cancelled" | "unknown";
 }
@@ -84,5 +84,7 @@ export interface AnalyticsClient {
     properties?: AnalyticsEventPropertiesByName[TEventName],
   ) => void;
   identify: (distinctId: string, traits?: AnalyticsProperties) => void;
+  screen: (name: string, properties?: AnalyticsProperties) => void;
   reset: () => void;
+  setCollectionEnabled?: (enabled: boolean) => void | Promise<void>;
 }

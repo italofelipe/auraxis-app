@@ -1,8 +1,13 @@
 import { Linking } from "react-native";
 
-import { act, renderHook } from "@testing-library/react-native";
+import { act, renderHook, waitFor } from "@testing-library/react-native";
 
 import { appRoutes } from "@/core/navigation/routes";
+import {
+  loadAnalyticsOptOutPreference,
+  persistAnalyticsOptOutPreference,
+} from "@/core/observability/analytics-preferences";
+import { setAnalyticsCollectionEnabled } from "@/core/observability/analytics-runtime";
 import {
   DATA_EXPORT_REQUEST_URL,
   usePrivacyCenterScreenController,
@@ -13,9 +18,23 @@ const mockPush = jest.fn();
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
+jest.mock("@/core/observability/analytics-preferences", () => ({
+  loadAnalyticsOptOutPreference: jest.fn(),
+  persistAnalyticsOptOutPreference: jest.fn(),
+}));
+jest.mock("@/core/observability/analytics-runtime", () => ({
+  setAnalyticsCollectionEnabled: jest.fn(),
+}));
 
 const canOpenUrlSpy = jest.spyOn(Linking, "canOpenURL");
 const openUrlSpy = jest.spyOn(Linking, "openURL");
+const mockedLoadAnalyticsPreference = jest.mocked(loadAnalyticsOptOutPreference);
+const mockedPersistAnalyticsPreference = jest.mocked(
+  persistAnalyticsOptOutPreference,
+);
+const mockedSetAnalyticsCollectionEnabled = jest.mocked(
+  setAnalyticsCollectionEnabled,
+);
 
 describe("usePrivacyCenterScreenController", () => {
   beforeEach(() => {
@@ -24,10 +43,16 @@ describe("usePrivacyCenterScreenController", () => {
     openUrlSpy.mockReset();
     canOpenUrlSpy.mockResolvedValue(true);
     openUrlSpy.mockResolvedValue(undefined);
+    mockedLoadAnalyticsPreference.mockResolvedValue({ optedOut: false });
+    mockedPersistAnalyticsPreference.mockResolvedValue({ optedOut: false });
   });
 
-  it("routes to legal documents, cookies information and secure deletion", () => {
+  it("routes to legal documents, cookies information and secure deletion", async () => {
     const { result } = renderHook(() => usePrivacyCenterScreenController());
+
+    await waitFor(() => {
+      expect(result.current.analyticsPreferenceHydrated).toBe(true);
+    });
 
     act(() => {
       result.current.handleOpenPrivacyPolicy();
@@ -45,6 +70,10 @@ describe("usePrivacyCenterScreenController", () => {
   it("opens the official LGPD support channel for data export requests", async () => {
     const { result } = renderHook(() => usePrivacyCenterScreenController());
 
+    await waitFor(() => {
+      expect(result.current.analyticsPreferenceHydrated).toBe(true);
+    });
+
     await act(async () => {
       await result.current.handleRequestDataExport();
     });
@@ -59,6 +88,10 @@ describe("usePrivacyCenterScreenController", () => {
     canOpenUrlSpy.mockResolvedValue(false);
     const { result } = renderHook(() => usePrivacyCenterScreenController());
 
+    await waitFor(() => {
+      expect(result.current.analyticsPreferenceHydrated).toBe(true);
+    });
+
     await act(async () => {
       await result.current.handleRequestDataExport();
     });
@@ -71,6 +104,10 @@ describe("usePrivacyCenterScreenController", () => {
   it("dismisses export request feedback", async () => {
     const { result } = renderHook(() => usePrivacyCenterScreenController());
 
+    await waitFor(() => {
+      expect(result.current.analyticsPreferenceHydrated).toBe(true);
+    });
+
     await act(async () => {
       await result.current.handleRequestDataExport();
     });
@@ -80,5 +117,27 @@ describe("usePrivacyCenterScreenController", () => {
 
     expect(result.current.exportRequestState).toBe("idle");
     expect(result.current.exportRequestError).toBeNull();
+  });
+
+  it("hydrates and persists analytics opt-out preferences", async () => {
+    mockedLoadAnalyticsPreference.mockResolvedValueOnce({ optedOut: true });
+    mockedPersistAnalyticsPreference.mockResolvedValueOnce({ optedOut: false });
+    const { result } = renderHook(() => usePrivacyCenterScreenController());
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(result.current.analyticsPreferenceHydrated).toBe(true);
+    expect(result.current.analyticsCollectionEnabled).toBe(false);
+    expect(mockedSetAnalyticsCollectionEnabled).toHaveBeenCalledWith(false);
+
+    await act(async () => {
+      await result.current.handleAnalyticsCollectionChange(true);
+    });
+
+    expect(mockedPersistAnalyticsPreference).toHaveBeenCalledWith(false);
+    expect(mockedSetAnalyticsCollectionEnabled).toHaveBeenLastCalledWith(true);
+    expect(result.current.analyticsCollectionEnabled).toBe(true);
   });
 });

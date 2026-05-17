@@ -79,6 +79,53 @@ throw new Error("sentry-smoketest");
 `Sentry.init({ enabled: !__DEV__ })` mantém o SDK silencioso durante
 `expo start`. Só builds de preview/production reportam.
 
+## PostHog — product analytics
+
+`core/observability/posthog-service.ts::initPostHog()` roda no startup logo depois de
+`initSentry()`. O provider so inicializa quando:
+
+1. a flag `app.observability.analytics` esta habilitada;
+2. `EXPO_PUBLIC_POSTHOG_API_KEY` existe no build;
+3. o usuario nao registrou opt-out em **Central de privacidade**.
+
+### Secrets e host
+
+Definir o token publico do projeto PostHog via EAS secret:
+
+```bash
+eas secret:create \
+  --scope project \
+  --name EXPO_PUBLIC_POSTHOG_API_KEY \
+  --value "phc_<project-token>" \
+  --type string
+```
+
+Opcionalmente, usar `EXPO_PUBLIC_POSTHOG_HOST` quando o projeto estiver
+em regioes especificas (`https://us.i.posthog.com` por padrao,
+`https://eu.i.posthog.com` para EU).
+
+### LGPD e minimizacao
+
+- `disableGeoip: true` evita enriquecimento automatico por IP.
+- Session replay fica desligado (`enableSessionReplay: false`).
+- Eventos passam por `sanitizeTelemetryContext`, que redige email, token,
+  segredo, DSN, IP e URLs com parametros sensiveis.
+- O opt-out persiste em SecureStore
+  (`auraxis.analytics-opt-out.v1`) e chama `posthog.optOut()`; reativar
+  analytics chama `posthog.optIn()`.
+
+### Eventos canonicos
+
+Eventos instrumentados no app:
+
+- `auth.login.success`, `auth.register.completed`, `auth.logout`.
+- `transaction.created`, `transaction.deleted`, `transaction.restored`.
+- `goal.created`, `goal.simulated`.
+- `tool.used`.
+- `subscription.checkout.opened`, `subscription.checkout.completed`.
+- `dashboard.period.changed`.
+- screen views via Expo Router (`posthog.screen(pathname, metadata)`).
+
 ## Checkout provider
 
 `EXPO_PUBLIC_CHECKOUT_PROVIDER` controla o provider de compra usado pela

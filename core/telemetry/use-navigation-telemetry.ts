@@ -2,8 +2,20 @@ import { usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
 
 import { appRouteRegistry, appRoutes } from "@/core/navigation/routes";
+import { getAnalyticsClient } from "@/core/observability/analytics-runtime";
 import { navigationLogger } from "@/core/telemetry/domain-loggers";
 import type { AppLogEntry } from "@/core/telemetry/types";
+
+interface NavigationRouteLogContext {
+  readonly route: string;
+  readonly routeKey: string;
+  readonly access: string;
+  readonly tabVisible: boolean;
+}
+
+type NavigationRouteLogEntry = AppLogEntry & {
+  readonly context: NavigationRouteLogContext;
+};
 
 export const normalizePathname = (value: string | null): string => {
   if (!value || value === "/") {
@@ -16,7 +28,7 @@ export const normalizePathname = (value: string | null): string => {
 
 export const buildNavigationRouteLogEntry = (
   pathname: string | null,
-): AppLogEntry => {
+): NavigationRouteLogEntry => {
   const route = normalizePathname(pathname);
   const routeDefinition = appRouteRegistry.find((entry) => entry.path === route);
 
@@ -42,13 +54,18 @@ export const useNavigationTelemetry = (enabled = true): void => {
     }
 
     const entry = buildNavigationRouteLogEntry(pathname);
-    const route = String(entry.context?.route ?? appRoutes.root);
+    const { route, access, routeKey, tabVisible } = entry.context;
     if (route === lastLoggedRouteRef.current) {
       return;
     }
 
     navigationLogger.log("navigation.route_changed", {
       context: entry.context,
+    });
+    getAnalyticsClient().screen(route, {
+      access,
+      routeKey,
+      tabVisible,
     });
     lastLoggedRouteRef.current = route;
   }, [enabled, pathname]);

@@ -15,6 +15,7 @@ import { transactionFixture } from "@/features/transactions/mocks";
 const mockAnalyticsClient: jest.Mocked<AnalyticsClient> = {
   capture: jest.fn(),
   identify: jest.fn(),
+  screen: jest.fn(),
   reset: jest.fn(),
 };
 const mockUseMutation = jest.fn();

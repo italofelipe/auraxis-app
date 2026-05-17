@@ -132,7 +132,7 @@ export const PRIVACY_POLICY_DOCUMENT: LegalDocument = {
       blocks: [
         {
           kind: "paragraph",
-          text: "O Auraxis adota medidas técnicas e organizacionais razoáveis para proteger dados pessoais, incluindo controle de acesso, criptografia em trânsito quando aplicável, segregação de ambientes e observabilidade técnica. Nenhum ambiente é absolutamente imune a incidentes, e por isso as medidas são continuamente revisadas conforme risco, porte e estágio da operação.",
+          text: "O Auraxis adota medidas técnicas e organizacionais razoáveis para proteger dados pessoais, incluindo controle de acesso, criptografia em trânsito quando aplicável, segregação de ambientes e observabilidade técnica com Sentry. Eventos de erro são configurados sem PII padrão e passam por sanitização de email, IP, tokens, cabeçalhos sensíveis e URLs antes do envio.",
         },
       ],
     },
@@ -143,7 +143,9 @@ export const PRIVACY_POLICY_DOCUMENT: LegalDocument = {
           kind: "list",
           items: [
             "O produto pode usar mecanismos técnicos para sessão, segurança, observabilidade e mitigação de abuso automatizado.",
-            "Caso recursos de analytics/cookies não estritamente necessários sejam ativados, a política deve ser revisada para refletir base legal e fluxo de consentimento correspondente.",
+            "O app pode usar PostHog Cloud para analytics de produto com eventos minimizados, sem email, CPF, tokens ou valores financeiros brutos.",
+            "O usuário pode desativar analytics de produto na Central de privacidade. A preferência fica armazenada no dispositivo e é respeitada pelo provider.",
+            "Dados de analytics são usados para entender estabilidade, adoção de funcionalidades e experiência geral, com retenção e exclusão conforme as configurações do provedor e solicitações encaminhadas ao canal LGPD.",
           ],
         },
       ],

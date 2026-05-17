@@ -1,8 +1,13 @@
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Linking } from "react-native";
 
 import { appRoutes } from "@/core/navigation/routes";
+import {
+  loadAnalyticsOptOutPreference,
+  persistAnalyticsOptOutPreference,
+} from "@/core/observability/analytics-preferences";
+import { setAnalyticsCollectionEnabled } from "@/core/observability/analytics-runtime";
 import { PRIVACY_SUPPORT_EMAIL } from "@/features/legal/privacy-center-config";
 
 export type DataExportRequestState = "idle" | "loading" | "success" | "error";
@@ -24,6 +29,9 @@ export interface PrivacyCenterScreenController {
   readonly handleOpenCookiesInfo: () => void;
   readonly handleOpenDeleteAccount: () => void;
   readonly handleRequestDataExport: () => Promise<void>;
+  readonly analyticsPreferenceHydrated: boolean;
+  readonly analyticsCollectionEnabled: boolean;
+  readonly handleAnalyticsCollectionChange: (enabled: boolean) => Promise<void>;
   readonly dismissExportRequestFeedback: () => void;
 }
 
@@ -39,6 +47,29 @@ export function usePrivacyCenterScreenController(): PrivacyCenterScreenControlle
   const [exportRequestState, setExportRequestState] =
     useState<DataExportRequestState>("idle");
   const [exportRequestError, setExportRequestError] = useState<Error | null>(null);
+  const [analyticsPreferenceHydrated, setAnalyticsPreferenceHydrated] =
+    useState(false);
+  const [analyticsCollectionEnabled, setAnalyticsCollectionEnabledState] =
+    useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    void loadAnalyticsOptOutPreference().then((preference) => {
+      if (!active) {
+        return;
+      }
+
+      const enabled = !preference.optedOut;
+      setAnalyticsCollectionEnabledState(enabled);
+      setAnalyticsCollectionEnabled(enabled);
+      setAnalyticsPreferenceHydrated(true);
+    });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const handleRequestDataExport = async (): Promise<void> => {
     setExportRequestState("loading");
@@ -57,6 +88,15 @@ export function usePrivacyCenterScreenController(): PrivacyCenterScreenControlle
     }
   };
 
+  const handleAnalyticsCollectionChange = useCallback(
+    async (enabled: boolean): Promise<void> => {
+      setAnalyticsCollectionEnabledState(enabled);
+      setAnalyticsCollectionEnabled(enabled);
+      await persistAnalyticsOptOutPreference(!enabled);
+    },
+    [],
+  );
+
   return {
     exportRequestState,
     exportRequestError,
@@ -65,6 +105,9 @@ export function usePrivacyCenterScreenController(): PrivacyCenterScreenControlle
     handleOpenCookiesInfo: () => router.push(appRoutes.legal.privacyPolicy),
     handleOpenDeleteAccount: () => router.push(appRoutes.private.dangerZone),
     handleRequestDataExport,
+    analyticsPreferenceHydrated,
+    analyticsCollectionEnabled,
+    handleAnalyticsCollectionChange,
     dismissExportRequestFeedback: () => {
       setExportRequestState("idle");
       setExportRequestError(null);

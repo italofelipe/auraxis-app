@@ -34,6 +34,7 @@ export const createNoopAnalyticsClient = (): AnalyticsClient => {
   return {
     capture: () => undefined,
     identify: () => undefined,
+    screen: () => undefined,
     reset: () => undefined,
   };
 };
@@ -81,6 +82,16 @@ const runtimeAnalyticsClient: AnalyticsClient = {
       sanitizeAnalyticsProperties(traits),
     );
   },
+  screen: (name: string, properties?: AnalyticsProperties): void => {
+    if (!analyticsRuntimeState.collectionEnabled) {
+      return;
+    }
+
+    analyticsRuntimeState.client.screen(
+      name,
+      sanitizeAnalyticsProperties(properties),
+    );
+  },
   reset: (): void => {
     analyticsRuntimeState.client.reset();
   },
@@ -102,6 +113,7 @@ export const setAnalyticsCollectionEnabled = (enabled: boolean): void => {
     ...analyticsRuntimeState,
     collectionEnabled: enabled,
   };
+  void analyticsRuntimeState.client.setCollectionEnabled?.(enabled);
 };
 
 export const resetAnalyticsRuntimeForTesting = (): void => {
