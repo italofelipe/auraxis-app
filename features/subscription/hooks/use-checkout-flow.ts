@@ -3,6 +3,7 @@ import { useState } from "react";
 
 import { ApiError } from "@/core/http/api-error";
 import { queryKeys } from "@/core/query/query-keys";
+import { useBiometricGate } from "@/core/security/use-biometric-gate";
 import type {
   CheckoutSession,
   CreateCheckoutCommand,
@@ -66,6 +67,7 @@ export function useCheckoutFlow(
 ): CheckoutFlowController {
   const queryClient = useQueryClient();
   const createCheckout = useCreateCheckoutMutation();
+  const requestBiometricGate = useBiometricGate();
   const [lastError, setLastError] = useState<unknown | null>(null);
   const checkoutProvider = resolveCheckoutProvider(dependencies);
 
@@ -78,6 +80,14 @@ export function useCheckoutFlow(
     command: CreateCheckoutCommand,
   ): Promise<CheckoutFlowResult> => {
     setLastError(null);
+
+    const gate = await requestBiometricGate({
+      promptMessage: "Confirme para finalizar checkout",
+      required: true,
+    });
+    if (!gate.authorised) {
+      return { outcome: "locked", session: null };
+    }
 
     let session: CheckoutSession | null = null;
     if (checkoutProvider.requiresCheckoutSession) {
