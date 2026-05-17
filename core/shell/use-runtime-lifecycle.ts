@@ -1,5 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import * as Linking from "expo-linking";
+import { useRouter } from "expo-router";
 import {
   useEffect,
   useMemo,
@@ -10,9 +11,11 @@ import { AppState, type AppStateStatus } from "react-native";
 
 import {
   parseAppUrl,
+  resolveDeepLinkFallbackRoute,
   sanitizeAppUrl,
   type CheckoutReturnIntent,
 } from "@/core/navigation/deep-linking";
+import type { AppRoute } from "@/core/navigation/routes";
 import { performanceTracker } from "@/core/performance/performance-tracker";
 import {
   type RuntimeAppState,
@@ -66,12 +69,15 @@ const resolveRuntimeFailureReason = (
 interface IncomingUrlHandlerDependencies {
   readonly setPendingCheckoutReturn: (value: CheckoutReturnIntent | null) => void;
   readonly setLastHandledUrl: (value: string | null) => void;
+  readonly replaceRoute: (href: AppRoute) => void;
+  readonly resolveFallbackRoute: () => AppRoute;
   readonly revalidate: (reason: "checkout-return") => Promise<unknown>;
 }
 
 const createIncomingUrlHandler = (
   dependencies: IncomingUrlHandlerDependencies,
 ) => {
+  // eslint-disable-next-line max-statements
   return async (rawUrl: string | null): Promise<void> => {
     if (!rawUrl) {
       return;
@@ -90,11 +96,15 @@ const createIncomingUrlHandler = (
 
     const intent = parseAppUrl(rawUrl);
     if (!intent) {
+      const fallbackRoute = dependencies.resolveFallbackRoute();
       navigationLogger.log("navigation.deep_link_ignored", {
         context: {
           url: sanitizedUrl,
+          fallbackRoute,
         },
       });
+      dependencies.setLastHandledUrl(sanitizedUrl);
+      dependencies.replaceRoute(fallbackRoute);
       return;
     }
 
@@ -176,7 +186,9 @@ const bindAppStateLifecycle = (
   return createSubscriptionTeardown(subscription);
 };
 
+// eslint-disable-next-line max-lines-per-function, max-statements
 export const useRuntimeLifecycle = (enabled = true): void => {
+  const router = useRouter();
   const queryClient = useQueryClient();
   const setAppState = useAppShellStore((state) => state.setAppState);
   const setConnectivityStatus = useAppShellStore(
@@ -327,9 +339,16 @@ export const useRuntimeLifecycle = (enabled = true): void => {
       createIncomingUrlHandler({
         setPendingCheckoutReturn,
         setLastHandledUrl,
+        replaceRoute: (href) => {
+          router.replace(href);
+        },
+        resolveFallbackRoute: () =>
+          resolveDeepLinkFallbackRoute(
+            useSessionStore.getState().isAuthenticated,
+          ),
         revalidate: (reason) => syncRuntime(reason),
       }),
-    [setLastHandledUrl, setPendingCheckoutReturn, syncRuntime],
+    [router, setLastHandledUrl, setPendingCheckoutReturn, syncRuntime],
   );
 
   useEffect(() => {
@@ -350,7 +369,7 @@ export const useRuntimeLifecycle = (enabled = true): void => {
 
   useEffect(() => {
     if (!enabled) {
-      return;
+      return undefined;
     }
 
     return bindInitialUrlLifecycle(handleIncomingUrl);
@@ -358,7 +377,7 @@ export const useRuntimeLifecycle = (enabled = true): void => {
 
   useEffect(() => {
     if (!enabled) {
-      return;
+      return undefined;
     }
 
     return bindAppStateLifecycle(
