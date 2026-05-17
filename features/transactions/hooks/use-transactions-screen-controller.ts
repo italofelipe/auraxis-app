@@ -28,6 +28,10 @@ export interface TransactionViewModel {
   readonly dueDate: string;
   readonly status: string;
   readonly isRecurring: boolean;
+  readonly isInstallment: boolean;
+  readonly installmentCount: number | null;
+  readonly installmentGroupId: string | null;
+  readonly installmentNumber: number | null;
 }
 
 export interface TransactionsScreenController {
@@ -36,6 +40,7 @@ export interface TransactionsScreenController {
   readonly total: number;
   readonly typeFilter: TransactionsTypeFilter;
   readonly setTypeFilter: (filter: TransactionsTypeFilter) => void;
+  readonly installmentGroupFilter: string | null;
   readonly viewMode: TransactionsViewMode;
   readonly setViewMode: (mode: TransactionsViewMode) => void;
   readonly formMode: TransactionFormMode;
@@ -49,10 +54,15 @@ export interface TransactionsScreenController {
   readonly handleSubmit: (values: CreateTransactionFormValues) => Promise<void>;
   readonly handleDelete: (transactionId: string) => Promise<void>;
   readonly handleDuplicate: (transactionId: string) => Promise<void>;
+  readonly handleShowInstallmentGroup: (installmentGroupId: string) => void;
+  readonly handleClearInstallmentGroupFilter: () => void;
   readonly dismissSubmitError: () => void;
 }
 
-const toViewModel = (record: TransactionRecord): TransactionViewModel => ({
+const toViewModel = (
+  record: TransactionRecord,
+  installmentNumber: number | null,
+): TransactionViewModel => ({
   id: record.id,
   title: record.title,
   amount: record.amount,
@@ -60,6 +70,10 @@ const toViewModel = (record: TransactionRecord): TransactionViewModel => ({
   dueDate: record.dueDate,
   status: record.status,
   isRecurring: record.isRecurring,
+  isInstallment: record.isInstallment,
+  installmentCount: record.installmentCount,
+  installmentGroupId: record.installmentGroupId,
+  installmentNumber,
 });
 
 const matchesFilter = (
@@ -72,6 +86,34 @@ const matchesFilter = (
   return type === filter;
 };
 
+const buildInstallmentNumberMap = (
+  records: readonly TransactionRecord[],
+): ReadonlyMap<string, number> => {
+  const groups = new Map<string, TransactionRecord[]>();
+  records.forEach((record) => {
+    if (!record.isInstallment || !record.installmentGroupId) {
+      return;
+    }
+    const group = groups.get(record.installmentGroupId) ?? [];
+    group.push(record);
+    groups.set(record.installmentGroupId, group);
+  });
+
+  const installmentNumbers = new Map<string, number>();
+  groups.forEach((group) => {
+    group
+      .sort((a, b) => {
+        const dateComparison = a.dueDate.localeCompare(b.dueDate);
+        return dateComparison === 0 ? a.id.localeCompare(b.id) : dateComparison;
+      })
+      .forEach((record, index) => {
+        installmentNumbers.set(record.id, index + 1);
+      });
+  });
+
+  return installmentNumbers;
+};
+
 const buildSubmitPayload = (values: CreateTransactionFormValues) => ({
   title: values.title,
   amount: normalizeAmount(values.amount),
@@ -79,6 +121,13 @@ const buildSubmitPayload = (values: CreateTransactionFormValues) => ({
   dueDate: values.dueDate,
   description: values.description,
   isRecurring: values.isRecurring ?? false,
+  creditCardId: values.type === "expense" ? values.creditCardId : null,
+  isInstallment:
+    values.type === "expense" && values.creditCardId ? values.isInstallment : false,
+  installmentCount:
+    values.type === "expense" && values.creditCardId && values.isInstallment
+      ? values.installmentCount
+      : null,
 });
 
 /**
@@ -98,13 +147,18 @@ export function useTransactionsScreenController(): TransactionsScreenController 
   const [duplicatingTransactionId, setDuplicatingTransactionId] = useState<string | null>(null);
   const [typeFilter, setTypeFilter] = useState<TransactionsTypeFilter>("all");
   const [viewMode, setViewMode] = useState<TransactionsViewMode>("list");
+  const [installmentGroupFilter, setInstallmentGroupFilter] = useState<string | null>(null);
 
   const transactions = useMemo<readonly TransactionViewModel[]>(() => {
     const records = transactionsQuery.data?.transactions ?? [];
+    const installmentNumbers = buildInstallmentNumberMap(records);
     return records
       .filter((record) => matchesFilter(record.type, typeFilter))
-      .map(toViewModel);
-  }, [transactionsQuery.data, typeFilter]);
+      .filter((record) =>
+        installmentGroupFilter ? record.installmentGroupId === installmentGroupFilter : true,
+      )
+      .map((record) => toViewModel(record, installmentNumbers.get(record.id) ?? null));
+  }, [installmentGroupFilter, transactionsQuery.data, typeFilter]);
 
   const handleSubmit = async (values: CreateTransactionFormValues): Promise<void> => {
     setSubmitError(null);
@@ -154,6 +208,9 @@ export function useTransactionsScreenController(): TransactionsScreenController 
         dueDate: new Date().toISOString().slice(0, 10),
         description: original.description ?? null,
         isRecurring: original.isRecurring,
+        creditCardId: original.type === "expense" ? original.creditCardId : null,
+        isInstallment: false,
+        installmentCount: null,
       });
     } catch (error) {
       setSubmitError(error);
@@ -168,6 +225,7 @@ export function useTransactionsScreenController(): TransactionsScreenController 
     total: transactionsQuery.data?.pagination.total ?? 0,
     typeFilter,
     setTypeFilter,
+    installmentGroupFilter,
     viewMode,
     setViewMode,
     formMode,
@@ -190,6 +248,13 @@ export function useTransactionsScreenController(): TransactionsScreenController 
     handleSubmit,
     handleDelete,
     handleDuplicate,
+    handleShowInstallmentGroup: (installmentGroupId) => {
+      setInstallmentGroupFilter(installmentGroupId);
+      setTypeFilter("expense");
+    },
+    handleClearInstallmentGroupFilter: () => {
+      setInstallmentGroupFilter(null);
+    },
     dismissSubmitError: () => {
       setSubmitError(null);
       createMutation.reset();

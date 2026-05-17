@@ -95,6 +95,52 @@ describe("useTransactionsScreenController data projection", () => {
     });
     expect(result.current.transactions.map((t) => t.id)).toEqual(["a"]);
   });
+
+  it("projeta numero da parcela e filtra outras parcelas do grupo", () => {
+    mockedUseQuery.mockReturnValue({
+      data: {
+        transactions: [
+          buildRecord({
+            id: "p2",
+            dueDate: "2026-06-17",
+            isInstallment: true,
+            installmentCount: 2,
+            installmentGroupId: "grp-1",
+          }),
+          buildRecord({
+            id: "cash",
+            dueDate: "2026-05-20",
+            isInstallment: false,
+            installmentCount: null,
+            installmentGroupId: null,
+          }),
+          buildRecord({
+            id: "p1",
+            dueDate: "2026-05-17",
+            isInstallment: true,
+            installmentCount: 2,
+            installmentGroupId: "grp-1",
+          }),
+        ],
+        pagination: { total: 3 },
+      },
+    } as never);
+
+    const { result } = renderHook(() => useTransactionsScreenController());
+
+    expect(result.current.transactions.find((item) => item.id === "p1")).toEqual(
+      expect.objectContaining({ installmentNumber: 1 }),
+    );
+    expect(result.current.transactions.find((item) => item.id === "p2")).toEqual(
+      expect.objectContaining({ installmentNumber: 2 }),
+    );
+
+    act(() => {
+      result.current.handleShowInstallmentGroup("grp-1");
+    });
+
+    expect(result.current.transactions.map((item) => item.id)).toEqual(["p2", "p1"]);
+  });
 });
 
 describe("useTransactionsScreenController mutations", () => {
@@ -117,12 +163,43 @@ describe("useTransactionsScreenController mutations", () => {
         dueDate: "2026-04-30",
         description: null,
         isRecurring: false,
+        creditCardId: null,
+        isInstallment: false,
+        installmentCount: null,
       });
     });
     expect(createStub.mutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Conta", amount: "150.75", type: "expense" }),
     );
     expect(result.current.formMode.kind).toBe("closed");
+  });
+
+  it("create preserva dados de cartao e parcelamento no payload", async () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    act(() => {
+      result.current.handleOpenCreate();
+    });
+    await act(async () => {
+      await result.current.handleSubmit({
+        title: "Notebook",
+        amount: "1200",
+        type: "expense",
+        dueDate: "2026-05-17",
+        description: null,
+        isRecurring: false,
+        creditCardId: "018f3a22-6ec3-7dc2-a93a-1bbdecb02000",
+        isInstallment: true,
+        installmentCount: 12,
+      });
+    });
+
+    expect(createStub.mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        creditCardId: "018f3a22-6ec3-7dc2-a93a-1bbdecb02000",
+        isInstallment: true,
+        installmentCount: 12,
+      }),
+    );
   });
 
   it("edit dispara updateMutation com transactionId", async () => {
@@ -138,6 +215,9 @@ describe("useTransactionsScreenController mutations", () => {
         dueDate: "2026-04-30",
         description: null,
         isRecurring: false,
+        creditCardId: null,
+        isInstallment: false,
+        installmentCount: null,
       });
     });
     expect(updateStub.mutateAsync).toHaveBeenCalledWith(
@@ -159,6 +239,9 @@ describe("useTransactionsScreenController mutations", () => {
         dueDate: "2026-04-30",
         description: null,
         isRecurring: false,
+        creditCardId: null,
+        isInstallment: false,
+        installmentCount: null,
       });
     });
     expect(result.current.submitError).toBeInstanceOf(Error);
@@ -188,6 +271,9 @@ describe("useTransactionsScreenController mutations", () => {
         dueDate: "2026-04-30",
         description: null,
         isRecurring: false,
+        creditCardId: null,
+        isInstallment: false,
+        installmentCount: null,
       });
     });
     act(() => {

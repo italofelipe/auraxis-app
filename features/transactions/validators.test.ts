@@ -9,6 +9,9 @@ const validBase = {
   amount: "2300.00",
   type: "expense" as const,
   dueDate: "2026-04-30",
+  creditCardId: null,
+  isInstallment: false,
+  installmentCount: null,
 };
 
 describe("createTransactionSchema", () => {
@@ -52,6 +55,61 @@ describe("createTransactionSchema", () => {
   it("rejeita titulo curto", () => {
     expect(() =>
       createTransactionSchema.parse({ ...validBase, title: "A" }),
+    ).toThrow();
+  });
+
+  it("aceita despesa parcelada com cartao e quantidade valida", () => {
+    const parsed = createTransactionSchema.parse({
+      ...validBase,
+      creditCardId: "018f3a22-6ec3-7dc2-a93a-1bbdecb02000",
+      isInstallment: true,
+      installmentCount: 12,
+    });
+
+    expect(parsed).toEqual(
+      expect.objectContaining({
+        creditCardId: "018f3a22-6ec3-7dc2-a93a-1bbdecb02000",
+        isInstallment: true,
+        installmentCount: 12,
+      }),
+    );
+  });
+
+  it("exige quantidade de parcelas quando despesa parcelada esta ativa", () => {
+    expect(() =>
+      createTransactionSchema.parse({
+        ...validBase,
+        creditCardId: "018f3a22-6ec3-7dc2-a93a-1bbdecb02000",
+        isInstallment: true,
+        installmentCount: null,
+      }),
+    ).toThrow();
+  });
+
+  it("limita quantidade de parcelas entre 2 e 60", () => {
+    const creditCardId = "018f3a22-6ec3-7dc2-a93a-1bbdecb02000";
+
+    expect(() =>
+      createTransactionSchema.parse({
+        ...validBase,
+        creditCardId,
+        isInstallment: true,
+        installmentCount: 1,
+      }),
+    ).toThrow();
+    expect(() =>
+      createTransactionSchema.parse({
+        ...validBase,
+        creditCardId,
+        isInstallment: true,
+        installmentCount: 61,
+      }),
+    ).toThrow();
+  });
+
+  it("rejeita cartao de credito sem formato uuid", () => {
+    expect(() =>
+      createTransactionSchema.parse({ ...validBase, creditCardId: "card-1" }),
     ).toThrow();
   });
 });

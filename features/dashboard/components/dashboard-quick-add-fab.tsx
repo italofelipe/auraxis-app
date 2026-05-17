@@ -8,7 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 
 import { useCreateTransactionMutation } from "@/features/transactions/hooks/use-transaction-mutations";
-import { createTransactionSchema } from "@/features/transactions/validators";
+import { createTransactionFieldsSchema } from "@/features/transactions/validators";
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
@@ -16,7 +16,7 @@ import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { triggerHapticImpact } from "@/shared/feedback/haptics";
 import { useT } from "@/shared/i18n";
 
-const quickAddSchema = createTransactionSchema.pick({
+const quickAddSchema = createTransactionFieldsSchema.pick({
   title: true,
   amount: true,
   type: true,
