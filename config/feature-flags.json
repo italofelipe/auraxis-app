@@ -31,6 +31,16 @@
       "repositories": ["auraxis-app", "auraxis-web", "auraxis-api"]
     },
     {
+      "key": "app.import.csv-xlsx",
+      "owner": "platform",
+      "createdAt": "2026-05-17",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-dev",
+      "description": "Controla o fluxo mobile de importacao CSV/XLSX com mapeamento, preview e confirmacao.",
+      "repositories": ["auraxis-app", "auraxis-api-v2", "auraxis-web"]
+    },
+    {
       "key": "app.notifications.push",
       "owner": "platform",
       "createdAt": "2026-05-17",

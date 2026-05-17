@@ -11,6 +11,11 @@ import {
   dashboardOverviewFixture,
   dashboardTrendsFixture,
 } from "@/features/dashboard/mocks";
+import {
+  confirmImportFixture,
+  importDetectFixture,
+  importPreviewFixture,
+} from "@/features/import/mocks";
 import { weeklyInsightFixture } from "@/features/insights/mocks";
 import { goalListFixture } from "@/features/goals/mocks";
 import {
@@ -337,6 +342,49 @@ const serializeWeeklyInsight = (): Record<string, unknown> => {
   };
 };
 
+const serializeImportDetect = (): Record<string, unknown> => {
+  return {
+    file_type: importDetectFixture.fileType,
+    sheet_names: importDetectFixture.sheetNames,
+    active_sheet: importDetectFixture.activeSheet,
+    headers: importDetectFixture.headers,
+    sample_rows: importDetectFixture.sampleRows,
+    suggested_mapping: {
+      date_column: importDetectFixture.suggestedMapping.dateColumn,
+      description_column: importDetectFixture.suggestedMapping.descriptionColumn,
+      amount_column: importDetectFixture.suggestedMapping.amountColumn,
+      type_column: importDetectFixture.suggestedMapping.typeColumn,
+      sheet_name: importDetectFixture.suggestedMapping.sheetName,
+    },
+    confidence: {
+      date_column: importDetectFixture.confidence.dateColumn,
+      description_column: importDetectFixture.confidence.descriptionColumn,
+      amount_column: importDetectFixture.confidence.amountColumn,
+      type_column: importDetectFixture.confidence.typeColumn,
+    },
+  };
+};
+
+const serializeImportPreview = (): Record<string, unknown> => {
+  return {
+    preview_token: importPreviewFixture.previewToken,
+    expires_at: importPreviewFixture.expiresAt,
+    file_type: importPreviewFixture.fileType,
+    total_count: importPreviewFixture.totalCount,
+    duplicates_count: importPreviewFixture.duplicatesCount,
+    transactions: importPreviewFixture.transactions.map((transaction) => ({
+      id: transaction.id,
+      date: transaction.date,
+      description: transaction.description,
+      amount: transaction.amount,
+      transaction_type: transaction.type,
+      category: transaction.category,
+      confidence: transaction.confidence,
+      is_duplicate: transaction.isDuplicate,
+    })),
+  };
+};
+
 const serializeWalletCollection = (): Record<string, unknown> => {
   return {
     items: walletCollectionFixture.items.map((item) => ({
@@ -532,6 +580,25 @@ const handleInsightRoutes: MockRouteHandler = (context) => {
   return null;
 };
 
+const handleImportRoutes: MockRouteHandler = (context) => {
+  if (context.method === "POST" && context.pathname === "/v2/import/detect") {
+    return ok(serializeImportDetect());
+  }
+
+  if (context.method === "POST" && context.pathname === "/v2/import/preview") {
+    return ok(serializeImportPreview());
+  }
+
+  if (context.method === "POST" && context.pathname === "/v2/import/confirm") {
+    return ok({
+      imported_count: confirmImportFixture.importedCount,
+      skipped_count: confirmImportFixture.skippedCount,
+    });
+  }
+
+  return null;
+};
+
 const handleWalletRoute: MockRouteHandler = (context) => {
   if (context.method !== "GET" || context.pathname !== "/wallet") {
     return null;
@@ -620,6 +687,7 @@ const routeHandlers: MockRouteHandler[] = [
   handleSubscriptionRoutes,
   handleDashboardRoutes,
   handleInsightRoutes,
+  handleImportRoutes,
   handleWalletRoute,
   handleGoalRoute,
   handleAlertRoutes,

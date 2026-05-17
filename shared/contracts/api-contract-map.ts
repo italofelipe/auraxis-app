@@ -75,6 +75,14 @@ import type {
   ReceivableRecord,
   RevenueSummary,
 } from "@/features/fiscal/contracts";
+import type {
+  ConfirmImportCommand,
+  ConfirmImportResult,
+  ImportDetectResult,
+  ImportFileAsset,
+  ImportPreview,
+  ImportPreviewCommand,
+} from "@/features/import/contracts";
 import type { LatestInsightResponse } from "@/features/insights/contracts";
 import type {
   PushSubscriptionCommand,
@@ -371,6 +379,36 @@ export const apiContractMap = {
   >({
     method: "POST",
     path: "/v1/insights/{insight_id}/read",
+    authRequired: true,
+  }),
+  importDetect: defineApiContract<
+    "POST",
+    "/v2/import/detect",
+    ImportFileAsset,
+    ImportDetectResult
+  >({
+    method: "POST",
+    path: "/v2/import/detect",
+    authRequired: true,
+  }),
+  importPreview: defineApiContract<
+    "POST",
+    "/v2/import/preview",
+    ImportPreviewCommand,
+    ImportPreview
+  >({
+    method: "POST",
+    path: "/v2/import/preview",
+    authRequired: true,
+  }),
+  importConfirm: defineApiContract<
+    "POST",
+    "/v2/import/confirm",
+    ConfirmImportCommand,
+    ConfirmImportResult
+  >({
+    method: "POST",
+    path: "/v2/import/confirm",
     authRequired: true,
   }),
   notificationsSubscribe: defineApiContract<

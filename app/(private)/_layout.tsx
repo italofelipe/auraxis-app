@@ -17,6 +17,7 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "confirm-email-pending",
   "compartilhamentos",
   "transacoes",
+  "importar-transacoes",
   "perfil",
   "fiscal",
   "questionario",
