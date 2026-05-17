@@ -6,6 +6,18 @@ const config = {
   // Padrões de arquivos de teste
   testMatch: ["**/__tests__/**/*.{ts,tsx}", "**/*.{spec,test}.{ts,tsx}"],
 
+  roots: [
+    "<rootDir>/__mocks__",
+    "<rootDir>/__tests__",
+    "<rootDir>/app",
+    "<rootDir>/config",
+    "<rootDir>/core",
+    "<rootDir>/features",
+    "<rootDir>/scripts",
+    "<rootDir>/shared",
+    "<rootDir>/types",
+  ],
+
   testPathIgnorePatterns: [
     "/node_modules/",
     // Only ignore the root-level /e2e/ dir (Maestro tests), not __tests__/e2e/
@@ -17,6 +29,9 @@ const config = {
     "<rootDir>/__tests__/e2e/handlers/",
     "<rootDir>/__tests__/e2e/render-helpers.tsx",
   ],
+
+  modulePathIgnorePatterns: ["<rootDir>/_worktrees/"],
+  watchPathIgnorePatterns: ["<rootDir>/_worktrees/"],
 
   // Transformações: jest-expo já configura babel-jest para RN
   transformIgnorePatterns: [

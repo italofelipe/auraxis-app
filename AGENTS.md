@@ -32,8 +32,10 @@ npm run quality-check
 ## Convenção de branch
 
 ```
-feat/claude-<desc>    feat/codex-<desc>
-fix/claude-<desc>     fix/codex-<desc>
+feat/<issue>-<desc>
+fix/<issue>-<desc>
+docs/<issue>-<desc>
+chore/<issue>-<desc>
 ```
 
 ## Regras críticas — NÃO VIOLAR

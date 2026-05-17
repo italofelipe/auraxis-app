@@ -3,6 +3,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { useUpdateNotificationPreferencesMutation } from "@/features/user-profile/hooks/use-notification-preferences-mutation";
 import { useNotificationPreferencesQuery } from "@/features/user-profile/hooks/use-notification-preferences-query";
 import { useNotificationPreferencesScreenController } from "@/features/user-profile/hooks/use-notification-preferences-screen-controller";
+import { usePushRegistration } from "@/features/notifications/hooks/use-push-registration";
 
 jest.mock("@/features/user-profile/hooks/use-notification-preferences-query", () => ({
   useNotificationPreferencesQuery: jest.fn(),
@@ -15,8 +16,13 @@ jest.mock(
   }),
 );
 
+jest.mock("@/features/notifications/hooks/use-push-registration", () => ({
+  usePushRegistration: jest.fn(),
+}));
+
 const mockedUseQuery = jest.mocked(useNotificationPreferencesQuery);
 const mockedUseUpdate = jest.mocked(useUpdateNotificationPreferencesMutation);
+const mockedUsePushRegistration = jest.mocked(usePushRegistration);
 
 const buildMutationStub = () => ({
   mutateAsync: jest.fn(),
@@ -25,7 +31,19 @@ const buildMutationStub = () => ({
   error: null,
 });
 
+const buildPushRegistrationStub = () => ({
+  status: "unregistered",
+  endpoint: null,
+  error: null,
+  isBusy: false,
+  isPushEnabled: false,
+  enablePush: jest.fn(),
+  disablePush: jest.fn(),
+  dismissError: jest.fn(),
+});
+
 let updateStub: ReturnType<typeof buildMutationStub>;
+let pushRegistrationStub: ReturnType<typeof buildPushRegistrationStub>;
 
 const initialPrefs = [
   { category: "alerts", enabled: true, globalOptOut: false },
@@ -34,8 +52,10 @@ const initialPrefs = [
 
 beforeEach(() => {
   updateStub = buildMutationStub();
+  pushRegistrationStub = buildPushRegistrationStub();
   updateStub.mutateAsync.mockResolvedValue({ preferences: initialPrefs });
   mockedUseUpdate.mockReturnValue(updateStub as never);
+  mockedUsePushRegistration.mockReturnValue(pushRegistrationStub as never);
   mockedUseQuery.mockReturnValue({
     data: { preferences: initialPrefs },
   } as never);
@@ -101,5 +121,31 @@ describe("useNotificationPreferencesScreenController", () => {
       await result.current.handleSave();
     });
     expect(result.current.submitError).toBeInstanceOf(Error);
+  });
+
+  it("handlePushToggle ativa registro nativo quando usuario liga push", async () => {
+    const { result } = renderHook(() =>
+      useNotificationPreferencesScreenController(),
+    );
+
+    await act(async () => {
+      await result.current.handlePushToggle(true);
+    });
+
+    expect(pushRegistrationStub.enablePush).toHaveBeenCalledTimes(1);
+    expect(pushRegistrationStub.disablePush).not.toHaveBeenCalled();
+  });
+
+  it("handlePushToggle remove registro nativo quando usuario desliga push", async () => {
+    const { result } = renderHook(() =>
+      useNotificationPreferencesScreenController(),
+    );
+
+    await act(async () => {
+      await result.current.handlePushToggle(false);
+    });
+
+    expect(pushRegistrationStub.disablePush).toHaveBeenCalledTimes(1);
+    expect(pushRegistrationStub.enablePush).not.toHaveBeenCalled();
   });
 });

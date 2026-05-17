@@ -19,6 +19,16 @@
       "status": "enabled-prod",
       "description": "Controla a exibição do insight semanal personalizado no dashboard do app.",
       "repositories": ["auraxis-app", "auraxis-api"]
+    },
+    {
+      "key": "app.notifications.push",
+      "owner": "platform",
+      "createdAt": "2026-05-17",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-dev",
+      "description": "Controla o registro de push notifications nativas no app.",
+      "repositories": ["auraxis-app", "auraxis-api"]
     }
   ]
 }

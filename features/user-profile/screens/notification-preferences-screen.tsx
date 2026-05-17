@@ -13,6 +13,7 @@ import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AppToggleRow } from "@/shared/components/app-toggle-row";
 
 export function NotificationPreferencesScreen(): ReactElement {
   const controller = useNotificationPreferencesScreenController();
@@ -42,6 +43,7 @@ export function NotificationPreferencesScreen(): ReactElement {
         >
           {() => <PreferencesList controller={controller} />}
         </AppQueryState>
+        <PushNotificationsToggle controller={controller} />
         {controller.submitError ? (
           <AppErrorNotice
             error={controller.submitError}
@@ -66,6 +68,48 @@ export function NotificationPreferencesScreen(): ReactElement {
 
 interface ControllerProps {
   readonly controller: NotificationPreferencesScreenController;
+}
+
+const pushDescriptionByStatus: Record<string, string> = {
+  registered: "Dispositivo registrado para alertas push.",
+  unregistered: "Receba alertas importantes neste dispositivo.",
+  "permission-denied":
+    "Permissao negada no sistema. Ative nas configuracoes do dispositivo.",
+  unavailable: "Push nao esta disponivel neste dispositivo.",
+  error: "Nao foi possivel atualizar push. Tente novamente.",
+};
+
+function PushNotificationsToggle({ controller }: ControllerProps): ReactElement {
+  const { pushRegistration } = controller;
+  const disabled =
+    pushRegistration.isBusy || pushRegistration.status === "unavailable";
+
+  return (
+    <>
+      <AppToggleRow
+        label="Push notifications"
+        description={
+          pushDescriptionByStatus[pushRegistration.status] ??
+          pushDescriptionByStatus.unregistered
+        }
+        checked={pushRegistration.isPushEnabled}
+        disabled={disabled}
+        testID="push-notifications"
+        onCheckedChange={(enabled) => {
+          void controller.handlePushToggle(enabled);
+        }}
+      />
+      {pushRegistration.error ? (
+        <AppErrorNotice
+          error={pushRegistration.error}
+          fallbackTitle="Nao foi possivel atualizar push"
+          fallbackDescription="Tente novamente em instantes."
+          secondaryActionLabel="Fechar"
+          onSecondaryAction={pushRegistration.dismissError}
+        />
+      ) : null}
+    </>
+  );
 }
 
 function PreferencesList({ controller }: ControllerProps): ReactElement {

@@ -1871,20 +1871,20 @@ export interface paths {
             parameters: {
                 query?: {
                     /**
-                     * @description Data inicial para período customizado (YYYY-MM-DD)
-                     * @example 2026-03-01
+                     * @description Data final para período customizado (YYYY-MM-DD)
+                     * @example 2026-04-19
                      */
-                    start_date?: string;
+                    end_date?: string;
                     /**
                      * @description Preset de período da série: 1m (padrão), 3m, 6m
                      * @example 1m
                      */
                     period?: string;
                     /**
-                     * @description Data final para período customizado (YYYY-MM-DD)
-                     * @example 2026-04-19
+                     * @description Data inicial para período customizado (YYYY-MM-DD)
+                     * @example 2026-03-01
                      */
-                    end_date?: string;
+                    start_date?: string;
                 };
                 header?: {
                     /**
@@ -2702,6 +2702,260 @@ export interface paths {
                 };
             };
         };
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/subscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Registrar token de push
+         * @description Registra um token de push para o dispositivo do usuário. Aceita 'expo' (FCM/APNS via Expo) e 'web_push' (VAPID). Idempotente: endpoint repetido faz upsert.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Subscription registrada */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "endpoint": "ExponentPushToken[...]",
+                         *         "id": "uuid",
+                         *         "transport": "expo"
+                         *       },
+                         *       "message": "Subscription registrada com sucesso."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "transport deve ser 'web_push' ou 'expo'.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/notifications/unsubscribe": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Remover token de push
+         * @description Remove a subscription de push para o endpoint informado.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Subscription removida */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "Subscription removida com sucesso."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Campo 'endpoint' obrigatório.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Subscription não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Subscription não encontrada.",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -6419,6 +6673,249 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user/me/avatar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Upload avatar do usuário
+         * @description Recebe uma imagem (JPEG, PNG ou WebP, máx. 5 MB) via multipart/form-data e armazena no S3. Retorna a URL pública do avatar atualizado.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "multipart/form-data": {
+                        /** Format: binary */
+                        file: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Avatar atualizado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "avatar_url": "https://cdn.auraxis.com.br/avatars/..."
+                         *       },
+                         *       "message": "Avatar atualizado com sucesso."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Arquivo inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Tipo de arquivo não permitido.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Falha no storage */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Falha ao armazenar avatar.",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        /**
+         * Remover avatar do usuário
+         * @description Remove o avatar do usuário autenticado e deleta o arquivo do S3.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Avatar removido com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {},
+                         *       "message": "Avatar removido com sucesso."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Nenhum avatar configurado */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Nenhum avatar configurado.",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user/notification-preferences": {
         parameters: {
             query?: never;
@@ -7338,6 +7835,13 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    end_date?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
+                    finalDate?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `start_date`.
@@ -7345,13 +7849,6 @@ export interface paths {
                     startDate?: string;
                     /** @description Data inicial (YYYY-MM-DD). Opcional. */
                     start_date?: string;
-                    /**
-                     * @deprecated
-                     * @description Alias legado de `end_date`.
-                     */
-                    finalDate?: string;
-                    /** @description Data final (YYYY-MM-DD). Opcional. */
-                    end_date?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -7412,6 +7909,13 @@ export interface paths {
         options: {
             parameters: {
                 query?: {
+                    /** @description Data final (YYYY-MM-DD). Opcional. */
+                    end_date?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
+                    finalDate?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `start_date`.
@@ -7419,13 +7923,6 @@ export interface paths {
                     startDate?: string;
                     /** @description Data inicial (YYYY-MM-DD). Opcional. */
                     start_date?: string;
-                    /**
-                     * @deprecated
-                     * @description Alias legado de `end_date`.
-                     */
-                    finalDate?: string;
-                    /** @description Data final (YYYY-MM-DD). Opcional. */
-                    end_date?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -9052,6 +9549,24 @@ export interface components {
              * @example example-token
              */
             token: string;
+        };
+        app_schemas_push_subscription_schema_SubscribeSchema: {
+            /** @default null */
+            device_label: string | null;
+            endpoint: string;
+            /**
+             * Format: date-time
+             * @default null
+             */
+            expiration_time: string | null;
+            /** @default null */
+            keys: {
+                [key: string]: string;
+            } | null;
+            transport: string;
+        };
+        app_schemas_push_subscription_schema_UnsubscribeSchema: {
+            endpoint: string;
         };
         app_schemas_user_schemas_DeleteAccountSchema: {
             /**

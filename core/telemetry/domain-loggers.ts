@@ -60,5 +60,6 @@ export const navigationLogger = createDomainLogger("navigation");
 export const networkLogger = createDomainLogger("network");
 export const observabilityLogger = createDomainLogger("observability");
 export const performanceLogger = createDomainLogger("performance");
+export const pushLogger = createDomainLogger("push");
 export const runtimeLogger = createDomainLogger("runtime");
 export const startupLogger = createDomainLogger("startup");

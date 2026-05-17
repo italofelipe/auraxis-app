@@ -2,6 +2,7 @@
   "components": {
     "schemas": {
       "InstallmentVsCashCalculation": {
+        "additionalProperties": false,
         "properties": {
           "cash_price": {
             "minimum": 0.01,
@@ -67,6 +68,7 @@
         "type": "object"
       },
       "InstallmentVsCashGoalBridge": {
+        "additionalProperties": false,
         "properties": {
           "category": {
             "default": "planned_purchase",
@@ -111,6 +113,7 @@
         "type": "object"
       },
       "InstallmentVsCashPlannedExpenseBridge": {
+        "additionalProperties": false,
         "properties": {
           "account_id": {
             "default": null,
@@ -185,6 +188,7 @@
         "type": "object"
       },
       "InstallmentVsCashSave": {
+        "additionalProperties": false,
         "properties": {
           "cash_price": {
             "minimum": 0.01,
@@ -250,6 +254,7 @@
         "type": "object"
       },
       "TransactionCreate": {
+        "additionalProperties": false,
         "properties": {
           "account_id": {
             "description": "ID da conta bancária associada",
@@ -398,6 +403,7 @@
         "type": "object"
       },
       "TransactionCreate_7d3b606eab": {
+        "additionalProperties": false,
         "properties": {
           "account_id": {
             "description": "ID da conta bancária associada",
@@ -545,6 +551,7 @@
         "type": "object"
       },
       "app_schemas_auth_schema_AuthSchema": {
+        "additionalProperties": false,
         "properties": {
           "captcha_token": {
             "default": null,
@@ -569,6 +576,7 @@
         "type": "object"
       },
       "app_schemas_auth_schema_ConfirmEmailSchema": {
+        "additionalProperties": false,
         "properties": {
           "token": {
             "description": "Token de confirmacao recebido por email",
@@ -582,6 +590,7 @@
         "type": "object"
       },
       "app_schemas_auth_schema_ForgotPasswordSchema": {
+        "additionalProperties": false,
         "properties": {
           "email": {
             "description": "Email da conta que deseja recuperar acesso",
@@ -594,6 +603,7 @@
         "type": "object"
       },
       "app_schemas_auth_schema_ResetPasswordSchema": {
+        "additionalProperties": false,
         "properties": {
           "new_password": {
             "description": "Nova senha (mínimo 10 caracteres, com maiúscula, número e símbolo)",
@@ -613,7 +623,50 @@
         "required": ["new_password", "token"],
         "type": "object"
       },
+      "app_schemas_push_subscription_schema_SubscribeSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "device_label": {
+            "default": null,
+            "nullable": true,
+            "type": "string"
+          },
+          "endpoint": {
+            "type": "string"
+          },
+          "expiration_time": {
+            "default": null,
+            "format": "date-time",
+            "nullable": true,
+            "type": "string"
+          },
+          "keys": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "default": null,
+            "nullable": true,
+            "type": "object"
+          },
+          "transport": {
+            "type": "string"
+          }
+        },
+        "required": ["endpoint", "transport"],
+        "type": "object"
+      },
+      "app_schemas_push_subscription_schema_UnsubscribeSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "endpoint": {
+            "type": "string"
+          }
+        },
+        "required": ["endpoint"],
+        "type": "object"
+      },
       "app_schemas_user_schemas_DeleteAccountSchema": {
+        "additionalProperties": false,
         "properties": {
           "password": {
             "description": "Senha atual do usuário para confirmar a exclusão da conta",
@@ -626,6 +679,7 @@
         "type": "object"
       },
       "app_schemas_user_schemas_QuestionnaireAnswerSchema": {
+        "additionalProperties": false,
         "properties": {
           "answers": {
             "description": "Lista de 5 respostas — pontos da opção escolhida em cada pergunta (1–3).",
@@ -643,6 +697,7 @@
         "type": "object"
       },
       "app_schemas_user_schemas_SalaryIncreaseSimulationRequestSchema": {
+        "additionalProperties": false,
         "properties": {
           "base_date": {
             "description": "Data base do salário atual",
@@ -673,6 +728,7 @@
         "type": "object"
       },
       "app_schemas_user_schemas_UserProfileSchema": {
+        "additionalProperties": false,
         "properties": {
           "birth_date": {
             "description": "Data de nascimento",
@@ -777,6 +833,7 @@
         "type": "object"
       },
       "app_schemas_user_schemas_UserRegistrationSchema": {
+        "additionalProperties": false,
         "properties": {
           "captcha_token": {
             "default": null,
@@ -2340,19 +2397,19 @@
         "description": "Contrato canônico do dashboard financeiro do MVP1. Use esta rota para visão agregada mensal; `/transactions/dashboard` permanece apenas como compatibilidade transitória.",
         "parameters": [
           {
-            "description": "Mês de referência no formato YYYY-MM",
-            "example": "2026-03",
-            "in": "query",
-            "name": "month",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "Mês de referência no formato YYYY-MM",
+            "example": "2026-03",
+            "in": "query",
+            "name": "month",
+            "required": true,
             "type": "string"
           }
         ],
@@ -2701,20 +2758,20 @@
         "description": "Retorna a série histórica de receitas, despesas e saldo para os últimos N meses (apenas transações pagas).",
         "parameters": [
           {
-            "description": "Número de meses a incluir (1–24, padrão 6)",
-            "example": 6,
-            "in": "query",
-            "name": "months",
-            "required": false,
-            "type": "integer"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
             "type": "string"
+          },
+          {
+            "description": "Número de meses a incluir (1–24, padrão 6)",
+            "example": 6,
+            "in": "query",
+            "name": "months",
+            "required": false,
+            "type": "integer"
           }
         ],
         "responses": {
@@ -2895,18 +2952,18 @@
         "description": "Retorna os totais da semana atual e da semana anterior (receita, despesa, saldo, contagem de transações pagas), o comparativo com deltas absolutos e percentuais, e uma série temporal para alimentar gráficos. Granularidade: diária quando period ≤ 31 dias, semanal caso contrário.",
         "parameters": [
           {
-            "description": "Data inicial para período customizado (YYYY-MM-DD)",
-            "example": "2026-03-01",
-            "in": "query",
-            "name": "start_date",
-            "required": false,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "Data final para período customizado (YYYY-MM-DD)",
+            "example": "2026-04-19",
+            "in": "query",
+            "name": "end_date",
             "required": false,
             "type": "string"
           },
@@ -2919,10 +2976,10 @@
             "type": "string"
           },
           {
-            "description": "Data final para período customizado (YYYY-MM-DD)",
-            "example": "2026-04-19",
+            "description": "Data inicial para período customizado (YYYY-MM-DD)",
+            "example": "2026-03-01",
             "in": "query",
-            "name": "end_date",
+            "name": "start_date",
             "required": false,
             "type": "string"
           }
@@ -3514,6 +3571,339 @@
           }
         },
         "tags": ["Health"]
+      }
+    },
+    "/notifications/subscribe": {
+      "post": {
+        "description": "Registra um token de push para o dispositivo do usuário. Aceita 'expo' (FCM/APNS via Expo) e 'web_push' (VAPID). Idempotente: endpoint repetido faz upsert.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/app_schemas_push_subscription_schema_SubscribeSchema"
+            }
+          },
+          {
+            "description": "Opcional. Envie `v2` para o envelope padronizado.",
+            "example": "v2",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "endpoint": "ExponentPushToken[...]",
+                    "id": "uuid",
+                    "transport": "expo"
+                  },
+                  "message": "Subscription registrada com sucesso."
+                },
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": ["message", "data"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Subscription registrada",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "VALIDATION_ERROR",
+                  "message": "transport deve ser 'web_push' ou 'expo'.",
+                  "status_code": 400
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Dados inválidos",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "Token revogado.",
+                  "status_code": 401
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Token revogado",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Registrar token de push",
+        "tags": ["Notificações"]
+      }
+    },
+    "/notifications/unsubscribe": {
+      "post": {
+        "description": "Remove a subscription de push para o endpoint informado.",
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/app_schemas_push_subscription_schema_UnsubscribeSchema"
+            }
+          },
+          {
+            "description": "Opcional. Envie `v2` para o envelope padronizado.",
+            "example": "v2",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {},
+                  "message": "Subscription removida com sucesso."
+                },
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": ["message", "data"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Subscription removida",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "VALIDATION_ERROR",
+                  "message": "Campo 'endpoint' obrigatório.",
+                  "status_code": 400
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Dados inválidos",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "Token revogado.",
+                  "status_code": 401
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Token revogado",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "NOT_FOUND",
+                  "message": "Subscription não encontrada.",
+                  "status_code": 404
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Subscription não encontrada",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Remover token de push",
+        "tags": ["Notificações"]
       }
     },
     "/ops/metrics": {
@@ -4307,18 +4697,18 @@
         "description": "Compatibilidade transitória para o dashboard mensal. Prefira `GET /dashboard/overview`.",
         "parameters": [
           {
-            "description": "Mês de referência no formato YYYY-MM",
-            "example": "2026-03",
-            "in": "query",
-            "name": "month",
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "Mês de referência no formato YYYY-MM",
+            "example": "2026-03",
+            "in": "query",
+            "name": "month",
             "type": "string"
           }
         ],
@@ -5494,19 +5884,19 @@
         "description": "Restaura uma transação deletada logicamente.",
         "parameters": [
           {
-            "description": "ID da transação",
-            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
-            "in": "path",
-            "name": "transaction_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID da transação",
+            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -5927,19 +6317,19 @@
         "description": "Realiza soft delete de uma transação do usuário autenticado.",
         "parameters": [
           {
-            "description": "ID da transação",
-            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
-            "in": "path",
-            "name": "transaction_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID da transação",
+            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -6150,19 +6540,19 @@
         "description": "Retorna o detalhe canônico de uma transação do usuário.",
         "parameters": [
           {
-            "description": "ID da transação",
-            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
-            "in": "path",
-            "name": "transaction_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID da transação",
+            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -6406,19 +6796,19 @@
             }
           },
           {
-            "description": "ID da transação",
-            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
-            "in": "path",
-            "name": "transaction_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID da transação",
+            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -6716,19 +7106,19 @@
             }
           },
           {
-            "description": "ID da transação",
-            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
-            "in": "path",
-            "name": "transaction_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID da transação",
+            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -7048,19 +7438,19 @@
         "description": "Remove permanentemente uma transação já deletada logicamente.",
         "parameters": [
           {
-            "description": "ID da transação",
-            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
-            "in": "path",
-            "name": "transaction_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie `v2` para o envelope padronizado.",
             "example": "v2",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID da transação",
+            "example": "cfef66a6-a148-49db-a72f-cc63b6080cf8",
+            "in": "path",
+            "name": "transaction_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -7742,6 +8132,336 @@
           }
         ],
         "summary": "Obter contexto do usuário autenticado",
+        "tags": ["Usuário"]
+      }
+    },
+    "/user/me/avatar": {
+      "delete": {
+        "description": "Remove o avatar do usuário autenticado e deleta o arquivo do S3.",
+        "parameters": [
+          {
+            "description": "Opcional. Envie `v2` para o envelope padronizado.",
+            "example": "v2",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {},
+                  "message": "Avatar removido com sucesso."
+                },
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": ["message", "data"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Avatar removido com sucesso",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "Token revogado.",
+                  "status_code": 401
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Token revogado",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "404": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "NOT_FOUND",
+                  "message": "Nenhum avatar configurado.",
+                  "status_code": 404
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Nenhum avatar configurado",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Remover avatar do usuário",
+        "tags": ["Usuário"]
+      },
+      "post": {
+        "description": "Recebe uma imagem (JPEG, PNG ou WebP, máx. 5 MB) via multipart/form-data e armazena no S3. Retorna a URL pública do avatar atualizado.",
+        "parameters": [
+          {
+            "description": "Opcional. Envie `v2` para o envelope padronizado.",
+            "example": "v2",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string"
+                  }
+                },
+                "required": ["file"],
+                "type": "object"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "data": {
+                    "avatar_url": "https://cdn.auraxis.com.br/avatars/..."
+                  },
+                  "message": "Avatar atualizado com sucesso."
+                },
+                "schema": {
+                  "properties": {
+                    "data": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "meta": {
+                      "type": "object"
+                    }
+                  },
+                  "required": ["message", "data"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Avatar atualizado com sucesso",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "VALIDATION_ERROR",
+                  "message": "Tipo de arquivo não permitido.",
+                  "status_code": 400
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Arquivo inválido",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "401": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "UNAUTHORIZED",
+                  "message": "Token revogado.",
+                  "status_code": 401
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Token revogado",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "500": {
+            "content": {
+              "application/json": {
+                "example": {
+                  "code": "INTERNAL_ERROR",
+                  "message": "Falha ao armazenar avatar.",
+                  "status_code": 500
+                },
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "type": "string"
+                    },
+                    "details": {
+                      "type": "object"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "status_code": {
+                      "type": "integer"
+                    }
+                  },
+                  "required": ["message", "code"],
+                  "type": "object"
+                }
+              }
+            },
+            "description": "Falha no storage",
+            "headers": {
+              "X-Request-ID": {
+                "description": "Identificador único da requisição gerado pela API.",
+                "example": "req-example-id",
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ],
+        "summary": "Upload avatar do usuário",
         "tags": ["Usuário"]
       }
     },
@@ -8529,6 +9249,13 @@
         "description": "Lista os investimentos cadastrados na carteira com paginação.",
         "parameters": [
           {
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
             "in": "query",
             "name": "page",
             "required": false,
@@ -8545,13 +9272,6 @@
               "default": 10,
               "type": "integer"
             }
-          },
-          {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
-            "type": "string"
           }
         ],
         "responses": {
@@ -8573,6 +9293,13 @@
         "description": "Lista os investimentos cadastrados na carteira com paginação.",
         "parameters": [
           {
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
             "in": "query",
             "name": "page",
             "required": false,
@@ -8589,13 +9316,6 @@
               "default": 10,
               "type": "integer"
             }
-          },
-          {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
-            "type": "string"
           }
         ],
         "responses": {
@@ -8704,16 +9424,9 @@
             "type": "string"
           },
           {
-            "deprecated": true,
-            "description": "Alias legado de `start_date`.",
+            "description": "Data final (YYYY-MM-DD). Opcional.",
             "in": "query",
-            "name": "startDate",
-            "required": false
-          },
-          {
-            "description": "Data inicial (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "start_date",
+            "name": "end_date",
             "required": false
           },
           {
@@ -8724,9 +9437,16 @@
             "required": false
           },
           {
-            "description": "Data final (YYYY-MM-DD). Opcional.",
+            "deprecated": true,
+            "description": "Alias legado de `start_date`.",
             "in": "query",
-            "name": "end_date",
+            "name": "startDate",
+            "required": false
+          },
+          {
+            "description": "Data inicial (YYYY-MM-DD). Opcional.",
+            "in": "query",
+            "name": "start_date",
             "required": false
           }
         ],
@@ -8789,16 +9509,9 @@
             "type": "string"
           },
           {
-            "deprecated": true,
-            "description": "Alias legado de `start_date`.",
+            "description": "Data final (YYYY-MM-DD). Opcional.",
             "in": "query",
-            "name": "startDate",
-            "required": false
-          },
-          {
-            "description": "Data inicial (YYYY-MM-DD). Opcional.",
-            "in": "query",
-            "name": "start_date",
+            "name": "end_date",
             "required": false
           },
           {
@@ -8809,9 +9522,16 @@
             "required": false
           },
           {
-            "description": "Data final (YYYY-MM-DD). Opcional.",
+            "deprecated": true,
+            "description": "Alias legado de `start_date`.",
             "in": "query",
-            "name": "end_date",
+            "name": "startDate",
+            "required": false
+          },
+          {
+            "description": "Data inicial (YYYY-MM-DD). Opcional.",
+            "in": "query",
+            "name": "start_date",
             "required": false
           }
         ],
@@ -8869,17 +9589,17 @@
         "description": "Deleta um investimento da carteira do usuário autenticado.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -8908,17 +9628,17 @@
         "description": "Retorna o detalhe canônico de um investimento específico da carteira do usuário autenticado.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -8947,17 +9667,17 @@
         "description": "Compatibilidade transitória para atualização parcial de investimento. Use `PATCH /wallet/{investment_id}` como método canônico.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9016,17 +9736,17 @@
         "description": "Atualiza parcialmente um investimento existente da carteira do usuário. Este é o método canônico para alterações parciais.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9055,17 +9775,17 @@
         "description": "Compatibilidade transitória para atualização parcial de investimento. Use `PATCH /wallet/{investment_id}` como método canônico.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9126,17 +9846,17 @@
         "description": "Retorna o histórico de alterações de um investimento, paginado e ordenado.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9165,17 +9885,17 @@
         "description": "Retorna o histórico de alterações de um investimento, paginado e ordenado.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9206,6 +9926,20 @@
         "description": "Lista operações de investimento de um item da carteira com paginação.",
         "parameters": [
           {
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
+            "type": "string"
+          },
+          {
             "in": "query",
             "name": "page",
             "required": false,
@@ -9222,20 +9956,6 @@
               "default": 10,
               "type": "integer"
             }
-          },
-          {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
-            "type": "string"
           }
         ],
         "responses": {
@@ -9263,6 +9983,20 @@
         "description": "Lista operações de investimento de um item da carteira com paginação.",
         "parameters": [
           {
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
+            "type": "string"
+          },
+          {
             "in": "query",
             "name": "page",
             "required": false,
@@ -9279,20 +10013,6 @@
               "default": 10,
               "type": "integer"
             }
-          },
-          {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
-            "type": "string"
           }
         ],
         "responses": {
@@ -9320,17 +10040,17 @@
         "description": "Registra uma operação de investimento (buy/sell) para um item da carteira.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9364,13 +10084,11 @@
         "description": "Retorna o valor investido no dia informado, considerando operações de compra e venda do investimento.",
         "parameters": [
           {
-            "in": "query",
-            "name": "date",
-            "required": true,
-            "schema": {
-              "format": "date",
-              "type": "string"
-            }
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
           },
           {
             "description": "ID do investimento",
@@ -9380,11 +10098,13 @@
             "type": "string"
           },
           {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
-            "type": "string"
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -9415,13 +10135,11 @@
         "description": "Retorna o valor investido no dia informado, considerando operações de compra e venda do investimento.",
         "parameters": [
           {
-            "in": "query",
-            "name": "date",
-            "required": true,
-            "schema": {
-              "format": "date",
-              "type": "string"
-            }
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
           },
           {
             "description": "ID do investimento",
@@ -9431,11 +10149,13 @@
             "type": "string"
           },
           {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
-            "type": "string"
+            "in": "query",
+            "name": "date",
+            "required": true,
+            "schema": {
+              "format": "date",
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -9468,17 +10188,17 @@
         "description": "Retorna posição atual e custo médio do investimento com base nas operações registradas.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9507,17 +10227,17 @@
         "description": "Retorna posição atual e custo médio do investimento com base nas operações registradas.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9548,17 +10268,17 @@
         "description": "Resumo agregado das operações de um investimento.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9587,17 +10307,17 @@
         "description": "Resumo agregado das operações de um investimento.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9628,6 +10348,13 @@
         "description": "Remove operação de investimento.",
         "parameters": [
           {
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
             "description": "ID do investimento",
             "in": "path",
             "name": "investment_id",
@@ -9639,13 +10366,6 @@
             "in": "path",
             "name": "operation_id",
             "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
             "type": "string"
           }
         ],
@@ -9674,6 +10394,13 @@
         "description": "Atualiza operação de investimento existente.",
         "parameters": [
           {
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
             "description": "ID do investimento",
             "in": "path",
             "name": "investment_id",
@@ -9685,13 +10412,6 @@
             "in": "path",
             "name": "operation_id",
             "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
             "type": "string"
           }
         ],
@@ -9723,6 +10443,13 @@
         "description": "Atualiza operação de investimento existente.",
         "parameters": [
           {
+            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
+            "in": "header",
+            "name": "X-API-Contract",
+            "required": false,
+            "type": "string"
+          },
+          {
             "description": "ID do investimento",
             "in": "path",
             "name": "investment_id",
@@ -9734,13 +10461,6 @@
             "in": "path",
             "name": "operation_id",
             "required": true,
-            "type": "string"
-          },
-          {
-            "description": "Opcional. Envie 'v2' para o contrato padronizado.",
-            "in": "header",
-            "name": "X-API-Contract",
-            "required": false,
             "type": "string"
           }
         ],
@@ -9774,17 +10494,17 @@
         "description": "Retorna a valorização atual de um investimento específico.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9813,17 +10533,17 @@
         "description": "Retorna a valorização atual de um investimento específico.",
         "parameters": [
           {
-            "description": "ID do investimento",
-            "in": "path",
-            "name": "investment_id",
-            "required": true,
-            "type": "string"
-          },
-          {
             "description": "Opcional. Envie 'v2' para o contrato padronizado.",
             "in": "header",
             "name": "X-API-Contract",
             "required": false,
+            "type": "string"
+          },
+          {
+            "description": "ID do investimento",
+            "in": "path",
+            "name": "investment_id",
+            "required": true,
             "type": "string"
           }
         ],
@@ -9890,6 +10610,10 @@
     {
       "description": "Sistema de categorização por tags (pendente)",
       "name": "Tags"
+    },
+    {
+      "description": "Registro de tokens de push (Expo, Web Push VAPID)",
+      "name": "Notificações"
     }
   ]
 }

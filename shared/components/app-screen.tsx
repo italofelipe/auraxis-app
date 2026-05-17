@@ -1,4 +1,5 @@
-import type { PropsWithChildren, ReactElement, ReactNode } from "react";
+import type { PropsWithChildren, ReactElement, ReactNode, Ref } from "react";
+import type { ScrollView as NativeScrollView } from "react-native";
 
 import { SafeAreaView } from "react-native-safe-area-context";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -6,6 +7,8 @@ import { ScrollView, YStack } from "tamagui";
 
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { motionDurations } from "@/shared/theme/motion";
+
+export type AppScreenScrollHandle = NativeScrollView;
 
 export interface AppScreenProps extends PropsWithChildren {
   readonly scrollable?: boolean;
@@ -17,6 +20,7 @@ export interface AppScreenProps extends PropsWithChildren {
    */
   readonly animateEntry?: boolean;
   readonly testID?: string;
+  readonly scrollViewRef?: Ref<AppScreenScrollHandle>;
 }
 
 interface ContentWrapperProps {
@@ -58,6 +62,7 @@ export function AppScreen({
   scrollable = true,
   animateEntry = true,
   testID,
+  scrollViewRef,
 }: AppScreenProps): ReactElement {
   const reducedMotion = useAppShellStore((state) => state.reducedMotionEnabled);
 
@@ -83,7 +88,12 @@ export function AppScreen({
   return (
     <SafeAreaView style={{ flex: 1 }}>
       <ContentWrapper animateEntry={animateEntry} reducedMotion={reducedMotion}>
-        <ScrollView flex={1} backgroundColor="$background" testID={testID}>
+        <ScrollView
+          ref={scrollViewRef}
+          flex={1}
+          backgroundColor="$background"
+          testID={testID}
+        >
           <YStack
             flex={1}
             paddingHorizontal="$4"

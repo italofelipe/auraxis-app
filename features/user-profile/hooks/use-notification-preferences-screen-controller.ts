@@ -1,16 +1,19 @@
 import { useEffect, useState } from "react";
 
+import { usePushRegistration } from "@/features/notifications/hooks/use-push-registration";
 import type { NotificationPreference } from "@/features/user-profile/contracts";
 import { useUpdateNotificationPreferencesMutation } from "@/features/user-profile/hooks/use-notification-preferences-mutation";
 import { useNotificationPreferencesQuery } from "@/features/user-profile/hooks/use-notification-preferences-query";
 
 export interface NotificationPreferencesScreenController {
   readonly preferencesQuery: ReturnType<typeof useNotificationPreferencesQuery>;
+  readonly pushRegistration: ReturnType<typeof usePushRegistration>;
   readonly preferences: readonly NotificationPreference[];
   readonly isSubmitting: boolean;
   readonly submitError: unknown | null;
   readonly togglePreference: (category: string) => void;
   readonly toggleGlobalOptOut: (category: string) => void;
+  readonly handlePushToggle: (enabled: boolean) => Promise<void>;
   readonly handleSave: () => Promise<void>;
   readonly dismissSubmitError: () => void;
 }
@@ -26,6 +29,7 @@ const replaceWhere = <T,>(
 export function useNotificationPreferencesScreenController(): NotificationPreferencesScreenController {
   const preferencesQuery = useNotificationPreferencesQuery();
   const updateMutation = useUpdateNotificationPreferencesMutation();
+  const pushRegistration = usePushRegistration();
   const [preferences, setPreferences] = useState<readonly NotificationPreference[]>(
     [],
   );
@@ -39,6 +43,7 @@ export function useNotificationPreferencesScreenController(): NotificationPrefer
 
   return {
     preferencesQuery,
+    pushRegistration,
     preferences,
     isSubmitting: updateMutation.isPending,
     submitError,
@@ -57,6 +62,14 @@ export function useNotificationPreferencesScreenController(): NotificationPrefer
           globalOptOut: !item.globalOptOut,
         })),
       );
+    },
+    handlePushToggle: async (enabled) => {
+      if (enabled) {
+        await pushRegistration.enablePush();
+        return;
+      }
+
+      await pushRegistration.disablePush();
     },
     handleSave: async () => {
       setSubmitError(null);

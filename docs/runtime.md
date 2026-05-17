@@ -93,6 +93,78 @@ Esse valor e publico e nao deve conter segredo. A decisao de entitlement e
 subscription continua no backend; o app apenas escolhe o provider de compra por
 canal e invalida `subscription`/`entitlements` depois do retorno.
 
+## Push notifications
+
+Push nativo e controlado pela flag `app.notifications.push`. O opt-in vive em
+`/preferencias-notificacao` e registra o dispositivo apenas quando o usuario
+liga o toggle.
+
+### Contrato backend
+
+Registro:
+
+```http
+POST /notifications/subscribe
+```
+
+Payload Expo:
+
+```json
+{
+  "transport": "expo",
+  "endpoint": "ExponentPushToken[...]",
+  "device_label": "iPhone 15"
+}
+```
+
+Opt-out:
+
+```http
+POST /notifications/unsubscribe
+```
+
+```json
+{
+  "endpoint": "ExponentPushToken[...]"
+}
+```
+
+### Config nativa
+
+`app.json` registra o plugin `expo-notifications` com:
+
+- `defaultChannel: "auraxis-default"` para FCM Android.
+- `mode: "production"` para gerar entitlement APNS de producao.
+- `color: "#2F80ED"` para a cor do icone de notificacao Android.
+
+O canal Android tambem e criado em runtime por
+`features/notifications/hooks/use-push-registration.ts`, porque o usuario pode
+ativar push antes de receber a primeira mensagem FCM.
+O app tambem cria o canal legado `analysis_ready` enquanto o backend antigo ainda
+envia esse `channelId`; novos payloads devem usar `auraxis-default`.
+
+### Payload de roteamento
+
+O listener global (`core/notifications/listener.ts`) aceita `deeplink` ou
+`deep_link` em `notification.request.content.data`. Apenas URLs aprovadas por
+`parseAppUrl` sao abertas.
+Como compatibilidade com payloads antigos, `screen: "Dashboard"` roteia para
+`auraxisapp://dashboard`.
+
+Exemplo:
+
+```json
+{
+  "type": "weekly_insight",
+  "deeplink": "auraxisapp://dashboard?focus=weekly-insight"
+}
+```
+
+Eventos Sentry/breadcrumb:
+
+- `push.delivered` quando a notificacao chega em foreground.
+- `push.tapped` quando o usuario toca na notificacao.
+
 ## SSL pinning
 
 Pinning é aplicado em duas camadas:
