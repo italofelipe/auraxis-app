@@ -3,7 +3,12 @@ import featureFlagsCatalogJson from "@/config/feature-flags.json";
 import type { FeatureFlagCatalog, FeatureFlagDefinition } from "@/shared/feature-flags/types";
 
 const featureFlagsCatalog: FeatureFlagCatalog = featureFlagsCatalogJson as FeatureFlagCatalog;
-const enabledStatuses = new Set<string>(["active", "released", "enabled"]);
+const enabledStatuses = new Set<string>([
+  "enabled-dev",
+  "enabled-staging",
+  "enabled-prod",
+  "cleanup-pending",
+]);
 const overridePrefix = "EXPO_PUBLIC_FLAG_";
 const defaultUnleashAppName = "auraxis-app";
 const defaultUnleashEnvironment = "development";
