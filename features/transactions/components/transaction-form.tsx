@@ -1,16 +1,22 @@
-import { useEffect, type ReactElement } from "react";
+import { useEffect, useMemo, type ReactElement } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Controller,
   useForm,
+  useWatch,
   type Control,
   type FieldErrors,
   type Resolver,
+  type UseFormSetValue,
 } from "react-hook-form";
-import { XStack, YStack } from "tamagui";
+import { Paragraph, XStack, YStack } from "tamagui";
 
+import type { CreditCard } from "@/features/credit-cards/contracts";
+import { useCreditCardsQuery } from "@/features/credit-cards/hooks/use-credit-cards-query";
 import type { TransactionRecord } from "@/features/transactions/contracts";
+import { TRANSACTION_INSTALLMENTS_FEATURE_FLAG_KEY } from "@/features/transactions/installments-config";
+import { previewInstallments } from "@/features/transactions/utils/preview-installments";
 import {
   createTransactionSchema,
   type CreateTransactionFormValues,
@@ -19,6 +25,9 @@ import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AppToggleRow } from "@/shared/components/app-toggle-row";
+import { isFeatureEnabled } from "@/shared/feature-flags";
+import { formatCurrency, formatShortDate } from "@/shared/utils/formatters";
 
 const transactionToFormValues = (
   transaction: TransactionRecord | null | undefined,
@@ -31,6 +40,9 @@ const transactionToFormValues = (
       dueDate: new Date().toISOString().slice(0, 10),
       description: null,
       isRecurring: false,
+      creditCardId: null,
+      isInstallment: false,
+      installmentCount: null,
     };
   }
   return {
@@ -40,6 +52,9 @@ const transactionToFormValues = (
     dueDate: transaction.dueDate.slice(0, 10),
     description: transaction.description,
     isRecurring: transaction.isRecurring,
+    creditCardId: transaction.creditCardId,
+    isInstallment: transaction.isInstallment,
+    installmentCount: transaction.installmentCount,
   };
 };
 
@@ -65,6 +80,7 @@ export function TransactionForm({
   onCancel,
   onDismissError,
 }: TransactionFormProps): ReactElement {
+  const installmentsEnabled = isFeatureEnabled(TRANSACTION_INSTALLMENTS_FEATURE_FLAG_KEY);
   const form = useForm<CreateTransactionFormValues>({
     mode: "onBlur",
     reValidateMode: "onChange",
@@ -88,6 +104,13 @@ export function TransactionForm({
       <YStack gap="$4">
         <TypeToggle control={form.control} />
         <TransactionFormFields control={form.control} errors={form.formState.errors} />
+        {installmentsEnabled ? (
+          <TransactionInstallmentFields
+            control={form.control}
+            errors={form.formState.errors}
+            setValue={form.setValue}
+          />
+        ) : null}
         <AppButton
           onPress={() => {
             void handleSubmit();
@@ -222,3 +245,358 @@ function TransactionFormFields({
     </YStack>
   );
 }
+
+interface TransactionInstallmentFieldsProps {
+  readonly control: Control<CreateTransactionFormValues>;
+  readonly errors: FieldErrors<CreateTransactionFormValues>;
+  readonly setValue: UseFormSetValue<CreateTransactionFormValues>;
+}
+
+function TransactionInstallmentFields({
+  control,
+  errors,
+  setValue,
+}: TransactionInstallmentFieldsProps): ReactElement | null {
+  const creditCardsQuery = useCreditCardsQuery();
+  const transactionType = useWatch({ control, name: "type" });
+  const creditCardId = useWatch({ control, name: "creditCardId" });
+  const isInstallment = useWatch({ control, name: "isInstallment" });
+  const installmentCount = useWatch({ control, name: "installmentCount" });
+  const amount = useWatch({ control, name: "amount" });
+  const dueDate = useWatch({ control, name: "dueDate" });
+
+  useResetInstallmentFields({
+    creditCardId,
+    installmentCount,
+    isInstallment,
+    setValue,
+    transactionType,
+  });
+
+  const creditCards = creditCardsQuery.data?.creditCards ?? [];
+
+  if (transactionType !== "expense") {
+    return null;
+  }
+
+  return (
+    <YStack gap="$3">
+      <CreditCardSelector
+        creditCardId={creditCardId}
+        creditCards={creditCards}
+        creditCardsQuery={creditCardsQuery}
+        errorText={errors.creditCardId?.message}
+        setValue={setValue}
+      />
+      {creditCardId ? <InstallmentToggle control={control} setValue={setValue} /> : null}
+      {creditCardId && isInstallment ? (
+        <InstallmentCountSection
+          amount={amount}
+          control={control}
+          dueDate={dueDate}
+          errorText={errors.installmentCount?.message}
+          installmentCount={installmentCount}
+        />
+      ) : null}
+    </YStack>
+  );
+}
+
+interface ResetInstallmentFieldsInput {
+  readonly creditCardId: string | null;
+  readonly installmentCount: number | null;
+  readonly isInstallment: boolean;
+  readonly setValue: UseFormSetValue<CreateTransactionFormValues>;
+  readonly transactionType: CreateTransactionFormValues["type"];
+}
+
+function useResetInstallmentFields({
+  creditCardId,
+  installmentCount,
+  isInstallment,
+  setValue,
+  transactionType,
+}: ResetInstallmentFieldsInput): void {
+  useEffect(() => {
+    if (transactionType === "expense") {
+      return;
+    }
+    resetInstallmentValues(setValue, { clearCreditCard: creditCardId !== null });
+  }, [creditCardId, setValue, transactionType]);
+
+  useEffect(() => {
+    if (creditCardId) {
+      return;
+    }
+    if (isInstallment || installmentCount !== null) {
+      resetInstallmentValues(setValue);
+    }
+  }, [creditCardId, installmentCount, isInstallment, setValue]);
+}
+
+const resetInstallmentValues = (
+  setValue: UseFormSetValue<CreateTransactionFormValues>,
+  options: { readonly clearCreditCard?: boolean } = {},
+): void => {
+  if (options.clearCreditCard) {
+    setValue("creditCardId", null, { shouldDirty: true, shouldValidate: true });
+  }
+  setValue("isInstallment", false, { shouldDirty: true, shouldValidate: true });
+  setValue("installmentCount", null, { shouldDirty: true, shouldValidate: true });
+};
+
+interface CreditCardSelectorProps {
+  readonly creditCardId: string | null;
+  readonly creditCards: readonly CreditCard[];
+  readonly creditCardsQuery: ReturnType<typeof useCreditCardsQuery>;
+  readonly errorText?: string;
+  readonly setValue: UseFormSetValue<CreateTransactionFormValues>;
+}
+
+function CreditCardSelector({
+  creditCardId,
+  creditCards,
+  creditCardsQuery,
+  errorText,
+  setValue,
+}: CreditCardSelectorProps): ReactElement {
+  return (
+    <YStack gap="$2">
+      <Paragraph color="$color" fontFamily="$body" fontSize="$3">
+        Cartao de credito
+      </Paragraph>
+      <XStack gap="$2" flexWrap="wrap">
+        {creditCardId ? (
+          <AppButton
+            tone="secondary"
+            onPress={() => resetInstallmentValues(setValue, { clearCreditCard: true })}
+          >
+            Sem cartao
+          </AppButton>
+        ) : null}
+        {creditCards.map((creditCard) => (
+          <CreditCardOptionButton
+            key={creditCard.id}
+            creditCard={creditCard}
+            selected={creditCardId === creditCard.id}
+            onSelect={(nextCreditCardId) => {
+              setValue("creditCardId", nextCreditCardId, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }}
+          />
+        ))}
+      </XStack>
+      <CreditCardsQueryState query={creditCardsQuery} creditCardsCount={creditCards.length} />
+      {errorText ? (
+        <Paragraph color="$danger" fontFamily="$body" fontSize="$2">
+          {errorText}
+        </Paragraph>
+      ) : null}
+    </YStack>
+  );
+}
+
+interface InstallmentToggleProps {
+  readonly control: Control<CreateTransactionFormValues>;
+  readonly setValue: UseFormSetValue<CreateTransactionFormValues>;
+}
+
+function InstallmentToggle({
+  control,
+  setValue,
+}: InstallmentToggleProps): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="isInstallment"
+      render={({ field: { value, onChange } }) => (
+        <AppToggleRow
+          label="Compra parcelada"
+          description="Divida a despesa no cartao e visualize o calendario de parcelas."
+          checked={Boolean(value)}
+          testID="transaction-installment-toggle"
+          onCheckedChange={(checked) => {
+            onChange(checked);
+            if (!checked) {
+              setValue("installmentCount", null, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
+            }
+          }}
+        />
+      )}
+    />
+  );
+}
+
+interface InstallmentCountSectionProps {
+  readonly amount: string;
+  readonly control: Control<CreateTransactionFormValues>;
+  readonly dueDate: string;
+  readonly errorText?: string;
+  readonly installmentCount: number | null;
+}
+
+function InstallmentCountSection({
+  amount,
+  control,
+  dueDate,
+  errorText,
+  installmentCount,
+}: InstallmentCountSectionProps): ReactElement {
+  return (
+    <>
+      <Controller
+        control={control}
+        name="installmentCount"
+        render={({ field: { onBlur, onChange, value } }) => (
+          <AppInputField
+            id="tx-installment-count"
+            label="Quantidade de parcelas"
+            placeholder="12"
+            keyboardType="number-pad"
+            value={value === null ? "" : String(value)}
+            onBlur={onBlur}
+            onChangeText={(text) => onChange(parseInstallmentCountInput(text))}
+            errorText={errorText}
+            helperText="De 2 a 60 parcelas."
+          />
+        )}
+      />
+      <InstallmentsPreview
+        amount={amount}
+        dueDate={dueDate}
+        installmentCount={installmentCount}
+      />
+    </>
+  );
+}
+
+interface CreditCardOptionButtonProps {
+  readonly creditCard: CreditCard;
+  readonly selected: boolean;
+  readonly onSelect: (creditCardId: string) => void;
+}
+
+function CreditCardOptionButton({
+  creditCard,
+  selected,
+  onSelect,
+}: CreditCardOptionButtonProps): ReactElement {
+  const label = formatCreditCardLabel(creditCard);
+  return (
+    <AppButton
+      tone={selected ? "primary" : "secondary"}
+      accessibilityState={{ selected }}
+      onPress={() => onSelect(creditCard.id)}
+    >
+      {label}
+    </AppButton>
+  );
+}
+
+interface CreditCardsQueryStateProps {
+  readonly query: ReturnType<typeof useCreditCardsQuery>;
+  readonly creditCardsCount: number;
+}
+
+function CreditCardsQueryState({
+  query,
+  creditCardsCount,
+}: CreditCardsQueryStateProps): ReactElement | null {
+  if (query.isLoading) {
+    return (
+      <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+        Carregando cartoes.
+      </Paragraph>
+    );
+  }
+  if (query.isError) {
+    return (
+      <Paragraph color="$danger" fontFamily="$body" fontSize="$2">
+        Nao foi possivel carregar cartoes.
+      </Paragraph>
+    );
+  }
+  if (creditCardsCount === 0) {
+    return (
+      <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+        Cadastre um cartao para parcelar despesas.
+      </Paragraph>
+    );
+  }
+  return null;
+}
+
+interface InstallmentsPreviewProps {
+  readonly amount: string;
+  readonly dueDate: string;
+  readonly installmentCount: number | null;
+}
+
+function InstallmentsPreview({
+  amount,
+  dueDate,
+  installmentCount,
+}: InstallmentsPreviewProps): ReactElement | null {
+  const preview = useMemo(() => {
+    if (installmentCount === null || installmentCount < 2 || amount.trim().length === 0) {
+      return null;
+    }
+    const firstDueDate = parseDueDateForPreview(dueDate);
+    if (!firstDueDate) {
+      return null;
+    }
+    try {
+      return previewInstallments({ amount, installmentCount, firstDueDate });
+    } catch {
+      return null;
+    }
+  }, [amount, dueDate, installmentCount]);
+
+  if (!preview) {
+    return null;
+  }
+
+  const lastInstallment = preview.installments.at(-1);
+  return (
+    <YStack gap="$1" backgroundColor="$surfaceRaised" padding="$3" borderRadius="$1">
+      <Paragraph color="$color" fontFamily="$body" fontSize="$3">
+        {installmentCount}x de {formatPreviewCurrency(preview.perInstallmentAmount)}
+      </Paragraph>
+      {lastInstallment ? (
+        <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+          Primeira em {formatShortDate(preview.installments[0].dueDate)} - ultima em{" "}
+          {formatShortDate(lastInstallment.dueDate)}
+        </Paragraph>
+      ) : null}
+    </YStack>
+  );
+}
+
+const parseInstallmentCountInput = (text: string): number | null => {
+  const digits = text.replace(/\D/g, "");
+  if (digits.length === 0) {
+    return null;
+  }
+  return Number.parseInt(digits, 10);
+};
+
+const parseDueDateForPreview = (value: string): Date | null => {
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatCreditCardLabel = (creditCard: CreditCard): string => {
+  if (creditCard.lastFourDigits) {
+    return `${creditCard.name} final ${creditCard.lastFourDigits}`;
+  }
+  return creditCard.name;
+};
+
+const formatPreviewCurrency = (value: string): string => {
+  return formatCurrency(Number(value)).replace(/\u00A0/g, " ");
+};

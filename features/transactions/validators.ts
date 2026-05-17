@@ -24,14 +24,49 @@ const isoDate = z
 
 export const transactionTypeSchema = z.enum(["income", "expense"]);
 
-export const createTransactionSchema = z.object({
+const creditCardIdSchema = z.string().uuid("Cartao invalido.").nullable();
+
+const installmentCountSchema = z
+  .number()
+  .int("Informe uma quantidade inteira de parcelas.")
+  .min(2, "Use pelo menos 2 parcelas.")
+  .max(60, "Use no maximo 60 parcelas.")
+  .nullable();
+
+const validateInstallmentRequirements = (
+  values: {
+    readonly isInstallment?: boolean | null;
+    readonly installmentCount?: number | null;
+  },
+  ctx: z.RefinementCtx,
+): void => {
+  if (
+    values.isInstallment === true &&
+    (values.installmentCount === null || values.installmentCount === undefined)
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["installmentCount"],
+      message: "Informe a quantidade de parcelas.",
+    });
+  }
+};
+
+export const createTransactionFieldsSchema = z.object({
   title: trimmedString(2, 120, "Informe um titulo de 2 a 120 caracteres."),
   amount: decimalAmount,
   type: transactionTypeSchema,
   dueDate: isoDate,
   description: z.string().trim().max(500, "Descricao muito longa.").optional().nullable(),
   isRecurring: z.boolean().optional(),
+  creditCardId: creditCardIdSchema.default(null),
+  isInstallment: z.boolean().default(false),
+  installmentCount: installmentCountSchema.default(null),
 });
+
+export const createTransactionSchema = createTransactionFieldsSchema.superRefine(
+  validateInstallmentRequirements,
+);
 
 export const updateTransactionSchema = z
   .object({
@@ -41,10 +76,14 @@ export const updateTransactionSchema = z
     dueDate: isoDate.optional(),
     description: z.string().trim().max(500).optional().nullable(),
     isRecurring: z.boolean().optional(),
+    creditCardId: creditCardIdSchema.optional(),
+    isInstallment: z.boolean().optional(),
+    installmentCount: installmentCountSchema.optional(),
     status: z
       .enum(["paid", "pending", "cancelled", "postponed", "overdue"])
       .optional(),
   })
+  .superRefine(validateInstallmentRequirements)
   .refine(
     (values) => Object.values(values).some((value) => value !== undefined),
     { message: "Nenhuma alteracao informada." },

@@ -121,42 +121,15 @@ function FilterHeader({ controller }: ControllerProps): ReactElement {
       title="Transacoes"
       description={`${controller.total} registradas`}
     >
-      <YStack gap="$3">
-        <ViewToggle
-          mode={controller.viewMode}
-          onChange={controller.setViewMode}
-          listLabel={t("transactions.view.list")}
-          calendarLabel={t("transactions.view.calendar")}
-        />
-        <XStack gap="$2" flexWrap="wrap">
-          {FILTER_ORDER.map((filter) => (
-            <AppButton
-              key={filter}
-              tone={controller.typeFilter === filter ? "primary" : "secondary"}
-              onPress={() => controller.setTypeFilter(filter)}
-            >
-              {FILTER_LABELS[filter]}
-            </AppButton>
-          ))}
-        </XStack>
-        <XStack gap="$2">
-          <AppButton flex={1} onPress={controller.handleOpenCreate}>
-            Nova transacao
-          </AppButton>
-          <AppButton
-            flex={1}
-            tone="secondary"
-            onPress={() => setExportSheetOpen(true)}
-          >
-            {t("transactions.export.title")}
-          </AppButton>
-        </XStack>
-        {importEnabled ? (
-          <AppButton tone="secondary" onPress={handleOpenImport}>
-            Importar planilha
-          </AppButton>
-        ) : null}
-      </YStack>
+      <FilterHeaderControls
+        controller={controller}
+        importEnabled={importEnabled}
+        listLabel={t("transactions.view.list")}
+        calendarLabel={t("transactions.view.calendar")}
+        exportLabel={t("transactions.export.title")}
+        onOpenExport={() => setExportSheetOpen(true)}
+        onOpenImport={handleOpenImport}
+      />
       <Modal
         visible={exportSheetOpen}
         transparent
@@ -173,6 +146,86 @@ function FilterHeader({ controller }: ControllerProps): ReactElement {
         />
       </Modal>
     </AppSurfaceCard>
+  );
+}
+
+interface FilterHeaderControlsProps extends ControllerProps {
+  readonly importEnabled: boolean;
+  readonly listLabel: string;
+  readonly calendarLabel: string;
+  readonly exportLabel: string;
+  readonly onOpenExport: () => void;
+  readonly onOpenImport: () => void;
+}
+
+function FilterHeaderControls({
+  controller,
+  importEnabled,
+  listLabel,
+  calendarLabel,
+  exportLabel,
+  onOpenExport,
+  onOpenImport,
+}: FilterHeaderControlsProps): ReactElement {
+  return (
+    <YStack gap="$3">
+      <ViewToggle
+        mode={controller.viewMode}
+        onChange={controller.setViewMode}
+        listLabel={listLabel}
+        calendarLabel={calendarLabel}
+      />
+      <TransactionTypeFilter controller={controller} />
+      <XStack gap="$2">
+        <AppButton flex={1} onPress={controller.handleOpenCreate}>
+          Nova transacao
+        </AppButton>
+        <AppButton flex={1} tone="secondary" onPress={onOpenExport}>
+          {exportLabel}
+        </AppButton>
+      </XStack>
+      {importEnabled ? (
+        <AppButton tone="secondary" onPress={onOpenImport}>
+          Importar planilha
+        </AppButton>
+      ) : null}
+      <InstallmentGroupFilterNotice controller={controller} />
+    </YStack>
+  );
+}
+
+function TransactionTypeFilter({ controller }: ControllerProps): ReactElement {
+  return (
+    <XStack gap="$2" flexWrap="wrap">
+      {FILTER_ORDER.map((filter) => (
+        <AppButton
+          key={filter}
+          tone={controller.typeFilter === filter ? "primary" : "secondary"}
+          onPress={() => controller.setTypeFilter(filter)}
+        >
+          {FILTER_LABELS[filter]}
+        </AppButton>
+      ))}
+    </XStack>
+  );
+}
+
+function InstallmentGroupFilterNotice({
+  controller,
+}: ControllerProps): ReactElement | null {
+  if (!controller.installmentGroupFilter) {
+    return null;
+  }
+
+  return (
+    <XStack alignItems="center" gap="$2">
+      <Paragraph color="$muted" flex={1} fontFamily="$body" fontSize="$2">
+        Mostrando parcelas da mesma compra.
+      </Paragraph>
+      <AppButton tone="secondary" onPress={controller.handleClearInstallmentGroupFilter}>
+        Mostrar todas
+      </AppButton>
+    </XStack>
   );
 }
 
@@ -338,6 +391,11 @@ function TransactionsListCard({ controller }: ControllerProps): ReactElement {
 
 function TransactionsList({ controller }: ControllerProps): ReactElement {
   const { refreshing, onRefresh } = useListRefresh(TRANSACTIONS_REFRESH_KEYS);
+  const [detailTransactionId, setDetailTransactionId] = useState<string | null>(null);
+  const detailTransaction = useMemo(
+    () => controller.transactions.find((item) => item.id === detailTransactionId) ?? null,
+    [controller.transactions, detailTransactionId],
+  );
 
   const handleEdit = useCallback(
     (txId: string): void => {
@@ -365,12 +423,21 @@ function TransactionsList({ controller }: ControllerProps): ReactElement {
     [controller],
   );
 
+  const handleDetails = useCallback((txId: string): void => {
+    setDetailTransactionId(txId);
+  }, []);
+
+  const handleCloseDetails = useCallback((): void => {
+    setDetailTransactionId(null);
+  }, []);
+
   const renderItem = useCallback(
     ({ item }: { readonly item: TransactionViewModel }) => (
       <TransactionRow
         tx={item}
         isDeleting={controller.deletingTransactionId === item.id}
         isDuplicating={controller.duplicatingTransactionId === item.id}
+        onDetails={handleDetails}
         onEdit={handleEdit}
         onDelete={handleDelete}
         onDuplicate={handleDuplicate}
@@ -380,23 +447,31 @@ function TransactionsList({ controller }: ControllerProps): ReactElement {
       controller.deletingTransactionId,
       controller.duplicatingTransactionId,
       handleDelete,
+      handleDetails,
       handleDuplicate,
       handleEdit,
     ],
   );
 
   return (
-    <FlashList
-      data={controller.transactions}
-      keyExtractor={extractTransactionKey}
-      renderItem={renderItem}
-      contentContainerStyle={listContainerStyle}
-      ItemSeparatorComponent={ListSeparator}
-      refreshControl={
-        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
-      }
-      testID="transactions-flashlist"
-    />
+    <>
+      <FlashList
+        data={controller.transactions}
+        keyExtractor={extractTransactionKey}
+        renderItem={renderItem}
+        contentContainerStyle={listContainerStyle}
+        ItemSeparatorComponent={ListSeparator}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+        testID="transactions-flashlist"
+      />
+      <TransactionDetailModal
+        transaction={detailTransaction}
+        onClose={handleCloseDetails}
+        onShowInstallmentGroup={controller.handleShowInstallmentGroup}
+      />
+    </>
   );
 }
 
@@ -412,6 +487,7 @@ interface TransactionRowProps {
   readonly tx: TransactionViewModel;
   readonly isDeleting: boolean;
   readonly isDuplicating: boolean;
+  readonly onDetails: (txId: string) => void;
   readonly onEdit: (txId: string) => void;
   readonly onDelete: (txId: string) => void;
   readonly onDuplicate: (txId: string) => void;
@@ -421,10 +497,16 @@ const TransactionRow = function TransactionRow({
   tx,
   isDeleting,
   isDuplicating,
+  onDetails,
   onEdit,
   onDelete,
   onDuplicate,
 }: TransactionRowProps): ReactElement {
+  const installmentLabel = getInstallmentLabel(tx);
+  const handleDetails = useCallback(() => {
+    onDetails(tx.id);
+  }, [onDetails, tx.id]);
+
   const handleEdit = useCallback(() => {
     onEdit(tx.id);
   }, [onEdit, tx.id]);
@@ -455,12 +537,22 @@ const TransactionRow = function TransactionRow({
               <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
                 {formatShortDate(tx.dueDate)}
               </Paragraph>
+              {installmentLabel ? (
+                <AppBadge tone="default">{installmentLabel}</AppBadge>
+              ) : null}
             </YStack>
             <AppBadge tone={STATUS_TONE[tx.status] ?? "default"}>{tx.status}</AppBadge>
           </XStack>
         }
       />
       <XStack gap="$2" flexWrap="wrap">
+        <AppButton
+          tone="secondary"
+          onPress={handleDetails}
+          disabled={isDeleting || isDuplicating}
+        >
+          Detalhes
+        </AppButton>
         <AppButton tone="secondary" onPress={handleEdit} disabled={isDeleting || isDuplicating}>
           Editar
         </AppButton>
@@ -477,4 +569,77 @@ const TransactionRow = function TransactionRow({
       </XStack>
     </YStack>
   );
+};
+
+interface TransactionDetailModalProps {
+  readonly transaction: TransactionViewModel | null;
+  readonly onClose: () => void;
+  readonly onShowInstallmentGroup: (installmentGroupId: string) => void;
+}
+
+function TransactionDetailModal({
+  transaction,
+  onClose,
+  onShowInstallmentGroup,
+}: TransactionDetailModalProps): ReactElement {
+  const installmentLabel = transaction ? getInstallmentLabel(transaction) : null;
+  const installmentGroupId = transaction?.installmentGroupId ?? null;
+  const visible = Boolean(transaction);
+
+  return (
+    <Modal
+      visible={visible}
+      transparent
+      animationType="slide"
+      onRequestClose={onClose}
+    >
+      <YStack flex={1} backgroundColor="rgba(0,0,0,0.45)" justifyContent="flex-end">
+        <YStack
+          backgroundColor="$background"
+          padding="$4"
+          gap="$3"
+          borderTopLeftRadius="$3"
+          borderTopRightRadius="$3"
+        >
+          {transaction ? (
+            <AppSurfaceCard title="Detalhes da transacao" description={transaction.title}>
+              <YStack gap="$3">
+                <AppKeyValueRow
+                  label="Valor"
+                  value={`${transaction.type === "income" ? "+" : "-"}${transaction.amount}`}
+                  helperText={formatShortDate(transaction.dueDate)}
+                />
+                <AppKeyValueRow label="Status" value={transaction.status} />
+                {installmentLabel ? (
+                  <AppKeyValueRow label="Parcelamento" value={installmentLabel} />
+                ) : null}
+                {installmentGroupId ? (
+                  <AppButton
+                    tone="secondary"
+                    onPress={() => {
+                      onShowInstallmentGroup(installmentGroupId);
+                      onClose();
+                    }}
+                  >
+                    Ver outras parcelas
+                  </AppButton>
+                ) : null}
+                <AppButton onPress={onClose}>Fechar</AppButton>
+              </YStack>
+            </AppSurfaceCard>
+          ) : null}
+        </YStack>
+      </YStack>
+    </Modal>
+  );
+}
+
+const getInstallmentLabel = (tx: TransactionViewModel): string | null => {
+  if (!tx.isInstallment || !tx.installmentCount) {
+    return null;
+  }
+  if (tx.installmentNumber) {
+    return `Parcela ${tx.installmentNumber}/${tx.installmentCount}`;
+  }
+  return `Parcelado em ${tx.installmentCount}x`;
 };

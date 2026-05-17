@@ -69,6 +69,16 @@
       "status": "enabled-prod",
       "description": "Controla a coleta minimizada de analytics de produto no app com provider PostHog e opt-out LGPD.",
       "repositories": ["auraxis-app"]
+    },
+    {
+      "key": "app.transactions.installments",
+      "owner": "platform",
+      "createdAt": "2026-05-17",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-dev",
+      "description": "Controla o fluxo mobile installments_v1 para selecionar cartao de credito e parcelar transacoes.",
+      "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
     }
   ]
 }
