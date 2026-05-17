@@ -8,6 +8,7 @@ import DashboardScreen from "@/app/(private)/dashboard";
 import type { ApiError } from "@/core/http/api-error";
 import type { DashboardOverview, DashboardTrends } from "@/features/dashboard/contracts";
 import { useDashboardScreenController } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
+import { useAiInsightConsent } from "@/features/insights/hooks/use-ai-insight-consent";
 import type { UserInsight } from "@/features/insights/contracts";
 import { isFeatureEnabled } from "@/shared/feature-flags";
 import { TestProviders } from "@/shared/testing/test-providers";
@@ -40,9 +41,14 @@ jest.mock("@/shared/feature-flags", () => ({
   isFeatureEnabled: jest.fn(),
 }));
 
+jest.mock("@/features/insights/hooks/use-ai-insight-consent", () => ({
+  useAiInsightConsent: jest.fn(),
+}));
+
 const mockedUseDashboardScreenController = jest.mocked(useDashboardScreenController);
 const mockedUseLocalSearchParams = jest.mocked(useLocalSearchParams);
 const mockedIsFeatureEnabled = jest.mocked(isFeatureEnabled);
+const mockedUseAiInsightConsent = jest.mocked(useAiInsightConsent);
 
 const buildQuery = <TData,>(
   overrides: Partial<UseQueryResult<TData, ApiError>>,
@@ -159,34 +165,43 @@ describe("DashboardScreen", () => {
     mockScrollTo.mockClear();
     mockedUseLocalSearchParams.mockReturnValue({});
     mockedIsFeatureEnabled.mockReturnValue(true);
+    mockedUseAiInsightConsent.mockReturnValue({
+      isHydrated: true,
+      hasConsent: true,
+      grantedAt: "2026-05-17T01:00:00.000Z",
+      grantConsent: jest.fn(),
+    });
   });
 
   afterEach(() => {
     mockedUseDashboardScreenController.mockReset();
+    mockedUseAiInsightConsent.mockReset();
   });
 
   it("renderiza o resumo e as opcoes mensais da tela canônica", () => {
-    mockedUseDashboardScreenController.mockReturnValue(buildDashboardController({
-      overviewQuery: buildQuery({
-        data: overviewData,
-      }) as unknown as DashboardController["overviewQuery"],
-      trendsQuery: buildQuery({
-        data: trendsData,
-      }) as unknown as DashboardController["trendsQuery"],
-      monthOptions: [{ value: "2026-04", label: "abril de 2026" }],
-      monthSnapshot: {
-        month: "2026-04",
-        incomes: 3000,
-        expenses: 1500,
-        balance: 1500,
-      },
-      currentBalance: 1500,
-      savingsRate: {
-        rate: 0.5,
-        level: "excellent",
-        summary: "Excelente taxa de poupanca!",
-      },
-    }));
+    mockedUseDashboardScreenController.mockReturnValue(
+      buildDashboardController({
+        overviewQuery: buildQuery({
+          data: overviewData,
+        }) as unknown as DashboardController["overviewQuery"],
+        trendsQuery: buildQuery({
+          data: trendsData,
+        }) as unknown as DashboardController["trendsQuery"],
+        monthOptions: [{ value: "2026-04", label: "abril de 2026" }],
+        monthSnapshot: {
+          month: "2026-04",
+          incomes: 3000,
+          expenses: 1500,
+          balance: 1500,
+        },
+        currentBalance: 1500,
+        savingsRate: {
+          rate: 0.5,
+          level: "excellent",
+          summary: "Excelente taxa de poupanca!",
+        },
+      }),
+    );
 
     const { getByText } = render(
       <TestProviders>
@@ -239,5 +254,57 @@ describe("DashboardScreen", () => {
       weeklyInsightEnabled: false,
     });
     expect(queryByText("Insight da semana")).toBeNull();
+  });
+
+  it("nao busca insight semanal antes do consentimento de IA", () => {
+    const grantConsent = jest.fn();
+    mockedUseAiInsightConsent.mockReturnValue({
+      isHydrated: true,
+      hasConsent: false,
+      grantedAt: null,
+      grantConsent,
+    });
+    mockedUseDashboardScreenController.mockReturnValue(buildDashboardController());
+
+    const { getByText, queryByText } = render(
+      <TestProviders>
+        <DashboardScreen />
+      </TestProviders>,
+    );
+
+    expect(mockedUseDashboardScreenController).toHaveBeenCalledWith({
+      weeklyInsightEnabled: false,
+    });
+    expect(getByText("Como usamos IA nos seus insights")).toBeTruthy();
+    expect(queryByText("Voce economizou R$ 320 nesta semana")).toBeNull();
+
+    fireEvent.press(getByText("Permitir insights informativos"));
+
+    expect(grantConsent).toHaveBeenCalledTimes(1);
+  });
+
+  it("mantem rollback pela flag de transparencia sem bloquear o fluxo semanal", () => {
+    mockedIsFeatureEnabled.mockImplementation((flagKey) => {
+      return flagKey !== "app.insights.ai-transparency";
+    });
+    mockedUseAiInsightConsent.mockReturnValue({
+      isHydrated: true,
+      hasConsent: false,
+      grantedAt: null,
+      grantConsent: jest.fn(),
+    });
+    mockedUseDashboardScreenController.mockReturnValue(buildDashboardController());
+
+    const { getByText, queryByText } = render(
+      <TestProviders>
+        <DashboardScreen />
+      </TestProviders>,
+    );
+
+    expect(mockedUseDashboardScreenController).toHaveBeenCalledWith({
+      weeklyInsightEnabled: true,
+    });
+    expect(getByText("Voce economizou R$ 320 nesta semana")).toBeTruthy();
+    expect(queryByText("Como usamos IA nos seus insights")).toBeNull();
   });
 });

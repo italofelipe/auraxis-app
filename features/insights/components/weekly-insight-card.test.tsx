@@ -19,12 +19,7 @@ describe("WeeklyInsightCard", () => {
   it("renderiza loading em altura fixa", () => {
     const { getByTestId } = render(
       <TestProviders>
-        <WeeklyInsightCard
-          insight={null}
-          isLoading
-          isNew={false}
-          onMarkAsRead={jest.fn()}
-        />
+        <WeeklyInsightCard insight={null} isLoading isNew={false} onMarkAsRead={jest.fn()} />
       </TestProviders>,
     );
 
@@ -67,5 +62,59 @@ describe("WeeklyInsightCard", () => {
 
     expect(markAsRead).toHaveBeenCalledWith("ins-1");
     expect(getByText("Voce reduziu gastos variaveis sem cortar lazer.")).toBeTruthy();
+  });
+
+  it("bloqueia o insight ate o consentimento de IA ser aceito", () => {
+    const grantConsent = jest.fn();
+    const { getByText, queryByText } = render(
+      <TestProviders>
+        <WeeklyInsightCard
+          insight={insightFixture}
+          isLoading={false}
+          isNew
+          onMarkAsRead={jest.fn()}
+          aiConsent={{
+            enabled: true,
+            isHydrated: true,
+            hasConsent: false,
+            onGrantConsent: grantConsent,
+          }}
+        />
+      </TestProviders>,
+    );
+
+    expect(getByText("Como usamos IA nos seus insights")).toBeTruthy();
+    expect(getByText(/Seus dados financeiros nao sao usados para treinar modelos/u)).toBeTruthy();
+    expect(
+      getByText(/conteudo informativo e nao substitui aconselhamento financeiro/u),
+    ).toBeTruthy();
+    expect(queryByText("Voce economizou R$ 320 nesta semana")).toBeNull();
+
+    fireEvent.press(getByText("Permitir insights informativos"));
+
+    expect(grantConsent).toHaveBeenCalledTimes(1);
+  });
+
+  it("mantem a transparencia visivel junto ao insight quando consentido", () => {
+    const { getByText } = render(
+      <TestProviders>
+        <WeeklyInsightCard
+          insight={insightFixture}
+          isLoading={false}
+          isNew={false}
+          onMarkAsRead={jest.fn()}
+          aiConsent={{
+            enabled: true,
+            isHydrated: true,
+            hasConsent: true,
+            onGrantConsent: jest.fn(),
+          }}
+        />
+      </TestProviders>,
+    );
+
+    expect(getByText("IA informativa")).toBeTruthy();
+    expect(getByText(/Seus dados financeiros nao sao usados para treinar modelos/u)).toBeTruthy();
+    expect(getByText("Voce economizou R$ 320 nesta semana")).toBeTruthy();
   });
 });

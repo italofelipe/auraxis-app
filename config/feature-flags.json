@@ -21,6 +21,16 @@
       "repositories": ["auraxis-app", "auraxis-api"]
     },
     {
+      "key": "app.insights.ai-transparency",
+      "owner": "platform",
+      "createdAt": "2026-05-17",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-prod",
+      "description": "Controla a camada de transparencia e consentimento de IA para insights no app.",
+      "repositories": ["auraxis-app", "auraxis-web", "auraxis-api"]
+    },
+    {
       "key": "app.notifications.push",
       "owner": "platform",
       "createdAt": "2026-05-17",

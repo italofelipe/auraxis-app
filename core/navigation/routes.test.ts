@@ -1,0 +1,25 @@
+import {
+  appRoutes,
+  buildGoalScenarioPath,
+  buildTickerDetailPath,
+} from "@/core/navigation/routes";
+
+describe("app routes", () => {
+  it("builds a typed goal scenario route object", () => {
+    expect(buildGoalScenarioPath("goal-1")).toEqual({
+      pathname: "/metas/[id]/simular",
+      params: { id: "goal-1" },
+    });
+  });
+
+  it("builds a typed ticker detail route object with normalized ticker", () => {
+    expect(buildTickerDetailPath(" petr4 ")).toEqual({
+      pathname: "/carteira/[ticker]",
+      params: { ticker: "PETR4" },
+    });
+  });
+
+  it("keeps static private routes as direct href strings", () => {
+    expect(appRoutes.private.dashboard).toBe("/dashboard");
+  });
+});
