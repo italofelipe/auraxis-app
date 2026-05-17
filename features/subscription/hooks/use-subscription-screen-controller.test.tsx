@@ -3,6 +3,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 import { ApiError } from "@/core/http/api-error";
+import type { AnalyticsClient } from "@/core/observability/analytics-types";
+import { useAnalytics } from "@/core/observability/use-analytics";
 import type {
   BillingPlan,
   SubscriptionState,
@@ -25,11 +27,22 @@ jest.mock("@/features/subscription/hooks/use-subscription-mutations", () => ({
 jest.mock("@/features/subscription/hooks/use-checkout-flow", () => ({
   useCheckoutFlow: jest.fn(),
 }));
+jest.mock("@/core/observability/use-analytics", () => ({
+  useAnalytics: jest.fn(),
+}));
 
 const mockedUsePlans = jest.mocked(useBillingPlansQuery);
 const mockedUseSubscription = jest.mocked(useSubscriptionStateQuery);
 const mockedUseTrial = jest.mocked(useStartTrialMutation);
 const mockedUseCheckout = jest.mocked(useCheckoutFlow);
+const mockedUseAnalytics = jest.mocked(useAnalytics);
+
+const analyticsClient: jest.Mocked<AnalyticsClient> = {
+  capture: jest.fn(),
+  identify: jest.fn(),
+  reset: jest.fn(),
+  screen: jest.fn(),
+};
 
 const buildPlan = (override: Partial<BillingPlan> = {}): BillingPlan => ({
   slug: "premium-monthly",
@@ -99,6 +112,7 @@ describe("useSubscriptionScreenController", () => {
       start: checkoutStart,
       resetError: jest.fn(),
     } as never);
+    mockedUseAnalytics.mockReturnValue(analyticsClient);
   });
 
   it("expoe presentations e trial offer derivados do comparador", () => {
@@ -110,6 +124,10 @@ describe("useSubscriptionScreenController", () => {
   });
 
   it("dispara checkout via fluxo orquestrado e captura outcome", async () => {
+    checkoutStart.mockResolvedValueOnce({
+      outcome: "completed",
+      session: { provider: "asaas" },
+    });
     const { result } = renderHook(() => useSubscriptionScreenController(), {
       wrapper: wrapper(client),
     });
@@ -123,6 +141,22 @@ describe("useSubscriptionScreenController", () => {
       billingCycle: "monthly",
     });
     expect(result.current.lastCheckoutOutcome).toBe("completed");
+    expect(analyticsClient.capture).toHaveBeenCalledWith(
+      "subscription.checkout.opened",
+      {
+        provider: "hosted",
+        planId: "premium-monthly",
+        status: "opened",
+      },
+    );
+    expect(analyticsClient.capture).toHaveBeenCalledWith(
+      "subscription.checkout.completed",
+      {
+        provider: "asaas",
+        planId: "premium-monthly",
+        status: "completed",
+      },
+    );
   });
 
   it("inicia trial e invalida subscription/entitlements ao concluir", async () => {

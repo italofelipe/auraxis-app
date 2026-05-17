@@ -2,6 +2,7 @@ import { usePathname } from "expo-router";
 import { useEffect, useRef } from "react";
 
 import { appRouteRegistry, appRoutes } from "@/core/navigation/routes";
+import { getAnalyticsClient } from "@/core/observability/analytics-runtime";
 import { navigationLogger } from "@/core/telemetry/domain-loggers";
 import type { AppLogEntry } from "@/core/telemetry/types";
 
@@ -49,6 +50,11 @@ export const useNavigationTelemetry = (enabled = true): void => {
 
     navigationLogger.log("navigation.route_changed", {
       context: entry.context,
+    });
+    getAnalyticsClient().screen(route, {
+      access: String(entry.context?.access ?? "unknown"),
+      routeKey: String(entry.context?.routeKey ?? "unknown"),
+      tabVisible: Boolean(entry.context?.tabVisible ?? false),
     });
     lastLoggedRouteRef.current = route;
   }, [enabled, pathname]);

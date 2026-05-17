@@ -13,6 +13,7 @@ import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 
 import { initSentry } from "@/app/services/sentry";
+import { initPostHog } from "@/app/services/posthog";
 import {
   performanceTracker,
   resetPerformanceTrackerForTests,
@@ -24,6 +25,7 @@ import { startupLogger } from "@/core/telemetry/domain-loggers";
 import { initI18n } from "@/shared/i18n";
 
 let sentryInitialized = false;
+let postHogInitialized = false;
 let splashScreenPrevented = false;
 let i18nInitialized = false;
 let integrityCheckDispatched = false;
@@ -54,6 +56,15 @@ const ensureSentryInitialized = (): void => {
   sentryInitialized = true;
 };
 
+const ensurePostHogInitialized = (): void => {
+  if (postHogInitialized) {
+    return;
+  }
+
+  postHogInitialized = true;
+  void initPostHog();
+};
+
 const ensureSplashScreenPrevented = (): void => {
   if (splashScreenPrevented) {
     return;
@@ -65,6 +76,7 @@ const ensureSplashScreenPrevented = (): void => {
 
 export const resetAppStartupRuntimeForTests = (): void => {
   sentryInitialized = false;
+  postHogInitialized = false;
   splashScreenPrevented = false;
   i18nInitialized = false;
   integrityCheckDispatched = false;
@@ -91,6 +103,7 @@ export const useAppStartup = (): AppStartupState => {
 
   useEffect(() => {
     ensureSentryInitialized();
+    ensurePostHogInitialized();
     ensureSplashScreenPrevented();
     ensureI18nInitialized(useAppShellStore.getState().locale);
     ensureIntegrityCheckDispatched();

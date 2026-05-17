@@ -15,6 +15,9 @@ const baseController: PrivacyCenterScreenController = {
   handleOpenCookiesInfo: jest.fn(),
   handleOpenDeleteAccount: jest.fn(),
   handleRequestDataExport: jest.fn().mockResolvedValue(undefined),
+  analyticsPreferenceHydrated: true,
+  analyticsCollectionEnabled: true,
+  handleAnalyticsCollectionChange: jest.fn().mockResolvedValue(undefined),
   dismissExportRequestFeedback: jest.fn(),
 };
 
@@ -41,12 +44,13 @@ describe("PrivacyCenterScreen", () => {
   });
 
   it("renders legal documents, cookies, export and delete account actions", () => {
-    const { getByText } = renderScreen();
+    const { getAllByText, getByText } = renderScreen();
 
     expect(getByText("Central de privacidade")).toBeTruthy();
     expect(getByText("Politica de Privacidade")).toBeTruthy();
     expect(getByText("Termos de Uso")).toBeTruthy();
     expect(getByText("Cookies e analytics")).toBeTruthy();
+    expect(getAllByText("Analytics de produto").length).toBeGreaterThan(0);
     expect(getByText("Solicitar exportacao de dados")).toBeTruthy();
     expect(getByText("Excluir minha conta")).toBeTruthy();
   });
@@ -57,12 +61,14 @@ describe("PrivacyCenterScreen", () => {
     const handleOpenCookiesInfo = jest.fn();
     const handleRequestDataExport = jest.fn().mockResolvedValue(undefined);
     const handleOpenDeleteAccount = jest.fn();
-    const { getByText } = renderScreen({
+    const handleAnalyticsCollectionChange = jest.fn().mockResolvedValue(undefined);
+    const { getByText, getByTestId } = renderScreen({
       handleOpenPrivacyPolicy,
       handleOpenTermsOfService,
       handleOpenCookiesInfo,
       handleRequestDataExport,
       handleOpenDeleteAccount,
+      handleAnalyticsCollectionChange,
     });
 
     fireEvent.press(getByText("Politica de Privacidade"));
@@ -76,6 +82,13 @@ describe("PrivacyCenterScreen", () => {
     expect(handleOpenCookiesInfo).toHaveBeenCalledTimes(1);
     expect(handleRequestDataExport).toHaveBeenCalledTimes(1);
     expect(handleOpenDeleteAccount).toHaveBeenCalledTimes(1);
+
+    fireEvent(
+      getByTestId("privacy-center-analytics-toggle-switch"),
+      "onCheckedChange",
+      false,
+    );
+    expect(handleAnalyticsCollectionChange).toHaveBeenCalledWith(false);
   });
 
   it("shows loading, success and error feedback for export requests", () => {

@@ -12,6 +12,7 @@ import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppFormMessage } from "@/shared/components/app-form-message";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { AppToggleRow } from "@/shared/components/app-toggle-row";
 
 export function PrivacyCenterScreen(): ReactElement {
   const controller = usePrivacyCenterScreenController();
@@ -20,6 +21,7 @@ export function PrivacyCenterScreen(): ReactElement {
     <AppScreen testID="privacy-center-screen">
       <OverviewCard />
       <DocumentsCard controller={controller} />
+      <AnalyticsPreferenceCard controller={controller} />
       <DataRightsCard controller={controller} />
       <DeleteAccountCard controller={controller} />
     </AppScreen>
@@ -78,6 +80,26 @@ function DocumentsCard({ controller }: ControllerProps): ReactElement {
           Cookies e analytics
         </AppButton>
       </YStack>
+    </AppSurfaceCard>
+  );
+}
+
+function AnalyticsPreferenceCard({ controller }: ControllerProps): ReactElement {
+  return (
+    <AppSurfaceCard
+      title="Analytics de produto"
+      description="Controle a coleta de eventos de uso para melhoria do app."
+    >
+      <AppToggleRow
+        label="Analytics de produto"
+        description="Permitir eventos minimizados, sem email, CPF, tokens ou valores financeiros brutos."
+        checked={controller.analyticsCollectionEnabled}
+        disabled={!controller.analyticsPreferenceHydrated}
+        testID="privacy-center-analytics-toggle"
+        onCheckedChange={(checked) => {
+          void controller.handleAnalyticsCollectionChange(checked);
+        }}
+      />
     </AppSurfaceCard>
   );
 }

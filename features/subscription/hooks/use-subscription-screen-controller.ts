@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { Linking } from "react-native";
 
+import { useAnalytics } from "@/core/observability/use-analytics";
 import { queryKeys } from "@/core/query/query-keys";
 import type {
   BillingPlan,
@@ -54,6 +55,7 @@ const buildCheckoutCommand = (plan: BillingPlan): CreateCheckoutCommand => {
  * checkout flow.
  */
 export function useSubscriptionScreenController(): SubscriptionScreenController {
+  const analytics = useAnalytics();
   const queryClient = useQueryClient();
   const subscriptionQuery = useSubscriptionStateQuery();
   const plansQuery = useBillingPlansQuery();
@@ -79,6 +81,23 @@ export function useSubscriptionScreenController(): SubscriptionScreenController 
   const handleSubscribe = async (plan: BillingPlan): Promise<void> => {
     const result = await checkout.start(buildCheckoutCommand(plan));
     setLastCheckoutOutcome(result.outcome);
+    if (result.outcome === "unavailable" || result.outcome === "locked") {
+      return;
+    }
+
+    analytics.capture("subscription.checkout.opened", {
+      provider: "hosted",
+      planId: plan.slug,
+      status: "opened",
+    });
+
+    if (result.outcome === "completed") {
+      analytics.capture("subscription.checkout.completed", {
+        provider: result.session?.provider ?? "hosted",
+        planId: plan.slug,
+        status: "completed",
+      });
+    }
   };
 
   const handleStartTrial = async (): Promise<void> => {

@@ -1,0 +1,8 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp
+- runFlow: 01_login.yaml
+- openLink: auraxisapp://assinatura
+- assertVisible: "Sua assinatura"
+- assertVisible: "Planos disponiveis"
+- assertVisible: "Gerenciar assinatura"

@@ -1,0 +1,8 @@
+appId: com.sensoriumit.auraxis
+---
+- launchApp
+- runFlow: 01_login.yaml
+- openLink: auraxisapp://privacidade
+- assertVisible: "Central de privacidade"
+- assertVisible: "Analytics de produto"
+- assertVisible: "Solicitar exportacao de dados"

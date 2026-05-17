@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { useMemo, useState } from "react";
 
 import { appRoutes } from "@/core/navigation/routes";
+import { useAnalytics } from "@/core/observability/use-analytics";
 import {
   TOOL_CATEGORIES,
   type ToolCategory,
@@ -52,6 +53,7 @@ const buildSections = (
  */
 export function useToolsScreenController(): ToolsScreenController {
   const router = useRouter();
+  const analytics = useAnalytics();
   const toolsCatalogQuery = useToolsCatalogQuery();
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -77,6 +79,7 @@ export function useToolsScreenController(): ToolsScreenController {
       if (!tool.enabled || !tool.route) {
         return;
       }
+      analytics.capture("tool.used", { slug: tool.slug });
       router.push(tool.route as never);
     },
     handleOpenSimulationsHistory: () => {

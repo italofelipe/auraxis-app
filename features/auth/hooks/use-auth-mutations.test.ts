@@ -12,6 +12,7 @@ const mockCreateApiMutation = jest.fn();
 const mockAnalyticsClient: jest.Mocked<AnalyticsClient> = {
   capture: jest.fn(),
   identify: jest.fn(),
+  screen: jest.fn(),
   reset: jest.fn(),
 };
 

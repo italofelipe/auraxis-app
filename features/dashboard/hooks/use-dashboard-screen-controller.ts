@@ -1,5 +1,6 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
+import { useAnalytics } from "@/core/observability/use-analytics";
 import { useSessionStore } from "@/core/session/session-store";
 import {
   useDashboardOverviewQuery,
@@ -76,6 +77,7 @@ const firstName = (fullName: string | null | undefined): string => {
 export function useDashboardScreenController(
   options: DashboardScreenControllerOptions = {},
 ): DashboardScreenController {
+  const analytics = useAnalytics();
   const userName = useSessionStore((state) => state.user?.name ?? null);
   const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth);
   const overviewQuery = useDashboardOverviewQuery({ month: selectedMonth });
@@ -130,6 +132,18 @@ export function useDashboardScreenController(
     );
   }, [selectedMonth, trendsQuery.data]);
 
+  const handleSelectedMonthChange = useCallback(
+    (month: string): void => {
+      setSelectedMonth((currentMonth) => {
+        if (currentMonth !== month) {
+          analytics.capture("dashboard.period.changed", { period: month });
+        }
+        return month;
+      });
+    },
+    [analytics],
+  );
+
   return {
     overviewQuery,
     trendsQuery,
@@ -141,6 +155,6 @@ export function useDashboardScreenController(
     comparison,
     weeklyInsight,
     greetingName: firstName(userName),
-    setSelectedMonth,
+    setSelectedMonth: handleSelectedMonthChange,
   };
 }

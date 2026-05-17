@@ -1,15 +1,26 @@
 import { renderHook } from "@testing-library/react-native";
+import { getAnalyticsClient } from "@/core/observability/analytics-runtime";
 import {
   buildNavigationRouteLogEntry,
   useNavigationTelemetry,
 } from "@/core/telemetry/use-navigation-telemetry";
 
+jest.mock("@/core/observability/analytics-runtime", () => ({
+  getAnalyticsClient: jest.fn(),
+}));
 jest.mock("@/core/telemetry/app-logger", () => ({
   appLogger: {
     info: jest.fn(),
   },
 }));
 
+const mockAnalyticsClient = {
+  capture: jest.fn(),
+  identify: jest.fn(),
+  reset: jest.fn(),
+  screen: jest.fn(),
+};
+const mockedGetAnalyticsClient = jest.mocked(getAnalyticsClient);
 const { appLogger } = jest.requireMock("@/core/telemetry/app-logger") as {
   appLogger: {
     info: jest.Mock;
@@ -19,6 +30,7 @@ const { appLogger } = jest.requireMock("@/core/telemetry/app-logger") as {
 describe("useNavigationTelemetry", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedGetAnalyticsClient.mockReturnValue(mockAnalyticsClient);
   });
 
   it("resolve metadados canônicos de rota a partir do pathname", () => {
@@ -72,6 +84,11 @@ describe("useNavigationTelemetry", () => {
         access: "root",
         tabVisible: false,
       },
+    });
+    expect(mockAnalyticsClient.screen).toHaveBeenCalledWith("/", {
+      access: "root",
+      routeKey: "root",
+      tabVisible: false,
     });
   });
 });
