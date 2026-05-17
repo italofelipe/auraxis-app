@@ -31,6 +31,16 @@
       "repositories": ["auraxis-app", "auraxis-api"]
     },
     {
+      "key": "app.privacy.center",
+      "owner": "platform",
+      "createdAt": "2026-05-17",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-prod",
+      "description": "Controla a central mobile de privacidade, direitos LGPD e solicitacoes de dados.",
+      "repositories": ["auraxis-app", "auraxis-web", "auraxis-api"]
+    },
+    {
       "key": "app.observability.analytics",
       "owner": "platform",
       "createdAt": "2026-05-17",

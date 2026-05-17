@@ -31,6 +31,7 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "lixeira-transacoes",
   "simulador-salario",
   "preferencias-notificacao",
+  "privacidade",
 ];
 
 function PrivateLayoutContent(): ReactElement | null {

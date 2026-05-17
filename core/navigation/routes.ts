@@ -45,6 +45,7 @@ export const appRoutes = {
     transactionsTrash: "/lixeira-transacoes",
     salarySimulator: "/simulador-salario",
     notificationPreferences: "/preferencias-notificacao",
+    privacyCenter: "/privacidade",
     dangerZone: "/perfil-zona-de-perigo",
     simulationsHistory: "/simulacoes",
     checkoutSuccess: "/checkout/success",
@@ -337,6 +338,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "notificationPreferences",
     path: appRoutes.private.notificationPreferences,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "privacyCenter",
+    path: appRoutes.private.privacyCenter,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,
