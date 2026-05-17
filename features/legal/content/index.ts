@@ -7,6 +7,11 @@ const DOCUMENTS: Readonly<Record<LegalDocumentId, LegalDocument>> = {
   "terms-of-service": TERMS_OF_SERVICE_DOCUMENT,
 };
 
+const LEGAL_DOCUMENT_PATHS: Readonly<Record<LegalDocumentId, `/${LegalDocumentId}`>> = {
+  "privacy-policy": "/privacy-policy",
+  "terms-of-service": "/terms-of-service",
+};
+
 /**
  * Returns the canonical legal document for the given id.
  * @param id Document identifier.
@@ -20,7 +25,8 @@ export const resolveLegalDocument = (id: LegalDocumentId): LegalDocument =>
  * @param id Document identifier.
  * @returns Expo Router path including the (legal) group prefix.
  */
-export const legalDocumentPath = (id: LegalDocumentId): string => `/${id}`;
+export const legalDocumentPath = (id: LegalDocumentId): `/${LegalDocumentId}` =>
+  LEGAL_DOCUMENT_PATHS[id];
 
 export type {
   LegalBlock,

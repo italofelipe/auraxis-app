@@ -1,14 +1,20 @@
 import { render } from "@testing-library/react-native";
 
-import { useRootRouteGuard } from "@/core/navigation/use-route-guards";
+import {
+  useRootRouteGuard,
+  type RouteGuardHookResult,
+} from "@/core/navigation/use-route-guards";
 import { TestProviders } from "@/shared/testing/test-providers";
 
 import IndexScreen from "@/app/index";
 
-const mockRedirect = jest.fn((_props: { href: string }) => null);
+const mockRedirect = jest.fn(
+  (_props: { href: NonNullable<RouteGuardHookResult["redirectTo"]> }) => null,
+);
 
 jest.mock("expo-router", () => ({
-  Redirect: (props: { href: string }) => mockRedirect(props),
+  Redirect: (props: { href: NonNullable<RouteGuardHookResult["redirectTo"]> }) =>
+    mockRedirect(props),
 }));
 
 jest.mock("@/core/navigation/use-route-guards", () => ({
@@ -17,10 +23,7 @@ jest.mock("@/core/navigation/use-route-guards", () => ({
 
 const mockedUseRootRouteGuard = jest.mocked(useRootRouteGuard);
 
-const mockRouteState = (state: {
-  readonly ready: boolean;
-  readonly redirectTo: string | null;
-}): void => {
+const mockRouteState = (state: RouteGuardHookResult): void => {
   mockedUseRootRouteGuard.mockReturnValue(state);
 };
 
