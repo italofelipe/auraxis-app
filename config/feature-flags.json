@@ -9,6 +9,16 @@
       "status": "draft",
       "description": "Controla a exibição da calculadora de pedir aumento na aba Ferramentas.",
       "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
+    },
+    {
+      "key": "app.insights.weekly",
+      "owner": "platform",
+      "createdAt": "2026-05-16",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-prod",
+      "description": "Controla a exibição do insight semanal personalizado no dashboard do app.",
+      "repositories": ["auraxis-app", "auraxis-api"]
     }
   ]
 }

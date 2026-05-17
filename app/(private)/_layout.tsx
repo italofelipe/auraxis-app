@@ -8,6 +8,7 @@ import { AppErrorBoundary } from "@/core/errors/app-error-boundary";
 import { privateTabDefinitions } from "@/core/navigation/routes";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
+import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 
 const HIDDEN_TAB_NAMES: readonly string[] = [
   "installment-vs-cash",
@@ -32,6 +33,7 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
 
 function PrivateLayoutContent(): ReactElement | null {
   const { ready, redirectTo } = usePrivateRouteGuard();
+  const weeklyInsight = useWeeklyInsight({ enabled: ready && !redirectTo });
   useEntitlementsForegroundRefresh();
 
   if (!ready) {
@@ -56,6 +58,8 @@ function PrivateLayoutContent(): ReactElement | null {
             name={tab.name}
             options={{
               title: tab.title,
+              tabBarBadge:
+                tab.name === "dashboard" && weeklyInsight.isNew ? "1" : undefined,
               tabBarIcon: ({ color, size }) => {
                 return (
                   <MaterialCommunityIcons name={tab.icon} color={color} size={size} />

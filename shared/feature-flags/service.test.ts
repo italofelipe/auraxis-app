@@ -71,6 +71,13 @@ describe("feature flag service - local fallback", () => {
     expect(isFeatureEnabled("app.tools.salary-raise-calculator")).toBe(false);
   });
 
+  it("considera status enabled-prod habilitado no fallback local", () => {
+    const localFlag = getLocalFlag("app.insights.weekly");
+
+    expect(localFlag?.status).toBe("enabled-prod");
+    expect(isFeatureEnabled("app.insights.weekly")).toBe(true);
+  });
+
   it("respeita decisao explicita do provider externo", () => {
     expect(isFeatureEnabled("app.tools.salary-raise-calculator", true)).toBe(true);
     expect(isFeatureEnabled("app.tools.salary-raise-calculator", false)).toBe(false);

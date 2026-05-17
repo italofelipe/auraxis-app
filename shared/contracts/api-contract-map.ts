@@ -75,6 +75,7 @@ import type {
   ReceivableRecord,
   RevenueSummary,
 } from "@/features/fiscal/contracts";
+import type { LatestInsightResponse } from "@/features/insights/contracts";
 import type {
   QuestionnaireCollection,
   QuestionnaireResult,
@@ -345,6 +346,26 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/dashboard/trends",
+    authRequired: true,
+  }),
+  insightsLatest: defineApiContract<
+    "GET",
+    "/v1/insights/latest",
+    never,
+    LatestInsightResponse
+  >({
+    method: "GET",
+    path: "/v1/insights/latest",
+    authRequired: true,
+  }),
+  insightsMarkRead: defineApiContract<
+    "POST",
+    "/v1/insights/{insight_id}/read",
+    never,
+    void
+  >({
+    method: "POST",
+    path: "/v1/insights/{insight_id}/read",
     authRequired: true,
   }),
   transactionsList: defineApiContract<
