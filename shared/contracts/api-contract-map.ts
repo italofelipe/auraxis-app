@@ -1,5 +1,6 @@
 import type {
   AuthActionResult,
+  AuthRefreshResult,
   AuthSession,
   ConfirmEmailCommand,
   ForgotPasswordCommand,
@@ -213,6 +214,16 @@ export const apiContractMap = {
   authLogout: defineApiContract<"POST", "/auth/logout", never, void>({
     method: "POST",
     path: "/auth/logout",
+    authRequired: true,
+  }),
+  authRefresh: defineApiContract<
+    "POST",
+    "/auth/refresh",
+    never,
+    AuthRefreshResult
+  >({
+    method: "POST",
+    path: "/auth/refresh",
     authRequired: true,
   }),
   authForgotPassword: defineApiContract<

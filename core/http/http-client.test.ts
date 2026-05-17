@@ -38,6 +38,28 @@ const readAuthorizationHeader = (
   return typeof value === "string" ? value : undefined;
 };
 
+const createUnauthorizedError = (
+  config: InternalAxiosRequestConfig,
+): AxiosError => {
+  return new AxiosError(
+    "Sessao expirada.",
+    "ERR_BAD_REQUEST",
+    config,
+    undefined,
+    {
+      data: {
+        message: "Sessao expirada.",
+      },
+      status: 401,
+      statusText: "Unauthorized",
+      headers: {},
+      config,
+    },
+  );
+};
+
+// Existing suite intentionally centralizes all interceptor behavior.
+// eslint-disable-next-line max-lines-per-function
 describe("httpClient", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -153,6 +175,164 @@ describe("httpClient", () => {
     });
   });
 
+  it("renova tokens com refresh rotacionado e repete o request autenticado apos 401", async () => {
+    useSessionStore.setState(
+      makeSessionState({
+        accessToken: "access-1",
+        refreshToken: "refresh-1",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-08T10:00:00.000Z",
+        expiresAt: null,
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    );
+
+    const client = createHttpClient("https://api.auraxis.dev/");
+    let dashboardAttempts = 0;
+    let refreshAttempts = 0;
+
+    client.defaults.adapter = async (config) => {
+      const authorization = readAuthorizationHeader(config);
+
+      if (config.url === "/dashboard") {
+        dashboardAttempts += 1;
+        if (dashboardAttempts === 1) {
+          expect(authorization).toBe("Bearer access-1");
+          throw createUnauthorizedError(config);
+        }
+
+        expect(authorization).toBe("Bearer access-2");
+        return {
+          data: { ok: true, authorization },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      }
+
+      if (config.url === "/auth/refresh") {
+        refreshAttempts += 1;
+        expect(authorization).toBe("Bearer refresh-1");
+        return {
+          data: {
+            data: {
+              token: "access-2",
+              refresh_token: "refresh-2",
+            },
+            message: "Token refreshed",
+          },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      }
+
+      throw new Error(`Unexpected request to ${config.url ?? "<missing>"}`);
+    };
+
+    const response = await client.get("/dashboard");
+
+    expect(response.data).toEqual({
+      ok: true,
+      authorization: "Bearer access-2",
+    });
+    expect(dashboardAttempts).toBe(2);
+    expect(refreshAttempts).toBe(1);
+    expect(useSessionStore.getState()).toMatchObject({
+      accessToken: "access-2",
+      refreshToken: "refresh-2",
+      isAuthenticated: true,
+      authFailureReason: null,
+    });
+  });
+
+  it("compartilha uma unica renovacao entre 401 concorrentes para evitar replay do refresh token", async () => {
+    useSessionStore.setState(
+      makeSessionState({
+        accessToken: "access-1",
+        refreshToken: "refresh-1",
+        user: makeSessionUser(),
+        userEmail: "italo@auraxis.dev",
+        authenticatedAt: "2026-04-08T10:00:00.000Z",
+        expiresAt: null,
+        hydrated: true,
+        isAuthenticated: true,
+      }),
+    );
+
+    const client = createHttpClient("https://api.auraxis.dev/");
+    let refreshAttempts = 0;
+    let resolveRefresh!: () => void;
+    let markRefreshStarted!: () => void;
+    const refreshGate = new Promise<void>((resolve) => {
+      resolveRefresh = resolve;
+    });
+    const refreshStarted = new Promise<void>((resolve) => {
+      markRefreshStarted = resolve;
+    });
+
+    client.defaults.adapter = async (config) => {
+      const authorization = readAuthorizationHeader(config);
+
+      if (config.url?.startsWith("/dashboard")) {
+        if (authorization === "Bearer access-1") {
+          throw createUnauthorizedError(config);
+        }
+
+        expect(authorization).toBe("Bearer access-2");
+        return {
+          data: { ok: true, path: config.url },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      }
+
+      if (config.url === "/auth/refresh") {
+        refreshAttempts += 1;
+        markRefreshStarted();
+        await refreshGate;
+        return {
+          data: {
+            data: {
+              token: "access-2",
+              refresh_token: "refresh-2",
+            },
+            message: "Token refreshed",
+          },
+          status: 200,
+          statusText: "OK",
+          headers: {},
+          config,
+        };
+      }
+
+      throw new Error(`Unexpected request to ${config.url ?? "<missing>"}`);
+    };
+
+    const firstRequest = client.get("/dashboard?request=1");
+    const secondRequest = client.get("/dashboard?request=2");
+
+    await refreshStarted;
+    expect(refreshAttempts).toBe(1);
+
+    resolveRefresh();
+    await expect(Promise.all([firstRequest, secondRequest])).resolves.toHaveLength(
+      2,
+    );
+    expect(refreshAttempts).toBe(1);
+    expect(useSessionStore.getState()).toMatchObject({
+      accessToken: "access-2",
+      refreshToken: "refresh-2",
+      isAuthenticated: true,
+    });
+  });
+
   it("anexa o bearer token no interceptor de request para sessao válida", async () => {
     useSessionStore.setState(
       makeSessionState({
@@ -170,11 +350,11 @@ describe("httpClient", () => {
     const client = createHttpClient("https://api.auraxis.dev/");
     const requestHandler = (
       client.interceptors.request as unknown as {
-        handlers: Array<{
+        handlers: {
           fulfilled: (
             config: InternalAxiosRequestConfig,
           ) => Promise<InternalAxiosRequestConfig>;
-        }>;
+        }[];
       }
     ).handlers[0].fulfilled;
 
@@ -208,7 +388,7 @@ describe("httpClient", () => {
 
       const {
         createHttpClient: createIsolatedHttpClient,
-      } = require("@/core/http/http-client") as {
+      } = jest.requireActual("@/core/http/http-client") as {
         createHttpClient: typeof createHttpClient;
       };
 
@@ -219,11 +399,11 @@ describe("httpClient", () => {
 
     const requestHandler = (
       isolatedClient!.interceptors.request as unknown as {
-        handlers: Array<{
+        handlers: {
           fulfilled: (
             config: InternalAxiosRequestConfig,
           ) => Promise<InternalAxiosRequestConfig>;
-        }>;
+        }[];
       }
     ).handlers[0].fulfilled;
 
@@ -310,9 +490,9 @@ describe("httpClient", () => {
     const client = createHttpClient("https://api.auraxis.dev/");
     const rejectedHandler = (
       client.interceptors.response as unknown as {
-        handlers: Array<{
+        handlers: {
           rejected: (error: unknown) => Promise<never>;
-        }>;
+        }[];
       }
     ).handlers[0].rejected;
 
@@ -387,9 +567,9 @@ describe("httpClient", () => {
     const client = createHttpClient("https://api.auraxis.dev/");
     const rejectedHandler = (
       client.interceptors.response as unknown as {
-        handlers: Array<{
+        handlers: {
           rejected: (error: unknown) => Promise<never>;
-        }>;
+        }[];
       }
     ).handlers[0].rejected;
 
