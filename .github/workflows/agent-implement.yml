@@ -14,6 +14,7 @@ jobs:
       contents: write
       pull-requests: write
       issues: write
+      id-token: write
 
     steps:
       - uses: actions/checkout@v4
@@ -33,9 +34,9 @@ jobs:
         id: claude
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
-          github_token: ${{ secrets.TOKEN_GITHUB_ADMIN }}
+          github_token: ${{ github.token }}
           max_turns: "40"
-          prompt: |
+          direct_prompt: |
             You are the autonomous frontend implementation agent for Auraxis App — a personal
             finance mobile application built with React Native, Expo, TypeScript strict,
             npm, and jest-expo.
