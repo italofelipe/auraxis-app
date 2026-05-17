@@ -26,8 +26,13 @@ import {
   useDashboardScreenController,
   type DashboardScreenController,
 } from "@/features/dashboard/hooks/use-dashboard-screen-controller";
-import { WeeklyInsightCard } from "@/features/insights/components/weekly-insight-card";
 import {
+  WeeklyInsightCard,
+  type WeeklyInsightAiConsent,
+} from "@/features/insights/components/weekly-insight-card";
+import { useAiInsightConsent } from "@/features/insights/hooks/use-ai-insight-consent";
+import {
+  AI_INSIGHT_TRANSPARENCY_FEATURE_FLAG_KEY,
   WEEKLY_INSIGHT_DASHBOARD_FOCUS_TARGET,
   WEEKLY_INSIGHT_FEATURE_FLAG_KEY,
 } from "@/features/insights/weekly-insight-config";
@@ -76,9 +81,15 @@ const normalizeFocusParam = (
  *
  * @returns Greeting, balance, savings rate and monthly snapshot panels.
  */
- 
+
 export function DashboardScreen(): ReactElement {
-  const weeklyInsightEnabled = isFeatureEnabled(WEEKLY_INSIGHT_FEATURE_FLAG_KEY);
+  const weeklyInsightFeatureEnabled = isFeatureEnabled(WEEKLY_INSIGHT_FEATURE_FLAG_KEY);
+  const aiTransparencyEnabled = isFeatureEnabled(AI_INSIGHT_TRANSPARENCY_FEATURE_FLAG_KEY);
+  const aiInsightConsent = useAiInsightConsent({
+    enabled: weeklyInsightFeatureEnabled && aiTransparencyEnabled,
+  });
+  const weeklyInsightEnabled =
+    weeklyInsightFeatureEnabled && (!aiTransparencyEnabled || aiInsightConsent.hasConsent);
   const controller = useDashboardScreenController({ weeklyInsightEnabled });
   const overview = controller.overviewQuery.data;
   const trendsSeries = controller.trendsQuery.data?.series ?? [];
@@ -87,7 +98,7 @@ export function DashboardScreen(): ReactElement {
   const scrollViewRef = useRef<AppScreenScrollHandle>(null);
   const weeklyInsightOffsetYRef = useRef<number | null>(null);
   const shouldFocusWeeklyInsight =
-    weeklyInsightEnabled &&
+    weeklyInsightFeatureEnabled &&
     normalizeFocusParam(params.focus) === WEEKLY_INSIGHT_DASHBOARD_FOCUS_TARGET;
 
   const scrollToWeeklyInsight = useCallback((): void => {
@@ -123,7 +134,13 @@ export function DashboardScreen(): ReactElement {
       <BalanceCard controller={controller} />
       <WeeklyInsightSection
         controller={controller}
-        enabled={weeklyInsightEnabled}
+        enabled={weeklyInsightFeatureEnabled}
+        aiConsent={{
+          enabled: aiTransparencyEnabled,
+          isHydrated: aiInsightConsent.isHydrated,
+          hasConsent: aiInsightConsent.hasConsent,
+          onGrantConsent: aiInsightConsent.grantConsent,
+        }}
         onLayout={handleWeeklyInsightLayout}
       />
       <DashboardComparisonCards controller={controller} />
@@ -150,6 +167,7 @@ interface ControllerProps {
 
 interface WeeklyInsightSectionProps extends ControllerProps {
   readonly enabled: boolean;
+  readonly aiConsent: WeeklyInsightAiConsent;
   readonly onLayout: (event: LayoutChangeEvent) => void;
 }
 
@@ -165,6 +183,7 @@ const readComparisonMetric = (
 function WeeklyInsightSection({
   controller,
   enabled,
+  aiConsent,
   onLayout,
 }: WeeklyInsightSectionProps): ReactElement | null {
   if (!enabled) {
@@ -173,7 +192,7 @@ function WeeklyInsightSection({
 
   return (
     <YStack onLayout={onLayout} testID="dashboard-weekly-insight-anchor">
-      <DashboardWeeklyInsightCard controller={controller} />
+      <DashboardWeeklyInsightCard controller={controller} aiConsent={aiConsent} />
     </YStack>
   );
 }
@@ -299,13 +318,21 @@ function BalanceCard({ controller }: ControllerProps): ReactElement {
   );
 }
 
-function DashboardWeeklyInsightCard({ controller }: ControllerProps): ReactElement {
+interface DashboardWeeklyInsightCardProps extends ControllerProps {
+  readonly aiConsent: WeeklyInsightAiConsent;
+}
+
+function DashboardWeeklyInsightCard({
+  controller,
+  aiConsent,
+}: DashboardWeeklyInsightCardProps): ReactElement {
   return (
     <WeeklyInsightCard
       insight={controller.weeklyInsight.insight}
       isLoading={controller.weeklyInsight.isLoading}
       isNew={controller.weeklyInsight.isNew}
       onMarkAsRead={controller.weeklyInsight.markAsRead}
+      aiConsent={aiConsent}
     />
   );
 }
