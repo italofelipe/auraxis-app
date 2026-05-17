@@ -11,6 +11,10 @@ export const queryKeys = {
     root: ["insights"] as const,
     latest: () => ["insights", "latest"] as const,
   },
+  import: {
+    root: ["import"] as const,
+    preview: () => ["import", "preview"] as const,
+  },
   transactions: {
     root: ["transactions"] as const,
     list: () => ["transactions", "list"] as const,

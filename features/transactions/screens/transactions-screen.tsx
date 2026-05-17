@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState, type ReactElement } from "react";
 
 import { FlashList } from "@shopify/flash-list";
+import { useRouter } from "expo-router";
 import { Modal, RefreshControl } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { queryKeys } from "@/core/query/query-keys";
+import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
 import { FinancialCalendar } from "@/features/transactions/components/financial-calendar";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { useTransactionsExport } from "@/features/transactions/hooks/use-transactions-export";
@@ -24,6 +27,7 @@ import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { useListRefresh } from "@/shared/hooks/use-list-refresh";
+import { isFeatureEnabled } from "@/shared/feature-flags";
 import { useT } from "@/shared/i18n";
 import { TransactionListSkeleton } from "@/shared/skeletons";
 import { formatShortDate } from "@/shared/utils/formatters";
@@ -96,8 +100,10 @@ interface ControllerProps {
 
 function FilterHeader({ controller }: ControllerProps): ReactElement {
   const { t } = useT();
+  const router = useRouter();
   const [exportSheetOpen, setExportSheetOpen] = useState<boolean>(false);
   const exportRunner = useTransactionsExport();
+  const importEnabled = isFeatureEnabled(IMPORT_FEATURE_FLAG_KEY);
 
   const handleExportFormat = useCallback(
     async (format: "csv" | "pdf"): Promise<void> => {
@@ -106,6 +112,9 @@ function FilterHeader({ controller }: ControllerProps): ReactElement {
     },
     [exportRunner],
   );
+  const handleOpenImport = useCallback(() => {
+    router.push(appRoutes.private.importTransactions);
+  }, [router]);
 
   return (
     <AppSurfaceCard
@@ -142,6 +151,11 @@ function FilterHeader({ controller }: ControllerProps): ReactElement {
             {t("transactions.export.title")}
           </AppButton>
         </XStack>
+        {importEnabled ? (
+          <AppButton tone="secondary" onPress={handleOpenImport}>
+            Importar planilha
+          </AppButton>
+        ) : null}
       </YStack>
       <Modal
         visible={exportSheetOpen}

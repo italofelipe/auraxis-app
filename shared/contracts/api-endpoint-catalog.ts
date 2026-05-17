@@ -29,6 +29,11 @@ export const apiEndpointCatalog = {
     "GET /v1/insights/latest",
     "POST /v1/insights/{insight_id}/read",
   ],
+  imports: [
+    "POST /v2/import/detect",
+    "POST /v2/import/preview",
+    "POST /v2/import/confirm",
+  ],
   notifications: [
     "POST /notifications/subscribe",
     "POST /notifications/unsubscribe",
