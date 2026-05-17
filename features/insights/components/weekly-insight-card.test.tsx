@@ -8,11 +8,28 @@ const insightFixture: UserInsight = {
   id: "ins-1",
   content: "Voce reduziu gastos variaveis sem cortar lazer.",
   keyMetric: "Voce economizou R$ 320 nesta semana",
+  items: [
+    {
+      type: "weekly_summary",
+      title: "Resumo semanal",
+      message: "Voce reduziu gastos variaveis sem cortar lazer.",
+    },
+  ],
+  summary: null,
+  periodType: "weekly",
+  periodLabel: "2026-05-04 a 2026-05-10",
   periodStart: "2026-05-04T00:00:00.000Z",
   periodEnd: "2026-05-10T23:59:59.000Z",
   status: "delivered",
   generatedAt: "2026-05-11T09:00:00.000Z",
   readAt: null,
+  metadata: {
+    model: null,
+    tokensUsed: null,
+    costUsd: null,
+    cached: null,
+    contextVersion: null,
+  },
 };
 
 describe("WeeklyInsightCard", () => {
@@ -62,6 +79,52 @@ describe("WeeklyInsightCard", () => {
 
     expect(markAsRead).toHaveBeenCalledWith("ins-1");
     expect(getByText("Voce reduziu gastos variaveis sem cortar lazer.")).toBeTruthy();
+  });
+
+  it("renderiza itens estruturados e periodo do insight ao expandir", () => {
+    const structuredInsight = {
+      ...insightFixture,
+      keyMetric: "Saldo semanal positivo",
+      periodType: "weekly",
+      periodLabel: "Semana 20 · 2026",
+      items: [
+        {
+          type: "weekly_cashflow",
+          title: "Fluxo de caixa",
+          message: "As entradas superaram as saidas em R$ 420.",
+          evidence: ["current_period.net_balance"],
+        },
+        {
+          type: "budget_alert",
+          title: "Orcamento em alerta",
+          message: "Mercado usou 82% do limite definido para a semana.",
+        },
+      ],
+      summary: {
+        headline: "Semana mais equilibrada",
+      },
+    } as unknown as UserInsight;
+    const { getByText, queryByText } = render(
+      <TestProviders>
+        <WeeklyInsightCard
+          insight={structuredInsight}
+          isLoading={false}
+          isNew={false}
+          onMarkAsRead={jest.fn()}
+        />
+      </TestProviders>,
+    );
+
+    expect(getByText("Semana 20 · 2026")).toBeTruthy();
+    expect(queryByText("Fluxo de caixa")).toBeNull();
+
+    fireEvent.press(getByText("Ver mais"));
+
+    expect(getByText("Semana mais equilibrada")).toBeTruthy();
+    expect(getByText("Fluxo de caixa")).toBeTruthy();
+    expect(getByText("As entradas superaram as saidas em R$ 420.")).toBeTruthy();
+    expect(getByText("Orcamento em alerta")).toBeTruthy();
+    expect(getByText("current_period.net_balance")).toBeTruthy();
   });
 
   it("bloqueia o insight ate o consentimento de IA ser aceito", () => {

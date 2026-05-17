@@ -19,11 +19,28 @@ const insightFixture: UserInsight = {
   id: "ins-1",
   content: "Voce reduziu gastos variaveis sem cortar lazer.",
   keyMetric: "Voce economizou R$ 320 nesta semana",
+  items: [
+    {
+      type: "weekly_summary",
+      title: "Resumo semanal",
+      message: "Voce reduziu gastos variaveis sem cortar lazer.",
+    },
+  ],
+  summary: null,
+  periodType: "weekly",
+  periodLabel: "2026-05-04 a 2026-05-10",
   periodStart: "2026-05-04T00:00:00.000Z",
   periodEnd: "2026-05-10T23:59:59.000Z",
   status: "delivered",
   generatedAt: "2026-05-11T09:00:00.000Z",
   readAt: null,
+  metadata: {
+    model: null,
+    tokensUsed: null,
+    costUsd: null,
+    cached: null,
+    contextVersion: null,
+  },
 };
 
 describe("useWeeklyInsight", () => {

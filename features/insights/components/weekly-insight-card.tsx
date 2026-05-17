@@ -4,10 +4,17 @@ import { ActivityIndicator } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { AiInsightTransparencyNotice } from "@/features/insights/components/ai-insight-transparency-notice";
-import type { UserInsight } from "@/features/insights/contracts";
+import type { InsightItem, UserInsight } from "@/features/insights/contracts";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+
+const PERIOD_TYPE_LABELS: Record<UserInsight["periodType"], string> = {
+  daily: "Diario",
+  weekly: "Semanal",
+  monthly: "Mensal",
+  recap: "Recap",
+};
 
 export interface WeeklyInsightAiConsent {
   readonly enabled: boolean;
@@ -31,6 +38,14 @@ interface WeeklyInsightBodyProps {
   readonly expanded: boolean;
   readonly canRenderInsight: boolean;
   readonly onToggle: () => void;
+}
+
+interface WeeklyInsightExpandedContentProps {
+  readonly insight: UserInsight;
+}
+
+interface WeeklyInsightItemListProps {
+  readonly items: readonly InsightItem[];
 }
 
 export function WeeklyInsightCard({
@@ -117,20 +132,71 @@ function WeeklyInsightBody({
     <YStack gap="$3">
       <XStack alignItems="center" gap="$2" flexWrap="wrap">
         {isNew ? <AppBadge tone="primary">NOVO</AppBadge> : null}
+        <AppBadge>{PERIOD_TYPE_LABELS[insight.periodType]}</AppBadge>
         <Paragraph color="$secondary" fontFamily="$heading" fontSize="$6">
           {insight.keyMetric}
         </Paragraph>
       </XStack>
+      <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+        {insight.periodLabel}
+      </Paragraph>
 
-      {expanded ? (
-        <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-          {insight.content}
-        </Paragraph>
-      ) : null}
+      {expanded ? <WeeklyInsightExpandedContent insight={insight} /> : null}
 
       <AppButton tone="secondary" onPress={onToggle}>
         {expanded ? "Ver menos" : "Ver mais"}
       </AppButton>
+    </YStack>
+  );
+}
+
+function WeeklyInsightExpandedContent({
+  insight,
+}: WeeklyInsightExpandedContentProps): ReactElement {
+  const summaryHeadline =
+    typeof insight.summary?.headline === "string" ? insight.summary.headline : null;
+  const shouldRenderContent = !insight.items.some((item) => item.message === insight.content);
+
+  return (
+    <YStack gap="$3">
+      {summaryHeadline ? (
+        <Paragraph color="$color" fontFamily="$heading" fontSize="$4">
+          {summaryHeadline}
+        </Paragraph>
+      ) : null}
+      {shouldRenderContent ? (
+        <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+          {insight.content}
+        </Paragraph>
+      ) : null}
+      <WeeklyInsightItemList items={insight.items} />
+    </YStack>
+  );
+}
+
+function WeeklyInsightItemList({ items }: WeeklyInsightItemListProps): ReactElement {
+  return (
+    <YStack gap="$3" testID="weekly-insight-items">
+      {items.map((item) => (
+        <YStack key={`${item.type}-${item.title}`} gap="$1">
+          <XStack alignItems="center" gap="$2" flexWrap="wrap">
+            <AppBadge>{item.type}</AppBadge>
+            <Paragraph color="$color" fontFamily="$heading" fontSize="$4">
+              {item.title}
+            </Paragraph>
+          </XStack>
+          <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+            {item.message}
+          </Paragraph>
+          {item.evidence && item.evidence.length > 0 ? (
+            <XStack gap="$2" flexWrap="wrap">
+              {item.evidence.map((evidence) => (
+                <AppBadge key={evidence}>{evidence}</AppBadge>
+              ))}
+            </XStack>
+          ) : null}
+        </YStack>
+      ))}
     </YStack>
   );
 }
