@@ -3,15 +3,21 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { ReactNode } from "react";
 
 import { ApiError } from "@/core/http/api-error";
+import { useBiometricGate } from "@/core/security/use-biometric-gate";
 import type { CheckoutSession } from "@/features/subscription/contracts";
 import { useCheckoutFlow } from "@/features/subscription/hooks/use-checkout-flow";
 import { useCreateCheckoutMutation } from "@/features/subscription/hooks/use-subscription-mutations";
 import type { CheckoutProvider } from "@/features/subscription/services/checkout-provider-service";
 
+jest.mock("@/core/security/use-biometric-gate", () => ({
+  useBiometricGate: jest.fn(),
+}));
+
 jest.mock("@/features/subscription/hooks/use-subscription-mutations", () => ({
   useCreateCheckoutMutation: jest.fn(),
 }));
 
+const mockedUseBiometricGate = jest.mocked(useBiometricGate);
 const mockedUseCreate = jest.mocked(useCreateCheckoutMutation);
 
 const buildSession = (
@@ -37,6 +43,7 @@ type CheckoutFlowTestState = {
   readonly mutateAsync: jest.Mock;
   readonly reset: jest.Mock;
   readonly openCheckout: jest.Mock;
+  readonly biometricGate: jest.Mock;
   readonly client: QueryClient;
 };
 
@@ -47,6 +54,10 @@ const setupCheckoutFlowTest = (): CheckoutFlowTestState => {
   const openCheckout = jest
     .fn()
     .mockResolvedValue({ type: "success", returnUrl: "x://" });
+  const biometricGate = jest
+    .fn()
+    .mockResolvedValue({ authorised: true, via: "biometric" });
+  mockedUseBiometricGate.mockReturnValue(biometricGate as never);
   mockedUseCreate.mockReturnValue({
       mutateAsync,
       reset,
@@ -54,12 +65,13 @@ const setupCheckoutFlowTest = (): CheckoutFlowTestState => {
       error: null,
     } as never);
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return { mutateAsync, reset, openCheckout, client };
+  return { mutateAsync, reset, openCheckout, biometricGate, client };
 };
 
-describe("useCheckoutFlow", () => {
+describe("useCheckoutFlow success states", () => {
   it("invalida subscription e entitlements em sucesso e retorna completed", async () => {
-    const { client, mutateAsync, openCheckout } = setupCheckoutFlowTest();
+    const { client, mutateAsync, openCheckout, biometricGate } =
+      setupCheckoutFlowTest();
     const invalidateSpy = jest.spyOn(client, "invalidateQueries");
     const { result } = renderHook(
       () =>
@@ -75,6 +87,10 @@ describe("useCheckoutFlow", () => {
     });
     const outcome = outcomeRef.current;
 
+    expect(biometricGate).toHaveBeenCalledWith({
+      promptMessage: "Confirme para finalizar checkout",
+      required: true,
+    });
     expect(mutateAsync).toHaveBeenCalledWith({ planSlug: "premium-monthly" });
     expect(openCheckout).toHaveBeenCalled();
     expect(outcome?.outcome).toBe("completed");
@@ -108,7 +124,43 @@ describe("useCheckoutFlow", () => {
     expect(outcome?.outcome).toBe("canceled");
     expect(invalidateSpy).not.toHaveBeenCalled();
   });
+});
 
+describe("useCheckoutFlow biometric gate", () => {
+  it("bloqueia o checkout sem criar sessao quando o gate biometrico nega", async () => {
+    const { client, mutateAsync, openCheckout, biometricGate } =
+      setupCheckoutFlowTest();
+    biometricGate.mockResolvedValueOnce({
+      authorised: false,
+      outcome: { outcome: "cancelled" },
+    });
+
+    const { result } = renderHook(
+      () =>
+        useCheckoutFlow({
+          checkoutService: { openCheckout, dismissCheckout: jest.fn() } as never,
+        }),
+      { wrapper: wrapper(client) },
+    );
+
+    const outcomeRef: { current: { outcome: string } | null } = { current: null };
+    await act(async () => {
+      outcomeRef.current = await result.current.start({ planSlug: "premium-monthly" });
+    });
+    const outcome = outcomeRef.current;
+
+    expect(biometricGate).toHaveBeenCalledWith({
+      promptMessage: "Confirme para finalizar checkout",
+      required: true,
+    });
+    expect(mutateAsync).not.toHaveBeenCalled();
+    expect(openCheckout).not.toHaveBeenCalled();
+    expect(outcome).toEqual({ outcome: "locked", session: null });
+    expect(result.current.lastError).toBeNull();
+  });
+});
+
+describe("useCheckoutFlow error states", () => {
   it("captura erro quando createCheckout falha e nao abre browser", async () => {
     const { client, mutateAsync, openCheckout } = setupCheckoutFlowTest();
     mutateAsync.mockRejectedValueOnce(

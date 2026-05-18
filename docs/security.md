@@ -50,9 +50,12 @@ posture see `auraxis-platform/.context/`.
 - User-facing toggle lives in **Profile → Security**. When the device
   reports unsupported / not-enrolled, the toggle disables itself with
   helper copy explaining why.
-- Application of the gate to specific flows (account deletion,
-  password change, checkout) ships incrementally per epic — see
-  `#298` follow-ups and `#304`.
+- Mandatory gates currently cover account deletion and checkout
+  finalization. Account deletion uses biometrics-only mode; checkout
+  allows the OS credential fallback when the biometric prompt offers it.
+- Password change does not have an authenticated in-app flow yet. When
+  that screen lands, it must call `useBiometricGate({ required: true })`
+  before submitting the mutation.
 
 ## Active scaffolding
 
@@ -73,6 +76,6 @@ posture see `auraxis-platform/.context/`.
 
 - **Backend session and refresh contracts** — see `auraxis-api`.
 - **Frontend (web) security headers and CSP** — see `auraxis-web`.
-- **CAPTCHA on login / register** — paridade com web ainda pendente
-  no app; tracking em `#298` (Cloudflare Turnstile via WebView).
+- **CAPTCHA on login / register** — Cloudflare Turnstile is active in
+  the auth forms; provider/key changes remain tracked in `#298`.
 - **Penetration test cadence** — owned by platform `.context/`.
