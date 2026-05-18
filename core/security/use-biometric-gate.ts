@@ -67,7 +67,10 @@ export const useBiometricGate = (): ((
         biometricsOnly: options.biometricsOnly,
       });
 
-      if (outcome.outcome === "success" || outcome.outcome === "fallback_pin") {
+      if (
+        outcome.outcome === "success" ||
+        (outcome.outcome === "fallback_pin" && options.biometricsOnly !== true)
+      ) {
         return { authorised: true, via: "biometric" };
       }
       return { authorised: false, outcome };

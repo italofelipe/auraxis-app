@@ -53,20 +53,28 @@ posture see `auraxis-platform/.context/`.
 - Mandatory gates currently cover account deletion and checkout
   finalization. Account deletion uses biometrics-only mode; checkout
   allows the OS credential fallback when the biometric prompt offers it.
+- Sensitive flows that pass `biometricsOnly: true` reject
+  `fallback_pin` and require a real biometric match.
 - Password change does not have an authenticated in-app flow yet. When
   that screen lands, it must call `useBiometricGate({ required: true })`
   before submitting the mutation.
 
+### CAPTCHA
+- Login and registration render the Cloudflare Turnstile challenge when
+  `EXPO_PUBLIC_TURNSTILE_SITE_KEY` is configured.
+- The auth service sends the resulting token as `captcha_token`, aligned
+  with the backend contract and web parity.
+
 ## Active scaffolding
 
-### SSL pinning (not yet enforcing)
+### SSL pinning (native pins pending)
 - `core/security/ssl-pinning.ts` exposes `resolveSslPinningPolicy()`
   and `isSslPinningEnforced()` reading from
   `EXPO_PUBLIC_SSL_PINNING_ENABLED` and
   `EXPO_PUBLIC_SSL_PINNING_FINGERPRINTS`.
-- The flag stays **off** in current builds because production
-  certificate fingerprints are not yet pinned at the native layer
-  (Android `networkSecurityConfig`, iOS ATS dictionary).
+- Native scaffolding exists in `app.json` / `assets/network-security-config.xml`,
+  but production certificate fingerprints are not yet populated in the
+  native pin sets.
 - Two SHA-256 fingerprints are recommended (current + next) so a
   certificate roll never bricks installed clients.
 - Enabling for real lands together with a deploy that ties the
@@ -76,6 +84,8 @@ posture see `auraxis-platform/.context/`.
 
 - **Backend session and refresh contracts** — see `auraxis-api`.
 - **Frontend (web) security headers and CSP** — see `auraxis-web`.
-- **CAPTCHA on login / register** — Cloudflare Turnstile is active in
+- **CAPTCHA provider/key changes** — Cloudflare Turnstile is active in
   the auth forms; provider/key changes remain tracked in `#298`.
+- **Native SSL pin values and MITM smoke** — tracked in `#298` and the
+  SSL pinning rotation runbook.
 - **Penetration test cadence** — owned by platform `.context/`.

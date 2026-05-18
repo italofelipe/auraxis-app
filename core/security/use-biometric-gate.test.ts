@@ -49,6 +49,20 @@ describe("useBiometricGate", () => {
     expect(outcome).toEqual({ authorised: true, via: "biometric" });
   });
 
+  it("nega fallback_pin quando o fluxo exige biometria real", async () => {
+    useAppShellStore.getState().setBiometricLockEnabled(true);
+    mockedRequest.mockResolvedValue({ outcome: "fallback_pin" });
+    const { result } = renderHook(() => useBiometricGate());
+    const outcome = await result.current({
+      promptMessage: "Auth",
+      biometricsOnly: true,
+    });
+    expect(outcome).toEqual({
+      authorised: false,
+      outcome: { outcome: "fallback_pin" },
+    });
+  });
+
   it("propaga cancelamento como nao autorizado", async () => {
     useAppShellStore.getState().setBiometricLockEnabled(true);
     mockedRequest.mockResolvedValue({ outcome: "cancelled" });
