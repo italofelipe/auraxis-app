@@ -2,16 +2,22 @@
 
 ## Quando executar
 
-- A cada 90 dias (alinhado ao ACM auto-renew dos certs `*.auraxis.com.br`).
-- Imediatamente quando ACM rotacionar inesperadamente um cert.
+- A cada 90 dias (alinhado ao ciclo de renovação do cert
+  `api.auraxis.com.br`).
+- Imediatamente quando o provedor TLS rotacionar inesperadamente um cert.
 - Antes de qualquer release que altere a infra de TLS (mudança de provider,
   região, distribuição CDN).
 
 ## Pre-requisitos
 
 - `openssl` na máquina local (≥1.1.1).
-- Acesso SSH/CLI à máquina que tem o cert atual da `auraxis.com.br`,
+- Acesso SSH/CLI à máquina que tem o cert atual da API,
   ou uso direto do endpoint público (handshake remoto).
+- Pins atuais extraídos em 2026-05-19:
+  - Leaf `api.auraxis.com.br`:
+    `sha256/6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=`
+  - Backup CA/intermediário `Let's Encrypt E7`:
+    `sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=`
 
 ## Passos
 
@@ -32,15 +38,18 @@ PIN_CURRENT=$(openssl x509 -in /tmp/api-cert.pem -pubkey -noout \
 echo "Pin atual: sha256/${PIN_CURRENT}"
 ```
 
-Repetir para `cdn.auraxis.com.br` e qualquer outro subdomínio servindo
-tráfego TLS direto.
+Repetir para `cdn.auraxis.com.br` e qualquer outro subdomínio somente
+quando ele passar a servir tráfego TLS direto pelo app. Em 2026-05-19,
+`cdn.auraxis.com.br` não respondeu handshake público, então a build
+pina apenas `api.auraxis.com.br`.
 
 ### 2. Gerar pin backup (próximo cert)
 
 O backup pin deve apontar para a **próxima** chave que a CA vai assinar.
 Duas opções:
 
-**Opção A — Pin do CA intermediário** (mais resiliente, menos seguro):
+**Opção A — Pin do CA intermediário** (atual nesta build; mais
+resiliente, menos seguro):
 
 ```bash
 openssl s_client -connect api.auraxis.com.br:443 -showcerts </dev/null 2>/dev/null \
@@ -64,8 +73,8 @@ PIN_BACKUP=$(openssl rsa -in /tmp/backup-key.pem -pubout -outform der 2>/dev/nul
 echo "Pin backup: sha256/${PIN_BACKUP}"
 ```
 
-Recomendado: opção B, com a chave guardada em AWS Secrets Manager
-(`auraxis/ssl-pinning/backup-key`).
+Recomendado para a próxima rotação: migrar para a opção B, com a chave
+guardada em AWS Secrets Manager (`auraxis/ssl-pinning/backup-key`).
 
 ### 3. Atualizar `app.json` (iOS)
 
@@ -75,10 +84,12 @@ Recomendado: opção B, com a chave guardada em AWS Secrets Manager
     "NSAppTransportSecurity": {
       "NSAllowsArbitraryLoads": false,
       "NSPinnedDomains": {
-        "auraxis.com.br": {
-          "NSIncludesSubdomains": true,
+        "api.auraxis.com.br": {
+          "NSIncludesSubdomains": false,
+          "NSPinnedLeafIdentities": [
+            { "SPKI-SHA256-BASE64": "<PIN_CURRENT>" }
+          ],
           "NSPinnedCAIdentities": [
-            { "SPKI-SHA256-BASE64": "<PIN_CURRENT>" },
             { "SPKI-SHA256-BASE64": "<PIN_BACKUP>" }
           ]
         }
@@ -93,10 +104,10 @@ Recomendado: opção B, com a chave guardada em AWS Secrets Manager
 ```xml
 <network-security-config>
     <domain-config>
-        <domain includeSubdomains="true">auraxis.com.br</domain>
+        <domain>api.auraxis.com.br</domain>
         <pin-set expiration="2026-08-01">
-            <pin digest="SHA-256"><!-- PIN_CURRENT --></pin>
-            <pin digest="SHA-256"><!-- PIN_BACKUP --></pin>
+            <pin digest="SHA-256"><!-- PIN_CURRENT without sha256/ --></pin>
+            <pin digest="SHA-256"><!-- PIN_BACKUP without sha256/ --></pin>
         </pin-set>
     </domain-config>
     <base-config cleartextTrafficPermitted="false">

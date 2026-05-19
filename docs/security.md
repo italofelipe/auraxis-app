@@ -66,20 +66,22 @@ posture see `auraxis-platform/.context/`.
 - The auth service sends the resulting token as `captcha_token`, aligned
   with the backend contract and web parity.
 
-## Active scaffolding
+## Native/runtime controls
 
-### SSL pinning (native pins pending)
+### SSL pinning (native pins active)
 - `core/security/ssl-pinning.ts` exposes `resolveSslPinningPolicy()`
   and `isSslPinningEnforced()` reading from
   `EXPO_PUBLIC_SSL_PINNING_ENABLED` and
   `EXPO_PUBLIC_SSL_PINNING_FINGERPRINTS`.
-- Native scaffolding exists in `app.json` / `assets/network-security-config.xml`,
-  but production certificate fingerprints are not yet populated in the
-  native pin sets.
-- Two SHA-256 fingerprints are recommended (current + next) so a
-  certificate roll never bricks installed clients.
-- Enabling for real lands together with a deploy that ties the
-  fingerprint to the current ACM certificate. Tracked in `#298`.
+- Native pinning is configured for `api.auraxis.com.br` in `app.json`
+  and `assets/network-security-config.xml`.
+- Current production pins:
+  - Leaf `api.auraxis.com.br`: `sha256/6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=`
+  - Backup CA/intermediate `Let's Encrypt E7`: `sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=`
+- The runtime policy only reports `enabled=true` when the build exposes
+  at least two distinct fingerprints.
+- Before promoting beyond internal beta, run the MITM smoke in the SSL
+  pinning rotation runbook on both preview devices.
 
 ## Out of scope here (links)
 
@@ -87,6 +89,6 @@ posture see `auraxis-platform/.context/`.
 - **Frontend (web) security headers and CSP** — see `auraxis-web`.
 - **CAPTCHA provider/key changes** — Cloudflare Turnstile is active in
   the auth forms; provider/key changes remain tracked in `#298`.
-- **Native SSL pin values and MITM smoke** — tracked in `#298` and the
-  SSL pinning rotation runbook.
+- **MITM smoke** — tracked in `#298` and the SSL pinning rotation
+  runbook before promoting beyond internal beta.
 - **Penetration test cadence** — owned by platform `.context/`.

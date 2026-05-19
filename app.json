@@ -17,9 +17,18 @@
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,
           "NSPinnedDomains": {
-            "auraxis.com.br": {
-              "NSIncludesSubdomains": true,
-              "NSPinnedCAIdentities": []
+            "api.auraxis.com.br": {
+              "NSIncludesSubdomains": false,
+              "NSPinnedLeafIdentities": [
+                {
+                  "SPKI-SHA256-BASE64": "6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI="
+                }
+              ],
+              "NSPinnedCAIdentities": [
+                {
+                  "SPKI-SHA256-BASE64": "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="
+                }
+              ]
             }
           }
         }

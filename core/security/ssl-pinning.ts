@@ -14,7 +14,7 @@
  *
  * 2. **Defensive (this module)** — runtime predicates the HTTP layer
  *    can call to ensure outbound requests target the canonical
- *    `*.auraxis.com.br` envelope and use HTTPS. This catches developer
+ *    `api.auraxis.com.br` host and use HTTPS. This catches developer
  *    errors (typos, dev-only bypass URLs, http://) before they reach
  *    the network — a small belt-and-braces step on top of the native
  *    layer.
@@ -39,8 +39,8 @@ interface RawEnvSnapshot {
   readonly fingerprints: string | undefined;
 }
 
-const CANONICAL_HOST_SUFFIX = ".auraxis.com.br";
-const ROOT_HOST = "auraxis.com.br";
+const API_HOST = "api.auraxis.com.br";
+const REQUIRED_PIN_COUNT = 2;
 
 const readEnv = (): RawEnvSnapshot => {
   return {
@@ -61,10 +61,12 @@ const parseFingerprints = (raw: string | undefined): readonly string[] => {
   if (!raw) {
     return [];
   }
-  return raw
+  const fingerprints = raw
     .split(",")
     .map((item) => item.trim())
     .filter((item) => item.length > 0);
+
+  return Array.from(new Set(fingerprints));
 };
 
 export interface SslPinningPolicy {
@@ -86,7 +88,7 @@ export const resolveSslPinningPolicy = (): SslPinningPolicy => {
   const fingerprints = parseFingerprints(env.fingerprints);
 
   return {
-    enabled: enabled && fingerprints.length > 0,
+    enabled: enabled && fingerprints.length >= REQUIRED_PIN_COUNT,
     expectedFingerprints: fingerprints,
   };
 };
@@ -111,14 +113,12 @@ export type BlockedReason =
 
 const isCanonicalHost = (hostname: string): boolean => {
   const normalized = hostname.trim().toLowerCase();
-  return (
-    normalized === ROOT_HOST || normalized.endsWith(CANONICAL_HOST_SUFFIX)
-  );
+  return normalized === API_HOST;
 };
 
 /**
  * Validates that an outbound request URL targets the canonical
- * `*.auraxis.com.br` envelope and uses HTTPS. Returns a discriminated
+ * `api.auraxis.com.br` host and uses HTTPS. Returns a discriminated
  * verdict so callers (HTTP client interceptor, fetch wrapper) can
  * react appropriately — typically blocking the request and reporting
  * to telemetry.

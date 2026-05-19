@@ -164,7 +164,7 @@ export const APP_EVENT_LOGGING_POLICY = Object.freeze({
     ["method", "path", "status", "code"],
   ),
   "network.canonical_request_violation": warnAndErrorWarnPolicy(
-    "Request iniciado fora do envelope canônico *.auraxis.com.br ou sem HTTPS — pinning nativo deve bloquear; sinal de bug em config.",
+    "Request iniciado fora do host canônico api.auraxis.com.br ou sem HTTPS — pinning nativo deve bloquear; sinal de bug em config.",
     ["method", "reason"],
   ),
   "auth.session_established": devOnlyInfoPolicy(

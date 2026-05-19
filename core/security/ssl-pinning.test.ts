@@ -36,7 +36,7 @@ describe("ssl-pinning policy", () => {
     expect(isSslPinningEnforced()).toBe(false);
   });
 
-  it("requires both flag and fingerprints to enforce", () => {
+  it("requires both flag and two distinct fingerprints to enforce", () => {
     setEnv("true", "sha256/AAA===,sha256/BBB===");
     const policy = resolveSslPinningPolicy();
     expect(policy.enabled).toBe(true);
@@ -46,12 +46,20 @@ describe("ssl-pinning policy", () => {
     ]);
   });
 
+  it("ignores a single or duplicated fingerprint", () => {
+    setEnv("true", "sha256/AAA===");
+    expect(isSslPinningEnforced()).toBe(false);
+
+    setEnv("true", "sha256/AAA===,sha256/AAA===");
+    expect(isSslPinningEnforced()).toBe(false);
+  });
+
   it("treats truthy variants of the flag as enabled", () => {
-    setEnv("1", "sha256/AAA===");
+    setEnv("1", "sha256/AAA===,sha256/BBB===");
     expect(isSslPinningEnforced()).toBe(true);
-    setEnv("on", "sha256/AAA===");
+    setEnv("on", "sha256/AAA===,sha256/BBB===");
     expect(isSslPinningEnforced()).toBe(true);
-    setEnv("TRUE", "sha256/AAA===");
+    setEnv("TRUE", "sha256/AAA===,sha256/BBB===");
     expect(isSslPinningEnforced()).toBe(true);
   });
 
@@ -69,12 +77,6 @@ describe("verifyCanonicalRequest", () => {
     expect(verifyCanonicalRequest("https://api.auraxis.com.br/foo")).toEqual({
       kind: "ok",
     });
-    expect(verifyCanonicalRequest("https://auraxis.com.br/")).toEqual({
-      kind: "ok",
-    });
-    expect(verifyCanonicalRequest("https://cdn.auraxis.com.br/avatar.png")).toEqual({
-      kind: "ok",
-    });
   });
 
   it("bloqueia esquemas nao-HTTPS", () => {
@@ -86,6 +88,16 @@ describe("verifyCanonicalRequest", () => {
 
   it("bloqueia hosts nao-canonicos", () => {
     expect(verifyCanonicalRequest("https://api.attacker.com/foo")).toEqual({
+      kind: "blocked",
+      reason: "non_canonical_host",
+    });
+    expect(verifyCanonicalRequest("https://auraxis.com.br/")).toEqual({
+      kind: "blocked",
+      reason: "non_canonical_host",
+    });
+    expect(
+      verifyCanonicalRequest("https://cdn.auraxis.com.br/avatar.png"),
+    ).toEqual({
       kind: "blocked",
       reason: "non_canonical_host",
     });
