@@ -90,6 +90,7 @@ describe("useCheckoutFlow success states", () => {
     expect(biometricGate).toHaveBeenCalledWith({
       promptMessage: "Confirme para finalizar checkout",
       required: true,
+      biometricsOnly: true,
     });
     expect(mutateAsync).toHaveBeenCalledWith({ planSlug: "premium-monthly" });
     expect(openCheckout).toHaveBeenCalled();
@@ -152,6 +153,7 @@ describe("useCheckoutFlow biometric gate", () => {
     expect(biometricGate).toHaveBeenCalledWith({
       promptMessage: "Confirme para finalizar checkout",
       required: true,
+      biometricsOnly: true,
     });
     expect(mutateAsync).not.toHaveBeenCalled();
     expect(openCheckout).not.toHaveBeenCalled();
