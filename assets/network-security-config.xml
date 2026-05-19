@@ -2,19 +2,21 @@
 <!--
   Auraxis app — Android network security config.
 
-  Baseline today (PR #346):
+  Baseline:
   - Cleartext traffic blocked by default. The whole app must speak HTTPS.
   - System trust anchors only. No user-installed CAs honored.
-  - <pin-set> deliberately omitted until ops populates production SPKI
-    hashes (Apr/2026). See docs/runtime.md "SSL pinning" for the
-    rotation playbook and sample structure to drop in.
-
-  Once SPKI hashes are populated, this file gains a <domain-config>
-  block listing auraxis.com.br + its api/cdn subdomains under a
-  <pin-set> with two pins (current + backup) and an explicit
-  expiration date.
+  - api.auraxis.com.br is pinned with the current leaf SPKI and the
+    Let's Encrypt E7 intermediate SPKI as the operational backup pin.
+    See docs/runbooks/ssl-pinning-rotation.md before rotating.
 -->
 <network-security-config>
+    <domain-config>
+        <domain>api.auraxis.com.br</domain>
+        <pin-set expiration="2026-08-01">
+            <pin digest="SHA-256">6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=</pin>
+            <pin digest="SHA-256">y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=</pin>
+        </pin-set>
+    </domain-config>
     <base-config cleartextTrafficPermitted="false">
         <trust-anchors>
             <certificates src="system" />

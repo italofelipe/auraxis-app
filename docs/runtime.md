@@ -224,18 +224,26 @@ Pinning é aplicado em duas camadas:
 "NSAppTransportSecurity": {
   "NSAllowsArbitraryLoads": false,
   "NSPinnedDomains": {
-    "auraxis.com.br": {
-      "NSIncludesSubdomains": true,
-      "NSPinnedCAIdentities": []  // populado por ops antes de promover a prod
+    "api.auraxis.com.br": {
+      "NSIncludesSubdomains": false,
+      "NSPinnedLeafIdentities": [
+        { "SPKI-SHA256-BASE64": "6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=" }
+      ],
+      "NSPinnedCAIdentities": [
+        { "SPKI-SHA256-BASE64": "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=" }
+      ]
     }
   }
 }
 ```
 
 **Android** — `app.json` aponta `expo.android.networkSecurityConfig` para
-`assets/network-security-config.xml`. Hoje o XML aplica baseline (cleartext
-bloqueado, system trust apenas). O bloco `<domain-config>` com `<pin-set>`
-entra quando ops popular as hashes SPKI.
+`assets/network-security-config.xml`. O XML aplica cleartext bloqueado,
+system trust apenas, e `<pin-set>` para `api.auraxis.com.br` com:
+
+- leaf atual: `sha256/6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=`
+- backup CA/intermediário Let's Encrypt E7:
+  `sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=`
 
 ### 2. Defensivo (JS, este módulo)
 
@@ -243,7 +251,7 @@ entra quando ops popular as hashes SPKI.
 toda chamada outbound:
 
 - Usa `https://` (rejeita `http://`).
-- Tem hostname dentro de `*.auraxis.com.br` (rejeita typos, dev-only
+- Tem hostname `api.auraxis.com.br` (rejeita typos, dev-only
   bypass URLs, exfil para hosts arbitrários).
 
 Retorna `{ kind: "ok" }` ou `{ kind: "blocked", reason: ... }`. O HTTP
@@ -253,7 +261,7 @@ belt-and-braces sobre o pinning nativo.
 ### Geração e rotação dos pins SPKI
 
 ```bash
-# 1. Baixar o cert público da raiz canônica
+# 1. Baixar o cert público da API canônica
 openssl s_client -connect api.auraxis.com.br:443 -servername api.auraxis.com.br \
   </dev/null 2>/dev/null | openssl x509 -outform PEM > /tmp/api-cert.pem
 
@@ -269,11 +277,12 @@ openssl x509 -in /tmp/api-cert.pem -pubkey -noout \
 
 **Política de pins:**
 
-- Sempre dois pins: **atual** + **backup** (próximo). Nunca um só, ou um
-  pin roll forçaria atualização da app store antes do cert vencer.
+- Sempre dois pins distintos. A build atual usa leaf
+  `api.auraxis.com.br` + CA/intermediário Let's Encrypt E7 porque ainda
+  não há chave offline de próxima rotação registrada em vault.
 - Validade dos pins documentada no XML/Info.plist com expiração explícita
   no XML Android (`<pin-set expiration="YYYY-MM-DD">`).
-- Rotação a cada 90 dias (alinhado ao ACM auto-renew).
+- Rotação a cada 90 dias (alinhada ao ciclo do provedor TLS).
 
 ### Smoke tests pós-build (manuais)
 
