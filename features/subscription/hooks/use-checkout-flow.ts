@@ -84,6 +84,7 @@ export function useCheckoutFlow(
     const gate = await requestBiometricGate({
       promptMessage: "Confirme para finalizar checkout",
       required: true,
+      biometricsOnly: true,
     });
     if (!gate.authorised) {
       return { outcome: "locked", session: null };

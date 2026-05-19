@@ -51,13 +51,14 @@ posture see `auraxis-platform/.context/`.
   reports unsupported / not-enrolled, the toggle disables itself with
   helper copy explaining why.
 - Mandatory gates currently cover account deletion and checkout
-  finalization. Account deletion uses biometrics-only mode; checkout
-  allows the OS credential fallback when the biometric prompt offers it.
+  finalization. Both pass `biometricsOnly: true`, so the OS credential
+  fallback cannot authorize these sensitive actions.
 - Sensitive flows that pass `biometricsOnly: true` reject
   `fallback_pin` and require a real biometric match.
 - Password change does not have an authenticated in-app flow yet. When
-  that screen lands, it must call `useBiometricGate({ required: true })`
-  before submitting the mutation.
+  that screen lands, it must call
+  `useBiometricGate({ required: true, biometricsOnly: true })` before
+  submitting the mutation.
 
 ### CAPTCHA
 - Login and registration render the Cloudflare Turnstile challenge when
