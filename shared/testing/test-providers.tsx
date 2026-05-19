@@ -1,5 +1,4 @@
-import type { PropsWithChildren, ReactElement } from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type PropsWithChildren, type ReactElement } from "react";
 
 import {
   QueryClientProvider,
@@ -12,11 +11,13 @@ import { createTestQueryClient } from "@/shared/testing/test-query-client";
 
 interface TestProvidersProps extends PropsWithChildren {
   readonly queryClient?: QueryClient;
+  readonly themeName?: "auraxis" | "auraxis_dark" | "auraxis_light";
 }
 
 export const TestProviders = ({
   children,
   queryClient: providedQueryClient,
+  themeName = "auraxis_light",
 }: TestProvidersProps): ReactElement => {
   const [queryClient] = useState<QueryClient>(() => {
     return providedQueryClient ?? createTestQueryClient();
@@ -30,19 +31,27 @@ export const TestProviders = ({
 
   return (
     <QueryClientProvider client={queryClient}>
-      <TamaguiProvider config={tamaguiConfig} defaultTheme="auraxis">
-        <Theme name="auraxis">{children}</Theme>
+      <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
+        <Theme name={themeName}>{children}</Theme>
       </TamaguiProvider>
     </QueryClientProvider>
   );
 };
 
 export const createTestHookWrapper = (
-  options: { readonly queryClient?: QueryClient } = {},
+  options: {
+    readonly queryClient?: QueryClient;
+    readonly themeName?: "auraxis" | "auraxis_dark" | "auraxis_light";
+  } = {},
 ): ((props: PropsWithChildren) => ReactElement) => {
   const Wrapper = ({ children }: PropsWithChildren): ReactElement => {
     return (
-      <TestProviders queryClient={options.queryClient}>{children}</TestProviders>
+      <TestProviders
+        queryClient={options.queryClient}
+        themeName={options.themeName}
+      >
+        {children}
+      </TestProviders>
     );
   };
 

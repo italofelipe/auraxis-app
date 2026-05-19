@@ -45,7 +45,7 @@ function RootLayout() {
             fallbackDescription="Recarregue o aplicativo para tentar novamente.">
             <RootLayoutContent />
           </AppErrorBoundary>
-          <StatusBar style="light" />
+          <StatusBar style="auto" />
         </AppProviders>
       </SafeAreaProvider>
     </GestureHandlerRootView>

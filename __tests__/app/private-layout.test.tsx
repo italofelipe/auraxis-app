@@ -6,14 +6,23 @@ import PrivateLayout from "@/app/(private)/_layout";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 import { isFeatureEnabled } from "@/shared/feature-flags";
+import { TestProviders } from "@/shared/testing/test-providers";
 
 const mockTabsScreens: {
   name: string;
   options?: Record<string, unknown>;
 }[] = [];
+let mockTabsScreenOptions: Record<string, unknown> | undefined;
 
 jest.mock("expo-router", () => {
-  function MockTabs({ children }: { readonly children: ReactNode }): ReactNode {
+  function MockTabs({
+    children,
+    screenOptions,
+  }: {
+    readonly children: ReactNode;
+    readonly screenOptions?: Record<string, unknown>;
+  }): ReactNode {
+    mockTabsScreenOptions = screenOptions;
     return children;
   }
 
@@ -71,9 +80,18 @@ const buildInsightState = (isNew: boolean): ReturnType<typeof useWeeklyInsight> 
     query: {},
   }) as unknown as ReturnType<typeof useWeeklyInsight>;
 
+const renderPrivateLayout = () => {
+  return render(
+    <TestProviders>
+      <PrivateLayout />
+    </TestProviders>,
+  );
+};
+
 describe("PrivateLayout", () => {
   beforeEach(() => {
     mockTabsScreens.length = 0;
+    mockTabsScreenOptions = undefined;
     mockedUsePrivateRouteGuard.mockReturnValue({ ready: true, redirectTo: null });
     mockedUseWeeklyInsight.mockReturnValue(buildInsightState(false));
     mockedIsFeatureEnabled.mockReturnValue(true);
@@ -86,7 +104,7 @@ describe("PrivateLayout", () => {
   it("exibe badge no tab do dashboard quando existe insight novo", () => {
     mockedUseWeeklyInsight.mockReturnValue(buildInsightState(true));
 
-    render(<PrivateLayout />);
+    renderPrivateLayout();
 
     const dashboardScreen = mockTabsScreens.find((screen) => screen.name === "dashboard");
     expect(dashboardScreen?.options?.tabBarBadge).toBe("1");
@@ -95,7 +113,7 @@ describe("PrivateLayout", () => {
   it("omite badge no tab do dashboard quando o insight ja foi lido", () => {
     mockedUseWeeklyInsight.mockReturnValue(buildInsightState(false));
 
-    render(<PrivateLayout />);
+    renderPrivateLayout();
 
     const dashboardScreen = mockTabsScreens.find((screen) => screen.name === "dashboard");
     expect(dashboardScreen?.options?.tabBarBadge).toBeUndefined();
@@ -105,10 +123,24 @@ describe("PrivateLayout", () => {
     mockedIsFeatureEnabled.mockReturnValue(false);
     mockedUseWeeklyInsight.mockReturnValue(buildInsightState(true));
 
-    render(<PrivateLayout />);
+    renderPrivateLayout();
 
     const dashboardScreen = mockTabsScreens.find((screen) => screen.name === "dashboard");
     expect(mockedUseWeeklyInsight).toHaveBeenCalledWith({ enabled: false });
     expect(dashboardScreen?.options?.tabBarBadge).toBeUndefined();
+  });
+
+  it("configura a tab bar com tokens semanticos do tema ativo", () => {
+    renderPrivateLayout();
+
+    expect(mockTabsScreenOptions).toMatchObject({
+      headerShown: false,
+      tabBarActiveTintColor: "#1598be",
+      tabBarInactiveTintColor: "#6e7f9f",
+      tabBarStyle: {
+        backgroundColor: "#ffffff",
+        borderTopColor: "rgba(29,43,68,0.14)",
+      },
+    });
   });
 });

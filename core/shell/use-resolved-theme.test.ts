@@ -1,4 +1,5 @@
 import { renderHook } from "@testing-library/react-native";
+// eslint-disable-next-line no-restricted-imports -- useColorScheme is the native API under test; no image APIs are used here.
 import * as ReactNative from "react-native";
 
 import { resetAppShellStore, useAppShellStore } from "@/core/shell/app-shell-store";
@@ -9,6 +10,7 @@ const useColorSchemeSpy = jest.spyOn(ReactNative, "useColorScheme");
 describe("useResolvedTheme", () => {
   beforeEach(() => {
     resetAppShellStore();
+    useColorSchemeSpy.mockReset();
   });
 
   it("retorna auraxis_dark quando preferência é \"dark\"", () => {
@@ -39,10 +41,10 @@ describe("useResolvedTheme", () => {
     expect(result.current).toBe("auraxis_dark");
   });
 
-  it("em \"system\" cai em dark quando o device retorna null", () => {
+  it("em \"system\" cai em light quando o device retorna null", () => {
     useAppShellStore.getState().setThemePreference("system");
     useColorSchemeSpy.mockReturnValue(null);
     const { result } = renderHook(() => useResolvedTheme());
-    expect(result.current).toBe("auraxis_dark");
+    expect(result.current).toBe("auraxis_light");
   });
 });
