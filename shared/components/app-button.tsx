@@ -1,7 +1,7 @@
 import { type ComponentProps, type ReactElement, type ReactNode, useCallback } from "react";
 import type { GestureResponderEvent } from "react-native";
 
-import { Button, styled } from "tamagui";
+import { Button, Paragraph, styled } from "tamagui";
 
 import { borderWidths } from "@/config/design-tokens";
 import {
@@ -10,10 +10,10 @@ import {
 } from "@/shared/feedback/haptics";
 
 const PrimaryButtonFrame = styled(Button, {
-  backgroundColor: "$secondary",
+  backgroundColor: "$primary",
   borderRadius: "$1",
   pressStyle: {
-    backgroundColor: "$primary",
+    backgroundColor: "$primaryPressed",
   },
 });
 
@@ -33,6 +33,13 @@ const DangerButtonFrame = styled(Button, {
   pressStyle: {
     backgroundColor: "$dangerStrong",
   },
+});
+
+const ButtonLabel = styled(Paragraph, {
+  fontFamily: "$body",
+  fontSize: "$4",
+  fontWeight: "$6",
+  textAlign: "center",
 });
 
 type FrameProps = ComponentProps<typeof PrimaryButtonFrame>;
@@ -87,6 +94,16 @@ const resolveAccessibilityLabel = (
   return undefined;
 };
 
+const renderButtonContent = (
+  children: ReactNode,
+  color: "$actionPrimaryForeground" | "$color",
+): ReactNode => {
+  if (typeof children === "string" || typeof children === "number") {
+    return <ButtonLabel color={color}>{children}</ButtonLabel>;
+  }
+  return children;
+};
+
 export function AppButton({
   children,
   tone = "primary",
@@ -127,7 +144,7 @@ export function AppButton({
         accessibilityState={a11yState}
         onPressIn={handlePressIn}
       >
-        {children}
+        {renderButtonContent(children, "$color")}
       </SecondaryButtonFrame>
     );
   }
@@ -143,7 +160,7 @@ export function AppButton({
         accessibilityState={a11yState}
         onPressIn={handlePressIn}
       >
-        {children}
+        {renderButtonContent(children, "$color")}
       </DangerButtonFrame>
     );
   }
@@ -158,7 +175,7 @@ export function AppButton({
       accessibilityState={a11yState}
       onPressIn={handlePressIn}
     >
-      {children}
+      {renderButtonContent(children, "$actionPrimaryForeground")}
     </PrimaryButtonFrame>
   );
 }

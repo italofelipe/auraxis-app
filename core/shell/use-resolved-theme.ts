@@ -8,8 +8,8 @@ export type ResolvedThemeName = "auraxis_dark" | "auraxis_light";
  * Resolves the active Tamagui theme name by combining the user's
  * `themePreference` with the device colour scheme.
  *
- * - `system` → mirrors `useColorScheme()` (defaults to dark when the
- *   OS reports `null`, preserving historical visuals).
+ * - `system` → mirrors `useColorScheme()` (defaults to light when the
+ *   OS reports `null`, matching the app default for new users).
  * - `light` / `dark` → pinned regardless of the OS setting.
  *
  * @returns Either `auraxis_dark` or `auraxis_light` — never `system`.
@@ -25,5 +25,5 @@ export const useResolvedTheme = (): ResolvedThemeName => {
     return "auraxis_dark";
   }
 
-  return systemScheme === "light" ? "auraxis_light" : "auraxis_dark";
+  return systemScheme === "dark" ? "auraxis_dark" : "auraxis_light";
 };

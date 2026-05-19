@@ -1,51 +1,63 @@
 import { colorPalette, fontSizes, radii, spacing } from "@/config/design-tokens";
 
 /**
- * Dark variant of the canonical Auraxis palette. Background is
- * almost-black neutral, surfaces lift via slightly lighter neutrals,
- * brand stays warm orange.
+ * Dark variant of the canonical Auraxis DS v3 "Market Pulse" palette.
+ * Backgrounds use the navy neutral scale and actions use cyan/violet
+ * accents, matching the web source of truth.
  */
 export const darkSemanticColors = {
   background: colorPalette.neutral950,
-  surface: colorPalette.neutral900,
-  surfaceRaised: colorPalette.neutral700,
-  foreground: colorPalette.white,
-  mutedForeground: colorPalette.brand300,
-  subduedForeground: "#bcb3b3",
-  primary: colorPalette.brand600,
-  secondary: colorPalette.brand500,
-  border: colorPalette.neutral700,
-  success: "#4ade80",
-  danger: colorPalette.danger500,
-  dangerStrong: colorPalette.danger700,
+  surface: colorPalette.neutral800,
+  surfaceRaised: colorPalette.neutral750,
+  foreground: colorPalette.text100,
+  mutedForeground: colorPalette.text300,
+  subduedForeground: colorPalette.text400,
+  primary: colorPalette.cyan500,
+  primaryPressed: colorPalette.cyan600,
+  primaryForeground: colorPalette.neutral900,
+  secondary: colorPalette.violet500,
+  secondaryPressed: colorPalette.violet600,
+  border: "rgba(255,255,255,0.10)",
+  borderStrong: "rgba(68,212,255,0.40)",
+  success: colorPalette.lime500,
+  danger: colorPalette.red500,
+  dangerStrong: colorPalette.red700,
+  warning: colorPalette.orange500,
+  info: colorPalette.cyan500,
 } as const;
 
 /**
- * Light variant of the canonical Auraxis palette. Background is
- * paper white, surfaces lift via cool greys, brand stays warm orange
- * but tones down on saturation for WCAG contrast against light fills.
+ * Light variant for native screens. DS v3 is dark-first on web, so the
+ * mobile light mode keeps the same cyan/violet/lime/red accent families
+ * while using high-contrast white and blue-grey surfaces.
  */
 export const lightSemanticColors = {
-  background: "#ffffff",
-  surface: "#f7f7f8",
-  surfaceRaised: "#eef0f3",
-  foreground: "#1a1a1a",
-  mutedForeground: "#5a5a5a",
-  subduedForeground: "#8a8a8a",
-  primary: colorPalette.brand600,
-  secondary: colorPalette.brand500,
-  border: "#dcdfe5",
-  success: "#1f9d55",
-  danger: "#c53030",
-  dangerStrong: "#9b2424",
+  background: "#f8fbff",
+  surface: colorPalette.white,
+  surfaceRaised: "#eef4fb",
+  foreground: colorPalette.neutral900,
+  mutedForeground: colorPalette.neutral600,
+  subduedForeground: colorPalette.text400,
+  primary: colorPalette.cyan700,
+  primaryPressed: colorPalette.cyan600,
+  primaryForeground: colorPalette.neutral950,
+  secondary: colorPalette.violet700,
+  secondaryPressed: colorPalette.violet600,
+  border: "rgba(29,43,68,0.14)",
+  borderStrong: "rgba(21,152,190,0.42)",
+  success: colorPalette.lime700,
+  danger: colorPalette.red700,
+  dangerStrong: colorPalette.red700,
+  warning: colorPalette.orange700,
+  info: colorPalette.cyan700,
 } as const;
 
 /**
  * Default export — kept as `semanticColors` for backwards compatibility
  * with consumers that read static colours outside the Tamagui theme
- * resolver. Points to the dark variant to preserve historical visuals.
+ * resolver. Points to light because light is now the default app mode.
  */
-export const semanticColors = darkSemanticColors;
+export const semanticColors = lightSemanticColors;
 
 export const semanticTypography = {
   display: fontSizes["4xl"],
@@ -69,10 +81,11 @@ export const semanticSpacing = {
 } as const;
 
 export const semanticRadii = {
+  xs: radii.xs,
   sm: radii.sm,
   md: radii.md,
-  lg: 16,
-  xl: 20,
+  lg: radii.lg,
+  xl: radii.xl,
   pill: 999,
 } as const;
 

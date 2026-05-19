@@ -84,9 +84,17 @@ const tokens = createTokens({
     textSecondaryDark: darkSemanticColors.mutedForeground,
     textMutedDark: darkSemanticColors.subduedForeground,
     borderMutedDark: darkSemanticColors.border,
+    borderStrongDark: darkSemanticColors.borderStrong,
+    brandPrimaryDark: darkSemanticColors.primary,
+    brandPrimaryPressedDark: darkSemanticColors.primaryPressed,
+    brandPrimaryForegroundDark: darkSemanticColors.primaryForeground,
+    brandSecondaryDark: darkSemanticColors.secondary,
+    brandSecondaryPressedDark: darkSemanticColors.secondaryPressed,
     successDark: darkSemanticColors.success,
     dangerDark: darkSemanticColors.danger,
     dangerStrongDark: darkSemanticColors.dangerStrong,
+    warningDark: darkSemanticColors.warning,
+    infoDark: darkSemanticColors.info,
     // light
     surfaceBaseLight: lightSemanticColors.background,
     surfaceCardLight: lightSemanticColors.surface,
@@ -95,13 +103,17 @@ const tokens = createTokens({
     textSecondaryLight: lightSemanticColors.mutedForeground,
     textMutedLight: lightSemanticColors.subduedForeground,
     borderMutedLight: lightSemanticColors.border,
+    borderStrongLight: lightSemanticColors.borderStrong,
+    brandPrimaryLight: lightSemanticColors.primary,
+    brandPrimaryPressedLight: lightSemanticColors.primaryPressed,
+    brandPrimaryForegroundLight: lightSemanticColors.primaryForeground,
+    brandSecondaryLight: lightSemanticColors.secondary,
+    brandSecondaryPressedLight: lightSemanticColors.secondaryPressed,
     successLight: lightSemanticColors.success,
     dangerLight: lightSemanticColors.danger,
     dangerStrongLight: lightSemanticColors.dangerStrong,
-    // brand (shared across modes)
-    brandPrimary: darkSemanticColors.primary,
-    brandSecondary: darkSemanticColors.secondary,
-    brandHighlight: darkSemanticColors.mutedForeground,
+    warningLight: lightSemanticColors.warning,
+    infoLight: lightSemanticColors.info,
   },
   space: {
     0: 0,
@@ -152,41 +164,48 @@ const buildModeTheme = (mode: "dark" | "light") => {
     colorPress: `$textPrimary${suffix}`,
     colorFocus: `$textPrimary${suffix}`,
     borderColor: `$borderMuted${suffix}`,
-    borderColorHover: "$brandSecondary",
-    borderColorFocus: "$brandSecondary",
-    borderColorPress: "$brandPrimary",
+    borderColorHover: `$borderStrong${suffix}`,
+    borderColorFocus: `$borderStrong${suffix}`,
+    borderColorPress: `$brandPrimary${suffix}`,
     placeholderColor: `$textMuted${suffix}`,
-    outlineColor: "$brandPrimary",
-    primary: "$brandPrimary",
-    secondary: "$brandSecondary",
-    accentColor: "$brandHighlight",
+    outlineColor: `$brandPrimary${suffix}`,
+    primary: `$brandPrimary${suffix}`,
+    primaryPressed: `$brandPrimaryPressed${suffix}`,
+    actionPrimaryForeground: `$brandPrimaryForeground${suffix}`,
+    secondary: `$brandSecondary${suffix}`,
+    secondaryPressed: `$brandSecondaryPressed${suffix}`,
+    accentColor: `$brandPrimary${suffix}`,
     surfaceCard: `$surfaceCard${suffix}`,
     surfaceRaised: `$surfaceRaised${suffix}`,
     muted: `$textMuted${suffix}`,
     success: `$success${suffix}`,
     danger: `$danger${suffix}`,
     dangerStrong: `$dangerStrong${suffix}`,
+    warning: `$warning${suffix}`,
+    info: `$info${suffix}`,
   } as const;
 };
 
-const themes = {
-  // Default theme: dark, preserves historical visuals when nothing else
-  // resolves a preference.
-  auraxis: buildModeTheme("dark"),
-  auraxis_dark: buildModeTheme("dark"),
-  auraxis_light: buildModeTheme("light"),
+const auraxisLightTheme = buildModeTheme("light");
+const auraxisDarkTheme = buildModeTheme("dark");
+
+export const auraxisThemes = {
+  auraxis: auraxisLightTheme,
+  auraxis_dark: auraxisDarkTheme,
+  auraxis_light: auraxisLightTheme,
 } as const;
 
-export type AuraxisThemeName = keyof typeof themes;
+export type AuraxisThemeName = keyof typeof auraxisThemes;
+export const auraxisDefaultTheme = "auraxis_light" satisfies AuraxisThemeName;
 
 export const tamaguiConfig = createTamagui({
   tokens,
-  themes,
+  themes: auraxisThemes,
   fonts: {
     body: bodyFont,
     heading: headingFont,
   },
-  defaultTheme: "auraxis_dark",
+  defaultTheme: auraxisDefaultTheme,
   settings: {
     shouldAddPrefersColorThemes: false,
     allowedStyleValues: "somewhat-strict-web",

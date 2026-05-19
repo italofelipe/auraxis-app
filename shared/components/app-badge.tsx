@@ -28,7 +28,7 @@ export function AppBadge({
 }: AppBadgeProps): ReactElement {
   const toneProps =
     tone === "primary"
-      ? { backgroundColor: "$secondary", color: "$background" }
+      ? { backgroundColor: "$primary", color: "$actionPrimaryForeground" }
       : tone === "danger"
         ? { backgroundColor: "$danger", color: "$color" }
         : undefined;

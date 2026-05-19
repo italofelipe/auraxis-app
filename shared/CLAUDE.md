@@ -55,8 +55,8 @@ Skeletons existentes cobrem: Dashboard, Transactions, Goals, Portfolio, Wallet.
 ## Tema (`shared/theme/`)
 
 Tokens de design (base em `config/tamagui-theme.ts`):
-- `colors` — paleta completa e tokens semânticos
-- `typography` — tamanhos, pesos, line-heights (Playfair Display + Raleway)
+- `colors` — paleta DS v3 Market Pulse e tokens semânticos light/dark
+- `typography` — tamanhos, pesos, line-heights; fontes nativas atuais ficam em `config/design-tokens.ts`
 - `spacing` — escala de espaçamento (base 8px: 4, 8, 12, 16, 24, 32, 48...)
 - `borderRadius` — raios canônicos
 
