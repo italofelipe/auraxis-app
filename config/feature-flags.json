@@ -79,6 +79,16 @@
       "status": "enabled-dev",
       "description": "Controla o fluxo mobile installments_v1 para selecionar cartao de credito e parcelar transacoes.",
       "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
+    },
+    {
+      "key": "app.credit-cards.hub",
+      "owner": "platform",
+      "createdAt": "2026-05-19",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-prod",
+      "description": "Controla o hub mobile de cartoes com fatura, utilizacao e metadados estendidos.",
+      "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
     }
   ]
 }

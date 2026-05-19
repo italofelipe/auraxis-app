@@ -1,0 +1,2796 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CreditCardCard mantem snapshot de utilizacao em 0% 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "$surfaceCardLight",
+      "borderBottomColor": "$borderMutedLight",
+      "borderBottomLeftRadius": 14,
+      "borderBottomRightRadius": 14,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "$borderMutedLight",
+      "borderLeftWidth": 1,
+      "borderRightColor": "$borderMutedLight",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "$borderMutedLight",
+      "borderTopLeftRadius": 14,
+      "borderTopRightRadius": 14,
+      "borderTopWidth": 1,
+      "flexDirection": "column",
+      "gap": 8,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+    }
+  }
+  testID="credit-card-card-card-1"
+>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+        "gap": 12,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "gap": 12,
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "flex": 1,
+            "flexDirection": "column",
+            "gap": 4,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "PlayfairDisplay_600SemiBold",
+              "fontSize": 20,
+              "lineHeight": 28,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank Ultravioleta
+        </Text>
+        <Text
+          style={
+            {
+              "color": "$textMutedLight",
+              "fontFamily": "Raleway_400Regular",
+              "fontSize": 14,
+              "lineHeight": 20,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank
+        </Text>
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textPrimaryLight",
+            "fontFamily": "PlayfairDisplay_600SemiBold",
+            "fontSize": 16,
+            "lineHeight": 24,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        R$ 5.000,00
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$brandPrimaryForegroundLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Mastercard
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Final 
+        1234
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Validade 
+        12/2029
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "flexDirection": "column",
+            "height": 8,
+            "overflow": "hidden",
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "backgroundColor": "$successLight",
+              "borderBottomLeftRadius": 28,
+              "borderBottomRightRadius": 28,
+              "borderTopLeftRadius": 28,
+              "borderTopRightRadius": 28,
+              "flexDirection": "column",
+              "height": 8,
+              "width": "0%",
+            }
+          }
+        />
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textMutedLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 14,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Utilizado: 0% · R$ 0,00 / R$ 5.000,00
+      </Text>
+    </View>
+    <RCTScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+    >
+      <View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Cashback 1%
+          </Text>
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Sala VIP
+          </Text>
+        </View>
+      </View>
+    </RCTScrollView>
+    <Text
+      style={
+        {
+          "color": "$textMutedLight",
+          "fontFamily": "Raleway_400Regular",
+          "fontSize": 14,
+          "lineHeight": 20,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Cartao principal das despesas mensais
+    </Text>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        accessibilityLabel="Ver fatura"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "transparent",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "transparent",
+            "borderLeftWidth": 1,
+            "borderRightColor": "transparent",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "transparent",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$brandPrimaryForegroundLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Ver fatura
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Editar"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Editar
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Excluir"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Excluir
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`CreditCardCard mantem snapshot de utilizacao em 50% 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "$surfaceCardLight",
+      "borderBottomColor": "$borderMutedLight",
+      "borderBottomLeftRadius": 14,
+      "borderBottomRightRadius": 14,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "$borderMutedLight",
+      "borderLeftWidth": 1,
+      "borderRightColor": "$borderMutedLight",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "$borderMutedLight",
+      "borderTopLeftRadius": 14,
+      "borderTopRightRadius": 14,
+      "borderTopWidth": 1,
+      "flexDirection": "column",
+      "gap": 8,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+    }
+  }
+  testID="credit-card-card-card-1"
+>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+        "gap": 12,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "gap": 12,
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "flex": 1,
+            "flexDirection": "column",
+            "gap": 4,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "PlayfairDisplay_600SemiBold",
+              "fontSize": 20,
+              "lineHeight": 28,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank Ultravioleta
+        </Text>
+        <Text
+          style={
+            {
+              "color": "$textMutedLight",
+              "fontFamily": "Raleway_400Regular",
+              "fontSize": 14,
+              "lineHeight": 20,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank
+        </Text>
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textPrimaryLight",
+            "fontFamily": "PlayfairDisplay_600SemiBold",
+            "fontSize": 16,
+            "lineHeight": 24,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        R$ 5.000,00
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$brandPrimaryForegroundLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Mastercard
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Final 
+        1234
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Validade 
+        12/2029
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "flexDirection": "column",
+            "height": 8,
+            "overflow": "hidden",
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "backgroundColor": "$successLight",
+              "borderBottomLeftRadius": 28,
+              "borderBottomRightRadius": 28,
+              "borderTopLeftRadius": 28,
+              "borderTopRightRadius": 28,
+              "flexDirection": "column",
+              "height": 8,
+              "width": "50%",
+            }
+          }
+        />
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textMutedLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 14,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Utilizado: 50% · R$ 2.500,00 / R$ 5.000,00
+      </Text>
+    </View>
+    <RCTScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+    >
+      <View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Cashback 1%
+          </Text>
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Sala VIP
+          </Text>
+        </View>
+      </View>
+    </RCTScrollView>
+    <Text
+      style={
+        {
+          "color": "$textMutedLight",
+          "fontFamily": "Raleway_400Regular",
+          "fontSize": 14,
+          "lineHeight": 20,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Cartao principal das despesas mensais
+    </Text>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        accessibilityLabel="Ver fatura"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "transparent",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "transparent",
+            "borderLeftWidth": 1,
+            "borderRightColor": "transparent",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "transparent",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$brandPrimaryForegroundLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Ver fatura
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Editar"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Editar
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Excluir"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Excluir
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`CreditCardCard mantem snapshot de utilizacao em 80% 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "$surfaceCardLight",
+      "borderBottomColor": "$borderMutedLight",
+      "borderBottomLeftRadius": 14,
+      "borderBottomRightRadius": 14,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "$borderMutedLight",
+      "borderLeftWidth": 1,
+      "borderRightColor": "$borderMutedLight",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "$borderMutedLight",
+      "borderTopLeftRadius": 14,
+      "borderTopRightRadius": 14,
+      "borderTopWidth": 1,
+      "flexDirection": "column",
+      "gap": 8,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+    }
+  }
+  testID="credit-card-card-card-1"
+>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+        "gap": 12,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "gap": 12,
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "flex": 1,
+            "flexDirection": "column",
+            "gap": 4,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "PlayfairDisplay_600SemiBold",
+              "fontSize": 20,
+              "lineHeight": 28,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank Ultravioleta
+        </Text>
+        <Text
+          style={
+            {
+              "color": "$textMutedLight",
+              "fontFamily": "Raleway_400Regular",
+              "fontSize": 14,
+              "lineHeight": 20,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank
+        </Text>
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textPrimaryLight",
+            "fontFamily": "PlayfairDisplay_600SemiBold",
+            "fontSize": 16,
+            "lineHeight": 24,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        R$ 5.000,00
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$brandPrimaryForegroundLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Mastercard
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Final 
+        1234
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Validade 
+        12/2029
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "flexDirection": "column",
+            "height": 8,
+            "overflow": "hidden",
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "backgroundColor": "$dangerLight",
+              "borderBottomLeftRadius": 28,
+              "borderBottomRightRadius": 28,
+              "borderTopLeftRadius": 28,
+              "borderTopRightRadius": 28,
+              "flexDirection": "column",
+              "height": 8,
+              "width": "80%",
+            }
+          }
+        />
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textMutedLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 14,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Utilizado: 80% · R$ 4.000,00 / R$ 5.000,00
+      </Text>
+    </View>
+    <RCTScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+    >
+      <View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Cashback 1%
+          </Text>
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Sala VIP
+          </Text>
+        </View>
+      </View>
+    </RCTScrollView>
+    <Text
+      style={
+        {
+          "color": "$textMutedLight",
+          "fontFamily": "Raleway_400Regular",
+          "fontSize": 14,
+          "lineHeight": 20,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Cartao principal das despesas mensais
+    </Text>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        accessibilityLabel="Ver fatura"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "transparent",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "transparent",
+            "borderLeftWidth": 1,
+            "borderRightColor": "transparent",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "transparent",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$brandPrimaryForegroundLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Ver fatura
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Editar"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Editar
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Excluir"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Excluir
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`CreditCardCard mantem snapshot de utilizacao em 100% 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "$surfaceCardLight",
+      "borderBottomColor": "$borderMutedLight",
+      "borderBottomLeftRadius": 14,
+      "borderBottomRightRadius": 14,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "$borderMutedLight",
+      "borderLeftWidth": 1,
+      "borderRightColor": "$borderMutedLight",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "$borderMutedLight",
+      "borderTopLeftRadius": 14,
+      "borderTopRightRadius": 14,
+      "borderTopWidth": 1,
+      "flexDirection": "column",
+      "gap": 8,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+    }
+  }
+  testID="credit-card-card-card-1"
+>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+        "gap": 12,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "gap": 12,
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "flex": 1,
+            "flexDirection": "column",
+            "gap": 4,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "PlayfairDisplay_600SemiBold",
+              "fontSize": 20,
+              "lineHeight": 28,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank Ultravioleta
+        </Text>
+        <Text
+          style={
+            {
+              "color": "$textMutedLight",
+              "fontFamily": "Raleway_400Regular",
+              "fontSize": 14,
+              "lineHeight": 20,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank
+        </Text>
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textPrimaryLight",
+            "fontFamily": "PlayfairDisplay_600SemiBold",
+            "fontSize": 16,
+            "lineHeight": 24,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        R$ 5.000,00
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$brandPrimaryForegroundLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Mastercard
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Final 
+        1234
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Validade 
+        12/2029
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "flexDirection": "column",
+            "height": 8,
+            "overflow": "hidden",
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "backgroundColor": "$dangerLight",
+              "borderBottomLeftRadius": 28,
+              "borderBottomRightRadius": 28,
+              "borderTopLeftRadius": 28,
+              "borderTopRightRadius": 28,
+              "flexDirection": "column",
+              "height": 8,
+              "width": "100%",
+            }
+          }
+        />
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textMutedLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 14,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Utilizado: 100% · R$ 5.000,00 / R$ 5.000,00
+      </Text>
+    </View>
+    <RCTScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+    >
+      <View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Cashback 1%
+          </Text>
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Sala VIP
+          </Text>
+        </View>
+      </View>
+    </RCTScrollView>
+    <Text
+      style={
+        {
+          "color": "$textMutedLight",
+          "fontFamily": "Raleway_400Regular",
+          "fontSize": 14,
+          "lineHeight": 20,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Cartao principal das despesas mensais
+    </Text>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        accessibilityLabel="Ver fatura"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "transparent",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "transparent",
+            "borderLeftWidth": 1,
+            "borderRightColor": "transparent",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "transparent",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$brandPrimaryForegroundLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Ver fatura
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Editar"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Editar
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Excluir"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Excluir
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;
+
+exports[`CreditCardCard mantem snapshot de utilizacao em 125% 1`] = `
+<View
+  style={
+    {
+      "backgroundColor": "$surfaceCardLight",
+      "borderBottomColor": "$borderMutedLight",
+      "borderBottomLeftRadius": 14,
+      "borderBottomRightRadius": 14,
+      "borderBottomWidth": 1,
+      "borderLeftColor": "$borderMutedLight",
+      "borderLeftWidth": 1,
+      "borderRightColor": "$borderMutedLight",
+      "borderRightWidth": 1,
+      "borderStyle": "solid",
+      "borderTopColor": "$borderMutedLight",
+      "borderTopLeftRadius": 14,
+      "borderTopRightRadius": 14,
+      "borderTopWidth": 1,
+      "flexDirection": "column",
+      "gap": 8,
+      "paddingBottom": 16,
+      "paddingLeft": 16,
+      "paddingRight": 16,
+      "paddingTop": 16,
+    }
+  }
+  testID="credit-card-card-card-1"
+>
+  <View
+    style={
+      {
+        "flexDirection": "column",
+        "gap": 12,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "alignItems": "flex-start",
+          "flexDirection": "row",
+          "gap": 12,
+          "justifyContent": "space-between",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "flex": 1,
+            "flexDirection": "column",
+            "gap": 4,
+          }
+        }
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "PlayfairDisplay_600SemiBold",
+              "fontSize": 20,
+              "lineHeight": 28,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank Ultravioleta
+        </Text>
+        <Text
+          style={
+            {
+              "color": "$textMutedLight",
+              "fontFamily": "Raleway_400Regular",
+              "fontSize": 14,
+              "lineHeight": 20,
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Nubank
+        </Text>
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textPrimaryLight",
+            "fontFamily": "PlayfairDisplay_600SemiBold",
+            "fontSize": 16,
+            "lineHeight": 24,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        R$ 5.000,00
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$brandPrimaryForegroundLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Mastercard
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Final 
+        1234
+      </Text>
+      <Text
+        style={
+          {
+            "alignSelf": "flex-start",
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomColor": "$borderMutedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$borderMutedLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$borderMutedLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$borderMutedLight",
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "borderTopWidth": 1,
+            "color": "$textPrimaryLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 13,
+            "lineHeight": 18,
+            "paddingBottom": 4,
+            "paddingLeft": 8,
+            "paddingRight": 8,
+            "paddingTop": 4,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Validade 
+        12/2029
+      </Text>
+    </View>
+    <View
+      style={
+        {
+          "flexDirection": "column",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "$surfaceRaisedLight",
+            "borderBottomLeftRadius": 28,
+            "borderBottomRightRadius": 28,
+            "borderTopLeftRadius": 28,
+            "borderTopRightRadius": 28,
+            "flexDirection": "column",
+            "height": 8,
+            "overflow": "hidden",
+            "width": "100%",
+          }
+        }
+      >
+        <View
+          style={
+            {
+              "backgroundColor": "$dangerLight",
+              "borderBottomLeftRadius": 28,
+              "borderBottomRightRadius": 28,
+              "borderTopLeftRadius": 28,
+              "borderTopRightRadius": 28,
+              "flexDirection": "column",
+              "height": 8,
+              "width": "100%",
+            }
+          }
+        />
+      </View>
+      <Text
+        style={
+          {
+            "color": "$textMutedLight",
+            "fontFamily": "Raleway_400Regular",
+            "fontSize": 14,
+            "lineHeight": 20,
+          }
+        }
+        suppressHighlighting={true}
+      >
+        Utilizado: 125% · R$ 6.250,00 / R$ 5.000,00
+      </Text>
+    </View>
+    <RCTScrollView
+      horizontal={true}
+      showsHorizontalScrollIndicator={false}
+    >
+      <View>
+        <View
+          style={
+            {
+              "flexDirection": "row",
+              "gap": 8,
+              "paddingRight": 8,
+            }
+          }
+        >
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Cashback 1%
+          </Text>
+          <Text
+            style={
+              {
+                "alignSelf": "flex-start",
+                "backgroundColor": "$surfaceRaisedLight",
+                "borderBottomColor": "$borderMutedLight",
+                "borderBottomLeftRadius": 28,
+                "borderBottomRightRadius": 28,
+                "borderBottomWidth": 1,
+                "borderLeftColor": "$borderMutedLight",
+                "borderLeftWidth": 1,
+                "borderRightColor": "$borderMutedLight",
+                "borderRightWidth": 1,
+                "borderStyle": "solid",
+                "borderTopColor": "$borderMutedLight",
+                "borderTopLeftRadius": 28,
+                "borderTopRightRadius": 28,
+                "borderTopWidth": 1,
+                "color": "$textPrimaryLight",
+                "fontFamily": "Raleway_400Regular",
+                "fontSize": 13,
+                "lineHeight": 18,
+                "paddingBottom": 4,
+                "paddingLeft": 8,
+                "paddingRight": 8,
+                "paddingTop": 4,
+              }
+            }
+            suppressHighlighting={true}
+          >
+            Sala VIP
+          </Text>
+        </View>
+      </View>
+    </RCTScrollView>
+    <Text
+      style={
+        {
+          "color": "$textMutedLight",
+          "fontFamily": "Raleway_400Regular",
+          "fontSize": 14,
+          "lineHeight": 20,
+        }
+      }
+      suppressHighlighting={true}
+    >
+      Cartao principal das despesas mensais
+    </Text>
+    <View
+      style={
+        {
+          "flexDirection": "row",
+          "flexWrap": "wrap",
+          "gap": 8,
+        }
+      }
+    >
+      <View
+        accessibilityLabel="Ver fatura"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "$brandPrimaryLight",
+            "borderBottomColor": "transparent",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "transparent",
+            "borderLeftWidth": 1,
+            "borderRightColor": "transparent",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "transparent",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$brandPrimaryForegroundLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Ver fatura
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Editar"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Editar
+        </Text>
+      </View>
+      <View
+        accessibilityLabel="Excluir"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Excluir
+        </Text>
+      </View>
+    </View>
+  </View>
+</View>
+`;

@@ -101,6 +101,10 @@ export const queryKeys = {
   creditCards: {
     root: ["credit-cards"] as const,
     list: () => ["credit-cards", "list"] as const,
+    bill: (creditCardId: string, month: string) =>
+      ["credit-cards", "bill", creditCardId, month] as const,
+    utilization: (creditCardId: string) =>
+      ["credit-cards", "utilization", creditCardId] as const,
   },
   budgets: {
     root: ["budgets"] as const,

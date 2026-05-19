@@ -140,7 +140,10 @@ import type {
 import type {
   CreateCreditCardCommand,
   CreditCard,
+  CreditCardBillQuery,
+  CreditCardBillRecord,
   CreditCardListResponse,
+  CreditCardUtilizationRecord,
   UpdateCreditCardCommand,
 } from "@/features/credit-cards/contracts";
 import type {
@@ -1173,6 +1176,27 @@ export const apiContractMap = {
   >({
     method: "DELETE",
     path: "/credit-cards/{credit_card_id}",
+    authRequired: true,
+  }),
+  creditCardBill: defineApiContract<
+    "GET",
+    "/credit-cards/{credit_card_id}/bill",
+    never,
+    CreditCardBillRecord,
+    CreditCardBillQuery
+  >({
+    method: "GET",
+    path: "/credit-cards/{credit_card_id}/bill",
+    authRequired: true,
+  }),
+  creditCardUtilization: defineApiContract<
+    "GET",
+    "/credit-cards/{credit_card_id}/utilization",
+    never,
+    CreditCardUtilizationRecord
+  >({
+    method: "GET",
+    path: "/credit-cards/{credit_card_id}/utilization",
     authRequired: true,
   }),
   budgetsList: defineApiContract<"GET", "/budgets", never, readonly Budget[]>({
