@@ -150,6 +150,8 @@ export const apiEndpointCatalog = {
     "POST /credit-cards",
     "PUT /credit-cards/{credit_card_id}",
     "DELETE /credit-cards/{credit_card_id}",
+    "GET /credit-cards/{credit_card_id}/bill",
+    "GET /credit-cards/{credit_card_id}/utilization",
   ],
   budgets: [
     "GET /budgets",

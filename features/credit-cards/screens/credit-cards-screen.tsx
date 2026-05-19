@@ -1,22 +1,24 @@
 import type { ReactElement } from "react";
 
-import { Paragraph, XStack, YStack } from "tamagui";
+import { useRouter } from "expo-router";
+import { YStack } from "tamagui";
 
+import { buildCreditCardBillPath } from "@/core/navigation/routes";
+import { CreditCardCard } from "@/features/credit-cards/components/credit-card-card";
 import { CreditCardForm } from "@/features/credit-cards/components/credit-card-form";
-import type { CreditCard } from "@/features/credit-cards/contracts";
 import {
   useCreditCardsScreenController,
   type CreditCardsScreenController,
 } from "@/features/credit-cards/hooks/use-credit-cards-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
-import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
+import { AppSectionHeader } from "@/shared/components/app-section-header";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
-import { formatCurrency } from "@/shared/utils/formatters";
 
 export function CreditCardsScreen(): ReactElement {
   const controller = useCreditCardsScreenController();
+  const router = useRouter();
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -40,7 +42,12 @@ export function CreditCardsScreen(): ReactElement {
   return (
     <AppScreen>
       <SummaryCard controller={controller} />
-      <CreditCardsListCard controller={controller} />
+      <CreditCardsListSection
+        controller={controller}
+        onViewBill={(creditCardId) => {
+          router.push(buildCreditCardBillPath(creditCardId));
+        }}
+      />
     </AppScreen>
   );
 }
@@ -62,12 +69,20 @@ function SummaryCard({ controller }: ControllerProps): ReactElement {
   );
 }
 
-function CreditCardsListCard({ controller }: ControllerProps): ReactElement {
+interface CreditCardsListSectionProps extends ControllerProps {
+  readonly onViewBill: (creditCardId: string) => void;
+}
+
+function CreditCardsListSection({
+  controller,
+  onViewBill,
+}: CreditCardsListSectionProps): ReactElement {
   return (
-    <AppSurfaceCard
-      title="Lista de cartoes"
-      description="Cartoes registrados para o usuario."
-    >
+    <YStack gap="$3">
+      <AppSectionHeader
+        title="Lista de cartoes"
+        description="Cartoes registrados para o usuario."
+      />
       <AppQueryState
         query={controller.creditCardsQuery}
         options={{
@@ -89,7 +104,7 @@ function CreditCardsListCard({ controller }: ControllerProps): ReactElement {
         {() => (
           <YStack gap="$3">
             {controller.creditCards.map((creditCard) => (
-              <CreditCardRow
+              <CreditCardCard
                 key={creditCard.id}
                 creditCard={creditCard}
                 isDeleting={controller.deletingCreditCardId === creditCard.id}
@@ -97,56 +112,12 @@ function CreditCardsListCard({ controller }: ControllerProps): ReactElement {
                 onDelete={() => {
                   void controller.handleDelete(creditCard.id);
                 }}
+                onViewBill={() => onViewBill(creditCard.id)}
               />
             ))}
           </YStack>
         )}
       </AppQueryState>
-    </AppSurfaceCard>
-  );
-}
-
-interface CreditCardRowProps {
-  readonly creditCard: CreditCard;
-  readonly isDeleting: boolean;
-  readonly onEdit: () => void;
-  readonly onDelete: () => void;
-}
-
-function CreditCardRow({
-  creditCard,
-  isDeleting,
-  onEdit,
-  onDelete,
-}: CreditCardRowProps): ReactElement {
-  const last = creditCard.lastFourDigits ? ` · ****${creditCard.lastFourDigits}` : "";
-  return (
-    <YStack gap="$2">
-      <AppKeyValueRow
-        label={`${creditCard.name}${last}`}
-        value={
-          <YStack alignItems="flex-end" gap="$1">
-            {creditCard.limitAmount !== null ? (
-              <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-                {formatCurrency(creditCard.limitAmount)}
-              </Paragraph>
-            ) : null}
-            {creditCard.brand ? (
-              <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-                {creditCard.brand}
-              </Paragraph>
-            ) : null}
-          </YStack>
-        }
-      />
-      <XStack gap="$2" flexWrap="wrap">
-        <AppButton tone="secondary" onPress={onEdit} disabled={isDeleting}>
-          Editar
-        </AppButton>
-        <AppButton tone="secondary" onPress={onDelete} disabled={isDeleting}>
-          {isDeleting ? "Excluindo..." : "Excluir"}
-        </AppButton>
-      </XStack>
     </YStack>
   );
 }

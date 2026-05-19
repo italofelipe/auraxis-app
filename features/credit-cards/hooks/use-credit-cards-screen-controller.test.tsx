@@ -37,6 +37,12 @@ const buildCard = (override: Record<string, unknown> = {}) => ({
   closingDay: null,
   dueDay: null,
   lastFourDigits: null,
+  bank: null,
+  description: null,
+  benefits: [],
+  validityDate: null,
+  createdAt: null,
+  updatedAt: null,
   ...override,
 });
 

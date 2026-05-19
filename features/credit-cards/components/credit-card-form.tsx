@@ -36,6 +36,10 @@ const EMPTY_DEFAULTS: CreateCreditCardFormValues = {
   closingDay: null,
   dueDay: null,
   lastFourDigits: null,
+  bank: null,
+  description: null,
+  benefits: null,
+  validityDate: null,
 };
 
 const buildDefaults = (initial: CreditCard | null): CreateCreditCardFormValues => {
@@ -49,6 +53,10 @@ const buildDefaults = (initial: CreditCard | null): CreateCreditCardFormValues =
     closingDay: initial.closingDay,
     dueDay: initial.dueDay,
     lastFourDigits: initial.lastFourDigits,
+    bank: initial.bank,
+    description: initial.description,
+    benefits: [...initial.benefits],
+    validityDate: initial.validityDate,
   };
 };
 
@@ -74,6 +82,23 @@ const parseInteger = (value: string): number | null => {
   }
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : null;
+};
+
+const parseOptionalText = (value: string): string | null => {
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+};
+
+const parseBenefits = (value: string): string[] | null => {
+  const benefits = value
+    .split(/[,;\n]/u)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+  return benefits.length > 0 ? benefits : null;
+};
+
+const formatBenefits = (value: readonly string[] | null | undefined): string => {
+  return value?.join(", ") ?? "";
 };
 
 export interface CreditCardFormProps {
@@ -177,6 +202,7 @@ function CreditCardFields({
   return (
     <YStack gap="$4">
       <NameField control={control} errors={errors} />
+      <BankField control={control} errors={errors} />
       <LimitField control={control} errors={errors} />
       <DayField
         control={control}
@@ -195,6 +221,9 @@ function CreditCardFields({
         placeholder="20"
       />
       <LastFourDigitsField control={control} errors={errors} />
+      <ValidityDateField control={control} errors={errors} />
+      <BenefitsField control={control} errors={errors} />
+      <DescriptionField control={control} errors={errors} />
     </YStack>
   );
 }
@@ -213,6 +242,26 @@ function NameField({ control, errors }: CreditCardFieldsProps): ReactElement {
           onBlur={onBlur}
           onChangeText={onChange}
           errorText={errors.name?.message}
+        />
+      )}
+    />
+  );
+}
+
+function BankField({ control, errors }: CreditCardFieldsProps): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="bank"
+      render={({ field: { onChange, onBlur, value } }) => (
+        <AppInputField
+          id="cc-bank"
+          label="Banco"
+          placeholder="Nubank"
+          value={value ?? ""}
+          onBlur={onBlur}
+          onChangeText={(text) => onChange(parseOptionalText(text))}
+          errorText={errors.bank?.message}
         />
       )}
     />
@@ -293,6 +342,74 @@ function LastFourDigitsField({
           onBlur={onBlur}
           onChangeText={(text) => onChange(text.length > 0 ? text : null)}
           errorText={errors.lastFourDigits?.message}
+        />
+      )}
+    />
+  );
+}
+
+function ValidityDateField({
+  control,
+  errors,
+}: CreditCardFieldsProps): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="validityDate"
+      render={({ field: { onChange, onBlur, value } }) => (
+        <AppInputField
+          id="cc-validity-date"
+          label="Validade"
+          placeholder="2029-12-01"
+          keyboardType="numbers-and-punctuation"
+          value={value ?? ""}
+          onBlur={onBlur}
+          onChangeText={(text) => onChange(parseOptionalText(text))}
+          errorText={errors.validityDate?.message}
+        />
+      )}
+    />
+  );
+}
+
+function BenefitsField({ control, errors }: CreditCardFieldsProps): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="benefits"
+      render={({ field: { onChange, onBlur, value } }) => (
+        <AppInputField
+          id="cc-benefits"
+          label="Beneficios"
+          placeholder="Cashback 1%, Sala VIP"
+          helperText="Separe os beneficios por virgula."
+          value={formatBenefits(value)}
+          onBlur={onBlur}
+          onChangeText={(text) => onChange(parseBenefits(text))}
+          errorText={errors.benefits?.message}
+        />
+      )}
+    />
+  );
+}
+
+function DescriptionField({
+  control,
+  errors,
+}: CreditCardFieldsProps): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="description"
+      render={({ field: { onChange, onBlur, value } }) => (
+        <AppInputField
+          id="cc-description"
+          label="Descricao"
+          placeholder="Cartao principal das despesas mensais"
+          value={value ?? ""}
+          onBlur={onBlur}
+          onChangeText={(text) => onChange(parseOptionalText(text))}
+          errorText={errors.description?.message}
         />
       )}
     />

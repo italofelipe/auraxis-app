@@ -39,6 +39,8 @@
     "POST /credit-cards",
     "PUT /credit-cards/{credit_card_id}",
     "DELETE /credit-cards/{credit_card_id}",
+    "GET /credit-cards/{credit_card_id}/bill",
+    "GET /credit-cards/{credit_card_id}/utilization",
     "GET /v1/insights/latest",
     "POST /v1/insights/{insight_id}/read",
     "POST /v2/import/detect",

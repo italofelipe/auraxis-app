@@ -1,5 +1,6 @@
 import {
   appRoutes,
+  buildCreditCardBillPath,
   buildGoalScenarioPath,
   buildTickerDetailPath,
 } from "@/core/navigation/routes";
@@ -16,6 +17,13 @@ describe("app routes", () => {
     expect(buildTickerDetailPath(" petr4 ")).toEqual({
       pathname: "/carteira/[ticker]",
       params: { ticker: "PETR4" },
+    });
+  });
+
+  it("builds a typed credit-card bill route object", () => {
+    expect(buildCreditCardBillPath("card-1")).toEqual({
+      pathname: "/cartoes/[id]/fatura",
+      params: { id: "card-1" },
     });
   });
 

@@ -17,9 +17,9 @@ describe("createCreditCardSchema", () => {
     ).toThrow();
   });
 
-  it("rejeita closingDay fora de 1-31", () => {
+  it("rejeita closingDay fora de 1-28", () => {
     expect(() =>
-      createCreditCardSchema.parse({ ...baseValid, closingDay: 32 }),
+      createCreditCardSchema.parse({ ...baseValid, closingDay: 29 }),
     ).toThrow();
   });
 
@@ -33,5 +33,47 @@ describe("createCreditCardSchema", () => {
     expect(() =>
       createCreditCardSchema.parse({ ...baseValid, limitAmount: 5000 }),
     ).not.toThrow();
+  });
+
+  it("aceita metadados estendidos do cartao", () => {
+    expect(() =>
+      createCreditCardSchema.parse({
+        ...baseValid,
+        bank: "Nubank",
+        description: "Cartao principal",
+        benefits: ["Cashback 1%", "Sala VIP"],
+        validityDate: "2029-12-01",
+      }),
+    ).not.toThrow();
+  });
+
+  it("rejeita benefits acima do limite", () => {
+    expect(() =>
+      createCreditCardSchema.parse({
+        ...baseValid,
+        benefits: Array.from({ length: 13 }, (_, index) => `benefit-${index}`),
+      }),
+    ).toThrow();
+  });
+
+  it("rejeita benefit acima de 120 caracteres", () => {
+    expect(() =>
+      createCreditCardSchema.parse({
+        ...baseValid,
+        benefits: ["x".repeat(121)],
+      }),
+    ).toThrow();
+  });
+
+  it("rejeita validityDate fora de ISO YYYY-MM-DD", () => {
+    expect(() =>
+      createCreditCardSchema.parse({ ...baseValid, validityDate: "12/2029" }),
+    ).toThrow();
+  });
+
+  it("rejeita validityDate inexistente", () => {
+    expect(() =>
+      createCreditCardSchema.parse({ ...baseValid, validityDate: "2029-02-31" }),
+    ).toThrow();
   });
 });

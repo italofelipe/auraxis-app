@@ -76,6 +76,16 @@ export const buildTickerDetailPath = (ticker: string): Href => ({
   params: { ticker: ticker.trim().toUpperCase() },
 });
 
+/**
+ * Builds the dynamic bill route for a credit card.
+ * @param creditCardId Credit card id from the card list.
+ * @returns Expo Router-compatible path under /cartoes.
+ */
+export const buildCreditCardBillPath = (creditCardId: string): Href => ({
+  pathname: "/cartoes/[id]/fatura",
+  params: { id: creditCardId },
+});
+
 export type PublicAppRoute =
   (typeof appRoutes.public)[keyof typeof appRoutes.public];
 export type PrivateAppRoute =
