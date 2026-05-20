@@ -13,6 +13,7 @@ export type AppEmptyStateIllustration =
   | "wallet"
   | "alerts"
   | "budgets"
+  | "insights"
   | "fiscal"
   | "shared"
   | "simulations"
@@ -27,6 +28,7 @@ const ICON_BY_ILLUSTRATION: Record<
   wallet: "chart-line",
   alerts: "bell-outline",
   budgets: "piggy-bank-outline",
+  insights: "lightbulb-on-outline",
   fiscal: "file-document-outline",
   shared: "account-multiple-outline",
   simulations: "calculator-variant-outline",

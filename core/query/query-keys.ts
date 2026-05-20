@@ -10,6 +10,10 @@ export const queryKeys = {
   insights: {
     root: ["insights"] as const,
     latest: () => ["insights", "latest"] as const,
+    current: () => ["insights", "current"] as const,
+    historyRoot: () => ["insights", "history"] as const,
+    history: (page: number, perPage: number) =>
+      ["insights", "history", page, perPage] as const,
   },
   import: {
     root: ["import"] as const,

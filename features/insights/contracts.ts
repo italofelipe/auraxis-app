@@ -1,8 +1,16 @@
 export type InsightStatus = "pending" | "delivered" | "read";
 export type InsightPeriodType = "daily" | "weekly" | "monthly" | "recap";
+export type InsightGenerationPeriodType = "daily" | "weekly" | "monthly";
+export type InsightDimension =
+  | "general"
+  | "transactions"
+  | "credit_cards"
+  | "goals"
+  | "budgets";
 
 export interface InsightItem {
   readonly type: string;
+  readonly dimension?: InsightDimension;
   readonly title: string;
   readonly message: string;
   readonly evidence?: readonly string[];
@@ -36,4 +44,26 @@ export interface UserInsight {
 
 export interface LatestInsightResponse {
   readonly insight: UserInsight | null;
+}
+
+export interface GenerateInsightCommand {
+  readonly periodType: InsightGenerationPeriodType;
+  readonly anchorDate?: string;
+}
+
+export interface GeneratedInsightResponse {
+  readonly insight: UserInsight;
+  readonly callsRemaining: number | null;
+}
+
+export interface InsightHistoryQuery {
+  readonly page?: number;
+  readonly perPage?: number;
+}
+
+export interface InsightHistoryResponse {
+  readonly items: readonly UserInsight[];
+  readonly page: number;
+  readonly perPage: number;
+  readonly total: number;
 }

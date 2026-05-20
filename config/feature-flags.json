@@ -89,6 +89,16 @@
       "status": "enabled-prod",
       "description": "Controla o hub mobile de cartoes com fatura, utilizacao e metadados estendidos.",
       "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
+    },
+    {
+      "key": "app.insights.contextual",
+      "owner": "platform",
+      "createdAt": "2026-05-19",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-prod",
+      "description": "Controla o hub mobile de insights de IA e a filtragem contextual por dimensao.",
+      "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
     }
   ]
 }
