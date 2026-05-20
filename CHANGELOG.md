@@ -1,5 +1,35 @@
 # Changelog
 
+## [1.6.0](https://github.com/italofelipe/auraxis-app/compare/v1.5.0...v1.6.0) (2026-05-20)
+
+
+### Features
+
+* add channel-aware checkout gates ([#397](https://github.com/italofelipe/auraxis-app/issues/397)) ([d490fef](https://github.com/italofelipe/auraxis-app/commit/d490fef4a63a989687820e909a5ef187f2b0f46c))
+* add contextual AI insights hub ([#435](https://github.com/italofelipe/auraxis-app/issues/435)) ([3f2321c](https://github.com/italofelipe/auraxis-app/commit/3f2321c34a821292c1271bb540ed9b4e8998509f))
+* add credit cards bill hub ([#434](https://github.com/italofelipe/auraxis-app/issues/434)) ([4945028](https://github.com/italofelipe/auraxis-app/commit/4945028c79ff4639a7b074eeac6b90e0d36eceb3))
+* add csv xlsx import flow ([#413](https://github.com/italofelipe/auraxis-app/issues/413)) ([3632f1f](https://github.com/italofelipe/auraxis-app/commit/3632f1fc53a4dd1bae3074428d3bad987cfb1c11))
+* add mobile analytics facade ([#409](https://github.com/italofelipe/auraxis-app/issues/409)) ([6209322](https://github.com/italofelipe/auraxis-app/commit/6209322e31df00d0ebf052317f4153c105ce4b9a))
+* add mobile privacy center ([#405](https://github.com/italofelipe/auraxis-app/issues/405)) ([54fbbfc](https://github.com/italofelipe/auraxis-app/commit/54fbbfcfd6347b7e42db674daf007038138a0d53))
+* add push notifications registration ([#402](https://github.com/italofelipe/auraxis-app/issues/402)) ([0baea09](https://github.com/italofelipe/auraxis-app/commit/0baea092be0d601853255fa7cd54840c9ef0bf4d))
+* align app theme with ds v3 ([#431](https://github.com/italofelipe/auraxis-app/issues/431)) ([0ce0b0c](https://github.com/italofelipe/auraxis-app/commit/0ce0b0cd5d5fdd8365f39232da24f2f67b75fe60))
+* enforce deep link allowlist ([#417](https://github.com/italofelipe/auraxis-app/issues/417)) ([7050a6a](https://github.com/italofelipe/auraxis-app/commit/7050a6a02c24f533f5a49c3d2b048f1b37f940f0))
+* gate checkout with biometrics ([#425](https://github.com/italofelipe/auraxis-app/issues/425)) ([5c1cdf9](https://github.com/italofelipe/auraxis-app/commit/5c1cdf996b780b9dd3337c6b09a9fcd79c9ae06a))
+* refresh sessions after unauthorized responses ([#418](https://github.com/italofelipe/auraxis-app/issues/418)) ([9229d20](https://github.com/italofelipe/auraxis-app/commit/9229d20de15e06b68d8b404e83ee0980c983929f))
+* support structured weekly insights ([#414](https://github.com/italofelipe/auraxis-app/issues/414)) ([ca4c59c](https://github.com/italofelipe/auraxis-app/commit/ca4c59c35e4ec6fe050719a3a74c6980d8dd5edc))
+* track auth analytics events ([#411](https://github.com/italofelipe/auraxis-app/issues/411)) ([c924935](https://github.com/italofelipe/auraxis-app/commit/c92493536dbbe12a8fae211b338e76bc488bcc27))
+* track goal analytics events ([#416](https://github.com/italofelipe/auraxis-app/issues/416)) ([4b25cc4](https://github.com/italofelipe/auraxis-app/commit/4b25cc437e617696a2d85e8dc9e7459a017c4aa4))
+* track transaction analytics events ([#415](https://github.com/italofelipe/auraxis-app/issues/415)) ([9e43aec](https://github.com/italofelipe/auraxis-app/commit/9e43aeccf7726d931a727d28542878bc4e663bbb))
+* **transactions:** add installment form flow ([#423](https://github.com/italofelipe/auraxis-app/issues/423)) ([cdf6175](https://github.com/italofelipe/auraxis-app/commit/cdf6175d054fc1ee308e594f7b2684316ad82895))
+* wire beta telemetry readiness ([#422](https://github.com/italofelipe/auraxis-app/issues/422)) ([aa24076](https://github.com/italofelipe/auraxis-app/commit/aa2407623783f36d549ff9af0915660395ff9e3d))
+
+
+### Bug Fixes
+
+* enable native ssl pinning ([#433](https://github.com/italofelipe/auraxis-app/issues/433)) ([62ec161](https://github.com/italofelipe/auraxis-app/commit/62ec1617c3d9463a470411a9a94ea0e63d2693e9))
+* reject biometric PIN fallback for sensitive gates ([#427](https://github.com/italofelipe/auraxis-app/issues/427)) ([e25654f](https://github.com/italofelipe/auraxis-app/commit/e25654f596ba1882363831bcb16c0b7d3cf2bce7))
+* require biometric-only checkout gate ([#432](https://github.com/italofelipe/auraxis-app/issues/432)) ([99a3f26](https://github.com/italofelipe/auraxis-app/commit/99a3f26a89b8f846368e8cebc84092d322c11138))
+
 ## [1.5.0](https://github.com/italofelipe/auraxis-app/compare/v1.4.0...v1.5.0) (2026-05-10)
 
 
