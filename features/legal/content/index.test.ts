@@ -55,16 +55,25 @@ describe("TERMS_OF_SERVICE_DOCUMENT", () => {
     expect(TERMS_OF_SERVICE_DOCUMENT.siblingId).toBe("privacy-policy");
   });
 
-  it("contains 13 sections matching the canonical web copy", () => {
-    expect(TERMS_OF_SERVICE_DOCUMENT.sections).toHaveLength(13);
+  it("contains 16 sections matching the canonical web copy (v1.1.0 with billing addendum)", () => {
+    expect(TERMS_OF_SERVICE_DOCUMENT.sections).toHaveLength(16);
     expect(TERMS_OF_SERVICE_DOCUMENT.sections[0]!.heading).toBe("1. Quem pode usar");
-    expect(TERMS_OF_SERVICE_DOCUMENT.sections[12]!.heading).toBe("13. Aceite");
+    expect(TERMS_OF_SERVICE_DOCUMENT.sections[15]!.heading).toBe("16. Aceite");
   });
 
-  it("includes an inline link to the privacy policy in section 8", () => {
-    const section8 = TERMS_OF_SERVICE_DOCUMENT.sections.find((s) => s.heading.startsWith("8."));
-    expect(section8).toBeDefined();
-    const list = section8!.blocks.find((b) => b.kind === "list");
+  it("includes the billing addendum sections (planos, CDC, falha de pagamento)", () => {
+    const headings = TERMS_OF_SERVICE_DOCUMENT.sections.map((s) => s.heading);
+    expect(headings).toContain("7. Planos e cobrança");
+    expect(headings).toContain("8. Cancelamento e direito de arrependimento");
+    expect(headings).toContain("9. Falha de pagamento, reembolso e disputas");
+  });
+
+  it("includes an inline link to the privacy policy in the privacy section", () => {
+    const privacySection = TERMS_OF_SERVICE_DOCUMENT.sections.find((s) =>
+      s.heading.includes("Privacidade e dados pessoais"),
+    );
+    expect(privacySection).toBeDefined();
+    const list = privacySection!.blocks.find((b) => b.kind === "list");
     expect(list).toBeDefined();
     const richItem = list!.kind === "list" ? list!.items[0]! : null;
     expect(Array.isArray(richItem)).toBe(true);

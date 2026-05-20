@@ -5,8 +5,8 @@ const SUPPORT_EMAIL = "suporte@auraxis.com.br";
 export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
   id: "terms-of-service",
   title: "Termos de Uso",
-  version: "1.0.0",
-  effectiveDate: "07/03/2026",
+  version: "1.1.0",
+  effectiveDate: "20/05/2026",
   contactEmail: SUPPORT_EMAIL,
   siblingId: "privacy-policy",
   siblingLabel: "Política de Privacidade",
@@ -95,7 +95,58 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      heading: "7. Limitação de responsabilidade",
+      heading: "7. Planos e cobrança",
+      blocks: [
+        { kind: "paragraph", text: "O Auraxis oferece os seguintes planos:" },
+        {
+          kind: "list",
+          items: [
+            "Free — gratuito, com funcionalidades essenciais e limites de uso.",
+            "Premium Mensal — R$ 29,90 por mês, renovação automática até cancelamento.",
+            "Premium Anual — R$ 287,04 por ano (equivalente a R$ 23,92/mês, 20% de desconto), renovação automática até cancelamento.",
+            "Trial — 7 dias de acesso Premium gratuito após o primeiro cadastro elegível, sem necessidade de cartão de crédito durante o período de teste, conforme disponibilidade do produto.",
+          ],
+        },
+        {
+          kind: "paragraph",
+          text: "O processamento de cobrança é realizado pela Asaas (provedor de pagamento brasileiro). O Auraxis não armazena dados de cartão de crédito. Tributos eventualmente aplicáveis seguem a legislação vigente.",
+        },
+        {
+          kind: "paragraph",
+          text: "Preços podem ser alterados mediante aviso prévio razoável e atualização desta seção. Renovações em andamento permanecem com o preço vigente no momento da contratação até o término do ciclo.",
+        },
+      ],
+    },
+    {
+      heading: "8. Cancelamento e direito de arrependimento",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "O usuário pode cancelar a assinatura Premium a qualquer momento pelo aplicativo, pelo site ou pelo canal oficial de suporte.",
+            "Após cancelamento, o acesso Premium permanece ativo até o final do período já pago. Não há cobrança no próximo ciclo.",
+            "Direito de arrependimento (CDC, art. 49): o usuário tem 7 dias corridos contados da primeira contratação para desistir do plano pago e receber reembolso integral. O pedido deve ser enviado para suporte@auraxis.com.br dentro desse prazo.",
+            "Após 7 dias da primeira contratação, não há reembolso parcial proporcional ao período não utilizado, salvo nas hipóteses previstas em lei.",
+          ],
+        },
+      ],
+    },
+    {
+      heading: "9. Falha de pagamento, reembolso e disputas",
+      blocks: [
+        {
+          kind: "list",
+          items: [
+            "Em caso de falha na cobrança automática (por exemplo, cartão expirado ou saldo insuficiente), o provedor de pagamento pode tentar a cobrança novamente conforme regras próprias.",
+            "Após a confirmação de falha definitiva, o usuário será notificado por email e poderá atualizar o método de pagamento ou cancelar o plano. Durante o período de carência (3 dias), o acesso Premium continua ativo.",
+            "Após a carência sem regularização, o plano é rebaixado para Free e funcionalidades Premium ficam indisponíveis. Os dados do usuário permanecem preservados.",
+            "Para disputas envolvendo cobranças, o usuário deve entrar em contato pelo canal oficial de suporte. O Auraxis colabora com a Asaas para investigação e resolução conforme normas do setor.",
+          ],
+        },
+      ],
+    },
+    {
+      heading: "10. Limitação de responsabilidade",
       blocks: [
         {
           kind: "list",
@@ -109,7 +160,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      heading: "8. Privacidade e dados pessoais",
+      heading: "11. Privacidade e dados pessoais",
       blocks: [
         {
           kind: "list",
@@ -126,7 +177,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      heading: "9. Suporte e solicitações",
+      heading: "12. Suporte e solicitações",
       blocks: [
         {
           kind: "list",
@@ -143,7 +194,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      heading: "10. Alterações destes Termos",
+      heading: "13. Alterações destes Termos",
       blocks: [
         {
           kind: "list",
@@ -155,7 +206,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      heading: "11. Lei aplicável",
+      heading: "14. Lei aplicável",
       blocks: [
         {
           kind: "list",
@@ -164,7 +215,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      heading: "12. Foro",
+      heading: "15. Foro",
       blocks: [
         {
           kind: "list",
@@ -175,7 +226,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
       ],
     },
     {
-      heading: "13. Aceite",
+      heading: "16. Aceite",
       blocks: [
         {
           kind: "list",
