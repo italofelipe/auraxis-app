@@ -84,7 +84,13 @@ import type {
   ImportPreview,
   ImportPreviewCommand,
 } from "@/features/import/contracts";
-import type { LatestInsightResponse } from "@/features/insights/contracts";
+import type {
+  GeneratedInsightResponse,
+  GenerateInsightCommand,
+  InsightHistoryQuery,
+  InsightHistoryResponse,
+  LatestInsightResponse,
+} from "@/features/insights/contracts";
 import type {
   PushSubscriptionCommand,
   PushSubscriptionRecord,
@@ -393,6 +399,27 @@ export const apiContractMap = {
   >({
     method: "POST",
     path: "/v1/insights/{insight_id}/read",
+    authRequired: true,
+  }),
+  aiInsightGenerate: defineApiContract<
+    "POST",
+    "/ai/insights/generate",
+    GenerateInsightCommand,
+    GeneratedInsightResponse
+  >({
+    method: "POST",
+    path: "/ai/insights/generate",
+    authRequired: true,
+  }),
+  aiInsightHistory: defineApiContract<
+    "GET",
+    "/ai/insights/history",
+    never,
+    InsightHistoryResponse,
+    InsightHistoryQuery
+  >({
+    method: "GET",
+    path: "/ai/insights/history",
     authRequired: true,
   }),
   importDetect: defineApiContract<

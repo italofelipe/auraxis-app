@@ -1,13 +1,16 @@
 import type { ReactElement } from "react";
 
+import { useRouter } from "expo-router";
 import { Paragraph, XStack, YStack } from "tamagui";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { BudgetForm } from "@/features/budgets/components/budget-form";
 import type { Budget } from "@/features/budgets/contracts";
 import {
   useBudgetsScreenController,
   type BudgetsScreenController,
 } from "@/features/budgets/hooks/use-budgets-screen-controller";
+import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
@@ -19,6 +22,7 @@ import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
 export function BudgetsScreen(): ReactElement {
   const controller = useBudgetsScreenController();
+  const router = useRouter();
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -42,6 +46,10 @@ export function BudgetsScreen(): ReactElement {
   return (
     <AppScreen>
       <SummaryCard controller={controller} />
+      <AiInsightSurface
+        dimension="budgets"
+        onOpenHub={() => router.push(appRoutes.private.insights)}
+      />
       <BudgetsListCard controller={controller} />
     </AppScreen>
   );

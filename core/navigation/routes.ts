@@ -42,6 +42,7 @@ export const appRoutes = {
     accounts: "/contas",
     creditCards: "/cartoes",
     budgets: "/orcamentos",
+    insights: "/insights",
     focus: "/foco",
     onboarding: "/onboarding",
     goalSimulator: "/simulador-meta",
@@ -320,6 +321,13 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
   {
     key: "budgets",
     path: appRoutes.private.budgets,
+    access: "private",
+    tabVisible: false,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "insights",
+    path: appRoutes.private.insights,
     access: "private",
     tabVisible: false,
     supportsHostedCheckoutReturn: false,

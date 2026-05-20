@@ -29,5 +29,6 @@ describe("app routes", () => {
 
   it("keeps static private routes as direct href strings", () => {
     expect(appRoutes.private.dashboard).toBe("/dashboard");
+    expect(appRoutes.private.insights).toBe("/insights");
   });
 });

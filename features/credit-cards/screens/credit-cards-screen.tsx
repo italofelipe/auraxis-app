@@ -3,13 +3,14 @@ import type { ReactElement } from "react";
 import { useRouter } from "expo-router";
 import { YStack } from "tamagui";
 
-import { buildCreditCardBillPath } from "@/core/navigation/routes";
+import { appRoutes, buildCreditCardBillPath } from "@/core/navigation/routes";
 import { CreditCardCard } from "@/features/credit-cards/components/credit-card-card";
 import { CreditCardForm } from "@/features/credit-cards/components/credit-card-form";
 import {
   useCreditCardsScreenController,
   type CreditCardsScreenController,
 } from "@/features/credit-cards/hooks/use-credit-cards-screen-controller";
+import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
 import { AppButton } from "@/shared/components/app-button";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
@@ -42,6 +43,10 @@ export function CreditCardsScreen(): ReactElement {
   return (
     <AppScreen>
       <SummaryCard controller={controller} />
+      <AiInsightSurface
+        dimension="credit_cards"
+        onOpenHub={() => router.push(appRoutes.private.insights)}
+      />
       <CreditCardsListSection
         controller={controller}
         onViewBill={(creditCardId) => {

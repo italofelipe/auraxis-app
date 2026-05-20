@@ -5,7 +5,7 @@ import { useRouter } from "expo-router";
 import { RefreshControl } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { buildGoalScenarioPath } from "@/core/navigation/routes";
+import { appRoutes, buildGoalScenarioPath } from "@/core/navigation/routes";
 import { queryKeys } from "@/core/query/query-keys";
 import { GoalForm } from "@/features/goals/components/goal-form";
 import { GoalPlanCard } from "@/features/goals/components/goal-plan-card";
@@ -14,6 +14,7 @@ import {
   useGoalsScreenController,
   type GoalsScreenController,
 } from "@/features/goals/hooks/use-goals-screen-controller";
+import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
 import type { GoalProgressView } from "@/features/goals/services/goal-progress-calculator";
 import { AppButton } from "@/shared/components/app-button";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
@@ -60,6 +61,7 @@ function ListSeparator(): ReactElement {
  */
 export function GoalsScreen(): ReactElement {
   const controller = useGoalsScreenController();
+  const router = useRouter();
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -81,6 +83,10 @@ export function GoalsScreen(): ReactElement {
   return (
     <AppScreen scrollable={false}>
       <SummaryCard controller={controller} />
+      <AiInsightSurface
+        dimension="goals"
+        onOpenHub={() => router.push(appRoutes.private.insights)}
+      />
       <YStack flex={1}>
         <GoalsListCard controller={controller} />
       </YStack>

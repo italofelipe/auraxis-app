@@ -8,6 +8,7 @@ import { Paragraph, XStack, YStack } from "tamagui";
 import { appRoutes } from "@/core/navigation/routes";
 import { queryKeys } from "@/core/query/query-keys";
 import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
+import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
 import { FinancialCalendar } from "@/features/transactions/components/financial-calendar";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { useTransactionsExport } from "@/features/transactions/hooks/use-transactions-export";
@@ -60,6 +61,7 @@ const TRANSACTIONS_REFRESH_KEYS = [
  */
 export function TransactionsScreen(): ReactElement {
   const controller = useTransactionsScreenController();
+  const router = useRouter();
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -83,6 +85,10 @@ export function TransactionsScreen(): ReactElement {
   return (
     <AppScreen scrollable={false}>
       <FilterHeader controller={controller} />
+      <AiInsightSurface
+        dimension="transactions"
+        onOpenHub={() => router.push(appRoutes.private.insights)}
+      />
       <YStack flex={1}>
         {controller.viewMode === "calendar" ? (
           <FinancialCalendar transactions={controller.transactions} />

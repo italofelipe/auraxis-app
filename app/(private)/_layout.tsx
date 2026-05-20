@@ -27,6 +27,7 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "contas",
   "cartoes",
   "orcamentos",
+  "insights",
   "foco",
   "onboarding",
   "simulador-meta",
