@@ -1,0 +1,40 @@
+appId: com.sensoriumit.auraxis
+name: A11y assertions on critical flows
+tags:
+  - a11y
+---
+# Critical-path a11y assertions: every interactive primary CTA on the 3 most
+# trafficked screens must be reachable by its visible label OR accessibilityLabel.
+# This is the minimum bar — pair with manual screen reader review per release.
+#
+# Initial implementation uses visible labels (Portuguese pt-BR). Follow-up issue
+# will add explicit testID/accessibilityLabel props to make the assertions
+# language-agnostic and screen-reader friendly.
+#
+# Run isolated: `maestro test .maestro/a11y_checks.yaml`
+
+- launchApp:
+    clearState: true
+
+# ── 1. Login screen — primary form a11y ─────────────────────────────────────
+- assertVisible: "E-mail"
+- assertVisible: "Senha"
+- assertVisible: "Entrar"
+
+- tapOn: "E-mail"
+- inputText: "test@auraxis.com.br"
+- tapOn: "Senha"
+- inputText: "TestPass123!"
+- tapOn: "Entrar"
+
+# ── 2. Dashboard — primary nav reachable ────────────────────────────────────
+- assertVisible: "Dashboard"
+
+# ── 3. Tools tab — navigation a11y ──────────────────────────────────────────
+- tapOn: "Ferramentas"
+- assertVisible: "Ferramentas"
+
+# Future-state (when testIDs land — tracked in follow-up):
+#   - assertVisible: { id: "login-submit-button" }
+#   - assertVisible: { id: "tab-dashboard" }
+#   - assertVisible: { id: "kpi-net-worth" }
