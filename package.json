@@ -23,6 +23,8 @@
     "contracts:check": "node scripts/contracts-check.cjs",
     "governance:all": "node scripts/governance-all.cjs",
     "policy:check": "npm run governance:all",
+    "audit:critical": "npm audit --audit-level=critical",
+    "audit:high": "npm audit --audit-level=high",
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:check": "graphql-codegen --config codegen.ts && git diff --exit-code shared/types/generated/graphql.ts",
     "quality-check": "npm run lint && npm run typecheck && npm run policy:check && npm run contracts:check && npm run codegen:check && npm run test:coverage",

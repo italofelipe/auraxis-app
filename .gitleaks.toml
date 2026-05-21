@@ -1,0 +1,42 @@
+title = "Auraxis App — Gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Test fixtures — mock credentials are intentional and not real secrets"
+paths = [
+  '''.*\.spec\.ts''',
+  '''.*\.spec\.tsx''',
+  '''.*\.test\.ts''',
+  '''.*\.test\.tsx''',
+  '''.*test\.ts''',
+  '''.*mock.*\.ts''',
+  '''__tests__/.*''',
+  '''__mocks__/.*''',
+  '''.maestro/.*''',
+]
+
+[[allowlists]]
+description = "Auto-generated OpenAPI artifacts — example values come from api spec, sanitized via scripts/check-openapi-secret-hygiene.cjs before snapshot is written"
+paths = [
+  '''contracts/openapi\.snapshot\.json''',
+  '''contracts/feature-contract-baseline\.json''',
+  '''shared/types/generated/.*''',
+]
+
+[[allowlists]]
+description = "Test fixture values — known mock credential patterns"
+regexTarget = "match"
+regexes = [
+  '''Test@\d+''',
+  '''test_secret''',
+  '''mock_token''',
+  '''fake_token''',
+  '''test_password''',
+  '''TestPass\w*''',
+  '''Password@\w*''',
+  '''Senha@\w*''',
+  '''validPassword\w*''',
+  '''StrongPass\w*''',
+]

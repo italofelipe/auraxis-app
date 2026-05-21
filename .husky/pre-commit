@@ -1,2 +1,13 @@
+set -e
+
+echo "🔐 Scanning staged files for secrets (gitleaks)..."
+if command -v gitleaks >/dev/null 2>&1; then
+  gitleaks protect --staged --redact --verbose --config=.gitleaks.toml
+else
+  echo "⚠️  gitleaks not found — install with: brew install gitleaks"
+  echo "    Hook will not block commits without gitleaks installed."
+fi
+
 bash scripts/check-no-duplicate-files.sh
+npm run policy:check
 npx lint-staged
