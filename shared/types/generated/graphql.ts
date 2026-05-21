@@ -1833,7 +1833,11 @@ export type UserType = {
   __typename?: 'UserType';
   avatarUrl?: Maybe<Scalars['String']['output']>;
   birthDate?: Maybe<Scalars['String']['output']>;
+  daysUntilEmailRequired?: Maybe<Scalars['Int']['output']>;
   email: Scalars['String']['output'];
+  emailVerificationDeadlineAt?: Maybe<Scalars['String']['output']>;
+  emailVerificationRequiredNow?: Maybe<Scalars['Boolean']['output']>;
+  emailVerified?: Maybe<Scalars['Boolean']['output']>;
   financialObjectives?: Maybe<Scalars['String']['output']>;
   gender?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
