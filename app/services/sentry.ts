@@ -138,6 +138,33 @@ const resolveSentryEnvironment = (): string => {
     : "development";
 };
 
+/**
+ * Whether the developer explicitly opted into Sentry-in-dev via
+ * `EXPO_PUBLIC_SENTRY_DEV_ENABLE=true`. Default is OFF to keep dev event noise
+ * out of the production project, but devs can flip it on to surface bugs
+ * locally before they ship.
+ */
+const isDevSentryOptIn = (): boolean => {
+  return process.env.EXPO_PUBLIC_SENTRY_DEV_ENABLE === "true";
+};
+
+/**
+ * Picks the right `tracesSampleRate` for the active env.
+ *
+ * - **dev (opted-in)**: 1.0 — capture every error locally
+ * - **staging / preview**: 0.5
+ * - **production**: 0.2 (current baseline)
+ */
+export function tracesSampleRateFor(environment: string, isDev: boolean): number {
+  if (isDev) {
+    return 1.0;
+  }
+  if (environment === "staging" || environment === "preview") {
+    return 0.5;
+  }
+  return 0.2;
+}
+
 export function initSentry(): void {
   const dsn = resolveSentryDsn();
   const environment = resolveSentryEnvironment();
@@ -150,12 +177,24 @@ export function initSentry(): void {
     return;
   }
 
+  // Sentry-in-dev requires explicit opt-in via EXPO_PUBLIC_SENTRY_DEV_ENABLE=true.
+  // Keeps dev noise out of prod project but lets devs surface bugs locally
+  // when investigating something specific. Tests bypass the dev gate so
+  // they exercise the real init code path.
+  const devOptIn = isDevSentryOptIn() || isJestRuntime();
+  const shouldEnable = !__DEV__ || devOptIn;
+
+  if (!shouldEnable) {
+    sentryEnabled = false;
+    return;
+  }
+
   sentryEnabled = true;
   Sentry.init({
     dsn,
     environment,
-    enabled: !__DEV__, // only in production builds
-    tracesSampleRate: 0.2,
+    enabled: true,
+    tracesSampleRate: tracesSampleRateFor(environment, __DEV__),
     _experiments: { profilesSampleRate: 0.1 },
     sendDefaultPii: false, // LGPD compliance
     beforeSend(event) {

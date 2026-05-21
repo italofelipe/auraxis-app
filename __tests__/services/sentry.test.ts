@@ -7,6 +7,7 @@ import {
   resetSentryRuntimeForTests,
   syncSentryOperationalContext,
   sanitizeSentryEvent,
+  tracesSampleRateFor,
 } from "@/app/services/sentry";
 
 const expoConfigMock = {
@@ -159,6 +160,23 @@ describe("initSentry", () => {
     });
   });
 
+});
+
+describe("tracesSampleRateFor", () => {
+  it("returns 1.0 in dev (opted-in) to capture all local errors", () => {
+expect(tracesSampleRateFor("production", true)).toBe(1.0);
+    expect(tracesSampleRateFor("development", true)).toBe(1.0);
+  });
+
+  it("returns 0.5 in staging or preview", () => {
+expect(tracesSampleRateFor("staging", false)).toBe(0.5);
+    expect(tracesSampleRateFor("preview", false)).toBe(0.5);
+  });
+
+  it("returns 0.2 in production (baseline) and for unknown envs", () => {
+expect(tracesSampleRateFor("production", false)).toBe(0.2);
+    expect(tracesSampleRateFor("unknown", false)).toBe(0.2);
+  });
 });
 
 describe("sentry runtime helpers", () => {
