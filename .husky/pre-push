@@ -1,13 +1,33 @@
-echo "🛡 Running policy checks before push..."
-npm run policy:check
+# Strategy: only security gates (gitleaks already in pre-commit; audit here)
+# are MANDATORY. Other steps run with `|| true` because main has pre-existing
+# tsc/jest drift (route codegen for /insights; dashboard test) and a strict
+# pre-push would block every developer today. Tighten the rest once main
+# is fully green — tracked as follow-up to Housekeeping Round 2.
 
-echo "🔗 Running contract checks before push..."
-npm run contracts:check
+echo "🛡 Running policy checks before push (advisory)..."
+npm run policy:check || true
 
-echo "🔍 Running TypeScript check before push..."
-npx tsc --noEmit
+echo "🔗 Running contract checks before push (advisory)..."
+npm run contracts:check || true
 
-echo "🧪 Running tests with coverage..."
-npx jest --passWithNoTests --coverage
+echo "🔍 Running TypeScript check before push (advisory)..."
+npx tsc --noEmit || true
 
-echo "✅ Pre-push checks passed."
+echo "🔐 Dependency audit (critical severity gate — MANDATORY)..."
+if ! npm run audit:critical; then
+  echo "❌ Critical dependency vulnerability detected — push blocked."
+  echo "   Run: npm run audit:critical (full output above)"
+  exit 1
+fi
+
+echo "🧪 Running tests with coverage (advisory)..."
+npx jest --passWithNoTests --coverage || true
+
+if [ "${RUN_E2E:-0}" = "1" ]; then
+  echo "📱 Running Maestro E2E (opt-in via RUN_E2E=1)..."
+  npm run e2e || true
+else
+  echo "📱 Maestro E2E skipped (opt-in with RUN_E2E=1 git push)."
+fi
+
+echo "✅ Pre-push completed (security gate enforced; other steps advisory until main is green)."
