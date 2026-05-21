@@ -34,7 +34,9 @@
     "test:mutation:features": "stryker run --mutate 'features/**/*.ts'",
     "ci:local": "bash scripts/run_ci_like_actions_local.sh",
     "e2e": "maestro test .maestro/",
-    "e2e:login": "maestro test .maestro/01_login.yaml"
+    "e2e:login": "maestro test .maestro/01_login.yaml",
+    "e2e:a11y": "maestro test .maestro/a11y_checks.yaml",
+    "e2e:visual": "maestro test .maestro/visual_baseline.yaml"
   },
   "dependencies": {
     "@expo-google-fonts/playfair-display": "^0.4.2",

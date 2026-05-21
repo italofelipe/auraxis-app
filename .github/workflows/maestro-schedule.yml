@@ -39,11 +39,23 @@ jobs:
           # Wait for simulator to be ready
           sleep 30
 
-      - name: Run Maestro flows
+      - name: Run Maestro flows (smoke)
         run: |
           maestro test .maestro/01_login.yaml
           maestro test .maestro/02_dashboard_overview.yaml
           maestro test .maestro/05_logout.yaml
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
+        continue-on-error: true
+
+      - name: Run Maestro a11y assertions
+        run: maestro test .maestro/a11y_checks.yaml
+        env:
+          MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
+        continue-on-error: true
+
+      - name: Run Maestro visual baseline (screenshots)
+        run: maestro test .maestro/visual_baseline.yaml
         env:
           MAESTRO_DRIVER_STARTUP_TIMEOUT: '120000'
         continue-on-error: true

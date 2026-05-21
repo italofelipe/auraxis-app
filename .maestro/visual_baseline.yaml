@@ -1,0 +1,34 @@
+appId: com.sensoriumit.auraxis
+name: Visual baseline (3 key screens)
+tags:
+  - visual
+---
+# Captures screenshots of the 3 most user-facing screens. Maestro Cloud
+# (when configured) diffs against the baseline of the latest passing main
+# build and fails the run on visual drift.
+#
+# Locally: `maestro test .maestro/visual_baseline.yaml` writes screenshots
+# under `~/.maestro/tests/<run-id>/`. CI uploads them as an artifact so they
+# can be inspected on the PR.
+
+- launchApp:
+    clearState: true
+
+# Login screen baseline
+- takeScreenshot: visual_01_login
+
+# Authenticate
+- tapOn: "E-mail"
+- inputText: "test@auraxis.com.br"
+- tapOn: "Senha"
+- inputText: "TestPass123!"
+- tapOn: "Entrar"
+- assertVisible: "Dashboard"
+
+# Dashboard baseline
+- takeScreenshot: visual_02_dashboard
+
+# Tools tab baseline
+- tapOn: "Ferramentas"
+- assertVisible: "Ferramentas"
+- takeScreenshot: visual_03_tools
