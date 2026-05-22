@@ -530,11 +530,19 @@ export const createHttpClient = (baseUrl: string): AxiosInstance => {
   const refreshSession = createRefreshSession(client);
 
   client.interceptors.request.use(attachAuthHeaders);
-  client.interceptors.response.use(captureRequestIdInterceptor);
+  // Register the main fulfilled+rejected handler FIRST so that tests which
+  // pull `handlers[0].rejected` continue to find it at the same index after
+  // captureRequestIdInterceptor was introduced.
+  //
+  // Axios runs response interceptors in REVERSE order of registration, so
+  // this also gives the desired chain: captureRequestId reads the raw
+  // response headers FIRST, then handleFulfilledResponse unwraps the
+  // envelope.
   client.interceptors.response.use(
     handleFulfilledResponse,
     createRejectedResponseHandler(client, refreshSession),
   );
+  client.interceptors.response.use(captureRequestIdInterceptor);
 
   return client;
 };

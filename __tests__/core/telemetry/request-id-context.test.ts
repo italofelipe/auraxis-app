@@ -18,7 +18,7 @@ const makeResponse = (headers: Record<string, unknown>): AxiosResponse => ({
   data: {},
   status: 200,
   statusText: "OK",
-  headers,
+  headers: headers as unknown as AxiosResponse["headers"],
   config: {} as AxiosResponse["config"],
 });
 
