@@ -20,6 +20,7 @@ import {
 import { useSessionStore } from "@/core/session/session-store";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { networkLogger } from "@/core/telemetry/domain-loggers";
+import { captureRequestIdInterceptor } from "@/core/telemetry/request-id-context";
 import { appRuntimeConfig, normalizeBaseUrl } from "@/shared/config/runtime";
 import { apiContractMap } from "@/shared/contracts/api-contract-map";
 import { createMockApiAdapter } from "@/shared/mocks/api/router";
@@ -529,6 +530,7 @@ export const createHttpClient = (baseUrl: string): AxiosInstance => {
   const refreshSession = createRefreshSession(client);
 
   client.interceptors.request.use(attachAuthHeaders);
+  client.interceptors.response.use(captureRequestIdInterceptor);
   client.interceptors.response.use(
     handleFulfilledResponse,
     createRejectedResponseHandler(client, refreshSession),
