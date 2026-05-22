@@ -3,6 +3,13 @@
     "name": "auraxis-app",
     "slug": "auraxis-app",
     "version": "1.0.0",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f775e10b-89c3-4bb9-8af1-5073e68ac2ce",
+      "fallbackToCacheTimeout": 0
+    },
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "auraxisapp",
@@ -13,6 +20,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.sensoriumit.auraxis",
       "buildNumber": "1",
+      "config": {
+        "usesNonExemptEncryption": false
+      },
       "infoPlist": {
         "NSAppTransportSecurity": {
           "NSAllowsArbitraryLoads": false,

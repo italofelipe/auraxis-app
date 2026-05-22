@@ -1,0 +1,11 @@
+coverage/
+reports/
+__tests__/
+__mocks__/
+e2e/
+.maestro/
+docs/
+.stryker-tmp/
+.context/
+.expo/
+.husky/
