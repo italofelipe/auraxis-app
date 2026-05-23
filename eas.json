@@ -6,10 +6,16 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "development",
+      "ios": {
+        "simulator": false
+      }
     },
     "preview": {
       "distribution": "internal",
+      "channel": "preview",
+      "autoIncrement": true,
       "android": {
         "buildType": "apk"
       },
@@ -19,6 +25,8 @@
     },
     "production": {
       "distribution": "store",
+      "channel": "production",
+      "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
       }
@@ -27,10 +35,16 @@
   "submit": {
     "production": {
       "android": {
-        "track": "internal"
+        "serviceAccountKeyPath": "@secret:GOOGLE_SERVICE_ACCOUNT",
+        "track": "internal",
+        "releaseStatus": "draft"
       },
       "ios": {
-        "ascAppId": "${ASC_APP_ID}"
+        "ascAppId": "${ASC_APP_ID}",
+        "appleTeamId": "${APPLE_TEAM_ID}",
+        "ascApiKeyPath": "@secret:ASC_API_KEY_FILE",
+        "ascApiKeyId": "${ASC_API_KEY_ID}",
+        "ascApiKeyIssuerId": "${ASC_API_KEY_ISSUER_ID}"
       }
     }
   }

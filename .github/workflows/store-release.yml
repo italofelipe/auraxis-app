@@ -1,4 +1,4 @@
-name: Store Release (Manual)
+name: Store Release (Manual + Tag)
 
 on:
   workflow_dispatch:
@@ -28,6 +28,9 @@ on:
         options:
           - "false"
           - "true"
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build-and-submit:
@@ -63,11 +66,42 @@ jobs:
           eas-version: 16.13.0
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Verify EAS context
+        run: |
+          set -euo pipefail
+          eas whoami
+          eas project:info
+
+      - name: Resolve build parameters
+        id: params
+        env:
+          DISPATCH_PLATFORM: ${{ inputs.platform }}
+          DISPATCH_PROFILE: ${{ inputs.profile }}
+          DISPATCH_AUTO_SUBMIT: ${{ inputs.auto_submit }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "push" ]; then
+            # Tag push (v*) -> full production release on both platforms with auto-submit
+            platform="all"
+            profile="production"
+            auto_submit="true"
+          else
+            platform="${DISPATCH_PLATFORM:-all}"
+            profile="${DISPATCH_PROFILE:-production}"
+            auto_submit="${DISPATCH_AUTO_SUBMIT:-false}"
+          fi
+          {
+            echo "platform=$platform"
+            echo "profile=$profile"
+            echo "auto_submit=$auto_submit"
+          } >> "$GITHUB_OUTPUT"
+          echo "Resolved trigger=${{ github.event_name }} platform=$platform profile=$profile auto_submit=$auto_submit"
+
       - name: Trigger build/submission
         env:
-          BUILD_PLATFORM: ${{ inputs.platform }}
-          BUILD_PROFILE: ${{ inputs.profile }}
-          AUTO_SUBMIT: ${{ inputs.auto_submit }}
+          PLATFORM: ${{ steps.params.outputs.platform }}
+          PROFILE: ${{ steps.params.outputs.profile }}
+          AUTO_SUBMIT: ${{ steps.params.outputs.auto_submit }}
         run: |
           set -euo pipefail
 
@@ -77,7 +111,7 @@ jobs:
           fi
 
           eas build \
-            --platform "$BUILD_PLATFORM" \
-            --profile "$BUILD_PROFILE" \
+            --platform "$PLATFORM" \
+            --profile "$PROFILE" \
             --non-interactive \
             $extra_args
