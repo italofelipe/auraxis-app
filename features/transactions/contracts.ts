@@ -1,5 +1,7 @@
 export type TransactionType = "income" | "expense";
 
+export type RecurrenceUnit = "day" | "week" | "month" | "year";
+
 export type TransactionStatus =
   | "paid"
   | "pending"
@@ -20,6 +22,8 @@ export interface TransactionRecord {
   readonly isRecurring: boolean;
   readonly isInstallment: boolean;
   readonly installmentCount: number | null;
+  readonly recurrenceInterval: number;
+  readonly recurrenceUnit: RecurrenceUnit;
   readonly tagId: string | null;
   readonly accountId: string | null;
   readonly creditCardId: string | null;
@@ -83,6 +87,8 @@ export interface UpsertTransactionCommand {
   readonly description?: string | null;
   readonly observation?: string | null;
   readonly isRecurring?: boolean;
+  readonly recurrenceInterval?: number;
+  readonly recurrenceUnit?: RecurrenceUnit;
   readonly isInstallment?: boolean;
   readonly installmentCount?: number | null;
   readonly tagId?: string | null;

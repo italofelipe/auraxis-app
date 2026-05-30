@@ -125,6 +125,64 @@ describe("updateTransactionSchema", () => {
   });
 });
 
+describe("createTransactionSchema — recurrence cadence", () => {
+  const recurringBase = {
+    ...validBase,
+    isRecurring: true,
+    startDate: "2026-04-01",
+    endDate: "2026-12-31",
+    dueDate: "2026-04-30",
+  };
+
+  it("aceita recorrente com start/end e cadencia", () => {
+    expect(() =>
+      createTransactionSchema.parse({
+        ...recurringBase,
+        recurrenceInterval: 2,
+        recurrenceUnit: "week",
+      }),
+    ).not.toThrow();
+  });
+
+  it("aplica cadencia mensal por padrao", () => {
+    const parsed = createTransactionSchema.parse(recurringBase);
+    expect(parsed.recurrenceUnit).toBe("month");
+    expect(parsed.recurrenceInterval).toBe(1);
+  });
+
+  it("exige startDate e endDate quando recorrente", () => {
+    expect(() =>
+      createTransactionSchema.parse({
+        ...validBase,
+        isRecurring: true,
+      }),
+    ).toThrow();
+  });
+
+  it("rejeita startDate posterior a endDate", () => {
+    expect(() =>
+      createTransactionSchema.parse({
+        ...recurringBase,
+        startDate: "2026-12-31",
+        endDate: "2026-04-01",
+      }),
+    ).toThrow();
+  });
+
+  it("rejeita unidade de recorrencia invalida", () => {
+    expect(() =>
+      createTransactionSchema.parse({
+        ...recurringBase,
+        recurrenceUnit: "fortnight",
+      }),
+    ).toThrow();
+  });
+
+  it("nao exige datas quando nao recorrente", () => {
+    expect(() => createTransactionSchema.parse(validBase)).not.toThrow();
+  });
+});
+
 describe("normalizeAmount", () => {
   it("converte virgula brasileira para ponto e arredonda 2 casas", () => {
     expect(normalizeAmount("1500,5")).toBe("1500.50");
