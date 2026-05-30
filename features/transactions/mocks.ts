@@ -17,6 +17,8 @@ export const transactionFixture: TransactionRecord = {
   isRecurring: true,
   isInstallment: false,
   installmentCount: null,
+  recurrenceInterval: 1,
+  recurrenceUnit: "month",
   tagId: null,
   accountId: "account-1",
   creditCardId: null,

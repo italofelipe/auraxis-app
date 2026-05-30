@@ -96,6 +96,36 @@ describe("TransactionForm installments", () => {
     expect(getByText("12x de R$ 100,00")).toBeTruthy();
   });
 
+  it("revela campos de recorrencia e submete cadencia ao ativar o toggle", async () => {
+    const { getByText, getByLabelText, queryByLabelText, onSubmit } = renderForm();
+
+    // Sub-fields hidden until recurring is enabled.
+    expect(queryByLabelText("Inicio")).toBeNull();
+
+    fireEvent.changeText(getByLabelText("Titulo"), "Aluguel");
+    fireEvent.changeText(getByLabelText("Valor (R$)"), "120000");
+    fireEvent.changeText(getByLabelText("Data"), "2026-05-05");
+    fireEvent(getByLabelText("Transacao recorrente"), "onCheckedChange", true);
+
+    fireEvent.press(getByText("Semana"));
+    fireEvent.changeText(getByLabelText("A cada (intervalo)"), "2");
+    fireEvent.changeText(getByLabelText("Inicio"), "2026-05-05");
+    fireEvent.changeText(getByLabelText("Fim"), "2026-08-05");
+    fireEvent.press(getByText("Criar transacao"));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          isRecurring: true,
+          recurrenceUnit: "week",
+          recurrenceInterval: 2,
+          startDate: "2026-05-05",
+          endDate: "2026-08-05",
+        }),
+      );
+    });
+  });
+
   it("nao renderiza selecao de cartao quando flag de parcelamento esta desligada", () => {
     mockedIsFeatureEnabled.mockReturnValue(false);
 

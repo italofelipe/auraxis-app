@@ -14,7 +14,10 @@ import { Paragraph, XStack, YStack } from "tamagui";
 
 import type { CreditCard } from "@/features/credit-cards/contracts";
 import { useCreditCardsQuery } from "@/features/credit-cards/hooks/use-credit-cards-query";
-import type { TransactionRecord } from "@/features/transactions/contracts";
+import type {
+  RecurrenceUnit,
+  TransactionRecord,
+} from "@/features/transactions/contracts";
 import { TRANSACTION_INSTALLMENTS_FEATURE_FLAG_KEY } from "@/features/transactions/installments-config";
 import { previewInstallments } from "@/features/transactions/utils/preview-installments";
 import {
@@ -31,6 +34,15 @@ import { isFeatureEnabled } from "@/shared/feature-flags";
 import { safeFormatCurrency } from "@/shared/utils/currency";
 import { formatShortDate } from "@/shared/utils/formatters";
 
+/** Today's date as `YYYY-MM-DD` in the device's local timezone (never UTC). */
+const todayLocalIsoDate = (): string => {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
 const transactionToFormValues = (
   transaction: TransactionRecord | null | undefined,
 ): CreateTransactionFormValues => {
@@ -39,9 +51,13 @@ const transactionToFormValues = (
       title: "",
       amount: "",
       type: "expense",
-      dueDate: new Date().toISOString().slice(0, 10),
+      dueDate: todayLocalIsoDate(),
       description: null,
       isRecurring: false,
+      startDate: null,
+      endDate: null,
+      recurrenceInterval: 1,
+      recurrenceUnit: "month",
       creditCardId: null,
       isInstallment: false,
       installmentCount: null,
@@ -54,6 +70,10 @@ const transactionToFormValues = (
     dueDate: transaction.dueDate.slice(0, 10),
     description: transaction.description,
     isRecurring: transaction.isRecurring,
+    startDate: transaction.startDate,
+    endDate: transaction.endDate,
+    recurrenceInterval: transaction.recurrenceInterval,
+    recurrenceUnit: transaction.recurrenceUnit,
     creditCardId: transaction.creditCardId,
     isInstallment: transaction.isInstallment,
     installmentCount: transaction.installmentCount,
@@ -106,6 +126,11 @@ export function TransactionForm({
       <YStack gap="$4">
         <TypeToggle control={form.control} />
         <TransactionFormFields control={form.control} errors={form.formState.errors} />
+        <RecurrenceFields
+          control={form.control}
+          errors={form.formState.errors}
+          setValue={form.setValue}
+        />
         {installmentsEnabled ? (
           <TransactionInstallmentFields
             control={form.control}
@@ -168,6 +193,148 @@ function TypeToggle({
         </XStack>
       )}
     />
+  );
+}
+
+const RECURRENCE_UNIT_OPTIONS: readonly { value: RecurrenceUnit; label: string }[] = [
+  { value: "day", label: "Dia" },
+  { value: "week", label: "Semana" },
+  { value: "month", label: "Mes" },
+  { value: "year", label: "Ano" },
+];
+
+interface RecurrenceFieldsProps {
+  readonly control: Control<CreateTransactionFormValues>;
+  readonly errors: FieldErrors<CreateTransactionFormValues>;
+  readonly setValue: UseFormSetValue<CreateTransactionFormValues>;
+}
+
+function RecurrenceFields({
+  control,
+  errors,
+  setValue,
+}: RecurrenceFieldsProps): ReactElement {
+  const isRecurring = useWatch({ control, name: "isRecurring" });
+  return (
+    <YStack gap="$4">
+      <Controller
+        control={control}
+        name="isRecurring"
+        render={({ field: { value, onChange } }) => (
+          <AppToggleRow
+            label="Transacao recorrente"
+            description="Repete automaticamente ate a data final (ex.: aluguel, salario)."
+            checked={Boolean(value)}
+            testID="transaction-recurring-toggle"
+            onCheckedChange={(checked) => {
+              onChange(checked);
+              if (!checked) {
+                setValue("startDate", null, { shouldDirty: true, shouldValidate: true });
+                setValue("endDate", null, { shouldDirty: true, shouldValidate: true });
+              }
+            }}
+          />
+        )}
+      />
+      {isRecurring ? <RecurrenceDetailFields control={control} errors={errors} /> : null}
+    </YStack>
+  );
+}
+
+function RecurrenceUnitPicker({
+  control,
+}: {
+  readonly control: Control<CreateTransactionFormValues>;
+}): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="recurrenceUnit"
+      render={({ field: { value, onChange } }) => (
+        <YStack gap="$2">
+          <Paragraph size="$3">Frequencia</Paragraph>
+          <XStack gap="$2" flexWrap="wrap">
+            {RECURRENCE_UNIT_OPTIONS.map((option) => (
+              <AppButton
+                key={option.value}
+                tone={value === option.value ? "primary" : "secondary"}
+                onPress={() => onChange(option.value)}
+              >
+                {option.label}
+              </AppButton>
+            ))}
+          </XStack>
+        </YStack>
+      )}
+    />
+  );
+}
+
+interface RecurrenceDetailFieldsProps {
+  readonly control: Control<CreateTransactionFormValues>;
+  readonly errors: FieldErrors<CreateTransactionFormValues>;
+}
+
+function RecurrenceDetailFields({
+  control,
+  errors,
+}: RecurrenceDetailFieldsProps): ReactElement {
+  return (
+    <>
+      <RecurrenceUnitPicker control={control} />
+      <Controller
+        control={control}
+        name="recurrenceInterval"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppInputField
+            id="tx-recurrence-interval"
+            label="A cada (intervalo)"
+            placeholder="1"
+            keyboardType="number-pad"
+            value={value ? String(value) : ""}
+            onBlur={onBlur}
+            onChangeText={(text) => {
+              const digits = text.replace(/\D/g, "");
+              onChange(digits.length === 0 ? 1 : Number.parseInt(digits, 10));
+            }}
+            errorText={errors.recurrenceInterval?.message}
+            helperText="Repete a cada N unidades de frequencia."
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="startDate"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppInputField
+            id="tx-start-date"
+            label="Inicio"
+            placeholder="AAAA-MM-DD"
+            autoCapitalize="none"
+            value={value ?? ""}
+            onBlur={onBlur}
+            onChangeText={(text) => onChange(text.length > 0 ? text : null)}
+            errorText={errors.startDate?.message}
+          />
+        )}
+      />
+      <Controller
+        control={control}
+        name="endDate"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppInputField
+            id="tx-end-date"
+            label="Fim"
+            placeholder="AAAA-MM-DD"
+            autoCapitalize="none"
+            value={value ?? ""}
+            onBlur={onBlur}
+            onChangeText={(text) => onChange(text.length > 0 ? text : null)}
+            errorText={errors.endDate?.message}
+          />
+        )}
+      />
+    </>
   );
 }
 
