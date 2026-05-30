@@ -26,8 +26,10 @@ import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { AppToggleRow } from "@/shared/components/app-toggle-row";
+import { CurrencyInputField } from "@/shared/forms/currency-input-field";
 import { isFeatureEnabled } from "@/shared/feature-flags";
-import { formatCurrency, formatShortDate } from "@/shared/utils/formatters";
+import { safeFormatCurrency } from "@/shared/utils/currency";
+import { formatShortDate } from "@/shared/utils/formatters";
 
 const transactionToFormValues = (
   transaction: TransactionRecord | null | undefined,
@@ -199,14 +201,13 @@ function TransactionFormFields({
         control={control}
         name="amount"
         render={({ field: { onChange, onBlur, value } }) => (
-          <AppInputField
+          <CurrencyInputField
             id="tx-amount"
             label="Valor (R$)"
             placeholder="0,00"
-            keyboardType="decimal-pad"
             value={value ?? ""}
             onBlur={onBlur}
-            onChangeText={onChange}
+            onChangeAmount={onChange}
             errorText={errors.amount?.message}
           />
         )}
@@ -586,7 +587,15 @@ const parseInstallmentCountInput = (text: string): number | null => {
 };
 
 const parseDueDateForPreview = (value: string): Date | null => {
-  const date = new Date(`${value}T00:00:00.000Z`);
+  // Build the date in the user's local timezone. Parsing `YYYY-MM-DD` with a
+  // trailing `Z` would anchor it to UTC midnight, which renders as the
+  // previous day for negative-offset zones (e.g. BRT, UTC-3).
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) {
+    return null;
+  }
+  const [, year, month, day] = match;
+  const date = new Date(Number(year), Number(month) - 1, Number(day));
   return Number.isNaN(date.getTime()) ? null : date;
 };
 
@@ -598,5 +607,5 @@ const formatCreditCardLabel = (creditCard: CreditCard): string => {
 };
 
 const formatPreviewCurrency = (value: string): string => {
-  return formatCurrency(Number(value)).replace(/\u00A0/g, " ");
+  return safeFormatCurrency(value).replace(/\u00A0/g, " ");
 };
