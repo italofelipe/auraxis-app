@@ -972,6 +972,8 @@ export type MutationCreateTransactionArgs = {
   isInstallment?: InputMaybe<Scalars['Boolean']['input']>;
   isRecurring?: InputMaybe<Scalars['Boolean']['input']>;
   observation?: InputMaybe<Scalars['String']['input']>;
+  recurrenceInterval?: InputMaybe<Scalars['Int']['input']>;
+  recurrenceUnit?: InputMaybe<Scalars['String']['input']>;
   startDate?: InputMaybe<Scalars['String']['input']>;
   status?: InputMaybe<TransactionStatus>;
   tagId?: InputMaybe<Scalars['UUID']['input']>;
@@ -1773,6 +1775,8 @@ export type TransactionTypeObject = {
   isRecurring: Scalars['Boolean']['output'];
   observation?: Maybe<Scalars['String']['output']>;
   paidAt?: Maybe<Scalars['String']['output']>;
+  recurrenceInterval?: Maybe<Scalars['Int']['output']>;
+  recurrenceUnit?: Maybe<Scalars['String']['output']>;
   source: Scalars['String']['output'];
   startDate?: Maybe<Scalars['String']['output']>;
   status: Scalars['String']['output'];
