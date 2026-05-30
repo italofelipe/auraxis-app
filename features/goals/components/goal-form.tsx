@@ -19,6 +19,7 @@ import {
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
+import { CurrencyInputField } from "@/shared/forms/currency-input-field";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
 export interface GoalFormProps {
@@ -40,19 +41,6 @@ const goalToFormValues = (goal: GoalRecord | null | undefined): CreateGoalFormVa
     currentAmount: goal.currentAmount,
     targetDate: goal.targetDate,
   };
-};
-
-const parseNumeric = (value: string): number => {
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  const parsed = Number.parseFloat(normalized);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const formatNumeric = (value: number | null | undefined): string => {
-  if (value === null || value === undefined || !Number.isFinite(value)) {
-    return "";
-  }
-  return value.toString();
 };
 
 /**
@@ -142,14 +130,13 @@ function GoalFormFields({ control, errors }: GoalFormFieldsProps): ReactElement 
         control={control}
         name="targetAmount"
         render={({ field: { onChange, onBlur, value } }) => (
-          <AppInputField
+          <CurrencyInputField
             id="goal-target-amount"
             label="Valor alvo (R$)"
             placeholder="0,00"
-            keyboardType="decimal-pad"
-            value={formatNumeric(value)}
+            value={value ? String(value) : ""}
             onBlur={onBlur}
-            onChangeText={(text) => onChange(parseNumeric(text))}
+            onChangeAmount={(amount) => onChange(amount === "" ? 0 : Number(amount))}
             errorText={errors.targetAmount?.message}
           />
         )}
@@ -158,14 +145,13 @@ function GoalFormFields({ control, errors }: GoalFormFieldsProps): ReactElement 
         control={control}
         name="currentAmount"
         render={({ field: { onChange, onBlur, value } }) => (
-          <AppInputField
+          <CurrencyInputField
             id="goal-current-amount"
             label="Valor ja acumulado (R$)"
             placeholder="0,00"
-            keyboardType="decimal-pad"
-            value={formatNumeric(value)}
+            value={value ? String(value) : ""}
             onBlur={onBlur}
-            onChangeText={(text) => onChange(parseNumeric(text))}
+            onChangeAmount={(amount) => onChange(amount === "" ? 0 : Number(amount))}
             errorText={errors.currentAmount?.message}
           />
         )}
