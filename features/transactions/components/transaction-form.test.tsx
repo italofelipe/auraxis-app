@@ -74,7 +74,9 @@ describe("TransactionForm installments", () => {
     const { getByText, getByLabelText, onSubmit } = renderForm();
 
     fireEvent.changeText(getByLabelText("Titulo"), "Notebook");
-    fireEvent.changeText(getByLabelText("Valor (R$)"), "1200");
+    // Cents-first entry: digits shift in from the right, so R$ 1.200,00 is
+    // typed as "120000" (12000 cents → 1200,00).
+    fireEvent.changeText(getByLabelText("Valor (R$)"), "120000");
     fireEvent.changeText(getByLabelText("Data"), "2026-05-17");
     fireEvent.press(getByText("Nubank final 1234"));
     fireEvent(getByLabelText("Compra parcelada"), "onCheckedChange", true);

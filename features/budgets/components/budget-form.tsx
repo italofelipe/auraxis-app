@@ -18,6 +18,7 @@ import {
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
+import { CurrencyInputField } from "@/shared/forms/currency-input-field";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
 const PERIOD_OPTIONS: readonly { value: BudgetPeriod; label: string }[] = [
@@ -156,14 +157,13 @@ function BudgetFields({ control, errors }: BudgetFieldsProps): ReactElement {
         control={control}
         name="amount"
         render={({ field: { onChange, onBlur, value } }) => (
-          <AppInputField
+          <CurrencyInputField
             id="bud-amount"
             label="Limite"
-            placeholder="1500.00"
-            keyboardType="decimal-pad"
+            placeholder="0,00"
             value={value ?? ""}
             onBlur={onBlur}
-            onChangeText={onChange}
+            onChangeAmount={onChange}
             errorText={errors.amount?.message}
           />
         )}

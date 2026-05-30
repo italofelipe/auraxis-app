@@ -18,6 +18,7 @@ import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { CurrencyInputField } from "@/shared/forms/currency-input-field";
 
 const DEFAULTS: SimulateGoalFormValues = {
   targetAmount: 0,
@@ -26,31 +27,6 @@ const DEFAULTS: SimulateGoalFormValues = {
   monthlyIncome: null,
   monthlyExpenses: null,
   monthlyContribution: null,
-};
-
-const parseNumeric = (value: string): number => {
-  if (value.trim().length === 0) {
-    return 0;
-  }
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  const parsed = Number.parseFloat(normalized);
-  return Number.isFinite(parsed) ? parsed : 0;
-};
-
-const parseOptional = (value: string): number | null => {
-  if (value.trim().length === 0) {
-    return null;
-  }
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  const parsed = Number.parseFloat(normalized);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const formatNumeric = (value: number | null | undefined): string => {
-  if (value === null || value === undefined || !Number.isFinite(value)) {
-    return "";
-  }
-  return value.toString();
 };
 
 export interface GoalSimulatorFormProps {
@@ -123,7 +99,7 @@ function SimulatorFields({
         name="targetAmount"
         id="sim-target"
         label="Valor alvo"
-        placeholder="100000"
+        placeholder="0,00"
       />
       <RequiredAmount
         control={control}
@@ -131,7 +107,7 @@ function SimulatorFields({
         name="currentAmount"
         id="sim-current"
         label="Valor atual"
-        placeholder="0"
+        placeholder="0,00"
       />
       <OptionalAmount
         control={control}
@@ -139,7 +115,7 @@ function SimulatorFields({
         name="monthlyIncome"
         id="sim-income"
         label="Renda mensal (opcional)"
-        placeholder="0"
+        placeholder="0,00"
       />
       <OptionalAmount
         control={control}
@@ -147,7 +123,7 @@ function SimulatorFields({
         name="monthlyExpenses"
         id="sim-expenses"
         label="Despesa mensal (opcional)"
-        placeholder="0"
+        placeholder="0,00"
       />
       <OptionalAmount
         control={control}
@@ -155,7 +131,7 @@ function SimulatorFields({
         name="monthlyContribution"
         id="sim-contribution"
         label="Contribuicao desejada (opcional)"
-        placeholder="0"
+        placeholder="0,00"
       />
       <Controller
         control={control}
@@ -197,14 +173,13 @@ function RequiredAmount({
       control={control}
       name={name}
       render={({ field: { onChange, onBlur, value } }) => (
-        <AppInputField
+        <CurrencyInputField
           id={id}
           label={label}
           placeholder={placeholder}
-          keyboardType="decimal-pad"
-          value={formatNumeric(value)}
+          value={value ? String(value) : ""}
           onBlur={onBlur}
-          onChangeText={(text) => onChange(parseNumeric(text))}
+          onChangeAmount={(amount) => onChange(amount === "" ? 0 : Number(amount))}
           errorText={errors[name]?.message}
         />
       )}
@@ -232,14 +207,13 @@ function OptionalAmount({
       control={control}
       name={name}
       render={({ field: { onChange, onBlur, value } }) => (
-        <AppInputField
+        <CurrencyInputField
           id={id}
           label={label}
           placeholder={placeholder}
-          keyboardType="decimal-pad"
-          value={formatNumeric(value)}
+          value={value ? String(value) : ""}
           onBlur={onBlur}
-          onChangeText={(text) => onChange(parseOptional(text))}
+          onChangeAmount={(amount) => onChange(amount === "" ? null : Number(amount))}
           errorText={errors[name]?.message}
         />
       )}
