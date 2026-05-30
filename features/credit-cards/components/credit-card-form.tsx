@@ -18,6 +18,7 @@ import {
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppInputField } from "@/shared/components/app-input-field";
+import { CurrencyInputField } from "@/shared/forms/currency-input-field";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 
 const BRAND_OPTIONS: readonly { value: CreditCardBrand; label: string }[] = [
@@ -58,22 +59,6 @@ const buildDefaults = (initial: CreditCard | null): CreateCreditCardFormValues =
     benefits: [...initial.benefits],
     validityDate: initial.validityDate,
   };
-};
-
-const parseNumeric = (value: string): number | null => {
-  if (value.trim().length === 0) {
-    return null;
-  }
-  const normalized = value.replace(/\./g, "").replace(",", ".");
-  const parsed = Number.parseFloat(normalized);
-  return Number.isFinite(parsed) ? parsed : null;
-};
-
-const formatNumeric = (value: number | null | undefined): string => {
-  if (value === null || value === undefined || !Number.isFinite(value)) {
-    return "";
-  }
-  return value.toString();
 };
 
 const parseInteger = (value: string): number | null => {
@@ -274,14 +259,13 @@ function LimitField({ control, errors }: CreditCardFieldsProps): ReactElement {
       control={control}
       name="limitAmount"
       render={({ field: { onChange, onBlur, value } }) => (
-        <AppInputField
+        <CurrencyInputField
           id="cc-limit"
           label="Limite"
           placeholder="0,00"
-          keyboardType="decimal-pad"
-          value={formatNumeric(value)}
+          value={value ? String(value) : ""}
           onBlur={onBlur}
-          onChangeText={(text) => onChange(parseNumeric(text))}
+          onChangeAmount={(amount) => onChange(amount === "" ? null : Number(amount))}
           errorText={errors.limitAmount?.message}
         />
       )}
