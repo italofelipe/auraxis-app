@@ -30,6 +30,8 @@ interface TransactionPayload {
   readonly is_recurring: boolean;
   readonly is_installment: boolean;
   readonly installment_count: number | null;
+  readonly recurrence_interval: number | null;
+  readonly recurrence_unit: string | null;
   readonly tag_id: string | null;
   readonly account_id: string | null;
   readonly credit_card_id: string | null;
@@ -70,6 +72,8 @@ const mapTransaction = (payload: TransactionPayload): TransactionRecord => {
     isRecurring: payload.is_recurring,
     isInstallment: payload.is_installment,
     installmentCount: payload.installment_count,
+    recurrenceInterval: payload.recurrence_interval ?? 1,
+    recurrenceUnit: (payload.recurrence_unit as TransactionRecord["recurrenceUnit"]) ?? "month",
     tagId: payload.tag_id,
     accountId: payload.account_id,
     creditCardId: payload.credit_card_id,
@@ -135,6 +139,8 @@ const buildTransactionPayload = (
     description: command.description,
     observation: command.observation,
     is_recurring: command.isRecurring,
+    recurrence_interval: command.recurrenceInterval,
+    recurrence_unit: command.recurrenceUnit,
     is_installment: command.isInstallment,
     installment_count: command.installmentCount,
     tag_id: command.tagId,

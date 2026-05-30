@@ -22,6 +22,10 @@ const isoDate = z
     message: "Data invalida.",
   });
 
+const optionalIsoDate = isoDate.nullable().optional();
+
+export const recurrenceUnitSchema = z.enum(["day", "week", "month", "year"]);
+
 export const transactionTypeSchema = z.enum(["income", "expense"]);
 
 const creditCardIdSchema = z.string().uuid("Cartao invalido.").nullable();
@@ -52,6 +56,44 @@ const validateInstallmentRequirements = (
   }
 };
 
+const validateRecurringRequirements = (
+  values: {
+    readonly isRecurring?: boolean;
+    readonly startDate?: string | null;
+    readonly endDate?: string | null;
+  },
+  ctx: z.RefinementCtx,
+): void => {
+  if (values.isRecurring !== true) {
+    return;
+  }
+  if (!values.startDate) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["startDate"],
+      message: "Informe a data de inicio da recorrencia.",
+    });
+  }
+  if (!values.endDate) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["endDate"],
+      message: "Informe a data de fim da recorrencia.",
+    });
+  }
+  if (
+    values.startDate &&
+    values.endDate &&
+    new Date(values.startDate) > new Date(values.endDate)
+  ) {
+    ctx.addIssue({
+      code: "custom",
+      path: ["endDate"],
+      message: "A data de fim deve ser posterior a data de inicio.",
+    });
+  }
+};
+
 export const createTransactionFieldsSchema = z.object({
   title: trimmedString(2, 120, "Informe um titulo de 2 a 120 caracteres."),
   amount: decimalAmount,
@@ -59,14 +101,23 @@ export const createTransactionFieldsSchema = z.object({
   dueDate: isoDate,
   description: z.string().trim().max(500, "Descricao muito longa.").optional().nullable(),
   isRecurring: z.boolean().optional(),
+  startDate: optionalIsoDate,
+  endDate: optionalIsoDate,
+  recurrenceInterval: z
+    .number()
+    .int("Informe um intervalo inteiro.")
+    .min(1, "O intervalo deve ser ao menos 1.")
+    .max(365, "Intervalo muito grande.")
+    .default(1),
+  recurrenceUnit: recurrenceUnitSchema.default("month"),
   creditCardId: creditCardIdSchema.default(null),
   isInstallment: z.boolean().default(false),
   installmentCount: installmentCountSchema.default(null),
 });
 
-export const createTransactionSchema = createTransactionFieldsSchema.superRefine(
-  validateInstallmentRequirements,
-);
+export const createTransactionSchema = createTransactionFieldsSchema
+  .superRefine(validateInstallmentRequirements)
+  .superRefine(validateRecurringRequirements);
 
 export const updateTransactionSchema = z
   .object({
@@ -76,6 +127,10 @@ export const updateTransactionSchema = z
     dueDate: isoDate.optional(),
     description: z.string().trim().max(500).optional().nullable(),
     isRecurring: z.boolean().optional(),
+    startDate: optionalIsoDate,
+    endDate: optionalIsoDate,
+    recurrenceInterval: z.number().int().min(1).max(365).optional(),
+    recurrenceUnit: recurrenceUnitSchema.optional(),
     creditCardId: creditCardIdSchema.optional(),
     isInstallment: z.boolean().optional(),
     installmentCount: installmentCountSchema.optional(),

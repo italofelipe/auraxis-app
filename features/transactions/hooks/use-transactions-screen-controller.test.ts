@@ -7,6 +7,7 @@ import {
 } from "@/features/transactions/hooks/use-transaction-mutations";
 import { useTransactionsQuery } from "@/features/transactions/hooks/use-transactions-query";
 import { useTransactionsScreenController } from "@/features/transactions/hooks/use-transactions-screen-controller";
+import type { CreateTransactionFormValues } from "@/features/transactions/validators";
 
 jest.mock("@/features/transactions/hooks/use-transactions-query", () => ({
   useTransactionsQuery: jest.fn(),
@@ -42,6 +43,8 @@ const buildRecord = (overrides: Record<string, unknown> = {}) => ({
   isRecurring: false,
   isInstallment: false,
   installmentCount: null,
+  recurrenceInterval: 1,
+  recurrenceUnit: "month" as const,
   tagId: null,
   accountId: null,
   creditCardId: null,
@@ -54,6 +57,25 @@ const buildRecord = (overrides: Record<string, unknown> = {}) => ({
   paidAt: null,
   createdAt: null,
   updatedAt: null,
+  ...overrides,
+});
+
+const formValues = (
+  overrides: Partial<CreateTransactionFormValues> = {},
+): CreateTransactionFormValues => ({
+  title: "Conta",
+  amount: "150,75",
+  type: "expense",
+  dueDate: "2026-04-30",
+  description: null,
+  isRecurring: false,
+  startDate: null,
+  endDate: null,
+  recurrenceInterval: 1,
+  recurrenceUnit: "month",
+  creditCardId: null,
+  isInstallment: false,
+  installmentCount: null,
   ...overrides,
 });
 
@@ -156,17 +178,9 @@ describe("useTransactionsScreenController mutations", () => {
       result.current.handleOpenCreate();
     });
     await act(async () => {
-      await result.current.handleSubmit({
-        title: "Conta",
-        amount: "150,75",
-        type: "expense",
-        dueDate: "2026-04-30",
-        description: null,
-        isRecurring: false,
-        creditCardId: null,
-        isInstallment: false,
-        installmentCount: null,
-      });
+      await result.current.handleSubmit(
+        formValues({ title: "Conta", amount: "150,75" }),
+      );
     });
     expect(createStub.mutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ title: "Conta", amount: "150.75", type: "expense" }),
@@ -180,17 +194,16 @@ describe("useTransactionsScreenController mutations", () => {
       result.current.handleOpenCreate();
     });
     await act(async () => {
-      await result.current.handleSubmit({
-        title: "Notebook",
-        amount: "1200",
-        type: "expense",
-        dueDate: "2026-05-17",
-        description: null,
-        isRecurring: false,
-        creditCardId: "018f3a22-6ec3-7dc2-a93a-1bbdecb02000",
-        isInstallment: true,
-        installmentCount: 12,
-      });
+      await result.current.handleSubmit(
+        formValues({
+          title: "Notebook",
+          amount: "1200",
+          dueDate: "2026-05-17",
+          creditCardId: "018f3a22-6ec3-7dc2-a93a-1bbdecb02000",
+          isInstallment: true,
+          installmentCount: 12,
+        }),
+      );
     });
 
     expect(createStub.mutateAsync).toHaveBeenCalledWith(
@@ -208,17 +221,9 @@ describe("useTransactionsScreenController mutations", () => {
       result.current.handleOpenEdit(buildRecord({ id: "tx-9" }));
     });
     await act(async () => {
-      await result.current.handleSubmit({
-        title: "Updated",
-        amount: "100.00",
-        type: "income",
-        dueDate: "2026-04-30",
-        description: null,
-        isRecurring: false,
-        creditCardId: null,
-        isInstallment: false,
-        installmentCount: null,
-      });
+      await result.current.handleSubmit(
+        formValues({ title: "Updated", amount: "100.00", type: "income" }),
+      );
     });
     expect(updateStub.mutateAsync).toHaveBeenCalledWith(
       expect.objectContaining({ transactionId: "tx-9" }),
@@ -232,17 +237,7 @@ describe("useTransactionsScreenController mutations", () => {
       result.current.handleOpenCreate();
     });
     await act(async () => {
-      await result.current.handleSubmit({
-        title: "X",
-        amount: "1.00",
-        type: "expense",
-        dueDate: "2026-04-30",
-        description: null,
-        isRecurring: false,
-        creditCardId: null,
-        isInstallment: false,
-        installmentCount: null,
-      });
+      await result.current.handleSubmit(formValues({ title: "X", amount: "1.00" }));
     });
     expect(result.current.submitError).toBeInstanceOf(Error);
     expect(result.current.formMode.kind).toBe("create");
@@ -264,17 +259,7 @@ describe("useTransactionsScreenController mutations", () => {
       result.current.handleOpenCreate();
     });
     await act(async () => {
-      await result.current.handleSubmit({
-        title: "X",
-        amount: "1.00",
-        type: "expense",
-        dueDate: "2026-04-30",
-        description: null,
-        isRecurring: false,
-        creditCardId: null,
-        isInstallment: false,
-        installmentCount: null,
-      });
+      await result.current.handleSubmit(formValues({ title: "X", amount: "1.00" }));
     });
     act(() => {
       result.current.dismissSubmitError();
