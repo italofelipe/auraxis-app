@@ -91,9 +91,9 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.4.2",
-    "@commitlint/config-conventional": "^20.4.2",
-    "@graphql-codegen/cli": "^7.0.0",
+    "@commitlint/cli": "^20.5.3",
+    "@commitlint/config-conventional": "^20.5.3",
+    "@graphql-codegen/cli": "^7.1.2",
     "@graphql-codegen/typed-document-node": "^7.0.0",
     "@graphql-codegen/typescript": "^6.0.1",
     "@graphql-codegen/typescript-operations": "^6.0.2",
@@ -108,11 +108,11 @@
     "graphql": "^16.14.0",
     "husky": "^9.1.7",
     "jest-expo": "^54.0.17",
-    "lint-staged": "^16.3.2",
+    "lint-staged": "^16.4.0",
     "msw": "^2.14.5",
     "openapi-typescript": "^7.13.0",
     "prettier": "^3.8.3",
-    "react-test-renderer": "19.1.6",
+    "react-test-renderer": "19.2.7",
     "ts-jest": "^29.4.9",
     "typescript": "~5.9.2"
   },
