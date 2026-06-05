@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/italofelipe/auraxis-app/compare/v1.6.0...v1.6.1) (2026-06-05)
+
+
+### Bug Fixes
+
+* **graphql:** regenerate codegen types to match API schema ([afdfe56](https://github.com/italofelipe/auraxis-app/commit/afdfe5676a2baaad523109c1ffc224901eb1329c))
+
 ## [1.6.0](https://github.com/italofelipe/auraxis-app/compare/v1.5.0...v1.6.0) (2026-05-30)
 
 
