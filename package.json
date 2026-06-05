@@ -1,7 +1,7 @@
 {
   "name": "auraxis-app",
   "main": "expo-router/entry",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -43,7 +43,7 @@
     "@expo-google-fonts/raleway": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
     "@hookform/resolvers": "^5.2.2",
-    "@react-navigation/bottom-tabs": "^7.15.11",
+    "@react-navigation/bottom-tabs": "^7.16.1",
     "@react-navigation/elements": "^2.6.3",
     "@react-navigation/native": "^7.1.8",
     "@sentry/react-native": "^8.12.0",
