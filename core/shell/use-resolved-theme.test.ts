@@ -41,9 +41,10 @@ describe("useResolvedTheme", () => {
     expect(result.current).toBe("auraxis_dark");
   });
 
-  it("em \"system\" cai em light quando o device retorna null", () => {
+  it("em \"system\" cai em light quando o device retorna unspecified", () => {
     useAppShellStore.getState().setThemePreference("system");
-    useColorSchemeSpy.mockReturnValue(null);
+    // RN 0.83 replaced the legacy `null` no-preference value with `unspecified`.
+    useColorSchemeSpy.mockReturnValue("unspecified");
     const { result } = renderHook(() => useResolvedTheme());
     expect(result.current).toBe("auraxis_light");
   });
