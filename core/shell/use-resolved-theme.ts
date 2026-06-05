@@ -9,7 +9,7 @@ export type ResolvedThemeName = "auraxis_dark" | "auraxis_light";
  * `themePreference` with the device colour scheme.
  *
  * - `system` → mirrors `useColorScheme()` (defaults to light when the
- *   OS reports `null`, matching the app default for new users).
+ *   OS reports `unspecified`, matching the app default for new users).
  * - `light` / `dark` → pinned regardless of the OS setting.
  *
  * @returns Either `auraxis_dark` or `auraxis_light` — never `system`.

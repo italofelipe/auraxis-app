@@ -191,7 +191,14 @@
           "mode": "production",
           "color": "#2F80ED"
         }
-      ]
+      ],
+      "@sentry/react-native",
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-sharing",
+      "expo-web-browser",
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,
