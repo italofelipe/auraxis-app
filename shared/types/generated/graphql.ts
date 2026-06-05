@@ -37,6 +37,18 @@ export type Scalars = {
   UUID: { input: string; output: string; }
 };
 
+export type AiInsightFeedbackPayload = {
+  __typename?: 'AIInsightFeedbackPayload';
+  comment?: Maybe<Scalars['String']['output']>;
+  depth?: Maybe<Scalars['Int']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
+  insightId?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+  relevance?: Maybe<Scalars['Int']['output']>;
+  truthfulness?: Maybe<Scalars['Int']['output']>;
+  usefulness?: Maybe<Scalars['Int']['output']>;
+};
+
 export type AiInsightHistoryResultType = {
   __typename?: 'AIInsightHistoryResultType';
   items: Array<AiInsightType>;
@@ -272,6 +284,17 @@ export type CheckoutSessionType = {
   providerSubscriptionId?: Maybe<Scalars['String']['output']>;
 };
 
+/**
+ * Consome 1 simulação da quota freemium (#1409).
+ *
+ * Parity de ``POST /simulations/quota/consume``. Não falha em esgotamento:
+ * retorna ``quota.allowed=False`` para o cliente exibir o paywall.
+ */
+export type ConsumeSimulationQuotaMutation = {
+  __typename?: 'ConsumeSimulationQuotaMutation';
+  quota: SimulationQuotaType;
+};
+
 export type CreateBudgetMutation = {
   __typename?: 'CreateBudgetMutation';
   budget: BudgetType;
@@ -466,6 +489,8 @@ export type GenerateAiInsightPayload = {
   cached?: Maybe<Scalars['Boolean']['output']>;
   contextVersion?: Maybe<Scalars['String']['output']>;
   costUsd?: Maybe<Scalars['Float']['output']>;
+  forecast?: Maybe<Scalars['Boolean']['output']>;
+  id?: Maybe<Scalars['String']['output']>;
   items?: Maybe<Array<Maybe<AiInsightItemType>>>;
   model?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
@@ -745,6 +770,13 @@ export type Mutation = {
    */
   confirmBankImport?: Maybe<BankImportConfirmationPayload>;
   confirmEmail?: Maybe<AuthPayloadType>;
+  /**
+   * Consome 1 simulação da quota freemium (#1409).
+   *
+   * Parity de ``POST /simulations/quota/consume``. Não falha em esgotamento:
+   * retorna ``quota.allowed=False`` para o cliente exibir o paywall.
+   */
+  consumeSimulationQuota?: Maybe<ConsumeSimulationQuotaMutation>;
   createAccount?: Maybe<AccountPayload>;
   /** @deprecated ADR-0002: use POST /budgets */
   createBudget?: Maybe<CreateBudgetMutation>;
@@ -803,6 +835,8 @@ export type Mutation = {
   revokeSession?: Maybe<RevokeSessionMutation>;
   saveInstallmentVsCashSimulation?: Maybe<SaveInstallmentVsCashSimulationMutation>;
   simulateGoalPlan?: Maybe<SimulateGoalPlanMutation>;
+  /** GraphQL parity for POST /ai/insights/<id>/feedback (#1387). */
+  submitAiInsightFeedback?: Maybe<AiInsightFeedbackPayload>;
   updateAccount?: Maybe<AccountPayload>;
   /** @deprecated ADR-0002: use PATCH /budgets/{id} */
   updateBudget?: Maybe<UpdateBudgetMutation>;
@@ -1014,6 +1048,7 @@ export type MutationDeleteTickerArgs = {
 
 
 export type MutationDeleteTransactionArgs = {
+  scope?: InputMaybe<Scalars['String']['input']>;
   transactionId: Scalars['UUID']['input'];
 };
 
@@ -1099,6 +1134,16 @@ export type MutationSimulateGoalPlanArgs = {
   monthlyIncome?: InputMaybe<Scalars['String']['input']>;
   targetAmount: Scalars['String']['input'];
   targetDate?: InputMaybe<Scalars['String']['input']>;
+};
+
+
+export type MutationSubmitAiInsightFeedbackArgs = {
+  comment?: InputMaybe<Scalars['String']['input']>;
+  depth: Scalars['Int']['input'];
+  insightId: Scalars['String']['input'];
+  relevance: Scalars['Int']['input'];
+  truthfulness: Scalars['Int']['input'];
+  usefulness: Scalars['Int']['input'];
 };
 
 
@@ -1336,6 +1381,7 @@ export type Query = {
   receivables?: Maybe<ReceivableListType>;
   receivablesSummary?: Maybe<ReceivableSummaryType>;
   simulation?: Maybe<SimulationType>;
+  simulationQuota: SimulationQuotaType;
   simulations: SimulationListPayloadType;
   tag?: Maybe<TagType>;
   tags?: Maybe<TagListType>;
@@ -1633,6 +1679,17 @@ export type SimulationListPayloadType = {
   pages: Scalars['Int']['output'];
   perPage: Scalars['Int']['output'];
   total: Scalars['Int']['output'];
+};
+
+/** Snapshot da quota freemium do simulador (#1409). */
+export type SimulationQuotaType = {
+  __typename?: 'SimulationQuotaType';
+  allowed: Scalars['Boolean']['output'];
+  limit: Scalars['Int']['output'];
+  remaining?: Maybe<Scalars['Int']['output']>;
+  resetAt: Scalars['String']['output'];
+  unlimited: Scalars['Boolean']['output'];
+  used: Scalars['Int']['output'];
 };
 
 /** Generic persisted simulation envelope (DEC-196 / #1128). */
