@@ -4,7 +4,8 @@
 #
 # Secrets necessários (Settings → Secrets and variables → Actions):
 #   EXPO_TOKEN    — Expo account token (expo.dev → Account Settings → Access Tokens)
-#   SONAR_AURAXIS_APP_TOKEN — SonarCloud (sonarcloud.io → My Account → Security)
+# SAST: job `semgrep` (OSS, blocking). Dashboard de qualidade: SonarQube Community
+# Build local — auraxis-platform `make sonar` (wiki SAST-Local-SonarQube-and-Semgrep).
 #
 # Nota sobre Detox / EAS Build nativo:
 #   Builds iOS/Android nativos requerem macOS runner (custo) ou self-hosted.
@@ -377,47 +378,38 @@ jobs:
       - name: Audit runtime deps (high/critical) with temporary Expo allowlist
         run: node scripts/ci-audit-gate.js
 
-  # ── 9. SonarCloud ──────────────────────────────────────────────────────
-  # Modelo oficial: CI-based analysis (Automatic Analysis desabilitado no SonarCloud).
-  sonarcloud:
-    name: SonarCloud Analysis
+  # ── 9. Semgrep SAST ─────────────────────────────────────────────────────
+  # SAST OSS cross-file/dataflow (standalone, sem conta). Bloqueia merge em
+  # finding ERROR; SARIF como artifact (Code Scanning exige GHAS pago em repo
+  # privado). Dashboard de qualidade: SonarQube Community Build local no
+  # auraxis-platform (`make sonar`). sonar-project.properties é mantido para o
+  # scan local e para a governança check-sonar-config-governance.
+  semgrep:
+    name: Semgrep SAST
     runs-on: ubuntu-latest
-    needs: [test]
     permissions:
       contents: read
     steps:
-      - name: Check Sonar capability
-        id: capability
-        env:
-          SONAR_TOKEN_VALUE: ${{ secrets.SONAR_AURAXIS_APP_TOKEN }}
-        run: |
-          if [ -n "${SONAR_TOKEN_VALUE:-}" ]; then
-            echo "enabled=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "enabled=false" >> "$GITHUB_OUTPUT"
-            echo "::notice::SonarCloud skipped: token not available for this run."
-          fi
-
       - uses: actions/checkout@v4
-        if: steps.capability.outputs.enabled == 'true'
+      - uses: actions/setup-python@v5
         with:
-          fetch-depth: 0
-      - uses: actions/setup-node@v4
-        if: steps.capability.outputs.enabled == 'true'
+          python-version: '3.13'
+      - name: Install Semgrep
+        run: pip install --quiet semgrep
+      - name: Run Semgrep (blocking on ERROR)
+        run: |
+          semgrep scan \
+            --config p/typescript --config p/javascript --config p/react \
+            --config p/security-audit \
+            --severity ERROR --error --metrics=off \
+            --sarif --output semgrep.sarif
+      - name: Upload Semgrep SARIF
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: npm
-      - if: steps.capability.outputs.enabled == 'true'
-        run: npm ci --ignore-scripts
-      - name: Generate coverage for Sonar
-        if: steps.capability.outputs.enabled == 'true'
-        run: npm run test:coverage
-      - name: SonarCloud Scan
-        if: steps.capability.outputs.enabled == 'true'
-        uses: SonarSource/sonarqube-scan-action@7006c4492b2e0ee0f816d36501671557c97f5995 # v8.1.0
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_AURAXIS_APP_TOKEN }}
+          name: semgrep-sarif
+          path: semgrep.sarif
+          if-no-files-found: ignore
 
   # ── 10. Commit lint ────────────────────────────────────────────────────
   commitlint:
