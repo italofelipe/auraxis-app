@@ -98,6 +98,16 @@ export const buildCreditCardBillPath = (creditCardId: string): Href => ({
 });
 
 /**
+ * Builds the dynamic credit card detail route (info, cycle and utilization).
+ * @param creditCardId Credit card id from the card list.
+ * @returns Expo Router-compatible path under /cartoes.
+ */
+export const buildCreditCardDetailPath = (creditCardId: string): Href => ({
+  pathname: "/cartoes/[id]",
+  params: { id: creditCardId },
+});
+
+/**
  * Builds the dynamic budget detail route (usage, period and transactions).
  * @param budgetId Budget id from the budgets list.
  * @returns Expo Router-compatible path under /orcamentos.
