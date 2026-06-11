@@ -123,7 +123,8 @@
   "private": true,
   "overrides": {
     "tar": "7.5.11",
-    "@xmldom/xmldom": "^0.8.13"
+    "@xmldom/xmldom": "^0.8.13",
+    "shell-quote": "1.8.4"
   },
   "lint-staged": {
     "**/*.{ts,tsx}": [

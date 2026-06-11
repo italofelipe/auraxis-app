@@ -37,6 +37,17 @@ export type Scalars = {
   UUID: { input: string; output: string; }
 };
 
+/** Whether the snapshot changed since the last insight (no LLM call). */
+export type AiInsightChangeStatusType = {
+  __typename?: 'AIInsightChangeStatusType';
+  changed: Scalars['Boolean']['output'];
+  currentContextHash: Scalars['String']['output'];
+  lastContextHash?: Maybe<Scalars['String']['output']>;
+  lastGeneratedAt?: Maybe<Scalars['String']['output']>;
+  periodLabel: Scalars['String']['output'];
+  periodType: Scalars['String']['output'];
+};
+
 export type AiInsightFeedbackPayload = {
   __typename?: 'AIInsightFeedbackPayload';
   comment?: Maybe<Scalars['String']['output']>;
@@ -284,6 +295,19 @@ export type CheckoutSessionType = {
   providerSubscriptionId?: Maybe<Scalars['String']['output']>;
 };
 
+/** Canonical payload for completeOnboarding mutation. */
+export type CompleteOnboardingPayload = {
+  __typename?: 'CompleteOnboardingPayload';
+  /** Field-level validation errors (empty on success). */
+  errors: Array<ValidationError>;
+  /** Human-readable status message. */
+  message: Scalars['String']['output'];
+  /** True when the mutation completed without errors. */
+  ok: Scalars['Boolean']['output'];
+  /** ISO 8601 timestamp when onboarding was completed. */
+  onboardingCompletedAt?: Maybe<Scalars['String']['output']>;
+};
+
 /**
  * Consome 1 simulação da quota freemium (#1409).
  *
@@ -358,11 +382,9 @@ export type CreditCardType = {
   description?: Maybe<Scalars['String']['output']>;
   dueDay?: Maybe<Scalars['Int']['output']>;
   id: Scalars['String']['output'];
-  lastFourDigits?: Maybe<Scalars['String']['output']>;
   limitAmount?: Maybe<Scalars['DecimalScalar']['output']>;
   name: Scalars['String']['output'];
   updatedAt?: Maybe<Scalars['String']['output']>;
-  validityDate?: Maybe<Scalars['String']['output']>;
 };
 
 export type CreditCardUtilizationType = {
@@ -500,6 +522,22 @@ export type GenerateAiInsightPayload = {
   periodType?: Maybe<Scalars['String']['output']>;
   summary?: Maybe<Scalars['String']['output']>;
   tokensUsed?: Maybe<Scalars['Int']['output']>;
+};
+
+export type GoalContributionListPayloadType = {
+  __typename?: 'GoalContributionListPayloadType';
+  items: Array<Maybe<GoalContributionType>>;
+  pagination: PaginationType;
+};
+
+export type GoalContributionType = {
+  __typename?: 'GoalContributionType';
+  amount: Scalars['String']['output'];
+  createdAt?: Maybe<Scalars['String']['output']>;
+  goalId: Scalars['ID']['output'];
+  id: Scalars['ID']['output'];
+  note?: Maybe<Scalars['String']['output']>;
+  occurredAt: Scalars['String']['output'];
 };
 
 export type GoalListPayloadType = {
@@ -760,6 +798,12 @@ export type Mutation = {
   /** @deprecated ADR-0004: use POST /subscription/cancel */
   cancelSubscription?: Maybe<CancelSubscriptionMutation>;
   /**
+   * Mark the authenticated user's onboarding as completed (idempotent).
+   *
+   * REST parity: ``POST /user/onboarding/complete``.
+   */
+  completeOnboarding?: Maybe<CompleteOnboardingPayload>;
+  /**
    * Persist a subset of bank statement entries as transactions.
    *
    * ``mode`` controls how existing data is handled:
@@ -826,6 +870,12 @@ export type Mutation = {
    * together with a bank identifier.  No data is written to the database.
    */
   previewBankStatement?: Maybe<BankImportPreviewPayload>;
+  /**
+   * Register a deposit (+) or withdrawal (-) against a goal.
+   *
+   * REST parity: ``POST /goals/{goal_id}/contributions``.
+   */
+  recordGoalContribution?: Maybe<RecordGoalContributionMutation>;
   registerUser?: Maybe<AuthPayloadType>;
   resendConfirmationEmail?: Maybe<AuthPayloadType>;
   resetPassword?: Maybe<AuthPayloadType>;
@@ -1085,6 +1135,14 @@ export type MutationMarkReceivableReceivedArgs = {
 export type MutationPreviewBankStatementArgs = {
   bankName: Scalars['String']['input'];
   content: Scalars['String']['input'];
+};
+
+
+export type MutationRecordGoalContributionArgs = {
+  amount: Scalars['String']['input'];
+  goalId: Scalars['UUID']['input'];
+  note?: InputMaybe<Scalars['String']['input']>;
+  occurredAt?: InputMaybe<Scalars['String']['input']>;
 };
 
 
@@ -1354,6 +1412,7 @@ export type Query = {
   __typename?: 'Query';
   account?: Maybe<AccountType>;
   accounts?: Maybe<AccountListType>;
+  aiInsightChangeStatus?: Maybe<AiInsightChangeStatusType>;
   aiInsightHistory?: Maybe<AiInsightHistoryResultType>;
   billingPlans?: Maybe<BillingPlanListPayloadType>;
   budget?: Maybe<BudgetType>;
@@ -1365,6 +1424,7 @@ export type Query = {
   dashboardOverview?: Maybe<TransactionDashboardPayloadType>;
   fiscalDocuments?: Maybe<FiscalDocumentListType>;
   goal?: Maybe<GoalTypeObject>;
+  goalContributions?: Maybe<GoalContributionListPayloadType>;
   goalPlan?: Maybe<GoalPlanType>;
   goals?: Maybe<GoalListPayloadType>;
   installmentVsCashCalculate?: Maybe<InstallmentVsCashCalculationPayloadType>;
@@ -1383,6 +1443,7 @@ export type Query = {
   simulation?: Maybe<SimulationType>;
   simulationQuota: SimulationQuotaType;
   simulations: SimulationListPayloadType;
+  spendingPatternsLatest?: Maybe<SpendingPatternsLatestType>;
   tag?: Maybe<TagType>;
   tags?: Maybe<TagListType>;
   tickers?: Maybe<TickerListPayloadType>;
@@ -1400,6 +1461,12 @@ export type Query = {
 
 export type QueryAccountArgs = {
   accountId: Scalars['UUID']['input'];
+};
+
+
+export type QueryAiInsightChangeStatusArgs = {
+  anchorDate?: InputMaybe<Scalars['String']['input']>;
+  periodType: Scalars['String']['input'];
 };
 
 
@@ -1437,6 +1504,13 @@ export type QueryFiscalDocumentsArgs = {
 
 export type QueryGoalArgs = {
   goalId: Scalars['UUID']['input'];
+};
+
+
+export type QueryGoalContributionsArgs = {
+  goalId: Scalars['UUID']['input'];
+  page?: InputMaybe<Scalars['Int']['input']>;
+  perPage?: InputMaybe<Scalars['Int']['input']>;
 };
 
 
@@ -1636,6 +1710,18 @@ export type ReceivableSummaryType = {
   receivedTotal: Scalars['String']['output'];
 };
 
+/**
+ * Register a deposit (+) or withdrawal (-) against a goal.
+ *
+ * REST parity: ``POST /goals/{goal_id}/contributions``.
+ */
+export type RecordGoalContributionMutation = {
+  __typename?: 'RecordGoalContributionMutation';
+  contribution: GoalContributionType;
+  goal: GoalTypeObject;
+  message: Scalars['String']['output'];
+};
+
 /** Revoke all active sessions — global logout (#1028). */
 export type RevokeAllSessionsMutation = {
   __typename?: 'RevokeAllSessionsMutation';
@@ -1704,6 +1790,24 @@ export type SimulationType = {
   saved: Scalars['Boolean']['output'];
   toolId: Scalars['String']['output'];
   userId: Scalars['UUID']['output'];
+};
+
+/**
+ * Read-only cached Radar de Gastos (cron-generated, no quota).
+ *
+ * The individual ``patterns`` are forwarded from auraxis-api-v2 and their shape
+ * is intentionally not pinned here; they are exposed as a JSON string
+ * (``patterns_json``) so the schema stays stable as v2 evolves. ``generated_at``
+ * is null when no analysis has been cached yet.
+ */
+export type SpendingPatternsLatestType = {
+  __typename?: 'SpendingPatternsLatestType';
+  costUsd: Scalars['Float']['output'];
+  generatedAt?: Maybe<Scalars['String']['output']>;
+  model: Scalars['String']['output'];
+  patternsJson: Scalars['String']['output'];
+  periodLabel?: Maybe<Scalars['String']['output']>;
+  tokensUsed: Scalars['Int']['output'];
 };
 
 export type SubscriptionType = {
@@ -1913,6 +2017,7 @@ export type UserType = {
   name: Scalars['String']['output'];
   netWorth?: Maybe<Scalars['DecimalScalar']['output']>;
   occupation?: Maybe<Scalars['String']['output']>;
+  onboardingCompletedAt?: Maybe<Scalars['String']['output']>;
   profileQuizScore?: Maybe<Scalars['Int']['output']>;
   stateUf?: Maybe<Scalars['String']['output']>;
   taxonomyVersion?: Maybe<Scalars['String']['output']>;
