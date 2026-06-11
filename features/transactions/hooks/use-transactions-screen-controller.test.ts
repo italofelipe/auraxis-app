@@ -3,6 +3,7 @@ import { act, renderHook } from "@testing-library/react-native";
 import {
   useCreateTransactionMutation,
   useDeleteTransactionMutation,
+  useMarkTransactionPaidMutation,
   useUpdateTransactionMutation,
 } from "@/features/transactions/hooks/use-transaction-mutations";
 import { useTransactionsQuery } from "@/features/transactions/hooks/use-transactions-query";
@@ -16,12 +17,14 @@ jest.mock("@/features/transactions/hooks/use-transaction-mutations", () => ({
   useCreateTransactionMutation: jest.fn(),
   useUpdateTransactionMutation: jest.fn(),
   useDeleteTransactionMutation: jest.fn(),
+  useMarkTransactionPaidMutation: jest.fn(),
 }));
 
 const mockedUseQuery = jest.mocked(useTransactionsQuery);
 const mockedUseCreate = jest.mocked(useCreateTransactionMutation);
 const mockedUseUpdate = jest.mocked(useUpdateTransactionMutation);
 const mockedUseDelete = jest.mocked(useDeleteTransactionMutation);
+const mockedUseMarkPaid = jest.mocked(useMarkTransactionPaidMutation);
 
 const buildMutationStub = () => ({
   mutateAsync: jest.fn().mockResolvedValue(undefined),
@@ -82,14 +85,26 @@ const formValues = (
 let createStub: ReturnType<typeof buildMutationStub>;
 let updateStub: ReturnType<typeof buildMutationStub>;
 let deleteStub: ReturnType<typeof buildMutationStub>;
+let markPaidStub: ReturnType<typeof buildMutationStub>;
+
+beforeAll(() => {
+  jest.useFakeTimers({ doNotFake: ["queueMicrotask"] });
+  jest.setSystemTime(new Date("2026-06-11T12:00:00"));
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
 
 beforeEach(() => {
   createStub = buildMutationStub();
   updateStub = buildMutationStub();
   deleteStub = buildMutationStub();
+  markPaidStub = buildMutationStub();
   mockedUseCreate.mockReturnValue(createStub as never);
   mockedUseUpdate.mockReturnValue(updateStub as never);
   mockedUseDelete.mockReturnValue(deleteStub as never);
+  mockedUseMarkPaid.mockReturnValue(markPaidStub as never);
 });
 
 describe("useTransactionsScreenController data projection", () => {
@@ -243,13 +258,49 @@ describe("useTransactionsScreenController mutations", () => {
     expect(result.current.formMode.kind).toBe("create");
   });
 
-  it("delete dispara deleteMutation pelo id", async () => {
+  it("delete dispara deleteMutation com escopo occurrence por padrao", async () => {
     const { result } = renderHook(() => useTransactionsScreenController());
     await act(async () => {
       await result.current.handleDelete("tx-9");
     });
-    expect(deleteStub.mutateAsync).toHaveBeenCalledWith("tx-9");
+    expect(deleteStub.mutateAsync).toHaveBeenCalledWith({
+      transactionId: "tx-9",
+      scope: "occurrence",
+    });
     expect(result.current.deletingTransactionId).toBeNull();
+  });
+
+  it("delete com scope series repassa o escopo para a mutation", async () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    await act(async () => {
+      await result.current.handleDelete("tx-9", "series");
+    });
+    expect(deleteStub.mutateAsync).toHaveBeenCalledWith({
+      transactionId: "tx-9",
+      scope: "series",
+    });
+  });
+
+  it("handleMarkPaid dispara mutation com data e limpa estado de paying", async () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    await act(async () => {
+      await result.current.handleMarkPaid("tx-3", "2026-06-11");
+    });
+    expect(markPaidStub.mutateAsync).toHaveBeenCalledWith({
+      transactionId: "tx-3",
+      paidAt: "2026-06-11",
+    });
+    expect(result.current.payingTransactionId).toBeNull();
+  });
+
+  it("handleMarkPaid captura erro em submitError", async () => {
+    markPaidStub.mutateAsync.mockRejectedValueOnce(new Error("pay boom"));
+    const { result } = renderHook(() => useTransactionsScreenController());
+    await act(async () => {
+      await result.current.handleMarkPaid("tx-3", "2026-06-11");
+    });
+    expect(result.current.submitError).toBeInstanceOf(Error);
+    expect(result.current.payingTransactionId).toBeNull();
   });
 
   it("dismissSubmitError limpa estado e reseta mutations", async () => {
@@ -266,5 +317,81 @@ describe("useTransactionsScreenController mutations", () => {
     });
     expect(result.current.submitError).toBeNull();
     expect(createStub.reset).toHaveBeenCalled();
+  });
+});
+
+describe("useTransactionsScreenController server-side filters", () => {
+  beforeEach(() => {
+    mockedUseQuery.mockReturnValue({
+      data: { transactions: [], pagination: { total: 0 } },
+    } as never);
+  });
+
+  it("usa o mes corrente como periodo default da query", () => {
+    renderHook(() => useTransactionsScreenController());
+    expect(mockedUseQuery).toHaveBeenLastCalledWith({
+      startDate: "2026-06-01",
+      endDate: "2026-06-30",
+    });
+  });
+
+  it("expoe label do periodo em pt-BR capitalizado", () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    expect(result.current.periodLabel).toBe("Junho de 2026");
+  });
+
+  it("envia type, status e tag na query quando filtros ativos", () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    act(() => {
+      result.current.setTypeFilter("income");
+      result.current.setStatusFilter("pending");
+      result.current.setTagFilter("tag-1");
+    });
+    expect(mockedUseQuery).toHaveBeenLastCalledWith({
+      type: "income",
+      status: "pending",
+      tagId: "tag-1",
+      startDate: "2026-06-01",
+      endDate: "2026-06-30",
+    });
+  });
+
+  it("navega para o mes anterior e seguinte ajustando o range", () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    act(() => {
+      result.current.goToPreviousMonth();
+    });
+    expect(mockedUseQuery).toHaveBeenLastCalledWith({
+      startDate: "2026-05-01",
+      endDate: "2026-05-31",
+    });
+    expect(result.current.periodLabel).toBe("Maio de 2026");
+
+    act(() => {
+      result.current.goToNextMonth();
+      result.current.goToNextMonth();
+    });
+    expect(mockedUseQuery).toHaveBeenLastCalledWith({
+      startDate: "2026-07-01",
+      endDate: "2026-07-31",
+    });
+  });
+
+  it("clearFilters reseta filtros e volta ao mes corrente", () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    act(() => {
+      result.current.setStatusFilter("overdue");
+      result.current.setTagFilter("tag-9");
+      result.current.goToPreviousMonth();
+    });
+    act(() => {
+      result.current.clearFilters();
+    });
+    expect(result.current.statusFilter).toBe("all");
+    expect(result.current.tagFilter).toBe("all");
+    expect(mockedUseQuery).toHaveBeenLastCalledWith({
+      startDate: "2026-06-01",
+      endDate: "2026-06-30",
+    });
   });
 });
