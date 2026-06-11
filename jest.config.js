@@ -259,6 +259,8 @@ const config = {
     "features/budgets/services/budget-risk.ts",
     "features/budgets/hooks/use-budget-detail-screen-controller.ts",
     "features/budgets/screens/budget-detail-screen.tsx",
+    "features/credit-cards/hooks/use-credit-card-detail-screen-controller.ts",
+    "features/credit-cards/screens/credit-card-detail-screen.tsx",
     "features/plans/contracts.ts",
     "features/plans/hooks/use-plans-screen-controller.ts",
     "features/plans/screens/plans-screen.tsx",
