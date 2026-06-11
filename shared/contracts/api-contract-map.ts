@@ -96,6 +96,7 @@ import type {
   SpendingPatternsDetectResponse,
   SpendingPatternsLatestResponse,
 } from "@/features/spending-patterns/contracts";
+import type { WeeklySummaryNarrativeResponse } from "@/features/weekly-snapshot/contracts";
 import type {
   PushSubscriptionCommand,
   PushSubscriptionRecord,
@@ -434,6 +435,16 @@ export const apiContractMap = {
   >({
     method: "GET",
     path: "/ai/insights/spending-patterns/latest",
+    authRequired: true,
+  }),
+  weeklySummary: defineApiContract<
+    "GET",
+    "/ai/insights/weekly-summary",
+    never,
+    WeeklySummaryNarrativeResponse
+  >({
+    method: "GET",
+    path: "/ai/insights/weekly-summary",
     authRequired: true,
   }),
   aiInsightHistory: defineApiContract<
