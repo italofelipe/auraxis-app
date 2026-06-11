@@ -10,6 +10,7 @@ import { queryKeys } from "@/core/query/query-keys";
 import type {
   CreateTransactionCommand,
   TransactionCollection,
+  TransactionDeleteScope,
   TransactionRecord,
   UpdateTransactionCommand,
 } from "@/features/transactions/contracts";
@@ -87,16 +88,28 @@ export const useUpdateTransactionMutation = () => {
   });
 };
 
+export interface DeleteTransactionVariables {
+  readonly transactionId: string;
+  /** "series" soft-deletes the whole recurring/installment series. */
+  readonly scope?: TransactionDeleteScope;
+}
+
 export const useDeleteTransactionMutation = () => {
   const analytics = useAnalytics();
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, string, DeleteTransactionMutationContext>({
-    mutationFn: (transactionId) => transactionsService.deleteTransaction(transactionId),
-    onMutate: (transactionId) => ({
+  return useMutation<
+    void,
+    Error,
+    DeleteTransactionVariables,
+    DeleteTransactionMutationContext
+  >({
+    mutationFn: ({ transactionId, scope }) =>
+      transactionsService.deleteTransaction(transactionId, scope ?? "occurrence"),
+    onMutate: ({ transactionId }) => ({
       transaction: findCachedTransaction(queryClient, transactionId),
     }),
-    onSuccess: async (_data, _transactionId, mutationContext) => {
+    onSuccess: async (_data, _variables, mutationContext) => {
       if (mutationContext?.transaction) {
         analytics.capture(
           "transaction.deleted",
@@ -104,6 +117,31 @@ export const useDeleteTransactionMutation = () => {
         );
       } else {
         analytics.capture("transaction.deleted");
+      }
+      await queryClient.invalidateQueries({ queryKey: queryKeys.transactions.root });
+    },
+  });
+};
+
+export interface MarkTransactionPaidVariables {
+  readonly transactionId: string;
+  /** Effective payment date in YYYY-MM-DD format. */
+  readonly paidAt: string;
+}
+
+export const useMarkTransactionPaidMutation = () => {
+  const analytics = useAnalytics();
+  const queryClient = useQueryClient();
+
+  return useMutation<TransactionRecord, Error, MarkTransactionPaidVariables>({
+    mutationFn: ({ transactionId, paidAt }) =>
+      transactionsService.markTransactionPaid(transactionId, paidAt),
+    onSuccess: async (transaction) => {
+      if (transaction) {
+        analytics.capture(
+          "transaction.paid",
+          toTransactionAnalyticsProperties(transaction),
+        );
       }
       await queryClient.invalidateQueries({ queryKey: queryKeys.transactions.root });
     },
