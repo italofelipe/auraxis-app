@@ -59,6 +59,7 @@ const renderCard = (utilizationPct: number) => {
         isDeleting={false}
         onEdit={jest.fn()}
         onDelete={jest.fn()}
+        onViewDetails={jest.fn()}
         onViewBill={jest.fn()}
       />
     </TestProviders>,
@@ -89,7 +90,8 @@ describe("CreditCardCard", () => {
           isDeleting={false}
           onEdit={jest.fn()}
           onDelete={jest.fn()}
-          onViewBill={jest.fn()}
+          onViewDetails={jest.fn()}
+        onViewBill={jest.fn()}
         />
       </TestProviders>,
     );

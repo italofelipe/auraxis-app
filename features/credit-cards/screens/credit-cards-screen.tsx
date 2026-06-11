@@ -3,7 +3,11 @@ import type { ReactElement } from "react";
 import { useRouter } from "expo-router";
 import { YStack } from "tamagui";
 
-import { appRoutes, buildCreditCardBillPath } from "@/core/navigation/routes";
+import {
+  appRoutes,
+  buildCreditCardBillPath,
+  buildCreditCardDetailPath,
+} from "@/core/navigation/routes";
 import { CreditCardCard } from "@/features/credit-cards/components/credit-card-card";
 import { CreditCardForm } from "@/features/credit-cards/components/credit-card-form";
 import {
@@ -52,6 +56,9 @@ export function CreditCardsScreen(): ReactElement {
         onViewBill={(creditCardId) => {
           router.push(buildCreditCardBillPath(creditCardId));
         }}
+        onViewDetails={(creditCardId) => {
+          router.push(buildCreditCardDetailPath(creditCardId));
+        }}
       />
     </AppScreen>
   );
@@ -76,11 +83,13 @@ function SummaryCard({ controller }: ControllerProps): ReactElement {
 
 interface CreditCardsListSectionProps extends ControllerProps {
   readonly onViewBill: (creditCardId: string) => void;
+  readonly onViewDetails: (creditCardId: string) => void;
 }
 
 function CreditCardsListSection({
   controller,
   onViewBill,
+  onViewDetails,
 }: CreditCardsListSectionProps): ReactElement {
   return (
     <YStack gap="$3">
@@ -113,6 +122,7 @@ function CreditCardsListSection({
                 key={creditCard.id}
                 creditCard={creditCard}
                 isDeleting={controller.deletingCreditCardId === creditCard.id}
+                onViewDetails={() => onViewDetails(creditCard.id)}
                 onEdit={() => controller.handleOpenEdit(creditCard)}
                 onDelete={() => {
                   void controller.handleDelete(creditCard.id);
