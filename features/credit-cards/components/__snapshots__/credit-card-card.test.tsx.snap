@@ -360,6 +360,71 @@ exports[`CreditCardCard mantem snapshot de utilizacao em 0% 1`] = `
       }
     >
       <View
+        accessibilityLabel="Detalhes"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Detalhes
+        </Text>
+      </View>
+      <View
         accessibilityLabel="Ver fatura"
         accessibilityRole="button"
         accessibilityState={
@@ -918,6 +983,71 @@ exports[`CreditCardCard mantem snapshot de utilizacao em 50% 1`] = `
         }
       }
     >
+      <View
+        accessibilityLabel="Detalhes"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Detalhes
+        </Text>
+      </View>
       <View
         accessibilityLabel="Ver fatura"
         accessibilityRole="button"
@@ -1478,6 +1608,71 @@ exports[`CreditCardCard mantem snapshot de utilizacao em 80% 1`] = `
       }
     >
       <View
+        accessibilityLabel="Detalhes"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Detalhes
+        </Text>
+      </View>
+      <View
         accessibilityLabel="Ver fatura"
         accessibilityRole="button"
         accessibilityState={
@@ -2037,6 +2232,71 @@ exports[`CreditCardCard mantem snapshot de utilizacao em 100% 1`] = `
       }
     >
       <View
+        accessibilityLabel="Detalhes"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Detalhes
+        </Text>
+      </View>
+      <View
         accessibilityLabel="Ver fatura"
         accessibilityRole="button"
         accessibilityState={
@@ -2595,6 +2855,71 @@ exports[`CreditCardCard mantem snapshot de utilizacao em 125% 1`] = `
         }
       }
     >
+      <View
+        accessibilityLabel="Detalhes"
+        accessibilityRole="button"
+        accessibilityState={
+          {
+            "disabled": false,
+          }
+        }
+        accessible={true}
+        focusVisibleStyle={
+          {
+            "outlineColor": "$brandPrimaryLight",
+            "outlineStyle": "solid",
+            "outlineWidth": 2,
+          }
+        }
+        onBlur={[Function]}
+        onFocus={[Function]}
+        onResponderGrant={[Function]}
+        onResponderMove={[Function]}
+        onResponderRelease={[Function]}
+        onResponderTerminate={[Function]}
+        onResponderTerminationRequest={[Function]}
+        onStartShouldSetResponder={[Function]}
+        role="button"
+        style={
+          {
+            "alignItems": "center",
+            "backgroundColor": "transparent",
+            "borderBottomColor": "$brandSecondaryLight",
+            "borderBottomLeftRadius": 10,
+            "borderBottomRightRadius": 10,
+            "borderBottomWidth": 1,
+            "borderLeftColor": "$brandSecondaryLight",
+            "borderLeftWidth": 1,
+            "borderRightColor": "$brandSecondaryLight",
+            "borderRightWidth": 1,
+            "borderStyle": "solid",
+            "borderTopColor": "$brandSecondaryLight",
+            "borderTopLeftRadius": 10,
+            "borderTopRightRadius": 10,
+            "borderTopWidth": 1,
+            "cursor": "pointer",
+            "flexDirection": "row",
+            "flexWrap": "nowrap",
+            "justifyContent": "center",
+          }
+        }
+        tabIndex={0}
+      >
+        <Text
+          style={
+            {
+              "color": "$textPrimaryLight",
+              "fontFamily": "Raleway_600SemiBold",
+              "fontSize": 15,
+              "lineHeight": 22,
+              "textAlign": "center",
+            }
+          }
+          suppressHighlighting={true}
+        >
+          Detalhes
+        </Text>
+      </View>
       <View
         accessibilityLabel="Ver fatura"
         accessibilityRole="button"

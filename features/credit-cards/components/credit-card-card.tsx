@@ -210,6 +210,7 @@ function CreditCardBenefits({
 interface CreditCardActionsProps {
   readonly canViewBill: boolean;
   readonly isDeleting: boolean;
+  readonly onViewDetails: () => void;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
   readonly onViewBill: () => void;
@@ -218,12 +219,16 @@ interface CreditCardActionsProps {
 function CreditCardActions({
   canViewBill,
   isDeleting,
+  onViewDetails,
   onEdit,
   onDelete,
   onViewBill,
 }: CreditCardActionsProps): ReactElement {
   return (
     <XStack gap="$2" flexWrap="wrap">
+      <AppButton tone="secondary" onPress={onViewDetails} disabled={isDeleting}>
+        Detalhes
+      </AppButton>
       <AppButton tone="primary" onPress={onViewBill} disabled={!canViewBill}>
         Ver fatura
       </AppButton>
@@ -240,6 +245,7 @@ function CreditCardActions({
 export interface CreditCardCardProps {
   readonly creditCard: CreditCard;
   readonly isDeleting: boolean;
+  readonly onViewDetails: () => void;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
   readonly onViewBill: () => void;
@@ -248,6 +254,7 @@ export interface CreditCardCardProps {
 export function CreditCardCard({
   creditCard,
   isDeleting,
+  onViewDetails,
   onEdit,
   onDelete,
   onViewBill,
@@ -289,6 +296,7 @@ export function CreditCardCard({
         <CreditCardActions
           canViewBill={canViewBill}
           isDeleting={isDeleting}
+          onViewDetails={onViewDetails}
           onEdit={onEdit}
           onDelete={onDelete}
           onViewBill={onViewBill}
