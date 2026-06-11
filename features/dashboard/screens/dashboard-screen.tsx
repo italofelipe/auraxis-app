@@ -18,6 +18,7 @@ import { DashboardTopCategoriesCard } from "@/features/dashboard/components/dash
 import { DashboardTrendsChartCard } from "@/features/dashboard/components/dashboard-trends-chart-card";
 import { DashboardUpcomingDueCard } from "@/features/dashboard/components/dashboard-upcoming-due-card";
 import { DashboardWalletSummaryCard } from "@/features/dashboard/components/dashboard-wallet-summary-card";
+import { SpendingPatternsCard } from "@/features/spending-patterns/components/spending-patterns-card";
 import type {
   DashboardOverview,
   DashboardTrendPoint,
@@ -144,6 +145,7 @@ export function DashboardScreen(): ReactElement {
         onLayout={handleWeeklyInsightLayout}
       />
       <DashboardComparisonCards controller={controller} />
+      <SpendingPatternsCard />
       <DashboardUpcomingDueCard />
       <DashboardGoalsSummaryCard />
       <DashboardWalletSummaryCard />

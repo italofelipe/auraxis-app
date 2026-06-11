@@ -31,6 +31,10 @@ export const apiEndpointCatalog = {
     "POST /ai/insights/generate",
     "GET /ai/insights/history",
   ],
+  spendingPatterns: [
+    "POST /ai/insights/spending-patterns",
+    "GET /ai/insights/spending-patterns/latest",
+  ],
   imports: [
     "POST /v2/import/detect",
     "POST /v2/import/preview",
