@@ -68,6 +68,7 @@ export interface AnalyticsEventPropertiesByName {
   readonly "transaction.created": TransactionAnalyticsProperties;
   readonly "transaction.deleted": TransactionAnalyticsProperties;
   readonly "transaction.restored": TransactionAnalyticsProperties;
+  readonly "transaction.paid": TransactionAnalyticsProperties;
   readonly "goal.created": GoalCreatedAnalyticsProperties;
   readonly "goal.simulated": GoalSimulatedAnalyticsProperties;
   readonly "tool.used": ToolUsedAnalyticsProperties;
