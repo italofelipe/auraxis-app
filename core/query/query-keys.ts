@@ -19,6 +19,10 @@ export const queryKeys = {
     root: ["spending-patterns"] as const,
     latest: () => ["spending-patterns", "latest"] as const,
   },
+  weeklySnapshot: {
+    root: ["weekly-snapshot"] as const,
+    current: () => ["weekly-snapshot", "current"] as const,
+  },
   import: {
     root: ["import"] as const,
     preview: () => ["import", "preview"] as const,
