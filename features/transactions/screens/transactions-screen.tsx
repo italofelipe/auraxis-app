@@ -10,12 +10,18 @@ import { queryKeys } from "@/core/query/query-keys";
 import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
 import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
 import { FinancialCalendar } from "@/features/transactions/components/financial-calendar";
+import {
+  DeleteConfirmModal,
+  MarkPaidConfirmModal,
+  type DeleteTarget,
+  type MarkPaidTarget,
+} from "@/features/transactions/components/transaction-action-modals";
+import { TransactionFilters } from "@/features/transactions/components/transaction-filters";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { useTransactionsExport } from "@/features/transactions/hooks/use-transactions-export";
 import {
   useTransactionsScreenController,
   type TransactionsScreenController,
-  type TransactionsTypeFilter,
   type TransactionsViewMode,
   type TransactionViewModel,
 } from "@/features/transactions/hooks/use-transactions-screen-controller";
@@ -40,14 +46,6 @@ const STATUS_TONE: Record<string, "default" | "primary" | "danger"> = {
   cancelled: "default",
   postponed: "default",
 };
-
-const FILTER_LABELS: Record<TransactionsTypeFilter, string> = {
-  all: "Todas",
-  income: "Receitas",
-  expense: "Despesas",
-};
-
-const FILTER_ORDER: readonly TransactionsTypeFilter[] = ["all", "income", "expense"];
 
 const TRANSACTIONS_REFRESH_KEYS = [
   queryKeys.transactions.list(),
@@ -181,7 +179,18 @@ function FilterHeaderControls({
         listLabel={listLabel}
         calendarLabel={calendarLabel}
       />
-      <TransactionTypeFilter controller={controller} />
+      <TransactionFilters
+        typeFilter={controller.typeFilter}
+        onTypeFilterChange={controller.setTypeFilter}
+        statusFilter={controller.statusFilter}
+        onStatusFilterChange={controller.setStatusFilter}
+        tagFilter={controller.tagFilter}
+        onTagFilterChange={controller.setTagFilter}
+        periodLabel={controller.periodLabel}
+        onPreviousMonth={controller.goToPreviousMonth}
+        onNextMonth={controller.goToNextMonth}
+        onClearFilters={controller.clearFilters}
+      />
       <XStack gap="$2">
         <AppButton flex={1} onPress={controller.handleOpenCreate}>
           Nova transacao
@@ -197,22 +206,6 @@ function FilterHeaderControls({
       ) : null}
       <InstallmentGroupFilterNotice controller={controller} />
     </YStack>
-  );
-}
-
-function TransactionTypeFilter({ controller }: ControllerProps): ReactElement {
-  return (
-    <XStack gap="$2" flexWrap="wrap">
-      {FILTER_ORDER.map((filter) => (
-        <AppButton
-          key={filter}
-          tone={controller.typeFilter === filter ? "primary" : "secondary"}
-          onPress={() => controller.setTypeFilter(filter)}
-        >
-          {FILTER_LABELS[filter]}
-        </AppButton>
-      ))}
-    </XStack>
   );
 }
 
@@ -395,9 +388,12 @@ function TransactionsListCard({ controller }: ControllerProps): ReactElement {
   );
 }
 
+// eslint-disable-next-line max-lines-per-function
 function TransactionsList({ controller }: ControllerProps): ReactElement {
   const { refreshing, onRefresh } = useListRefresh(TRANSACTIONS_REFRESH_KEYS);
   const [detailTransactionId, setDetailTransactionId] = useState<string | null>(null);
+  const [payTarget, setPayTarget] = useState<MarkPaidTarget | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
   const detailTransaction = useMemo(
     () => controller.transactions.find((item) => item.id === detailTransactionId) ?? null,
     [controller.transactions, detailTransactionId],
@@ -417,9 +413,26 @@ function TransactionsList({ controller }: ControllerProps): ReactElement {
 
   const handleDelete = useCallback(
     (txId: string): void => {
-      void controller.handleDelete(txId);
+      const tx = controller.transactions.find((item) => item.id === txId);
+      if (tx) {
+        setDeleteTarget({
+          id: tx.id,
+          title: tx.title,
+          isSeries: tx.isRecurring || tx.isInstallment,
+        });
+      }
     },
-    [controller],
+    [controller.transactions],
+  );
+
+  const handleMarkPaid = useCallback(
+    (txId: string): void => {
+      const tx = controller.transactions.find((item) => item.id === txId);
+      if (tx) {
+        setPayTarget({ id: tx.id, title: tx.title });
+      }
+    },
+    [controller.transactions],
   );
 
   const handleDuplicate = useCallback(
@@ -443,19 +456,23 @@ function TransactionsList({ controller }: ControllerProps): ReactElement {
         tx={item}
         isDeleting={controller.deletingTransactionId === item.id}
         isDuplicating={controller.duplicatingTransactionId === item.id}
+        isPaying={controller.payingTransactionId === item.id}
         onDetails={handleDetails}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onMarkPaid={handleMarkPaid}
         onDuplicate={handleDuplicate}
       />
     ),
     [
       controller.deletingTransactionId,
       controller.duplicatingTransactionId,
+      controller.payingTransactionId,
       handleDelete,
       handleDetails,
       handleDuplicate,
       handleEdit,
+      handleMarkPaid,
     ],
   );
 
@@ -477,6 +494,24 @@ function TransactionsList({ controller }: ControllerProps): ReactElement {
         onClose={handleCloseDetails}
         onShowInstallmentGroup={controller.handleShowInstallmentGroup}
       />
+      <MarkPaidConfirmModal
+        target={payTarget}
+        isSubmitting={controller.payingTransactionId !== null}
+        onConfirm={(txId, paidAt) => {
+          void controller.handleMarkPaid(txId, paidAt);
+          setPayTarget(null);
+        }}
+        onClose={() => setPayTarget(null)}
+      />
+      <DeleteConfirmModal
+        target={deleteTarget}
+        isDeleting={controller.deletingTransactionId !== null}
+        onConfirm={(txId, scope) => {
+          void controller.handleDelete(txId, scope);
+          setDeleteTarget(null);
+        }}
+        onClose={() => setDeleteTarget(null)}
+      />
     </>
   );
 }
@@ -493,22 +528,28 @@ interface TransactionRowProps {
   readonly tx: TransactionViewModel;
   readonly isDeleting: boolean;
   readonly isDuplicating: boolean;
+  readonly isPaying: boolean;
   readonly onDetails: (txId: string) => void;
   readonly onEdit: (txId: string) => void;
   readonly onDelete: (txId: string) => void;
+  readonly onMarkPaid: (txId: string) => void;
   readonly onDuplicate: (txId: string) => void;
 }
 
+ 
 const TransactionRow = function TransactionRow({
   tx,
   isDeleting,
   isDuplicating,
+  isPaying,
   onDetails,
   onEdit,
   onDelete,
+  onMarkPaid,
   onDuplicate,
 }: TransactionRowProps): ReactElement {
   const installmentLabel = getInstallmentLabel(tx);
+  const isBusy = isDeleting || isDuplicating || isPaying;
   const handleDetails = useCallback(() => {
     onDetails(tx.id);
   }, [onDetails, tx.id]);
@@ -520,6 +561,10 @@ const TransactionRow = function TransactionRow({
   const handleDelete = useCallback(() => {
     onDelete(tx.id);
   }, [onDelete, tx.id]);
+
+  const handleMarkPaid = useCallback(() => {
+    onMarkPaid(tx.id);
+  }, [onMarkPaid, tx.id]);
 
   const handleDuplicate = useCallback(() => {
     onDuplicate(tx.id);
@@ -552,24 +597,21 @@ const TransactionRow = function TransactionRow({
         }
       />
       <XStack gap="$2" flexWrap="wrap">
-        <AppButton
-          tone="secondary"
-          onPress={handleDetails}
-          disabled={isDeleting || isDuplicating}
-        >
+        <AppButton tone="secondary" onPress={handleDetails} disabled={isBusy}>
           Detalhes
         </AppButton>
-        <AppButton tone="secondary" onPress={handleEdit} disabled={isDeleting || isDuplicating}>
+        {tx.status !== "paid" ? (
+          <AppButton onPress={handleMarkPaid} disabled={isBusy}>
+            {isPaying ? "Pagando..." : "Pagar"}
+          </AppButton>
+        ) : null}
+        <AppButton tone="secondary" onPress={handleEdit} disabled={isBusy}>
           Editar
         </AppButton>
-        <AppButton
-          tone="secondary"
-          onPress={handleDuplicate}
-          disabled={isDeleting || isDuplicating}
-        >
+        <AppButton tone="secondary" onPress={handleDuplicate} disabled={isBusy}>
           {isDuplicating ? "Duplicando..." : "Duplicar"}
         </AppButton>
-        <AppButton tone="secondary" onPress={handleDelete} disabled={isDeleting || isDuplicating}>
+        <AppButton tone="secondary" onPress={handleDelete} disabled={isBusy}>
           {isDeleting ? "Excluindo..." : "Excluir"}
         </AppButton>
       </XStack>
