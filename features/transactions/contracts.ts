@@ -9,6 +9,13 @@ export type TransactionStatus =
   | "postponed"
   | "overdue";
 
+/**
+ * Scope accepted by DELETE /transactions/{id}: "occurrence" removes only the
+ * target row (default), "series" soft-deletes the whole recurring/installment
+ * series. Mirrors the web client contract.
+ */
+export type TransactionDeleteScope = "occurrence" | "series";
+
 export interface TransactionRecord {
   readonly id: string;
   readonly title: string;

@@ -500,3 +500,61 @@ describe("transactionsService - error paths and trash", () => {
     );
   });
 });
+
+describe("transactionsService - mark paid + delete scope", () => {
+  it("markTransactionPaid faz PATCH parcial com status paid e paid_at", async () => {
+    const client = createClient();
+    client.patch.mockResolvedValue({
+      data: {
+        data: {
+          transaction: buildTransactionPayload({
+            status: "paid",
+            paid_at: "2026-06-11",
+          }),
+        },
+      },
+    });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    const result = await service.markTransactionPaid("tx-1", "2026-06-11");
+
+    expect(client.patch).toHaveBeenCalledWith("/transactions/tx-1", {
+      status: "paid",
+      paid_at: "2026-06-11",
+    });
+    expect(result.status).toBe("paid");
+    expect(result.paidAt).toBe("2026-06-11");
+  });
+
+  it("markTransactionPaid lanca erro quando payload nao volta", async () => {
+    const client = createClient();
+    client.patch.mockResolvedValue({ data: { data: {} } });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    await expect(service.markTransactionPaid("tx-1", "2026-06-11")).rejects.toThrow(
+      "Transacao paga veio sem payload.",
+    );
+  });
+
+  it("deleteTransaction com scope series envia query param scope", async () => {
+    const client = createClient();
+    client.delete.mockResolvedValue({ data: {} });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    await service.deleteTransaction("tx-9", "series");
+
+    expect(client.delete).toHaveBeenCalledWith("/transactions/tx-9", {
+      params: { scope: "series" },
+    });
+  });
+
+  it("deleteTransaction com scope occurrence mantem chamada sem params", async () => {
+    const client = createClient();
+    client.delete.mockResolvedValue({ data: {} });
+
+    const service = createTransactionsService(client as unknown as AxiosInstance);
+    await service.deleteTransaction("tx-9", "occurrence");
+
+    expect(client.delete).toHaveBeenCalledWith("/transactions/tx-9");
+  });
+});
