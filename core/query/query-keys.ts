@@ -15,6 +15,10 @@ export const queryKeys = {
     history: (page: number, perPage: number) =>
       ["insights", "history", page, perPage] as const,
   },
+  spendingPatterns: {
+    root: ["spending-patterns"] as const,
+    latest: () => ["spending-patterns", "latest"] as const,
+  },
   import: {
     root: ["import"] as const,
     preview: () => ["import", "preview"] as const,

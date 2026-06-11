@@ -92,6 +92,11 @@ import type {
   LatestInsightResponse,
 } from "@/features/insights/contracts";
 import type {
+  SpendingPatternsDetectCommand,
+  SpendingPatternsDetectResponse,
+  SpendingPatternsLatestResponse,
+} from "@/features/spending-patterns/contracts";
+import type {
   PushSubscriptionCommand,
   PushSubscriptionRecord,
   PushUnsubscribeCommand,
@@ -409,6 +414,26 @@ export const apiContractMap = {
   >({
     method: "POST",
     path: "/ai/insights/generate",
+    authRequired: true,
+  }),
+  spendingPatternsDetect: defineApiContract<
+    "POST",
+    "/ai/insights/spending-patterns",
+    SpendingPatternsDetectCommand,
+    SpendingPatternsDetectResponse
+  >({
+    method: "POST",
+    path: "/ai/insights/spending-patterns",
+    authRequired: true,
+  }),
+  spendingPatternsLatest: defineApiContract<
+    "GET",
+    "/ai/insights/spending-patterns/latest",
+    never,
+    SpendingPatternsLatestResponse
+  >({
+    method: "GET",
+    path: "/ai/insights/spending-patterns/latest",
     authRequired: true,
   }),
   aiInsightHistory: defineApiContract<
