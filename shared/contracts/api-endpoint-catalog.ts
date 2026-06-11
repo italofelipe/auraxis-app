@@ -35,6 +35,7 @@ export const apiEndpointCatalog = {
     "POST /ai/insights/spending-patterns",
     "GET /ai/insights/spending-patterns/latest",
   ],
+  weeklySnapshot: ["GET /ai/insights/weekly-summary"],
   imports: [
     "POST /v2/import/detect",
     "POST /v2/import/preview",
