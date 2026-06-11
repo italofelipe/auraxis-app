@@ -97,6 +97,16 @@ export const buildCreditCardBillPath = (creditCardId: string): Href => ({
   params: { id: creditCardId },
 });
 
+/**
+ * Builds the dynamic budget detail route (usage, period and transactions).
+ * @param budgetId Budget id from the budgets list.
+ * @returns Expo Router-compatible path under /orcamentos.
+ */
+export const buildBudgetDetailPath = (budgetId: string): Href => ({
+  pathname: "/orcamentos/[id]",
+  params: { id: budgetId },
+});
+
 export type PublicAppRoute =
   (typeof appRoutes.public)[keyof typeof appRoutes.public];
 export type PrivateAppRoute =
