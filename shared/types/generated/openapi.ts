@@ -4,6 +4,1480 @@
  */
 
 export interface paths {
+    "/ai/goals/{goal_id}/projection": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Narrativa de projeção de meta com IA (Premium)
+         * @description Gera uma narrativa motivacional e prática para uma meta financeira específica, combinando projeção matemática com contexto do usuário. Requer entitlement 'advanced_simulations' (plano Premium).
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    goal_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Narrativa gerada com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "cost_usd": 0.000067,
+                         *         "model": "gpt-4o-mini",
+                         *         "narrative": "Com base no seu plano de aportes...",
+                         *         "projection": {
+                         *           "months_to_completion": 24
+                         *         },
+                         *         "tokens_used": 450
+                         *       },
+                         *       "message": "Narrativa de projeção gerada com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "monthly_contribution deve ser um número positivo",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Não autenticado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token inválido",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Entitlement insuficiente */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "ENTITLEMENT_REQUIRED",
+                         *       "message": "Recurso exclusivo para assinantes Premium.",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Meta não encontrada",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Falha do provider LLM */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao gerar narrativa de projeção",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/change-status": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Verificar se houve mudança desde o último insight (sem IA)
+         * @description Compara o snapshot financeiro atual com o último insight persistido do mesmo período e retorna `changed`. NÃO chama o LLM: sem custo de tokens e sem consumir a cota diária. Usado pelo front para confirmar 'nada mudou, gerar mesmo assim?' antes de gastar uma geração.
+         */
+        get: {
+            parameters: {
+                query: {
+                    /**
+                     * @description daily, weekly ou monthly.
+                     * @example daily
+                     */
+                    period_type: string;
+                    /**
+                     * @description Data âncora ISO (YYYY-MM-DD). Default: hoje.
+                     * @example 2026-05-17
+                     */
+                    anchor_date?: string;
+                };
+                header?: {
+                    /**
+                     * @description Timezone IANA do usuário (para anchor_date omitido).
+                     * @example America/Sao_Paulo
+                     */
+                    "X-Auraxis-Timezone"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Status de mudança calculado */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "changed": false,
+                         *         "current_context_hash": "sha256",
+                         *         "last_context_hash": "sha256",
+                         *         "last_generated_at": "2026-05-17T03:15:00",
+                         *         "period_label": "2026-05-17",
+                         *         "period_type": "daily"
+                         *       },
+                         *       "message": "Status de mudança do insight"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "period_type deve ser daily, weekly ou monthly",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/generate": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Gerar insight financeiro period-aware com IA (Premium)
+         * @description Gera insights financeiros com contexto daily, weekly ou monthly, incluindo evidências estruturadas extraídas do snapshot financeiro.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Timezone IANA do usuário. Usado para calcular anchor_date quando a data âncora é omitida.
+                     * @example America/Sao_Paulo
+                     */
+                    "X-Auraxis-Timezone"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    /**
+                     * @description Período que deve ser consolidado antes da chamada à IA.
+                     * @example {
+                     *       "anchor_date": null,
+                     *       "period_type": "daily",
+                     *       "preview_run_id": "550e8400-e29b-41d4-a716-446655440000",
+                     *       "timezone": "America/Sao_Paulo"
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_ai_insight_schema_AIInsightGenerateRequestSchema"];
+                };
+            };
+            responses: {
+                /** @description Insight gerado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "cached": false,
+                         *         "context_hash": "sha256",
+                         *         "context_version": "financial_insight_snapshot.v1",
+                         *         "cost_usd": 0.000063,
+                         *         "items": [
+                         *           {
+                         *             "dimension": "general",
+                         *             "evidence": [
+                         *               "current_period.paid.balance"
+                         *             ],
+                         *             "message": "Você terminou o período com saldo positivo.",
+                         *             "title": "Saldo positivo",
+                         *             "type": "saude_financeira"
+                         *           }
+                         *         ],
+                         *         "model": "gpt-4o-mini",
+                         *         "period_end": "2026-05-17",
+                         *         "period_label": "2026-05-17",
+                         *         "period_start": "2026-05-17",
+                         *         "period_type": "daily",
+                         *         "summary": "Resumo do período.",
+                         *         "tokens_used": 420
+                         *       },
+                         *       "message": "Insight financeiro gerado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Parâmetros inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "period_type deve ser daily, weekly ou monthly",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Entitlement insuficiente */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "ENTITLEMENT_REQUIRED",
+                         *       "message": "Recurso exclusivo para assinantes Premium.",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno ou falha do provider LLM */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao gerar insight financeiro",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Histórico de insights de IA
+         * @description Retorna a lista paginada de insights gerados por IA para o usuário autenticado, ordenada do mais recente para o mais antigo. Acessível sem entitlement premium.
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /**
+                     * @description Itens por página (máx. 50). Padrão: 20.
+                     * @example 20
+                     */
+                    per_page?: string;
+                    /**
+                     * @description Número da página (base 1). Padrão: 1.
+                     * @example 1
+                     */
+                    page?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Lista de insights */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "items": [
+                         *           {
+                         *             "content": "{\"summary\":\"Resumo\",\"items\":[]}",
+                         *             "context_hash": "sha256",
+                         *             "context_schema_version": "financial_insight_snapshot.v1",
+                         *             "cost_usd": 0.000048,
+                         *             "created_at": "2026-05-11T19:00:00",
+                         *             "id": "uuid",
+                         *             "insight_type": "daily",
+                         *             "items": [],
+                         *             "model": "gpt-4o-mini",
+                         *             "period_end": "2026-05-11",
+                         *             "period_label": "2026-05-11",
+                         *             "period_start": "2026-05-11",
+                         *             "period_type": "daily",
+                         *             "summary": "Resumo",
+                         *             "tokens_used": 320
+                         *           }
+                         *         ],
+                         *         "page": 1,
+                         *         "per_page": 20,
+                         *         "total": 1
+                         *       },
+                         *       "message": "Histórico de insights carregado"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Não autenticado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token inválido",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/monthly-report": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Solicitar relatório mensal com IA (Premium)
+         * @description Cria um run auditável para relatório mensal, consolida daily insights do mês, compara com o relatório mensal anterior e envia email com deep link quando a geração terminar.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    /**
+                     * @description Mês que deve ser consolidado pelo relatório mensal.
+                     * @example {
+                     *       "anchor_date": "2026-05-21",
+                     *       "enqueue": true
+                     *     }
+                     */
+                    "application/json": components["schemas"]["app_schemas_ai_insight_schema_AIMonthlyReportRequestSchema"];
+                };
+            };
+            responses: {
+                /** @description Relatório gerado no fallback síncrono */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "deep_link": "https://app.auraxis.com.br/insights?open=uuid",
+                         *         "insight_id": "uuid",
+                         *         "period_label": "2026-05",
+                         *         "period_type": "monthly",
+                         *         "run_id": "uuid",
+                         *         "status": "generated"
+                         *       },
+                         *       "message": "Relatório mensal gerado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Run mensal enfileirado */
+                202: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "job_id": "rq-job-id",
+                         *         "period_label": "2026-05",
+                         *         "period_type": "monthly",
+                         *         "queued": true,
+                         *         "run_id": "uuid",
+                         *         "status": "previewed"
+                         *       },
+                         *       "message": "Relatório mensal enfileirado"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Entitlement ou consentimento insuficiente */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "ENTITLEMENT_REQUIRED",
+                         *       "message": "Recurso exclusivo para assinantes Premium.",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/runs/{run_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Consultar status de run de AI Insight
+         * @description Retorna o status rastreável de um run de AI Insight do usuário.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    run_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Status carregado */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "deep_link": "https://app.auraxis.com.br/insights?open=uuid",
+                         *         "insight_id": "uuid",
+                         *         "run_id": "uuid",
+                         *         "status": "generated"
+                         *       },
+                         *       "message": "Status do run carregado"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Run não encontrado */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Run não encontrado",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/spending": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Insights de gastos com IA (Premium)
+         * @description Analisa os gastos do mês informado e retorna insights gerados por LLM em PT-BR. Requer entitlement 'advanced_simulations' (plano Premium).
+         */
+        get: {
+            parameters: {
+                query?: {
+                    /**
+                     * @description Mês no formato YYYY-MM. Padrão: mês atual.
+                     * @example 2026-05
+                     */
+                    month?: string;
+                };
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Insights gerados com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "cached": false,
+                         *         "cost_usd": 0.000048,
+                         *         "insights": "[{\"type\":\"saude_financeira\",\"title\":\"Resumo\",\"message\":\"Mensagem acionável.\"}]",
+                         *         "items": [
+                         *           {
+                         *             "message": "Mensagem acionável.",
+                         *             "title": "Resumo",
+                         *             "type": "saude_financeira"
+                         *           }
+                         *         ],
+                         *         "model": "gpt-4o-mini",
+                         *         "month": "2026-05",
+                         *         "tokens_used": 320
+                         *       },
+                         *       "message": "Insights de gastos gerados com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Não autenticado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token inválido",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Entitlement insuficiente */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "ENTITLEMENT_REQUIRED",
+                         *       "message": "Recurso exclusivo para assinantes Premium.",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno ou falha do provider LLM */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao gerar insights de gastos",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/spending-patterns": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Radar de gastos compulsivos (Premium)
+         * @description Recebe as transações dos últimos ~90 dias e encaminha para o auraxis-api-v2, que roda a detecção de padrões via LLM. Requer entitlement 'advanced_simulations'. Retorna 503 quando a v2 está indisponível.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: never;
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/spending-patterns/latest": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Radar de gastos em cache (Premium, somente leitura)
+         * @description Retorna o último radar de gastos compulsivos já gerado pelo cron diário. NÃO chama o LLM nem consome a cota diária de IA — a geração ocorre exclusivamente no batch agendado. Quando ainda não há análise, 'patterns' vem vazio e 'generated_at' é null. Requer entitlement 'advanced_simulations'.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Radar de gastos em cache retornado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "cost_usd": 0.000042,
+                         *         "generated_at": "2026-06-05T06:00:00",
+                         *         "model": "v2-spending-patterns",
+                         *         "patterns": [
+                         *           {
+                         *             "description": "Cafés",
+                         *             "severity": "high"
+                         *           }
+                         *         ],
+                         *         "period_label": "2026-06-05",
+                         *         "tokens_used": 280
+                         *       },
+                         *       "message": "Radar de gastos retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Não autenticado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token inválido",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Entitlement insuficiente */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "ENTITLEMENT_REQUIRED",
+                         *       "message": "Recurso exclusivo para assinantes Premium.",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao ler o radar de gastos",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/weekly-summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Briefing semanal com IA (Premium, somente leitura)
+         * @description Retorna o resumo financeiro da semana atual (agregação de transações) e a narrativa do último insight semanal já gerado pelo batch agendado. NÃO chama o LLM nem envia email — a geração ocorre exclusivamente no cron semanal. Quando ainda não há insight, 'narrative' vem vazio. Requer entitlement 'advanced_simulations'.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Resumo semanal retornado com sucesso */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "cost_usd": 0.000042,
+                         *         "generated_at": "2026-06-01T03:00:00",
+                         *         "model": "gpt-4o-mini",
+                         *         "narrative": "Esta semana você gastou R$ 1.200...",
+                         *         "summary": {
+                         *           "current_week": {},
+                         *           "previous_week": {}
+                         *         },
+                         *         "tokens_used": 280
+                         *       },
+                         *       "message": "Resumo semanal retornado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Não autenticado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token inválido",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Entitlement insuficiente */
+                403: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "ENTITLEMENT_REQUIRED",
+                         *       "message": "Recurso exclusivo para assinantes Premium.",
+                         *       "status_code": 403
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Erro interno */
+                500: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "INTERNAL_ERROR",
+                         *       "message": "Erro ao ler resumo semanal",
+                         *       "status_code": 500
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/{insight_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Buscar AI Insight por id
+         * @description Retorna um insight específico do usuário autenticado, usado por deep links como /insights?open=<insight_id>.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    insight_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Insight carregado */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "id": "uuid",
+                         *         "items": [],
+                         *         "period_label": "2026-05",
+                         *         "period_type": "monthly",
+                         *         "summary": "Resumo mensal"
+                         *       },
+                         *       "message": "Insight carregado"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Insight não encontrado */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "NOT_FOUND",
+                         *       "message": "Insight não encontrado",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/ai/insights/{insight_id}/feedback": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Enviar feedback de um insight de IA
+         * @description Registra notas de 0 a 5 (relevância, veracidade, profundidade, utilidade) e um comentário opcional sobre um insight do próprio usuário. Reenviar atualiza o feedback existente.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    /** @description UUID do insight */
+                    insight_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Feedback registrado */
+                201: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "comment": "Muito útil",
+                         *         "depth": 4,
+                         *         "id": "uuid",
+                         *         "insight_id": "uuid",
+                         *         "relevance": 5,
+                         *         "truthfulness": 4,
+                         *         "usefulness": 5
+                         *       },
+                         *       "message": "Feedback registrado com sucesso"
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Dados de feedback inválidos.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Insight não encontrado */
+                404: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "AI_INSIGHT_NOT_FOUND",
+                         *       "message": "Insight não encontrado.",
+                         *       "status_code": 404
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/email/confirm": {
         parameters: {
             query?: never;
@@ -55,7 +1529,20 @@ export interface paths {
                     content: {
                         /**
                          * @example {
-                         *       "data": {},
+                         *       "data": {
+                         *         "refresh_token": "refresh-token-example",
+                         *         "session_created": true,
+                         *         "token": "example-token",
+                         *         "user": {
+                         *           "email_verification": {
+                         *             "verified": true
+                         *           },
+                         *           "identity": {
+                         *             "email": "usuario@auraxis.com.br",
+                         *             "id": "00000000-0000-0000-0000-000000000000"
+                         *           }
+                         *         }
+                         *       },
                          *       "message": "Email confirmed successfully."
                          *     }
                          */
@@ -80,6 +1567,9 @@ export interface paths {
                         /**
                          * @example {
                          *       "code": "VALIDATION_ERROR",
+                         *       "details": {
+                         *         "reason": "expired"
+                         *       },
                          *       "message": "Invalid or expired email confirmation token.",
                          *       "status_code": 400
                          *     }
@@ -1871,20 +3361,20 @@ export interface paths {
             parameters: {
                 query?: {
                     /**
-                     * @description Data final para período customizado (YYYY-MM-DD)
-                     * @example 2026-04-19
+                     * @description Data inicial para período customizado (YYYY-MM-DD)
+                     * @example 2026-03-01
                      */
-                    end_date?: string;
+                    start_date?: string;
                     /**
                      * @description Preset de período da série: 1m (padrão), 3m, 6m
                      * @example 1m
                      */
                     period?: string;
                     /**
-                     * @description Data inicial para período customizado (YYYY-MM-DD)
-                     * @example 2026-03-01
+                     * @description Data final para período customizado (YYYY-MM-DD)
+                     * @example 2026-04-19
                      */
-                    start_date?: string;
+                    end_date?: string;
                 };
                 header?: {
                     /**
@@ -2540,6 +4030,114 @@ export interface paths {
         };
         trace?: never;
     };
+    "/goals/{goal_id}/contributions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Lista o histórico de contribuições de uma meta (paginado). */
+        get: {
+            parameters: {
+                query?: {
+                    page?: number;
+                    per_page?: number;
+                };
+                header?: never;
+                path: {
+                    goal_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Histórico paginado de contribuições */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        /** @description Registra um aporte (valor positivo) ou retirada (valor negativo) na meta, atualizando o valor acumulado e o histórico. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path: {
+                    goal_id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Contribuição registrada com sucesso */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Dados inválidos ou saldo insuficiente */
+                400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Sem permissão */
+                403: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Meta não encontrada */
+                404: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/goals/{goal_id}/plan": {
         parameters: {
             query?: never;
@@ -2702,6 +4300,304 @@ export interface paths {
                 };
             };
         };
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/consents": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Listar consentimentos LGPD do usuário
+         * @description Retorna o evento mais recente para cada tipo de consentimento que o usuário já registrou. Tipos nunca registrados não aparecem na lista.
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Lista de consentimentos atual */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "items": [
+                         *           {
+                         *             "action": "granted",
+                         *             "created_at": "2026-05-17T12:00:00",
+                         *             "id": "uuid",
+                         *             "kind": "terms",
+                         *             "source": "web",
+                         *             "version": "1.0"
+                         *           }
+                         *         ],
+                         *         "total": 1
+                         *       },
+                         *       "message": "Consentimentos listados com sucesso."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        /**
+         * Registrar consentimento LGPD
+         * @description Registra um evento de aceite ou revogação de um tipo de consentimento em uma versão específica. Idempotente sobre (kind, version, action) — replay do mesmo evento retorna a linha original.
+         */
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consentimento registrado */
+                201: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "action": "granted",
+                         *         "created_at": "2026-05-17T12:00:00",
+                         *         "id": "uuid",
+                         *         "kind": "terms",
+                         *         "source": "web",
+                         *         "version": "1.0"
+                         *       },
+                         *       "message": "Consentimento registrado com sucesso."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Dados inválidos */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "kind/action/source inválido.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/me/consents/{kind}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revogar consentimento LGPD
+         * @description Atalho para registrar um evento de revogação. Versão revogada é a última versão aceita do mesmo tipo, ou '1.0' se nunca houve evento anterior.
+         */
+        delete: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path: {
+                    kind: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Consentimento revogado */
+                204: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Kind inválido */
+                400: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "VALIDATION_ERROR",
+                         *       "message": "Kind não suportado.",
+                         *       "status_code": 400
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+                /** @description Token revogado */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        options?: never;
         head?: never;
         patch?: never;
         trace?: never;
@@ -3380,6 +5276,88 @@ export interface paths {
                 };
                 /** @description Dados inválidos */
                 400: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/quota": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Retorna a quota de simulações do usuário autenticado. */
+        get: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Snapshot da quota */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/simulations/quota/consume": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Consome uma simulação completa. Premium é ilimitado; free esgotado retorna allowed=false (sem erro) para o cliente exibir o paywall. */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Quota atualizada (ver campo allowed) */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -6536,14 +8514,17 @@ export interface paths {
         post?: never;
         /**
          * Excluir conta do usuário (LGPD)
-         * @description Anonimiza permanentemente todos os dados pessoais do usuário autenticado (soft-delete LGPD). Requer confirmação de senha.
+         * @description Apaga ou anonimiza permanentemente os dados pessoais do usuário autenticado, executando a estratégia de deleção registrada no registry LGPD para cada entidade. Requer confirmação de senha.
          *
          *     Após a exclusão:
-         *     - Todos os campos de PII são anonimizados
+         *     - Entidades com `DELETE` são removidas do banco (transactions, goals, accounts, etc.)
+         *     - Entidades com `ANONYMIZE` mantêm a linha com PII anonimizado (User, audit_events, subscriptions, etc.)
+         *     - Entidades com `RETAIN` são preservadas por obrigação fiscal (fiscal_documents, etc.)
          *     - O JWT é revogado (sessão encerrada)
+         *     - Refresh tokens e push subscriptions são removidos
          *     - O usuário não consegue mais fazer login
          *
-         *     Esta ação é irreversível.
+         *     A resposta inclui o relatório de auditoria com a contagem por entidade e a metadata de retenções legais. Esta ação é irreversível.
          */
         delete: {
             parameters: {
@@ -6577,7 +8558,34 @@ export interface paths {
                     content: {
                         /**
                          * @example {
-                         *       "data": {},
+                         *       "data": {
+                         *         "report": {
+                         *           "deleted_at": "2026-05-17T06:00:00",
+                         *           "retentions": [
+                         *             {
+                         *               "entity": "fiscal_documents",
+                         *               "explanation": "Fiscal documents (NF, receipts) — Brazilian tax retention",
+                         *               "reason": "fiscal",
+                         *               "retention_days": 1825
+                         *             }
+                         *           ],
+                         *           "summary": {
+                         *             "anonymized": {
+                         *               "audit_events": 12,
+                         *               "users": 1
+                         *             },
+                         *             "deleted": {
+                         *               "goals": 3,
+                         *               "transactions": 47
+                         *             },
+                         *             "retained": {
+                         *               "fiscal_documents": 5
+                         *             }
+                         *           },
+                         *           "user_id": "uuid"
+                         *         },
+                         *         "success": true
+                         *       },
                          *       "message": "Account deleted."
                          *     }
                          */
@@ -6916,6 +8924,116 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/user/me/export": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Exportar pacote LGPD do usuário
+         * @description Gera um pacote JSON com todos os dados pessoais do usuário autenticado, organizados por entidade do registry LGPD. Inclui metadados de geração e seção ``retentions`` que explica os dados retidos por obrigação legal (ex: documentos fiscais com retenção de 5 anos).
+         */
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /**
+                     * @description Opcional. Envie `v2` para o envelope padronizado.
+                     * @example v2
+                     */
+                    "X-API-Contract"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Pacote LGPD gerado */
+                200: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "data": {
+                         *         "consents": [],
+                         *         "metadata": {
+                         *           "generated_at": "2026-05-17T06:00:00+00:00",
+                         *           "registry_version": "1.0",
+                         *           "scope": "lgpd_full_export",
+                         *           "user_id": "uuid"
+                         *         },
+                         *         "retentions": [
+                         *           {
+                         *             "entity": "fiscal_documents",
+                         *             "explanation": "Fiscal documents (NF, receipts) — Brazilian tax retention",
+                         *             "reason": "fiscal",
+                         *             "retention_days": 1825
+                         *           }
+                         *         ],
+                         *         "transactions": [],
+                         *         "users": [
+                         *           {
+                         *             "email": "...",
+                         *             "id": "uuid",
+                         *             "name": "..."
+                         *           }
+                         *         ]
+                         *       },
+                         *       "message": "Pacote LGPD gerado com sucesso."
+                         *     }
+                         */
+                        "application/json": {
+                            data: Record<string, never>;
+                            message: string;
+                            meta?: Record<string, never>;
+                        };
+                    };
+                };
+                /** @description Token revogado ou ausente */
+                401: {
+                    headers: {
+                        /**
+                         * @description Identificador único da requisição gerado pela API.
+                         * @example req-example-id
+                         */
+                        "X-Request-ID"?: string;
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        /**
+                         * @example {
+                         *       "code": "UNAUTHORIZED",
+                         *       "message": "Token revogado.",
+                         *       "status_code": 401
+                         *     }
+                         */
+                        "application/json": {
+                            code: string;
+                            details?: Record<string, never>;
+                            message: string;
+                            status_code?: number;
+                        };
+                    };
+                };
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/user/notification-preferences": {
         parameters: {
             query?: never;
@@ -6987,6 +9105,47 @@ export interface paths {
                 };
             };
         };
+        trace?: never;
+    };
+    "/user/onboarding/complete": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Marca o onboarding do usuário como concluído (idempotente). */
+        post: {
+            parameters: {
+                query?: never;
+                header?: never;
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Onboarding marcado como concluído */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                /** @description Token inválido ou expirado */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/user/profile": {
@@ -7835,20 +9994,20 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
                     /** @description Data final (YYYY-MM-DD). Opcional. */
                     end_date?: string;
-                    /**
-                     * @deprecated
-                     * @description Alias legado de `end_date`.
-                     */
-                    finalDate?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `start_date`.
                      */
                     startDate?: string;
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    start_date?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
+                    finalDate?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -7909,20 +10068,20 @@ export interface paths {
         options: {
             parameters: {
                 query?: {
+                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
+                    start_date?: string;
                     /** @description Data final (YYYY-MM-DD). Opcional. */
                     end_date?: string;
-                    /**
-                     * @deprecated
-                     * @description Alias legado de `end_date`.
-                     */
-                    finalDate?: string;
                     /**
                      * @deprecated
                      * @description Alias legado de `start_date`.
                      */
                     startDate?: string;
-                    /** @description Data inicial (YYYY-MM-DD). Opcional. */
-                    start_date?: string;
+                    /**
+                     * @deprecated
+                     * @description Alias legado de `end_date`.
+                     */
+                    finalDate?: string;
                 };
                 header?: {
                     /** @description Opcional. Envie 'v2' para o contrato padronizado. */
@@ -9272,6 +11431,12 @@ export interface components {
              */
             amount: number;
             /**
+             * @description Categoria estruturada para controle de orçamento
+             * @default null
+             * @enum {string|null}
+             */
+            category: "alimentacao" | "transporte" | "moradia" | "saude" | "lazer" | "educacao" | "investimentos" | "poupanca" | "outros" | null;
+            /**
              * Format: date-time
              * @description Data de criação da transação
              */
@@ -9343,6 +11508,19 @@ export interface components {
              */
             paid_at?: string | null;
             /**
+             * @description Intervalo da recorrência (a cada N unidades)
+             * @default 1
+             * @example 1
+             */
+            recurrence_interval: number;
+            /**
+             * @description Unidade da recorrência: day, week, month ou year
+             * @default month
+             * @example month
+             * @enum {string}
+             */
+            recurrence_unit: "day" | "week" | "month" | "year";
+            /**
              * Format: date
              * @description Data de início (para transações recorrentes)
              * @default null
@@ -9393,6 +11571,12 @@ export interface components {
              * @example 150.50
              */
             amount?: number;
+            /**
+             * @description Categoria estruturada para controle de orçamento
+             * @default null
+             * @enum {string|null}
+             */
+            category: "alimentacao" | "transporte" | "moradia" | "saude" | "lazer" | "educacao" | "investimentos" | "poupanca" | "outros" | null;
             /**
              * Format: date-time
              * @description Data de criação da transação
@@ -9465,6 +11649,19 @@ export interface components {
              */
             paid_at?: string | null;
             /**
+             * @description Intervalo da recorrência (a cada N unidades)
+             * @default 1
+             * @example 1
+             */
+            recurrence_interval: number;
+            /**
+             * @description Unidade da recorrência: day, week, month ou year
+             * @default month
+             * @example month
+             * @enum {string}
+             */
+            recurrence_unit: "day" | "week" | "month" | "year";
+            /**
              * Format: date
              * @description Data de início (para transações recorrentes)
              * @default null
@@ -9503,6 +11700,45 @@ export interface components {
              * @description ID do usuário proprietário da transação
              */
             readonly user_id?: string;
+        };
+        app_schemas_ai_insight_schema_AIInsightGenerateRequestSchema: {
+            /**
+             * Format: date
+             * @description Data âncora do período no formato YYYY-MM-DD.
+             * @example 2026-05-17
+             */
+            anchor_date?: string | null;
+            /**
+             * @description Granularidade do insight financeiro.
+             * @example daily
+             * @enum {string}
+             */
+            period_type: "daily" | "weekly" | "monthly";
+            /**
+             * Format: uuid
+             * @description Run de preview admin a ser reutilizado para manter o mesmo snapshot_hash na geração.
+             * @example 550e8400-e29b-41d4-a716-446655440000
+             */
+            preview_run_id?: string | null;
+            /**
+             * @description Timezone IANA do usuário usado quando anchor_date é omitido. Também pode ser enviado no header X-Auraxis-Timezone.
+             * @example America/Sao_Paulo
+             */
+            timezone?: string | null;
+        };
+        app_schemas_ai_insight_schema_AIMonthlyReportRequestSchema: {
+            /**
+             * Format: date
+             * @description Data âncora do mês a consolidar. Quando omitida, a API usa a data atual.
+             * @example 2026-05-21
+             */
+            anchor_date?: string | null;
+            /**
+             * @description Quando true, tenta enfileirar o processamento mensal em RQ. Ambientes sem Redis usam fallback síncrono.
+             * @default true
+             * @example true
+             */
+            enqueue: boolean;
         };
         app_schemas_auth_schema_AuthSchema: {
             /**
@@ -9549,6 +11785,15 @@ export interface components {
              * @example example-token
              */
             token: string;
+        };
+        app_schemas_consent_schemas_ConsentRecordSchema: {
+            /** @enum {string} */
+            action: "granted" | "revoked";
+            /** @enum {string} */
+            kind: "terms" | "privacy" | "cookies" | "ai" | "marketing";
+            /** @enum {string} */
+            source: "web" | "app" | "api" | "system";
+            version: string;
         };
         app_schemas_push_subscription_schema_SubscribeSchema: {
             /** @default null */
