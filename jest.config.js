@@ -248,6 +248,8 @@ const config = {
     "features/goals/services/goal-scenario-projector.ts",
     "features/goals/hooks/use-goal-scenario-screen-controller.ts",
     "features/goals/screens/goal-scenario-screen.tsx",
+    "features/goals/hooks/use-goal-detail-screen-controller.ts",
+    "features/goals/screens/goal-detail-screen.tsx",
     "features/plans/contracts.ts",
     "features/plans/hooks/use-plans-screen-controller.ts",
     "features/plans/screens/plans-screen.tsx",
