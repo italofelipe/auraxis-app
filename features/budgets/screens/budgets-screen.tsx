@@ -3,13 +3,19 @@ import type { ReactElement } from "react";
 import { useRouter } from "expo-router";
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { appRoutes } from "@/core/navigation/routes";
+import { appRoutes, buildBudgetDetailPath } from "@/core/navigation/routes";
 import { BudgetForm } from "@/features/budgets/components/budget-form";
 import type { Budget } from "@/features/budgets/contracts";
 import {
   useBudgetsScreenController,
   type BudgetsScreenController,
 } from "@/features/budgets/hooks/use-budgets-screen-controller";
+import {
+  BUDGET_USAGE_LABELS,
+  BUDGET_USAGE_TONE,
+  getBudgetUsageLevel,
+  sortBudgetsByRisk,
+} from "@/features/budgets/services/budget-risk";
 import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
@@ -92,6 +98,7 @@ function SummaryCard({ controller }: ControllerProps): ReactElement {
                 label="% utilizado"
                 value={`${summary.percentageUsed.toFixed(1)}%`}
               />
+              <ConsolidatedHealthBar percentage={summary.percentageUsed} />
             </YStack>
           )}
         </AppQueryState>
@@ -134,29 +141,61 @@ function BudgetsListCard({ controller }: ControllerProps): ReactElement {
           />
         }
       >
-        {() => (
-          <YStack gap="$3">
-            {controller.budgets.map((budget) => (
-              <BudgetRow
-                key={budget.id}
-                budget={budget}
-                isDeleting={controller.deletingBudgetId === budget.id}
-                onEdit={() => controller.handleOpenEdit(budget)}
-                onDelete={() => {
-                  void controller.handleDelete(budget.id);
-                }}
-              />
-            ))}
-          </YStack>
-        )}
+        {() => <BudgetsList controller={controller} />}
       </AppQueryState>
     </AppSurfaceCard>
+  );
+}
+
+interface ConsolidatedHealthBarProps {
+  readonly percentage: number;
+}
+
+function ConsolidatedHealthBar({
+  percentage,
+}: ConsolidatedHealthBarProps): ReactElement {
+  const level = getBudgetUsageLevel(percentage, false);
+  const width = Math.min(100, Math.max(0, percentage));
+  const color = level === "danger" ? "$danger" : level === "warning" ? "$muted" : "$primary";
+  return (
+    <YStack
+      height={10}
+      borderRadius="$10"
+      backgroundColor="$backgroundPress"
+      overflow="hidden"
+      accessibilityRole="progressbar"
+      accessibilityValue={{ now: Math.round(width), min: 0, max: 100 }}
+    >
+      <YStack height="100%" width={`${width}%`} backgroundColor={color} />
+    </YStack>
+  );
+}
+
+function BudgetsList({ controller }: ControllerProps): ReactElement {
+  const router = useRouter();
+  const ranked = sortBudgetsByRisk(controller.budgets);
+  return (
+    <YStack gap="$3">
+      {ranked.map((budget) => (
+        <BudgetRow
+          key={budget.id}
+          budget={budget}
+          isDeleting={controller.deletingBudgetId === budget.id}
+          onDetails={() => router.push(buildBudgetDetailPath(budget.id))}
+          onEdit={() => controller.handleOpenEdit(budget)}
+          onDelete={() => {
+            void controller.handleDelete(budget.id);
+          }}
+        />
+      ))}
+    </YStack>
   );
 }
 
 interface BudgetRowProps {
   readonly budget: Budget;
   readonly isDeleting: boolean;
+  readonly onDetails: () => void;
   readonly onEdit: () => void;
   readonly onDelete: () => void;
 }
@@ -164,10 +203,11 @@ interface BudgetRowProps {
 function BudgetRow({
   budget,
   isDeleting,
+  onDetails,
   onEdit,
   onDelete,
 }: BudgetRowProps): ReactElement {
-  const tone = budget.isOverBudget ? "danger" : "primary";
+  const level = getBudgetUsageLevel(budget.percentageUsed, budget.isOverBudget);
   return (
     <YStack gap="$2">
       <AppKeyValueRow
@@ -177,13 +217,16 @@ function BudgetRow({
             <Paragraph color="$color" fontFamily="$body" fontSize="$4">
               {budget.spent} / {budget.amount}
             </Paragraph>
-            <AppBadge tone={tone}>
-              {budget.percentageUsed.toFixed(1)}%
+            <AppBadge tone={BUDGET_USAGE_TONE[level]}>
+              {`${BUDGET_USAGE_LABELS[level]} · ${budget.percentageUsed.toFixed(1)}%`}
             </AppBadge>
           </YStack>
         }
       />
       <XStack gap="$2" flexWrap="wrap">
+        <AppButton tone="secondary" onPress={onDetails} disabled={isDeleting}>
+          Detalhes
+        </AppButton>
         <AppButton tone="secondary" onPress={onEdit} disabled={isDeleting}>
           Editar
         </AppButton>
