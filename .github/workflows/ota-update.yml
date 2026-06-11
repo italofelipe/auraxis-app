@@ -1,0 +1,70 @@
+name: OTA Update (EAS Update)
+
+# Publica um update over-the-air (JS-only) no canal escolhido, sem consumir
+# créditos de build do EAS. Para mudanças nativas (nova dependência nativa,
+# bump de version/runtimeVersion), use o workflow Store Release.
+# Regras do ciclo em docs/release-process.md.
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Canal do EAS Update"
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - production
+      message:
+        description: "Mensagem do update (default: título do último commit)"
+        required: false
+        type: string
+
+jobs:
+  publish-update:
+    name: Publish OTA update
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd # v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate EXPO_TOKEN
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "${EXPO_TOKEN:-}" ]; then
+            echo "Missing required secret: EXPO_TOKEN" >&2
+            exit 1
+          fi
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: 16.13.0
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Publish update
+        env:
+          CHANNEL: ${{ inputs.channel }}
+          MESSAGE: ${{ inputs.message }}
+        run: |
+          set -euo pipefail
+          if [ -z "${MESSAGE:-}" ]; then
+            MESSAGE="$(git log -1 --pretty=%s)"
+          fi
+          eas update \
+            --channel "$CHANNEL" \
+            --message "$MESSAGE" \
+            --non-interactive
