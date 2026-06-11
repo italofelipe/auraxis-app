@@ -7,6 +7,7 @@ import type {
   DeletedTransactionListResponse,
   DeletedTransactionRecord,
   TransactionCollection,
+  TransactionDeleteScope,
   TransactionListQuery,
   TransactionPagination,
   TransactionRecord,
@@ -309,12 +310,36 @@ export const createTransactionsService = (client: AxiosInstance) => {
       );
       return extractTransactionFromMutation(response.data);
     },
-    deleteTransaction: async (transactionId: string): Promise<void> => {
-      await client.delete(
-        resolveApiContractPath(apiContractMap.transactionDelete.path, {
+    deleteTransaction: async (
+      transactionId: string,
+      scope: TransactionDeleteScope = "occurrence",
+    ): Promise<void> => {
+      const path = resolveApiContractPath(apiContractMap.transactionDelete.path, {
+        transaction_id: transactionId,
+      });
+      if (scope === "series") {
+        await client.delete(path, { params: { scope: "series" } });
+        return;
+      }
+      await client.delete(path);
+    },
+    markTransactionPaid: async (
+      transactionId: string,
+      paidAt: string,
+    ): Promise<TransactionRecord> => {
+      const response = await client.patch(
+        resolveApiContractPath(apiContractMap.transactionUpdate.path, {
           transaction_id: transactionId,
         }),
+        { status: "paid", paid_at: paidAt },
       );
+      const payload = unwrapEnvelopeData<{ readonly transaction?: TransactionPayload }>(
+        response.data,
+      );
+      if (!payload.transaction) {
+        throw new Error("Transacao paga veio sem payload.");
+      }
+      return mapTransaction(payload.transaction);
     },
     getSummary: (query: TransactionSummaryQuery) =>
       getSummaryRequest(client, query),

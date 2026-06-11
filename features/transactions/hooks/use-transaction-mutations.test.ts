@@ -8,6 +8,7 @@ import type {
 import {
   useCreateTransactionMutation,
   useDeleteTransactionMutation,
+  useMarkTransactionPaidMutation,
   useRestoreTransactionMutation,
 } from "@/features/transactions/hooks/use-transaction-mutations";
 import { transactionFixture } from "@/features/transactions/mocks";
@@ -26,6 +27,7 @@ const mockCreateTransaction = jest.fn();
 const mockUpdateTransaction = jest.fn();
 const mockDeleteTransaction = jest.fn();
 const mockRestoreTransaction = jest.fn();
+const mockMarkTransactionPaid = jest.fn();
 
 jest.mock("@tanstack/react-query", () => ({
   useMutation: (...args: readonly unknown[]) => mockUseMutation(...args),
@@ -46,6 +48,8 @@ jest.mock("@/features/transactions/services/transactions-service", () => ({
       mockDeleteTransaction(...args),
     restoreTransaction: (...args: readonly unknown[]) =>
       mockRestoreTransaction(...args),
+    markTransactionPaid: (...args: readonly unknown[]) =>
+      mockMarkTransactionPaid(...args),
   },
 }));
 
@@ -83,18 +87,18 @@ const expectedAnalyticsProperties = (
   currency: transaction.currency,
 });
 
-describe("useTransactionMutations analytics", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-    mockUseMutation.mockImplementation((options: unknown) => options);
-    mockInvalidateQueries.mockResolvedValue(undefined);
-    mockGetQueriesData.mockReturnValue([]);
-    mockUseQueryClient.mockReturnValue({
-      invalidateQueries: mockInvalidateQueries,
-      getQueriesData: mockGetQueriesData,
-    });
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockUseMutation.mockImplementation((options: unknown) => options);
+  mockInvalidateQueries.mockResolvedValue(undefined);
+  mockGetQueriesData.mockReturnValue([]);
+  mockUseQueryClient.mockReturnValue({
+    invalidateQueries: mockInvalidateQueries,
+    getQueriesData: mockGetQueriesData,
   });
+});
 
+describe("useTransactionMutations analytics", () => {
   it("captures transaction.created without PII when creation succeeds", async () => {
     const command: CreateTransactionCommand = {
       title: "Confidential vendor",
@@ -154,18 +158,19 @@ describe("useTransactionMutations analytics", () => {
     const mutation =
       useDeleteTransactionMutation() as unknown as MutationConfig<
         void,
-        string,
+        { readonly transactionId: string; readonly scope?: "occurrence" | "series" },
         { readonly transaction?: TransactionRecord }
       >;
 
-    const mutationContext = mutation.onMutate?.(deletedTransaction.id);
-    await expect(mutation.mutationFn(deletedTransaction.id)).resolves.toBeUndefined();
-    await mutation.onSuccess?.(
-      undefined,
-      deletedTransaction.id,
-      mutationContext ?? {},
-    );
+    const variables = { transactionId: deletedTransaction.id } as const;
+    const mutationContext = mutation.onMutate?.(variables);
+    await expect(mutation.mutationFn(variables)).resolves.toBeUndefined();
+    await mutation.onSuccess?.(undefined, variables, mutationContext ?? {});
 
+    expect(mockDeleteTransaction).toHaveBeenCalledWith(
+      deletedTransaction.id,
+      "occurrence",
+    );
     expect(mutationContext).toEqual({ transaction: deletedTransaction });
     expect(mockAnalyticsClient.capture).toHaveBeenCalledWith(
       "transaction.deleted",
@@ -207,6 +212,65 @@ describe("useTransactionMutations analytics", () => {
     );
     expect(JSON.stringify(mockAnalyticsClient.capture.mock.calls)).not.toContain(
       restoredTransaction.title,
+    );
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: queryKeys.transactions.root,
+    });
+  });
+});
+
+describe("useTransactionMutations pay + delete scope", () => {
+  it("repassa scope series ao service ao excluir serie inteira", async () => {
+    mockDeleteTransaction.mockResolvedValue(undefined);
+
+    const mutation =
+      useDeleteTransactionMutation() as unknown as MutationConfig<
+        void,
+        { readonly transactionId: string; readonly scope?: "occurrence" | "series" },
+        { readonly transaction?: TransactionRecord }
+      >;
+
+    await expect(
+      mutation.mutationFn({ transactionId: "tx-series", scope: "series" }),
+    ).resolves.toBeUndefined();
+
+    expect(mockDeleteTransaction).toHaveBeenCalledWith("tx-series", "series");
+  });
+
+  it("captures transaction.paid without PII when mark paid succeeds", async () => {
+    const paidTransaction: TransactionRecord = {
+      ...transactionFixture,
+      id: "tx-paid",
+      title: "Private paid title",
+      type: "expense",
+      source: "manual",
+      status: "paid",
+      paidAt: "2026-06-11",
+    };
+    mockMarkTransactionPaid.mockResolvedValue(paidTransaction);
+
+    const mutation =
+      useMarkTransactionPaidMutation() as unknown as MutationConfig<
+        TransactionRecord,
+        { readonly transactionId: string; readonly paidAt: string }
+      >;
+
+    await expect(
+      mutation.mutationFn({ transactionId: paidTransaction.id, paidAt: "2026-06-11" }),
+    ).resolves.toEqual(paidTransaction);
+    await mutation.onSuccess?.(
+      paidTransaction,
+      { transactionId: paidTransaction.id, paidAt: "2026-06-11" },
+      undefined,
+    );
+
+    expect(mockMarkTransactionPaid).toHaveBeenCalledWith("tx-paid", "2026-06-11");
+    expect(mockAnalyticsClient.capture).toHaveBeenCalledWith(
+      "transaction.paid",
+      expectedAnalyticsProperties(paidTransaction),
+    );
+    expect(JSON.stringify(mockAnalyticsClient.capture.mock.calls)).not.toContain(
+      paidTransaction.title,
     );
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
       queryKey: queryKeys.transactions.root,

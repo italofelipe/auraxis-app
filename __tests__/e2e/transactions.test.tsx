@@ -175,7 +175,7 @@ describe("Transactions E2E flow", () => {
     });
 
     await act(async () => {
-      await result.current.mutateAsync(transactionFixture.id);
+      await result.current.mutateAsync({ transactionId: transactionFixture.id });
     });
 
     await waitFor(() => {
@@ -183,6 +183,7 @@ describe("Transactions E2E flow", () => {
     });
     expect(mockedTransactionsService.deleteTransaction).toHaveBeenCalledWith(
       transactionFixture.id,
+      "occurrence",
     );
   });
 

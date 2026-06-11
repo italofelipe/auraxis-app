@@ -148,18 +148,23 @@ describe("transactions hooks", () => {
       onSuccess: () => Promise<void>;
     };
     const deleteMutation = useDeleteTransactionMutation() as unknown as {
-      mutationFn: (transactionId: string) => Promise<void>;
+      mutationFn: (input: {
+        readonly transactionId: string;
+        readonly scope?: "occurrence" | "series";
+      }) => Promise<void>;
       onSuccess: () => Promise<void>;
     };
 
     await expect(
       updateMutation.mutationFn({ transactionId: "txn-10", payload }),
     ).resolves.toEqual({ id: "txn-10" });
-    await expect(deleteMutation.mutationFn("txn-10")).resolves.toBeUndefined();
+    await expect(
+      deleteMutation.mutationFn({ transactionId: "txn-10" }),
+    ).resolves.toBeUndefined();
     await updateMutation.onSuccess();
     await deleteMutation.onSuccess();
     expect(mockUpdateTransaction).toHaveBeenCalledWith("txn-10", payload);
-    expect(mockDeleteTransaction).toHaveBeenCalledWith("txn-10");
+    expect(mockDeleteTransaction).toHaveBeenCalledWith("txn-10", "occurrence");
     expect(mockInvalidateQueries).toHaveBeenCalledTimes(2);
   });
 });
