@@ -108,7 +108,17 @@ const validateReleaseReadinessGovernance = ({ appConfig, easConfig }) => {
     errors.push("app.json must define expo.ios.bundleIdentifier");
   }
 
-  if (typeof ios.buildNumber !== "string" || ios.buildNumber.trim().length === 0) {
+  // With appVersionSource=remote, EAS owns buildNumber/versionCode; local
+  // values drift from the real ones and EAS Build warns they are ignored.
+  const remoteVersionSource = easConfig?.cli?.appVersionSource === "remote";
+
+  if (remoteVersionSource) {
+    if (ios.buildNumber !== undefined) {
+      errors.push(
+        "app.json must not define expo.ios.buildNumber when eas.json cli.appVersionSource=remote",
+      );
+    }
+  } else if (typeof ios.buildNumber !== "string" || ios.buildNumber.trim().length === 0) {
     errors.push("app.json must define expo.ios.buildNumber");
   }
 
@@ -116,7 +126,13 @@ const validateReleaseReadinessGovernance = ({ appConfig, easConfig }) => {
     errors.push("app.json must define expo.android.package");
   }
 
-  if (typeof android.versionCode !== "number" || android.versionCode <= 0) {
+  if (remoteVersionSource) {
+    if (android.versionCode !== undefined) {
+      errors.push(
+        "app.json must not define expo.android.versionCode when eas.json cli.appVersionSource=remote",
+      );
+    }
+  } else if (typeof android.versionCode !== "number" || android.versionCode <= 0) {
     errors.push("app.json must define a positive expo.android.versionCode");
   }
 
