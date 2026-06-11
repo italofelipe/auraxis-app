@@ -250,6 +250,8 @@ const config = {
     "features/goals/screens/goal-scenario-screen.tsx",
     "features/goals/hooks/use-goal-detail-screen-controller.ts",
     "features/goals/screens/goal-detail-screen.tsx",
+    "features/spending-patterns/services/spending-patterns-service.ts",
+    "features/spending-patterns/components/spending-patterns-card.tsx",
     "features/plans/contracts.ts",
     "features/plans/hooks/use-plans-screen-controller.ts",
     "features/plans/screens/plans-screen.tsx",
