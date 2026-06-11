@@ -19,7 +19,6 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.sensoriumit.auraxis",
-      "buildNumber": "1",
       "config": {
         "usesNonExemptEncryption": false
       },
@@ -162,7 +161,6 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.sensoriumit.auraxis",
-      "versionCode": 1,
       "networkSecurityConfig": "./assets/network-security-config.xml"
     },
     "web": {
