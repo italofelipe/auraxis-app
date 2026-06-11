@@ -5,7 +5,11 @@ import { useRouter } from "expo-router";
 import { RefreshControl } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
-import { appRoutes, buildGoalScenarioPath } from "@/core/navigation/routes";
+import {
+  appRoutes,
+  buildGoalDetailPath,
+  buildGoalScenarioPath,
+} from "@/core/navigation/routes";
 import { queryKeys } from "@/core/query/query-keys";
 import { GoalForm } from "@/features/goals/components/goal-form";
 import { GoalPlanCard } from "@/features/goals/components/goal-plan-card";
@@ -201,6 +205,13 @@ function GoalsList({ controller }: ControllerProps): ReactElement {
     [router],
   );
 
+  const handleDetails = useCallback(
+    (goalId: string): void => {
+      router.push(buildGoalDetailPath(goalId));
+    },
+    [router],
+  );
+
   const renderItem = useCallback(
     ({ item }: { readonly item: GoalProgressView }) => (
       <GoalItem
@@ -211,12 +222,14 @@ function GoalsList({ controller }: ControllerProps): ReactElement {
         onDelete={handleDelete}
         onTogglePlan={handleTogglePlan}
         onSimulate={handleSimulate}
+        onDetails={handleDetails}
       />
     ),
     [
       controller.deletingGoalId,
       controller.selectedPlanGoalId,
       handleDelete,
+      handleDetails,
       handleEdit,
       handleSimulate,
       handleTogglePlan,
@@ -246,8 +259,10 @@ interface GoalItemProps {
   readonly onDelete: (goalId: string) => void;
   readonly onTogglePlan: (goalId: string) => void;
   readonly onSimulate: (goalId: string) => void;
+  readonly onDetails: (goalId: string) => void;
 }
 
+ 
 const GoalItem = function GoalItem({
   goal,
   isPlanOpen,
@@ -256,6 +271,7 @@ const GoalItem = function GoalItem({
   onDelete,
   onTogglePlan,
   onSimulate,
+  onDetails,
 }: GoalItemProps): ReactElement {
   const handleEdit = useCallback(() => onEdit(goal), [goal, onEdit]);
   const handleDelete = useCallback(() => onDelete(goal.id), [goal.id, onDelete]);
@@ -266,6 +282,10 @@ const GoalItem = function GoalItem({
   const handleSimulate = useCallback(
     () => onSimulate(goal.id),
     [goal.id, onSimulate],
+  );
+  const handleDetails = useCallback(
+    () => onDetails(goal.id),
+    [goal.id, onDetails],
   );
 
   return (
@@ -290,6 +310,9 @@ const GoalItem = function GoalItem({
           }
         />
         <XStack gap="$2" flexWrap="wrap">
+          <AppButton tone="secondary" onPress={handleDetails} disabled={isDeleting}>
+            Detalhes
+          </AppButton>
           <AppButton tone="secondary" onPress={handleToggle} disabled={isDeleting}>
             {isPlanOpen ? "Ocultar plano" : "Ver plano"}
           </AppButton>

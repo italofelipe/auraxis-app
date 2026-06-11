@@ -68,6 +68,16 @@ export const buildGoalScenarioPath = (goalId: string): Href => ({
 });
 
 /**
+ * Builds the dynamic goal detail route (progress, plan and projection).
+ * @param goalId Goal id from the goals list.
+ * @returns Expo Router-compatible path under /metas.
+ */
+export const buildGoalDetailPath = (goalId: string): Href => ({
+  pathname: "/metas/[id]",
+  params: { id: goalId },
+});
+
+/**
  * Builds the dynamic ticker detail route (price chart + position).
  * @param ticker BRAPI ticker symbol (case-insensitive — normalized here).
  * @returns Expo Router-compatible path under /carteira.
