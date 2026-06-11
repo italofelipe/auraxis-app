@@ -1,5 +1,40 @@
 # Changelog
 
+## [1.7.0](https://github.com/italofelipe/auraxis-app/compare/v1.6.1...v1.7.0) (2026-06-11)
+
+
+### Features
+
+* **budgets:** detail controller with period transaction preview ([9b5df85](https://github.com/italofelipe/auraxis-app/commit/9b5df853db9c13c921a96f9103066cfa4cf7c14d))
+* **budgets:** detail screen (usage, period, tag, transaction preview) ([2463f03](https://github.com/italofelipe/auraxis-app/commit/2463f032cf0d8052ca8276eb260bab535e9dd71b))
+* **budgets:** painel de detalhe + preview de transações + saúde/risco (paridade web) ([cc3c2e0](https://github.com/italofelipe/auraxis-app/commit/cc3c2e0ca0355c3959b89868360ab6f5e1975016))
+* **budgets:** risk classification + sort by risk + period range helpers ([f44ac37](https://github.com/italofelipe/auraxis-app/commit/f44ac37438f98480e049ecbbddd50fa8a18be6ca))
+* **budgets:** risk sort + 3-tier badges + consolidated health bar + detail nav ([b3da07c](https://github.com/italofelipe/auraxis-app/commit/b3da07c3709898864d004027e345581ddde64ee4))
+* **contracts:** register spending-patterns endpoints ([4d19760](https://github.com/italofelipe/auraxis-app/commit/4d19760791bcd39a1306b8d81e696e69f1a38513))
+* **contracts:** register weekly-summary endpoint ([8fc8ea7](https://github.com/italofelipe/auraxis-app/commit/8fc8ea7d003bdd999593dcdd0f3381e7f421cc9f))
+* **credit-cards:** tela de detalhe do cartão (info, ciclo, utilização) — paridade web ([#517](https://github.com/italofelipe/auraxis-app/issues/517)) ([1f5f528](https://github.com/italofelipe/auraxis-app/commit/1f5f52812b36dacf8172ad4c9c98d07efb02d0f9))
+* **goals:** goal detail screen (progress, plan, projection, AI surface) ([cabf8b7](https://github.com/italofelipe/auraxis-app/commit/cabf8b73612c947e65708f39af2a660238707007))
+* **goals:** goal detail screen controller with progress + nav ([0abf3a3](https://github.com/italofelipe/auraxis-app/commit/0abf3a313d9e13a2224647e05351325d4550aa4d))
+* **goals:** link goal list items to detail screen ([f80a16e](https://github.com/italofelipe/auraxis-app/commit/f80a16ed618d9080da3e2658f14f807dca55a4e7))
+* **goals:** tela de detalhe de meta (progresso, plano, projeção, navegação) ([d5a0af3](https://github.com/italofelipe/auraxis-app/commit/d5a0af3e2a19521d28701223ad44408451af41df))
+* **navigation:** add budget detail route builder ([ee8c1c7](https://github.com/italofelipe/auraxis-app/commit/ee8c1c73a20b7efea4ff3eb645e55bca8e260e5f))
+* **navigation:** add goal detail route builder ([42c9ff3](https://github.com/italofelipe/auraxis-app/commit/42c9ff3114eb53c986ee36bd082602f36d96d71f))
+* **observability:** add transaction.paid analytics event ([d3e4a00](https://github.com/italofelipe/auraxis-app/commit/d3e4a008f5e7a566926ad11906ed48e28f51c504))
+* **spending-patterns:** mount radar card on dashboard + coverage/sonar ([cfa6b53](https://github.com/italofelipe/auraxis-app/commit/cfa6b53b40cd06b0e36f6f5f0f9f581ed8767edb))
+* **spending-patterns:** quota-free latest query + dashboard radar card ([f8b6176](https://github.com/italofelipe/auraxis-app/commit/f8b61765b0c524f4cebef452fb05233dae36e348))
+* **spending-patterns:** radar de gastos como feature dedicada + card no dashboard ([830ecdb](https://github.com/italofelipe/auraxis-app/commit/830ecdb9f3f220c63a345584e16ea8dccc2a43de))
+* **spending-patterns:** service (getLatest/detect) + LGPD-safe inputs + severity rank ([4a3a621](https://github.com/italofelipe/auraxis-app/commit/4a3a62141a4b1f4e5607b6a5d0bd651058bc4d60))
+* **transactions:** filter bar + pay/delete confirmation modals ([364495b](https://github.com/italofelipe/auraxis-app/commit/364495b26c565ee4c200e949723889b5b64598d9))
+* **transactions:** filtros avançados, marcar como pago e exclusão por escopo ([dc2e3ba](https://github.com/italofelipe/auraxis-app/commit/dc2e3baca42c10e204aa20904ff17feac55f29e7))
+* **transactions:** mark-paid mutation + scoped delete variables ([fc85a20](https://github.com/italofelipe/auraxis-app/commit/fc85a20170cb0076042c9b30017a905275917688))
+* **transactions:** server-side filters (status/tag/month) + mark-paid + scoped delete no controller ([52a3bb3](https://github.com/italofelipe/auraxis-app/commit/52a3bb3472ea1efe977919a2bc67b9bce8b67e49))
+* **transactions:** service mark-paid PATCH + delete scope param ([5084a02](https://github.com/italofelipe/auraxis-app/commit/5084a02b524d19ed7605bc2260ae79b16bbd2c2a))
+* **transactions:** wire filters, pay action and scoped delete into screen ([4303e09](https://github.com/italofelipe/auraxis-app/commit/4303e09b99c776a49636228321fdff84fc182624))
+* **weekly-snapshot:** digest semanal premium como feature dedicada + card no dashboard ([41625bf](https://github.com/italofelipe/auraxis-app/commit/41625bf20c495442f8ed0a5b41bdf86f7c2071e7))
+* **weekly-snapshot:** entitlement-gated query + card controller + premium dashboard card ([208df1e](https://github.com/italofelipe/auraxis-app/commit/208df1e550601290ea74d77bbc24f9b644745369))
+* **weekly-snapshot:** mount premium card on dashboard + coverage/sonar ([95df915](https://github.com/italofelipe/auraxis-app/commit/95df915643a6e3f9c9d99ac3e65c03ab9322283a))
+* **weekly-snapshot:** service + change-detection signature + seen storage ([abdc224](https://github.com/italofelipe/auraxis-app/commit/abdc2245978265ed1bcd96cdee6ea2ae96a4db07))
+
 ## [1.6.1](https://github.com/italofelipe/auraxis-app/compare/v1.6.0...v1.6.1) (2026-06-05)
 
 
