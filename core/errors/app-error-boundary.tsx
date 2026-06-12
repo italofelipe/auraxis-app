@@ -6,6 +6,7 @@ import { AppErrorNotice } from "@/shared/components/app-error-notice";
 
 interface AppErrorBoundaryState {
   readonly error: unknown | null;
+  readonly componentStack: string | null;
 }
 
 export interface AppErrorBoundaryProps extends PropsWithChildren {
@@ -36,15 +37,19 @@ export class AppErrorBoundary extends Component<
 > {
   override state: AppErrorBoundaryState = {
     error: null,
+    componentStack: null,
   };
 
-  static getDerivedStateFromError(error: unknown): AppErrorBoundaryState {
+  static getDerivedStateFromError(error: unknown): Partial<AppErrorBoundaryState> {
     return {
       error,
     };
   }
 
   override componentDidCatch(error: unknown, errorInfo: ErrorInfo): void {
+    this.setState({
+      componentStack: errorInfo.componentStack ?? null,
+    });
     runtimeLogger.log("runtime.error_boundary_captured", {
       context: {
         scope: this.props.scope,
@@ -61,6 +66,7 @@ export class AppErrorBoundary extends Component<
     ) {
       this.setState({
         error: null,
+        componentStack: null,
       });
     }
   }
@@ -68,6 +74,7 @@ export class AppErrorBoundary extends Component<
   private readonly handleReset = (): void => {
     this.setState({
       error: null,
+      componentStack: null,
     });
     this.props.onReset?.();
   };
@@ -84,6 +91,7 @@ export class AppErrorBoundary extends Component<
         // alpha: with remote crash reporting deferred (#522), the device
         // screen is the only channel to diagnose store-build-only failures.
         showTechnicalDetails={this.props.presentation === "screen"}
+        technicalComponentStack={this.state.componentStack}
         testID={this.props.testID}
       />
     );

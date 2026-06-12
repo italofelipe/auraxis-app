@@ -81,6 +81,27 @@ describe("AppErrorBoundary", () => {
     ).toBeTruthy();
   });
 
+  it("exibe componentStack nos detalhes tecnicos de boundary de tela cheia", () => {
+    const ComponenteQuebrado = (): ReactElement => {
+      throw new Error("Boom de stack");
+    };
+
+    const { getByTestId } = render(
+      <TestProviders>
+        <AppErrorBoundary
+          scope="public-layout"
+          presentation="screen"
+          testID="boundary">
+          <ComponenteQuebrado />
+        </AppErrorBoundary>
+      </TestProviders>,
+    );
+
+    const details = getByTestId("boundary-technical-details").props.children;
+    expect(details).toContain("Component stack:");
+    expect(details).toContain("ComponenteQuebrado");
+  });
+
   it("nao exibe detalhes tecnicos em boundary inline", () => {
     const BrokenComponent = (): ReactElement => {
       throw new Error("Boom inline");
