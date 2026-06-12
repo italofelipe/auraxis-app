@@ -4,6 +4,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
 
 import { AppErrorBoundary } from "@/core/errors/app-error-boundary";
+import { AppTabBar } from "@/core/navigation/app-tab-bar";
 import { privateTabDefinitions } from "@/core/navigation/routes";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
@@ -17,7 +18,10 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "installment-vs-cash",
   "confirm-email-pending",
   "compartilhamentos",
-  "transacoes",
+  "carteira",
+  "metas",
+  "ferramentas",
+  "alertas",
   "importar-transacoes",
   "perfil",
   "fiscal",
@@ -58,6 +62,7 @@ function PrivateLayoutContent(): ReactElement | null {
 
   return (
     <Tabs
+      tabBar={(props) => <AppTabBar {...props} />}
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: tabTheme.primary,

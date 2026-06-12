@@ -395,3 +395,30 @@ describe("useTransactionsScreenController server-side filters", () => {
     });
   });
 });
+
+describe("useTransactionsScreenController quick-create intent (tab [+])", () => {
+  it("abre o form de criacao quando a rota recebe intent=create", () => {
+    const { useLocalSearchParams } = jest.requireMock("expo-router");
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ intent: "create" });
+
+    const { result } = renderHook(() => useTransactionsScreenController());
+
+    expect(result.current.formMode.kind).toBe("create");
+
+    (useLocalSearchParams as jest.Mock).mockReturnValue({});
+  });
+
+  it("nao reabre o form apos o usuario fechar com o intent ainda na rota", () => {
+    const { useLocalSearchParams } = jest.requireMock("expo-router");
+    (useLocalSearchParams as jest.Mock).mockReturnValue({ intent: "create" });
+
+    const { result } = renderHook(() => useTransactionsScreenController());
+    act(() => {
+      result.current.handleCloseForm();
+    });
+
+    expect(result.current.formMode.kind).toBe("closed");
+
+    (useLocalSearchParams as jest.Mock).mockReturnValue({});
+  });
+});

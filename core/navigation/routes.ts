@@ -5,7 +5,10 @@ type MaterialCommunityIconName =
   | "wallet-outline"
   | "tools"
   | "bell-outline"
-  | "flag-outline";
+  | "flag-outline"
+  | "swap-horizontal"
+  | "target"
+  | "view-grid-outline";
 
 export const appRoutes = {
   root: "/",
@@ -52,6 +55,8 @@ export const appRoutes = {
     privacyCenter: "/privacidade",
     dangerZone: "/perfil-zona-de-perigo",
     simulationsHistory: "/simulacoes",
+    planning: "/planejamento",
+    moreHub: "/mais",
     checkoutSuccess: "/checkout/success",
     checkoutCancel: "/checkout/cancel",
   },
@@ -140,42 +145,39 @@ export interface AppRouteDefinition {
 }
 
 export interface PrivateTabDefinition {
-  readonly name: "dashboard" | "carteira" | "metas" | "ferramentas" | "alertas";
+  readonly name: "dashboard" | "transacoes" | "planejamento" | "mais";
   readonly href: PrivateAppRoute;
   readonly title: string;
   readonly icon: MaterialCommunityIconName;
 }
 
+// Destinos das tabs (redesign F2 — épico #540): Transações ganha lugar de
+// destaque; Carteira/Ferramentas/Alertas/Metas vivem no hub "Mais" e no
+// Planejamento. O slot central [+] é renderizado pela AppTabBar.
 export const privateTabDefinitions: readonly PrivateTabDefinition[] = [
   {
     name: "dashboard",
     href: appRoutes.private.dashboard,
-    title: "Dashboard",
+    title: "Início",
     icon: "view-dashboard-outline",
   },
   {
-    name: "carteira",
-    href: appRoutes.private.wallet,
-    title: "Carteira",
-    icon: "wallet-outline",
+    name: "transacoes",
+    href: appRoutes.private.transactions,
+    title: "Transações",
+    icon: "swap-horizontal",
   },
   {
-    name: "metas",
-    href: appRoutes.private.goals,
-    title: "Metas",
-    icon: "flag-outline",
+    name: "planejamento",
+    href: appRoutes.private.planning,
+    title: "Planejar",
+    icon: "target",
   },
   {
-    name: "ferramentas",
-    href: appRoutes.private.tools,
-    title: "Ferramentas",
-    icon: "tools",
-  },
-  {
-    name: "alertas",
-    href: appRoutes.private.alerts,
-    title: "Alertas",
-    icon: "bell-outline",
+    name: "mais",
+    href: appRoutes.private.moreHub,
+    title: "Mais",
+    icon: "view-grid-outline",
   },
 ] as const;
 
@@ -233,28 +235,28 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     key: "wallet",
     path: appRoutes.private.wallet,
     access: "private",
-    tabVisible: true,
+    tabVisible: false,
     supportsHostedCheckoutReturn: false,
   },
   {
     key: "goals",
     path: appRoutes.private.goals,
     access: "private",
-    tabVisible: true,
+    tabVisible: false,
     supportsHostedCheckoutReturn: false,
   },
   {
     key: "tools",
     path: appRoutes.private.tools,
     access: "private",
-    tabVisible: true,
+    tabVisible: false,
     supportsHostedCheckoutReturn: false,
   },
   {
     key: "alerts",
     path: appRoutes.private.alerts,
     access: "private",
-    tabVisible: true,
+    tabVisible: false,
     supportsHostedCheckoutReturn: false,
   },
   {
@@ -286,10 +288,24 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     supportsHostedCheckoutReturn: false,
   },
   {
+    key: "planning",
+    path: appRoutes.private.planning,
+    access: "private",
+    tabVisible: true,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
+    key: "moreHub",
+    path: appRoutes.private.moreHub,
+    access: "private",
+    tabVisible: true,
+    supportsHostedCheckoutReturn: false,
+  },
+  {
     key: "transactions",
     path: appRoutes.private.transactions,
     access: "private",
-    tabVisible: false,
+    tabVisible: true,
     supportsHostedCheckoutReturn: false,
   },
   {
