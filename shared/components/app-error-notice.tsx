@@ -16,10 +16,12 @@ export interface AppErrorNoticeProps {
   readonly secondaryActionLabel?: string;
   readonly onSecondaryAction?: () => void;
   readonly showTechnicalDetails?: boolean;
+  readonly technicalComponentStack?: string | null;
   readonly testID?: string;
 }
 
 const TECHNICAL_DETAILS_STACK_LINES = 4;
+const COMPONENT_STACK_LINES = 8;
 
 const formatTechnicalDetails = (error: unknown): string => {
   if (error instanceof Error) {
@@ -62,8 +64,20 @@ export function AppErrorNotice({
   secondaryActionLabel,
   onSecondaryAction,
   showTechnicalDetails = false,
+  technicalComponentStack = null,
   testID,
 }: AppErrorNoticeProps): ReactElement {
+  const componentStackHead = technicalComponentStack
+    ? technicalComponentStack
+        .split("\n")
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0)
+        .slice(0, COMPONENT_STACK_LINES)
+        .join("\n")
+    : null;
+  const technicalDetails = componentStackHead
+    ? `${formatTechnicalDetails(error)}\nComponent stack:\n${componentStackHead}`
+    : formatTechnicalDetails(error);
   const errorState = createAppErrorState(error, {
     fallbackTitle,
     fallbackDescription,
@@ -86,7 +100,7 @@ export function AppErrorNotice({
             size="$1"
             color="$muted"
             testID={testID ? `${testID}-technical-details` : undefined}>
-            {formatTechnicalDetails(error)}
+            {technicalDetails}
           </Paragraph>
         </AppStack>
       ) : null}
