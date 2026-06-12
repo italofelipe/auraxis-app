@@ -96,21 +96,28 @@ export const initPostHog = async (): Promise<void> => {
     return;
   }
 
-  const preference = await loadAnalyticsOptOutPreference();
-  const collectionEnabled = !preference.optedOut;
-  const posthog = new PostHog(apiKey, {
-    host: resolvePostHogHost(),
-    captureAppLifecycleEvents: true,
-    defaultOptIn: collectionEnabled,
-    disableGeoip: true,
-    enableSessionReplay: false,
-  });
+  try {
+    const preference = await loadAnalyticsOptOutPreference();
+    const collectionEnabled = !preference.optedOut;
+    const posthog = new PostHog(apiKey, {
+      host: resolvePostHogHost(),
+      captureAppLifecycleEvents: true,
+      defaultOptIn: collectionEnabled,
+      disableGeoip: true,
+      enableSessionReplay: false,
+    });
 
-  setAnalyticsClient(
-    createPostHogAnalyticsClient(posthog as unknown as PostHogSdkClient),
-  );
-  setAnalyticsCollectionEnabled(collectionEnabled);
-  postHogInitialized = true;
+    setAnalyticsClient(
+      createPostHogAnalyticsClient(posthog as unknown as PostHogSdkClient),
+    );
+    setAnalyticsCollectionEnabled(collectionEnabled);
+    postHogInitialized = true;
+  } catch {
+    // Analytics nunca pode derrubar o app: o SDK lança quando não encontra
+    // storage (ex.: web sem AsyncStorage) — degradar para client desligado.
+    setAnalyticsClient(undefined);
+    setAnalyticsCollectionEnabled(false);
+  }
 };
 
 export const resetPostHogRuntimeForTests = (): void => {
