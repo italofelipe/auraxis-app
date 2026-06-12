@@ -56,6 +56,48 @@ describe("AppErrorNotice", () => {
     );
   });
 
+  it("exibe detalhes tecnicos sem stack para Error sem stack", () => {
+    const error = new Error("sem stack");
+    error.stack = "";
+    const { getByTestId } = render(
+      <AppProviders>
+        <AppErrorNotice error={error} showTechnicalDetails testID="notice" />
+      </AppProviders>,
+    );
+
+    expect(getByTestId("notice-technical-details").props.children).toBe(
+      "Error: sem stack",
+    );
+  });
+
+  it("serializa erros nao-Error como JSON nos detalhes tecnicos", () => {
+    const { getByTestId } = render(
+      <AppProviders>
+        <AppErrorNotice
+          error={{ code: "E_WEIRD", status: 500 }}
+          showTechnicalDetails
+          testID="notice"
+        />
+      </AppProviders>,
+    );
+
+    expect(getByTestId("notice-technical-details").props.children).toContain(
+      "E_WEIRD",
+    );
+  });
+
+  it("degrada para String() quando o erro nao e serializavel", () => {
+    const circular: Record<string, unknown> = {};
+    circular.self = circular;
+    const { getByText } = render(
+      <AppProviders>
+        <AppErrorNotice error={circular} showTechnicalDetails />
+      </AppProviders>,
+    );
+
+    expect(getByText("[object Object]")).toBeTruthy();
+  });
+
   it("nao exibe detalhes tecnicos por padrao", () => {
     const { queryByText } = render(
       <AppProviders>
