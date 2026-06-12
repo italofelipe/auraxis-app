@@ -41,9 +41,10 @@ jobs:
           EXPO_NO_TELEMETRY: "1"
         # Mata o processo no teardown pós-export e valida o artefato (#510/#532).
         run: |
-          set -uo pipefail
-          timeout --signal=KILL 15m npx expo export --platform web --output-dir dist-web
-          status=$?
+          # `|| status=$?` é obrigatório: o GitHub injeta `bash -e`, e o exit
+          # 137 do KILL abortaria o script antes da validação do artefato.
+          status=0
+          timeout --signal=KILL 10m npx expo export --platform web --output-dir dist-web || status=$?
           if [ ! -d dist-web ] || [ -z "$(ls -A dist-web 2>/dev/null)" ]; then
             echo "::error::expo export did not produce dist-web (exit $status)"
             exit 1
