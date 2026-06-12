@@ -18,6 +18,8 @@ jobs:
   web-baseline-artifact:
     name: Export Web Baseline Artifact
     runs-on: ubuntu-latest
+    # Guard-rail (#510): export travado não pode segurar runner por 6h.
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
@@ -34,6 +36,9 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Export web bundle
+        env:
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
         run: npx expo export --platform web --output-dir dist-web
 
       - name: Upload web baseline artifact

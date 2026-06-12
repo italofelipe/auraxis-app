@@ -146,6 +146,9 @@ jobs:
   expo-bundle:
     name: Expo JS Bundle Check
     runs-on: ubuntu-latest
+    # Guard-rail (#510): sem timeout o job herdava o default de 360min do
+    # GitHub e um export travado segurava a fila de runners por 6h.
+    timeout-minutes: 20
     needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test, contract-smoke, graphql-codegen]
     outputs:
       enabled: ${{ steps.capability.outputs.enabled }}
@@ -181,6 +184,11 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Export JS bundle (Android + iOS)
         if: steps.capability.outputs.enabled == 'true'
+        env:
+          # Evita qualquer caminho interativo/telemetria do expo export em CI
+          # (hipótese de causa do hang — ver #510).
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
         run: npx expo export --platform all --output-dir dist
         continue-on-error: false
       - name: Upload bundle artifact
@@ -195,6 +203,7 @@ jobs:
   bundle-analysis:
     name: Bundle Size Analysis (Metro)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [expo-bundle]
     if: github.event_name == 'pull_request' && needs.expo-bundle.outputs.enabled == 'true'
     permissions:
