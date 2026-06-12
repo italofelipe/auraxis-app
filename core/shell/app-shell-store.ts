@@ -92,7 +92,10 @@ export const appShellStateDefaults: AppShellStateSnapshot = {
   fontsReady: false,
   reducedMotionEnabled: false,
   hapticsEnabled: true,
-  themePreference: "system",
+  // Paridade com o web: light é o default explícito (defaultThemePreference
+  // em auraxis-web), independente do dark mode do aparelho. O usuário troca
+  // no Perfil → Aparência.
+  themePreference: "light",
   locale: "pt",
   biometricLockEnabled: false,
   startupReady: false,
