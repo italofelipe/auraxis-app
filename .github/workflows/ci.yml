@@ -192,9 +192,10 @@ jobs:
         # `timeout` mata o processo no teardown; o sucesso real é validado
         # pela presença do artefato exportado.
         run: |
-          set -uo pipefail
-          timeout --signal=KILL 15m npx expo export --platform all --output-dir dist
-          status=$?
+          # `|| status=$?` é obrigatório: o GitHub injeta `bash -e`, e o exit
+          # 137 do KILL abortaria o script antes da validação do artefato.
+          status=0
+          timeout --signal=KILL 10m npx expo export --platform all --output-dir dist || status=$?
           if [ ! -f dist/metadata.json ]; then
             echo "::error::expo export did not produce dist/metadata.json (exit $status)"
             exit 1
