@@ -125,3 +125,23 @@ describe("createQueryFeedbackState", () => {
     });
   });
 });
+
+describe("createQueryFeedbackState — isEmpty defensivo", () => {
+  it("trata como vazio quando isEmpty lanca por shape inesperado (nunca propaga ao ErrorBoundary)", () => {
+    const brokenShape = {} as CollectionPayload;
+    const state = createQueryFeedbackState({
+      query: createQuery({
+        data: brokenShape,
+      }),
+      options: {
+        ...createOptions(),
+        isEmpty: (data) => data.items.length === 0,
+      },
+      connectivityStatus: "online",
+      degradedReason: null,
+      onRetry: jest.fn(),
+    });
+
+    expect(state.kind).toBe("empty");
+  });
+});
