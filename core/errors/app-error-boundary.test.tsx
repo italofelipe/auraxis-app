@@ -61,4 +61,39 @@ describe("AppErrorBoundary", () => {
       }),
     );
   });
+
+  it("exibe detalhes tecnicos da excecao em boundary de tela cheia", () => {
+    const BrokenComponent = (): ReactElement => {
+      throw new Error("Cannot read property 'length' of undefined");
+    };
+
+    const { getByText } = render(
+      <TestProviders>
+        <AppErrorBoundary scope="public-layout" presentation="screen">
+          <BrokenComponent />
+        </AppErrorBoundary>
+      </TestProviders>,
+    );
+
+    expect(getByText("Detalhes tecnicos")).toBeTruthy();
+    expect(
+      getByText(/Cannot read property 'length' of undefined/u),
+    ).toBeTruthy();
+  });
+
+  it("nao exibe detalhes tecnicos em boundary inline", () => {
+    const BrokenComponent = (): ReactElement => {
+      throw new Error("Boom inline");
+    };
+
+    const { queryByText } = render(
+      <TestProviders>
+        <AppErrorBoundary scope="widget" presentation="inline">
+          <BrokenComponent />
+        </AppErrorBoundary>
+      </TestProviders>,
+    );
+
+    expect(queryByText("Detalhes tecnicos")).toBeNull();
+  });
 });
