@@ -185,12 +185,21 @@ jobs:
       - name: Export JS bundle (Android + iOS)
         if: steps.capability.outputs.enabled == 'true'
         env:
-          # Evita qualquer caminho interativo/telemetria do expo export em CI
-          # (hipótese de causa do hang — ver #510).
           CI: "1"
           EXPO_NO_TELEMETRY: "1"
-        run: npx expo export --platform all --output-dir dist
-        continue-on-error: false
+        # O processo do `expo export` não encerra após "Exported: dist" (handle
+        # aberto no event loop — #510/#532) e segurava o runner por 6h. O
+        # `timeout` mata o processo no teardown; o sucesso real é validado
+        # pela presença do artefato exportado.
+        run: |
+          set -uo pipefail
+          timeout --signal=KILL 15m npx expo export --platform all --output-dir dist
+          status=$?
+          if [ ! -f dist/metadata.json ]; then
+            echo "::error::expo export did not produce dist/metadata.json (exit $status)"
+            exit 1
+          fi
+          echo "Export artifact validated (exit $status tolerated as post-export teardown hang)."
       - name: Upload bundle artifact
         if: steps.capability.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
