@@ -146,6 +146,9 @@ jobs:
   expo-bundle:
     name: Expo JS Bundle Check
     runs-on: ubuntu-latest
+    # Guard-rail (#510): sem timeout o job herdava o default de 360min do
+    # GitHub e um export travado segurava a fila de runners por 6h.
+    timeout-minutes: 20
     needs: [lint, typecheck, feature-flag-hygiene, frontend-governance, test, contract-smoke, graphql-codegen]
     outputs:
       enabled: ${{ steps.capability.outputs.enabled }}
@@ -181,8 +184,22 @@ jobs:
           token: ${{ secrets.EXPO_TOKEN }}
       - name: Export JS bundle (Android + iOS)
         if: steps.capability.outputs.enabled == 'true'
-        run: npx expo export --platform all --output-dir dist
-        continue-on-error: false
+        env:
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
+        # O processo do `expo export` não encerra após "Exported: dist" (handle
+        # aberto no event loop — #510/#532) e segurava o runner por 6h. O
+        # `timeout` mata o processo no teardown; o sucesso real é validado
+        # pela presença do artefato exportado.
+        run: |
+          set -uo pipefail
+          timeout --signal=KILL 15m npx expo export --platform all --output-dir dist
+          status=$?
+          if [ ! -f dist/metadata.json ]; then
+            echo "::error::expo export did not produce dist/metadata.json (exit $status)"
+            exit 1
+          fi
+          echo "Export artifact validated (exit $status tolerated as post-export teardown hang)."
       - name: Upload bundle artifact
         if: steps.capability.outputs.enabled == 'true'
         uses: actions/upload-artifact@v4
@@ -195,6 +212,7 @@ jobs:
   bundle-analysis:
     name: Bundle Size Analysis (Metro)
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     needs: [expo-bundle]
     if: github.event_name == 'pull_request' && needs.expo-bundle.outputs.enabled == 'true'
     permissions:
