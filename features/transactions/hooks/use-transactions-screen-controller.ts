@@ -1,4 +1,6 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+
+import { useLocalSearchParams } from "expo-router";
 
 import type {
   TransactionDeleteScope,
@@ -413,6 +415,19 @@ export function useTransactionsScreenController(): TransactionsScreenController 
   const filters = useTransactionsFilters();
   const transactionsQuery = useTransactionsQuery(filters.listQuery);
   const [formMode, setFormMode] = useState<TransactionFormMode>({ kind: "closed" });
+  const searchParams = useLocalSearchParams<{ readonly intent?: string }>();
+  const quickCreateHandled = useRef(false);
+
+  // Atalho do botão central [+] da tab bar (F2): /transacoes?intent=create
+  // abre o form de criação uma única vez por montagem — fechar o form não
+  // deve reabri-lo enquanto o param continua na rota.
+  useEffect(() => {
+    if (searchParams.intent === "create" && !quickCreateHandled.current) {
+      quickCreateHandled.current = true;
+      setFormMode({ kind: "create" });
+    }
+  }, [searchParams.intent]);
+
   const [viewMode, setViewMode] = useState<TransactionsViewMode>("list");
   const [installmentGroupFilter, setInstallmentGroupFilter] = useState<string | null>(null);
   const actions = useTransactionsActions({
