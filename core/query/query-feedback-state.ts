@@ -103,7 +103,17 @@ const hasMeaningfulData = <TData>(
     return false;
   }
 
-  return isEmpty ? !isEmpty(data) : true;
+  if (!isEmpty) {
+    return true;
+  }
+
+  try {
+    return !isEmpty(data);
+  } catch {
+    // Shape inesperado da API (ex.: envelope divergente do contrato) não
+    // pode derrubar a tela no ErrorBoundary — degrada para empty-state.
+    return false;
+  }
 };
 
 const createNoticeState = (
@@ -191,33 +201,40 @@ export const createQueryFeedbackState = <TData, TError = unknown>(
   }
 
   if (query.isError) {
-    const errorState = createAppErrorState(query.error, {
-      fallbackTitle: options.error?.fallbackTitle,
-      fallbackDescription: options.error?.fallbackDescription,
-      connectivityStatus,
-    });
-
-    if (errorState.category === "network") {
-      return createNoticeState("offline", options.offline ?? DEFAULT_OFFLINE_COPY, onRetry);
-    }
-
-    if (errorState.category === "degraded") {
-      return createNoticeState("degraded", options.degraded ?? DEFAULT_DEGRADED_COPY, onRetry);
-    }
-
-    return {
-      kind: "error",
-      error: query.error,
-      fallbackTitle: options.error?.fallbackTitle,
-      fallbackDescription: options.error?.fallbackDescription,
-      onAction: onRetry,
-    };
+    return createErrorFeedbackState(params);
   }
 
   return {
     kind: "empty",
     title: options.empty.title,
     description: options.empty.description,
+  };
+};
+
+const createErrorFeedbackState = <TData, TError>(
+  params: CreateQueryFeedbackStateParams<TData, TError>,
+): QueryFeedbackState<TData> => {
+  const { connectivityStatus, onRetry, options, query } = params;
+  const errorState = createAppErrorState(query.error, {
+    fallbackTitle: options.error?.fallbackTitle,
+    fallbackDescription: options.error?.fallbackDescription,
+    connectivityStatus,
+  });
+
+  if (errorState.category === "network") {
+    return createNoticeState("offline", options.offline ?? DEFAULT_OFFLINE_COPY, onRetry);
+  }
+
+  if (errorState.category === "degraded") {
+    return createNoticeState("degraded", options.degraded ?? DEFAULT_DEGRADED_COPY, onRetry);
+  }
+
+  return {
+    kind: "error",
+    error: query.error,
+    fallbackTitle: options.error?.fallbackTitle,
+    fallbackDescription: options.error?.fallbackDescription,
+    onAction: onRetry,
   };
 };
 

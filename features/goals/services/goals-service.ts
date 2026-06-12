@@ -1,6 +1,6 @@
 import type { AxiosInstance } from "axios";
 
-import { unwrapEnvelopeData } from "@/core/http/contracts";
+import { unwrapEnvelopeData, type ApiEnvelope } from "@/core/http/contracts";
 import { httpClient } from "@/core/http/http-client";
 import type {
   CreateGoalCommand,
@@ -18,18 +18,35 @@ import { resolveApiContractPath } from "@/shared/contracts/resolve-api-contract-
 interface GoalPayload {
   readonly id: string;
   readonly title: string;
-  readonly current_amount: number;
-  readonly target_amount: number;
+  // O Flask serializa Decimal como string (GoalSchema, as_string=True).
+  readonly current_amount: number | string;
+  readonly target_amount: number | string;
   readonly target_date: string | null;
   readonly status: string;
 }
+
+const toNumeric = (value: number | string): number => {
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+};
+
+// O backend responde `data: {items: [...]}` (goal/resources.py) — não
+// `{goals}`. Ver docs/runbooks/api-envelope-contracts.md.
+const mapGoalListEnvelope = (
+  envelope: ApiEnvelope<{ readonly items?: readonly GoalPayload[] }>,
+): GoalListResponse => {
+  const payload = unwrapEnvelopeData(envelope);
+  return {
+    goals: (payload.items ?? []).map(mapGoal),
+  };
+};
 
 const mapGoal = (payload: GoalPayload): GoalRecord => {
   return {
     id: payload.id,
     title: payload.title,
-    currentAmount: payload.current_amount,
-    targetAmount: payload.target_amount,
+    currentAmount: toNumeric(payload.current_amount),
+    targetAmount: toNumeric(payload.target_amount),
     targetDate: payload.target_date,
     status: payload.status,
   };
@@ -91,7 +108,7 @@ export const createGoalsService = (client: AxiosInstance) => {
   return {
     listGoals: async (): Promise<GoalListResponse> => {
       const response = await client.get(apiContractMap.goalsList.path);
-      return unwrapEnvelopeData<GoalListResponse>(response.data);
+      return mapGoalListEnvelope(response.data);
     },
     createGoal: async (command: CreateGoalCommand): Promise<GoalRecord> => {
       const response = await client.post(
