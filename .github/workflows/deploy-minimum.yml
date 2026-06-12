@@ -18,6 +18,8 @@ jobs:
   web-baseline-artifact:
     name: Export Web Baseline Artifact
     runs-on: ubuntu-latest
+    # Guard-rail (#510): export travado não pode segurar runner por 6h.
+    timeout-minutes: 20
     permissions:
       contents: read
     steps:
@@ -34,7 +36,19 @@ jobs:
         run: npm ci --ignore-scripts
 
       - name: Export web bundle
-        run: npx expo export --platform web --output-dir dist-web
+        env:
+          CI: "1"
+          EXPO_NO_TELEMETRY: "1"
+        # Mata o processo no teardown pós-export e valida o artefato (#510/#532).
+        run: |
+          set -uo pipefail
+          timeout --signal=KILL 15m npx expo export --platform web --output-dir dist-web
+          status=$?
+          if [ ! -d dist-web ] || [ -z "$(ls -A dist-web 2>/dev/null)" ]; then
+            echo "::error::expo export did not produce dist-web (exit $status)"
+            exit 1
+          fi
+          echo "Export artifact validated (exit $status tolerated as post-export teardown hang)."
 
       - name: Upload web baseline artifact
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
