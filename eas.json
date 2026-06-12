@@ -35,16 +35,12 @@
   "submit": {
     "production": {
       "android": {
-        "serviceAccountKeyPath": "@secret:GOOGLE_SERVICE_ACCOUNT",
         "track": "internal",
         "releaseStatus": "draft"
       },
       "ios": {
-        "ascAppId": "${ASC_APP_ID}",
-        "appleTeamId": "${APPLE_TEAM_ID}",
-        "ascApiKeyPath": "@secret:ASC_API_KEY_FILE",
-        "ascApiKeyId": "${ASC_API_KEY_ID}",
-        "ascApiKeyIssuerId": "${ASC_API_KEY_ISSUER_ID}"
+        "ascAppId": "6772551270",
+        "appleTeamId": "725XG6A2A7"
       }
     }
   }
