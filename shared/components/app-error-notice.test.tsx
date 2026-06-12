@@ -27,6 +27,45 @@ describe("AppErrorNotice", () => {
     expect(handleRetry).toHaveBeenCalledTimes(1);
   });
 
+  it("exibe detalhes tecnicos com a mensagem da excecao original", () => {
+    const { getByText, getByTestId } = render(
+      <AppProviders>
+        <AppErrorNotice
+          error={new Error("Cannot read property 'foo' of undefined")}
+          showTechnicalDetails
+          testID="notice"
+        />
+      </AppProviders>,
+    );
+
+    expect(getByText("Detalhes tecnicos")).toBeTruthy();
+    expect(getByTestId("notice-technical-details").props.children).toContain(
+      "Cannot read property 'foo' of undefined",
+    );
+  });
+
+  it("exibe detalhes tecnicos legiveis para erro nao-Error", () => {
+    const { getByTestId } = render(
+      <AppProviders>
+        <AppErrorNotice error="string failure" showTechnicalDetails testID="notice" />
+      </AppProviders>,
+    );
+
+    expect(getByTestId("notice-technical-details").props.children).toContain(
+      "string failure",
+    );
+  });
+
+  it("nao exibe detalhes tecnicos por padrao", () => {
+    const { queryByText } = render(
+      <AppProviders>
+        <AppErrorNotice error={new Error("Boom")} />
+      </AppProviders>,
+    );
+
+    expect(queryByText("Detalhes tecnicos")).toBeNull();
+  });
+
   it("permite copy contextualizada para o fluxo atual", () => {
     const { getByText } = render(
       <AppProviders>

@@ -1,5 +1,4 @@
-import type { ErrorInfo, PropsWithChildren, ReactElement } from "react";
-import { Component } from "react";
+import { Component, type ErrorInfo, type PropsWithChildren, type ReactElement } from "react";
 
 import { runtimeLogger } from "@/core/telemetry/domain-loggers";
 import { AppScreen } from "@/shared/components/app-screen";
@@ -16,13 +15,13 @@ export interface AppErrorBoundaryProps extends PropsWithChildren {
   readonly fallbackDescription?: string;
   readonly resetLabel?: string;
   readonly onReset?: () => void;
-  readonly resetKeys?: ReadonlyArray<unknown>;
+  readonly resetKeys?: readonly unknown[];
   readonly testID?: string;
 }
 
 const haveResetKeysChanged = (
-  previousKeys: ReadonlyArray<unknown> = [],
-  nextKeys: ReadonlyArray<unknown> = [],
+  previousKeys: readonly unknown[] = [],
+  nextKeys: readonly unknown[] = [],
 ): boolean => {
   if (previousKeys.length !== nextKeys.length) {
     return true;
@@ -81,6 +80,10 @@ export class AppErrorBoundary extends Component<
         fallbackDescription={this.props.fallbackDescription}
         actionLabel={this.props.resetLabel}
         onAction={this.handleReset}
+        // Full-screen boundaries expose the original exception during the
+        // alpha: with remote crash reporting deferred (#522), the device
+        // screen is the only channel to diagnose store-build-only failures.
+        showTechnicalDetails={this.props.presentation === "screen"}
         testID={this.props.testID}
       />
     );
