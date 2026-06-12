@@ -5,13 +5,20 @@ import { Paragraph, YStack, styled } from "tamagui";
 import { borderWidths } from "@/config/design-tokens";
 import { AppHeading } from "@/shared/components/app-heading";
 
+// Cards de superfície com raio 20 + sombra suave — paridade com os cards
+// brancos do dashboard web (border #D8E3EF + shadow card).
 const SurfaceFrame = styled(YStack, {
   backgroundColor: "$surfaceCard",
   borderColor: "$borderColor",
   borderWidth: borderWidths.hairline,
-  borderRadius: "$2",
-  padding: "$4",
-  gap: "$2",
+  borderRadius: "$3",
+  padding: "$5",
+  gap: "$3",
+  shadowColor: "#0A1628",
+  shadowOffset: { width: 0, height: 6 },
+  shadowOpacity: 0.06,
+  shadowRadius: 16,
+  elevation: 2,
 });
 
 export interface AppSurfaceCardProps extends ComponentProps<typeof SurfaceFrame> {

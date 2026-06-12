@@ -27,29 +27,29 @@ export const darkSemanticColors = {
 } as const;
 
 /**
- * Light variant for native screens. DS v3 is dark-first on web, so the
- * mobile light mode keeps the same cyan/violet/lime/red accent families
- * while using high-contrast white and blue-grey surfaces.
+ * Light variant — DEFAULT do app, paridade exata com o tema light do web
+ * (`auraxis-web/app/theme/tokens/semantic.ts`, palette `light`). Teal
+ * #087FA7 como ação primária sobre superfícies brancas/azul-acinzentadas.
  */
 export const lightSemanticColors = {
-  background: "#f8fbff",
+  background: "#F4F8FB",
   surface: colorPalette.white,
-  surfaceRaised: "#eef4fb",
-  foreground: colorPalette.neutral900,
-  mutedForeground: colorPalette.neutral600,
-  subduedForeground: colorPalette.text400,
-  primary: colorPalette.cyan700,
-  primaryPressed: colorPalette.cyan600,
-  primaryForeground: colorPalette.neutral950,
-  secondary: colorPalette.violet700,
-  secondaryPressed: colorPalette.violet600,
-  border: "rgba(29,43,68,0.14)",
-  borderStrong: "rgba(21,152,190,0.42)",
-  success: colorPalette.lime700,
-  danger: colorPalette.red700,
-  dangerStrong: colorPalette.red700,
-  warning: colorPalette.orange700,
-  info: colorPalette.cyan700,
+  surfaceRaised: "#F8FBFF",
+  foreground: "#0A1628",
+  mutedForeground: "#5D6F89",
+  subduedForeground: "#7A8BA3",
+  primary: "#087FA7",
+  primaryPressed: "#066985",
+  primaryForeground: colorPalette.white,
+  secondary: "#6F62E2",
+  secondaryPressed: "#594FC2",
+  border: "#D8E3EF",
+  borderStrong: "#087FA7",
+  success: "#087F5B",
+  danger: "#C2414D",
+  dangerStrong: "#A33440",
+  warning: "#B7791F",
+  info: "#2563EB",
 } as const;
 
 /**

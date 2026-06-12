@@ -9,6 +9,7 @@ import {
 } from "@/features/dashboard/services/period-comparison";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { useT } from "@/shared/i18n";
+import { AppMoneyText } from "@/shared/components/app-money-text";
 import { formatCurrency } from "@/shared/utils/formatters";
 
 export interface DashboardComparisonCardProps {
@@ -84,9 +85,9 @@ export function DashboardComparisonCard({
         <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
           {title}
         </Paragraph>
-        <Paragraph color="$color" fontFamily="$heading" fontSize="$7">
+        <AppMoneyText fontSize="$7">
           {formatCurrency(value)}
-        </Paragraph>
+        </AppMoneyText>
         {hasBaseline ? (
           <XStack gap="$1" alignItems="center">
             <MaterialCommunityIcons

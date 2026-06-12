@@ -9,9 +9,11 @@ import {
   triggerHapticImpact,
 } from "@/shared/feedback/haptics";
 
+// Botões pill (raio total) — paridade com os CTAs do web ("Entrar na
+// Auraxis", chips de período do dashboard).
 const PrimaryButtonFrame = styled(Button, {
   backgroundColor: "$primary",
-  borderRadius: "$1",
+  borderRadius: "$5",
   pressStyle: {
     backgroundColor: "$primaryPressed",
   },
@@ -19,17 +21,18 @@ const PrimaryButtonFrame = styled(Button, {
 
 const SecondaryButtonFrame = styled(Button, {
   backgroundColor: "transparent",
-  borderRadius: "$1",
-  borderColor: "$secondary",
+  borderRadius: "$5",
+  borderColor: "$borderColor",
   borderWidth: borderWidths.hairline,
   pressStyle: {
     backgroundColor: "$surfaceRaised",
+    borderColor: "$borderColorHover",
   },
 });
 
 const DangerButtonFrame = styled(Button, {
   backgroundColor: "$danger",
-  borderRadius: "$1",
+  borderRadius: "$5",
   pressStyle: {
     backgroundColor: "$dangerStrong",
   },

@@ -45,6 +45,7 @@ import type {
   SavingsRateLevel,
 } from "@/features/dashboard/services/savings-rate-calculator";
 import { AppButton } from "@/shared/components/app-button";
+import { AppMoneyText } from "@/shared/components/app-money-text";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { DashboardSkeleton, MetricGridSkeleton } from "@/shared/skeletons";
 import {
@@ -312,9 +313,9 @@ function BalanceCard({ controller }: ControllerProps): ReactElement {
             <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
               Saldo geral
             </Paragraph>
-            <Paragraph color="$color" fontFamily="$heading" fontSize="$8">
+            <AppMoneyText fontSize="$8">
               {formatCurrency(controller.currentBalance)}
-            </Paragraph>
+            </AppMoneyText>
           </YStack>
         )}
       </AppQueryState>

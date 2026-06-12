@@ -44,12 +44,16 @@ export const colorPalette = {
   danger700: "#c53f4a",
 } as const;
 
+// Paridade com o web (auraxis-web/app/theme/tokens/typography.ts):
+// Inter para texto/headings e IBM Plex Mono para valores financeiros.
 export const typography = {
-  heading: "PlayfairDisplay_700Bold",
-  headingSemiBold: "PlayfairDisplay_600SemiBold",
-  body: "Raleway_400Regular",
-  bodyMedium: "Raleway_500Medium",
-  bodySemiBold: "Raleway_600SemiBold",
+  heading: "Inter_700Bold",
+  headingSemiBold: "Inter_600SemiBold",
+  body: "Inter_400Regular",
+  bodyMedium: "Inter_500Medium",
+  bodySemiBold: "Inter_600SemiBold",
+  mono: "IBMPlexMono_500Medium",
+  monoRegular: "IBMPlexMono_400Regular",
 } as const;
 
 export const spacing = (step: number): number => {

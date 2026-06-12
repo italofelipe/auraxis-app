@@ -1,14 +1,16 @@
 import { useEffect, useRef } from "react";
 
 import {
-  PlayfairDisplay_600SemiBold,
-  PlayfairDisplay_700Bold,
-} from "@expo-google-fonts/playfair-display";
+  IBMPlexMono_400Regular,
+  IBMPlexMono_500Medium,
+  IBMPlexMono_600SemiBold,
+} from "@expo-google-fonts/ibm-plex-mono";
 import {
-  Raleway_400Regular,
-  Raleway_500Medium,
-  Raleway_600SemiBold,
-} from "@expo-google-fonts/raleway";
+  Inter_400Regular,
+  Inter_500Medium,
+  Inter_600SemiBold,
+  Inter_700Bold,
+} from "@expo-google-fonts/inter";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 
@@ -94,11 +96,13 @@ export const useAppStartup = (): AppStartupState => {
   const hydrated = useSessionStore((state) => state.hydrated);
   const startupMeasurementStarted = useRef(false);
   const [fontsLoaded] = useFonts({
-    PlayfairDisplay_600SemiBold,
-    PlayfairDisplay_700Bold,
-    Raleway_400Regular,
-    Raleway_500Medium,
-    Raleway_600SemiBold,
+    Inter_400Regular,
+    Inter_500Medium,
+    Inter_600SemiBold,
+    Inter_700Bold,
+    IBMPlexMono_400Regular,
+    IBMPlexMono_500Medium,
+    IBMPlexMono_600SemiBold,
   });
 
   useEffect(() => {
