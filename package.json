@@ -39,8 +39,8 @@
     "e2e:visual": "maestro test .maestro/visual_baseline.yaml"
   },
   "dependencies": {
-    "@expo-google-fonts/playfair-display": "^0.4.2",
-    "@expo-google-fonts/raleway": "^0.4.2",
+    "@expo-google-fonts/ibm-plex-mono": "^0.4.1",
+    "@expo-google-fonts/inter": "^0.4.2",
     "@expo/vector-icons": "^15.0.3",
     "@hookform/resolvers": "^5.4.0",
     "@react-navigation/bottom-tabs": "^7.16.2",

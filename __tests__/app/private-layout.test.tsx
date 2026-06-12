@@ -135,11 +135,11 @@ describe("PrivateLayout", () => {
 
     expect(mockTabsScreenOptions).toMatchObject({
       headerShown: false,
-      tabBarActiveTintColor: "#1598be",
-      tabBarInactiveTintColor: "#6e7f9f",
+      tabBarActiveTintColor: "#087FA7",
+      tabBarInactiveTintColor: "#7A8BA3",
       tabBarStyle: {
         backgroundColor: "#ffffff",
-        borderTopColor: "rgba(29,43,68,0.14)",
+        borderTopColor: "#D8E3EF",
       },
     });
   });

@@ -9,7 +9,7 @@ import {
 } from "@/shared/theme";
 
 const bodyFont = createFont({
-  family: "Raleway_400Regular",
+  family: "Inter_400Regular",
   size: {
     1: fontSizes.xs,
     2: fontSizes.sm,
@@ -37,14 +37,15 @@ const bodyFont = createFont({
     7: "700",
   },
   face: {
-    400: { normal: "Raleway_400Regular" },
-    500: { normal: "Raleway_500Medium" },
-    600: { normal: "Raleway_600SemiBold" },
+    400: { normal: "Inter_400Regular" },
+    500: { normal: "Inter_500Medium" },
+    600: { normal: "Inter_600SemiBold" },
+    700: { normal: "Inter_700Bold" },
   },
 });
 
 const headingFont = createFont({
-  family: "PlayfairDisplay_700Bold",
+  family: "Inter_700Bold",
   size: {
     4: fontSizes.base,
     5: fontSizes.lg,
@@ -59,61 +60,62 @@ const headingFont = createFont({
     6: 28,
     7: 32,
     8: 36,
-    9: 40,
+    9: 42,
   },
   weight: {
     6: "600",
     7: "700",
   },
   face: {
-    600: { normal: "PlayfairDisplay_600SemiBold" },
-    700: { normal: "PlayfairDisplay_700Bold" },
+    600: { normal: "Inter_600SemiBold" },
+    700: { normal: "Inter_700Bold" },
   },
 });
 
-// Token names are namespaced with -dark / -light suffixes so each Tamagui
-// theme can resolve a specific colour while components reference the
-// semantic Tamagui variable (e.g. `$background`).
+// Valores financeiros (R$) — assinatura visual do dashboard web.
+const monoFont = createFont({
+  family: "IBMPlexMono_500Medium",
+  size: {
+    1: fontSizes.xs,
+    2: fontSizes.sm,
+    3: fontSizes.md,
+    4: fontSizes.base,
+    5: fontSizes.lg,
+    6: fontSizes.xl,
+    7: fontSizes["2xl"],
+    8: fontSizes["3xl"],
+    9: fontSizes["4xl"],
+  },
+  lineHeight: {
+    1: 16,
+    2: 18,
+    3: 20,
+    4: 22,
+    5: 24,
+    6: 28,
+    7: 32,
+    8: 38,
+    9: 44,
+  },
+  weight: {
+    4: "400",
+    5: "500",
+    6: "600",
+  },
+  face: {
+    400: { normal: "IBMPlexMono_400Regular" },
+    500: { normal: "IBMPlexMono_500Medium" },
+    600: { normal: "IBMPlexMono_600SemiBold" },
+  },
+});
+
 const tokens = createTokens({
   color: {
-    // dark
-    surfaceBaseDark: darkSemanticColors.background,
-    surfaceCardDark: darkSemanticColors.surface,
-    surfaceRaisedDark: darkSemanticColors.surfaceRaised,
-    textPrimaryDark: darkSemanticColors.foreground,
-    textSecondaryDark: darkSemanticColors.mutedForeground,
-    textMutedDark: darkSemanticColors.subduedForeground,
-    borderMutedDark: darkSemanticColors.border,
-    borderStrongDark: darkSemanticColors.borderStrong,
+    // Mantidos para consumo direto via $token quando necessário.
     brandPrimaryDark: darkSemanticColors.primary,
-    brandPrimaryPressedDark: darkSemanticColors.primaryPressed,
-    brandPrimaryForegroundDark: darkSemanticColors.primaryForeground,
-    brandSecondaryDark: darkSemanticColors.secondary,
-    brandSecondaryPressedDark: darkSemanticColors.secondaryPressed,
-    successDark: darkSemanticColors.success,
-    dangerDark: darkSemanticColors.danger,
-    dangerStrongDark: darkSemanticColors.dangerStrong,
-    warningDark: darkSemanticColors.warning,
-    infoDark: darkSemanticColors.info,
-    // light
-    surfaceBaseLight: lightSemanticColors.background,
-    surfaceCardLight: lightSemanticColors.surface,
-    surfaceRaisedLight: lightSemanticColors.surfaceRaised,
-    textPrimaryLight: lightSemanticColors.foreground,
-    textSecondaryLight: lightSemanticColors.mutedForeground,
-    textMutedLight: lightSemanticColors.subduedForeground,
-    borderMutedLight: lightSemanticColors.border,
-    borderStrongLight: lightSemanticColors.borderStrong,
     brandPrimaryLight: lightSemanticColors.primary,
-    brandPrimaryPressedLight: lightSemanticColors.primaryPressed,
-    brandPrimaryForegroundLight: lightSemanticColors.primaryForeground,
-    brandSecondaryLight: lightSemanticColors.secondary,
-    brandSecondaryPressedLight: lightSemanticColors.secondaryPressed,
-    successLight: lightSemanticColors.success,
-    dangerLight: lightSemanticColors.danger,
-    dangerStrongLight: lightSemanticColors.dangerStrong,
-    warningLight: lightSemanticColors.warning,
-    infoLight: lightSemanticColors.info,
+    surfaceBaseDark: darkSemanticColors.background,
+    surfaceBaseLight: lightSemanticColors.background,
   },
   space: {
     0: 0,
@@ -143,6 +145,7 @@ const tokens = createTokens({
     2: semanticRadii.md,
     3: semanticRadii.lg,
     4: semanticRadii.xl,
+    5: semanticRadii.pill,
   },
   zIndex: {
     0: 0,
@@ -152,42 +155,52 @@ const tokens = createTokens({
   },
 });
 
-const buildModeTheme = (mode: "dark" | "light") => {
-  const suffix = mode === "dark" ? "Dark" : "Light";
+type SemanticColors = Record<keyof typeof lightSemanticColors, string>;
+
+/**
+ * Constrói o tema com VALORES CONCRETOS (hex/rgba).
+ *
+ * Regressão #539/#543: a versão anterior populava os temas com referências
+ * de token ("$brandPrimaryLight") que o resolvedor do Tamagui nunca
+ * converteu para cor — o RN recebia a string crua e o app inteiro
+ * renderizava sem cor. Temas devem carregar valores finais; o teste
+ * `shared/theme/theme-resolution.test.tsx` protege este contrato.
+ */
+const buildModeTheme = (palette: SemanticColors) => {
   return {
-    background: `$surfaceBase${suffix}`,
-    backgroundHover: `$surfaceCard${suffix}`,
-    backgroundPress: `$surfaceRaised${suffix}`,
-    backgroundFocus: `$surfaceRaised${suffix}`,
-    color: `$textPrimary${suffix}`,
-    colorHover: `$textPrimary${suffix}`,
-    colorPress: `$textPrimary${suffix}`,
-    colorFocus: `$textPrimary${suffix}`,
-    borderColor: `$borderMuted${suffix}`,
-    borderColorHover: `$borderStrong${suffix}`,
-    borderColorFocus: `$borderStrong${suffix}`,
-    borderColorPress: `$brandPrimary${suffix}`,
-    placeholderColor: `$textMuted${suffix}`,
-    outlineColor: `$brandPrimary${suffix}`,
-    primary: `$brandPrimary${suffix}`,
-    primaryPressed: `$brandPrimaryPressed${suffix}`,
-    actionPrimaryForeground: `$brandPrimaryForeground${suffix}`,
-    secondary: `$brandSecondary${suffix}`,
-    secondaryPressed: `$brandSecondaryPressed${suffix}`,
-    accentColor: `$brandPrimary${suffix}`,
-    surfaceCard: `$surfaceCard${suffix}`,
-    surfaceRaised: `$surfaceRaised${suffix}`,
-    muted: `$textMuted${suffix}`,
-    success: `$success${suffix}`,
-    danger: `$danger${suffix}`,
-    dangerStrong: `$dangerStrong${suffix}`,
-    warning: `$warning${suffix}`,
-    info: `$info${suffix}`,
+    background: palette.background,
+    backgroundHover: palette.surface,
+    backgroundPress: palette.surfaceRaised,
+    backgroundFocus: palette.surfaceRaised,
+    color: palette.foreground,
+    colorHover: palette.foreground,
+    colorPress: palette.foreground,
+    colorFocus: palette.foreground,
+    borderColor: palette.border,
+    borderColorHover: palette.borderStrong,
+    borderColorFocus: palette.borderStrong,
+    borderColorPress: palette.primary,
+    placeholderColor: palette.subduedForeground,
+    outlineColor: palette.primary,
+    primary: palette.primary,
+    primaryPressed: palette.primaryPressed,
+    actionPrimaryForeground: palette.primaryForeground,
+    secondary: palette.secondary,
+    secondaryPressed: palette.secondaryPressed,
+    accentColor: palette.primary,
+    surfaceCard: palette.surface,
+    surfaceRaised: palette.surfaceRaised,
+    muted: palette.mutedForeground,
+    success: palette.success,
+    danger: palette.danger,
+    dangerStrong: palette.dangerStrong,
+    warning: palette.warning,
+    info: palette.info,
   } as const;
 };
 
-const auraxisLightTheme = buildModeTheme("light");
-const auraxisDarkTheme = buildModeTheme("dark");
+const auraxisLightTheme = buildModeTheme(lightSemanticColors);
+const auraxisDarkTheme = buildModeTheme(darkSemanticColors);
 
 export const auraxisThemes = {
   auraxis: auraxisLightTheme,
@@ -204,6 +217,7 @@ export const tamaguiConfig = createTamagui({
   fonts: {
     body: bodyFont,
     heading: headingFont,
+    mono: monoFont,
   },
   defaultTheme: auraxisDefaultTheme,
   settings: {

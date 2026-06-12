@@ -9,11 +9,15 @@ const FieldInput = styled(Input, {
   backgroundColor: "$surfaceRaised",
   borderColor: "$borderColor",
   borderWidth: borderWidths.hairline,
-  borderRadius: "$1",
+  borderRadius: "$2",
   color: "$color",
   fontFamily: "$body",
   fontSize: "$4",
   placeholderTextColor: "$placeholderColor",
+  focusStyle: {
+    borderColor: "$borderColorFocus",
+    borderWidth: borderWidths.hairline,
+  },
 });
 
 export interface AppInputFieldProps

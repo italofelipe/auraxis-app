@@ -21,19 +21,19 @@ describe("semantic theme tokens", () => {
     });
   });
 
-  it("keeps light mode on DS v3 accents with high-contrast native surfaces", () => {
+  it("keeps light mode identical to the web canonical light palette (semantic.ts)", () => {
     expect(lightSemanticColors).toMatchObject({
-      background: "#f8fbff",
+      background: "#F4F8FB",
       surface: "#ffffff",
-      surfaceRaised: "#eef4fb",
-      foreground: "#0a0f1a",
-      mutedForeground: "#2d4466",
-      primary: "#1598be",
-      secondary: "#594fc2",
-      success: "#169b6b",
-      danger: "#c53f4a",
-      warning: "#c68431",
-      info: "#1598be",
+      surfaceRaised: "#F8FBFF",
+      foreground: "#0A1628",
+      mutedForeground: "#5D6F89",
+      primary: "#087FA7",
+      secondary: "#6F62E2",
+      success: "#087F5B",
+      danger: "#C2414D",
+      warning: "#B7791F",
+      info: "#2563EB",
     });
   });
 
