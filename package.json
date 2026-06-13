@@ -75,7 +75,7 @@
     "expo-web-browser": "~55.0.16",
     "i18next": "^26.1.0",
     "jail-monkey": "^2.8.5",
-    "posthog-react-native": "^4.45.6",
+    "posthog-react-native": "^4.47.0",
     "react": "19.2.7",
     "react-dom": "19.2.7",
     "react-hook-form": "^7.75.0",
