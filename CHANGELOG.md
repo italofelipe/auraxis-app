@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.9.0](https://github.com/italofelipe/auraxis-app/compare/v1.8.0...v1.9.0) (2026-06-13)
+
+
+### Features
+
+* **auth,transactions:** glow the primary login and create-transaction CTAs ([#562](https://github.com/italofelipe/auraxis-app/issues/562)) ([23fd51d](https://github.com/italofelipe/auraxis-app/commit/23fd51d899a8a314b1c5a05c7870f48e536e9209))
+* **dashboard:** month period chips and glow the balance hero card ([d8d2104](https://github.com/italofelipe/auraxis-app/commit/d8d21047d38506a0129b13f89f133b1767cd5521))
+* **ui:** allow AppPeriodChips to wrap for many options ([ef6ddfe](https://github.com/italofelipe/auraxis-app/commit/ef6ddfe41183cd336a1fe72ebdda5f11df71d07e))
+
 ## [1.8.0](https://github.com/italofelipe/auraxis-app/compare/v1.7.0...v1.8.0) (2026-06-13)
 
 
