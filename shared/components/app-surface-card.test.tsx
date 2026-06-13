@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react-native";
+import { fireEvent, render } from "@testing-library/react-native";
 import { Text } from "react-native";
 
 import { AppProviders } from "@/core/providers/app-providers";
@@ -18,5 +18,19 @@ describe("AppSurfaceCard", () => {
     expect(getByText("Resumo")).toBeTruthy();
     expect(getByText("Descrição curta")).toBeTruthy();
     expect(getByText("Conteúdo do card")).toBeTruthy();
+  });
+
+  it("variante interactive dispara onPress", () => {
+    const onPress = jest.fn();
+    const { getByTestId } = render(
+      <AppProviders>
+        <AppSurfaceCard testID="card" variant="interactive" onPress={onPress}>
+          <Text>toque</Text>
+        </AppSurfaceCard>
+      </AppProviders>,
+    );
+
+    fireEvent.press(getByTestId("card"));
+    expect(onPress).toHaveBeenCalledTimes(1);
   });
 });
