@@ -89,9 +89,34 @@ export const motionDurations = {
   fast: 120,
   normal: 180,
   slow: 260,
+  deliberate: 320,
 } as const;
 
 export const motionScales = {
   pressIn: 0.98,
   pressOut: 1,
 } as const;
+
+// Letter-spacing canônico — usado em labels de CTA, chips de período e
+// overlines (uppercase). Paridade com `letter-spacing: 0.05em` da web.
+export const letterSpacings = {
+  tight: -0.2,
+  normal: 0,
+  wide: 0.4,
+  caps: 0.8,
+} as const;
+
+/**
+ * Dimensionamento canônico dos botões por tamanho. Antes os frames de
+ * `AppButton` herdavam o padding apertado do `Button` do Tamagui (texto
+ * "sufocado"); estes valores dão altura e respiro explícitos. Importado
+ * como variável nos componentes (não literal) — passa no enforcement de
+ * tokens. `fontToken`/`iconSize` alimentam label e ícones do CTA.
+ */
+export const buttonSizing = {
+  sm: { minHeight: 40, px: 16, py: 8, fontToken: "$3", iconSize: 16 },
+  md: { minHeight: 48, px: 24, py: 14, fontToken: "$4", iconSize: 18 },
+  lg: { minHeight: 56, px: 28, py: 16, fontToken: "$5", iconSize: 20 },
+} as const;
+
+export type ButtonSizeKey = keyof typeof buttonSizing;
