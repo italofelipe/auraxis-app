@@ -184,6 +184,7 @@ const buildModeTheme = (palette: SemanticColors) => {
     outlineColor: palette.primary,
     primary: palette.primary,
     primaryPressed: palette.primaryPressed,
+    primarySubtle: palette.primarySubtle,
     actionPrimaryForeground: palette.primaryForeground,
     secondary: palette.secondary,
     secondaryPressed: palette.secondaryPressed,
