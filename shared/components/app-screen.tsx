@@ -17,8 +17,14 @@ import { motionDurations } from "@/shared/theme/motion";
 
 export type AppScreenScrollHandle = NativeScrollView;
 
-// Espaçamento base das telas (= semanticSpacing.md).
-const SCREEN_GUTTER = 16;
+// Espaçamento base das telas por densidade. `comfortable` (default) dá mais
+// respiro horizontal/vertical — corrige a sensação de "denso"; `cozy` mantém
+// o 16 compacto para telas com muito conteúdo.
+const SCREEN_GUTTER_BY_DENSITY = {
+  comfortable: 20,
+  cozy: 16,
+} as const;
+export type AppScreenDensity = keyof typeof SCREEN_GUTTER_BY_DENSITY;
 // Folga adicional acima da tab bar flutuante para o conteúdo respirar.
 const TAB_BAR_BREATHING_ROOM = 16;
 
@@ -31,6 +37,8 @@ export interface AppScreenProps extends PropsWithChildren {
    * boilerplate.
    */
   readonly animateEntry?: boolean;
+  /** Densidade do espaçamento. `comfortable` (default) respira mais. */
+  readonly density?: AppScreenDensity;
   readonly testID?: string;
   readonly scrollViewRef?: Ref<AppScreenScrollHandle>;
 }
@@ -94,11 +102,13 @@ export function AppScreen({
   children,
   scrollable = true,
   animateEntry = true,
+  density = "comfortable",
   testID,
   scrollViewRef,
 }: AppScreenProps): ReactElement {
   const reducedMotion = useAppShellStore((state) => state.reducedMotionEnabled);
   const bottomInset = useScreenBottomInset();
+  const gutter = SCREEN_GUTTER_BY_DENSITY[density];
 
   if (!scrollable) {
     return (
@@ -107,10 +117,10 @@ export function AppScreen({
           <YStack
             flex={1}
             backgroundColor="$background"
-            paddingHorizontal="$4"
-            paddingTop="$4"
+            paddingHorizontal={gutter}
+            paddingTop={gutter}
             paddingBottom={bottomInset}
-            gap="$4"
+            gap={gutter}
             testID={testID}
           >
             {children}
@@ -131,10 +141,10 @@ export function AppScreen({
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={{
             flexGrow: 1,
-            paddingHorizontal: SCREEN_GUTTER,
-            paddingTop: SCREEN_GUTTER,
+            paddingHorizontal: gutter,
+            paddingTop: gutter,
             paddingBottom: bottomInset,
-            gap: SCREEN_GUTTER,
+            gap: gutter,
           }}
           testID={testID}
         >
