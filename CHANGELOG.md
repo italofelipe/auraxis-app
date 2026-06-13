@@ -1,5 +1,51 @@
 # Changelog
 
+## [1.8.0](https://github.com/italofelipe/auraxis-app/compare/v1.7.0...v1.8.0) (2026-06-13)
+
+
+### Features
+
+* **design:** F1 — tokens do web (light teal), Inter + IBM Plex Mono e FIX da resolução de temas Tamagui ([3f9ed38](https://github.com/italofelipe/auraxis-app/commit/3f9ed38b5444afbcb59b6f051bb4867a18811a1e))
+* **design:** port web DS tokens (light teal default, Inter + IBM Plex Mono) and fix Tamagui theme resolution ([8c5b50f](https://github.com/italofelipe/auraxis-app/commit/8c5b50f333b17b85b12c0e1e628de94863c0872d))
+* **navigation:** F2 — tab bar nova (Dashboard · Transações · [+] · Planejar · Mais) ([94ae94c](https://github.com/italofelipe/auraxis-app/commit/94ae94cf46705c21485f32178a5a90f37edd7530))
+* **navigation:** redesigned tab bar with quick-create center action, planning segment and more hub ([c5337de](https://github.com/italofelipe/auraxis-app/commit/c5337def8de39904b08226bcfda6ef625fac4e32))
+* **navigation:** refine tab bar with active pill, larger icons and brand glow ([3a3ae18](https://github.com/italofelipe/auraxis-app/commit/3a3ae181b81790205bb4ca6f864d872ddbf14636))
+* **profile:** persist theme preference on appearance change ([1be3775](https://github.com/italofelipe/auraxis-app/commit/1be37755fba3f25a949f80abc79f3092eae2496a))
+* **shell:** hydrate persisted theme on startup before ready ([77f5fdd](https://github.com/italofelipe/auraxis-app/commit/77f5fdd9a2d92fefc8b1f1335a064235aec938fe))
+* **theme:** add gradient, glow and motion tokens with light/dark parity ([032638e](https://github.com/italofelipe/auraxis-app/commit/032638e4b759139560c7292f536307873333bfbe))
+* **theme:** add SecureStore-backed theme preference storage ([e12c2d4](https://github.com/italofelipe/auraxis-app/commit/e12c2d42f5f8eab07817459fd5e68ccd99526414))
+* **theme:** add subdued token and extend AppText/AppHeading scale ([7194d00](https://github.com/italofelipe/auraxis-app/commit/7194d001cf6cd67e158a73f83859cdf50dcd75d4))
+* **ui:** add AppButton size/glow/press-scale and fix cramped padding ([d5d671d](https://github.com/italofelipe/auraxis-app/commit/d5d671d8448d130e4487e3a38ca127cbfbc93bf5))
+* **ui:** add AppReveal stagger entrance and AppPeriodChips segmented ([7af8ecb](https://github.com/italofelipe/auraxis-app/commit/7af8ecbb261a9c1164371fe7f2d7348a0afa704d))
+* **ui:** add AppScreen density with comfortable default spacing ([2a82ceb](https://github.com/italofelipe/auraxis-app/commit/2a82cebc8aa50cfd486ebd4488492824635cb25b))
+* **ui:** add card variants, brand glow and mono metric value ([d91b10d](https://github.com/italofelipe/auraxis-app/commit/d91b10d9ddf070a1d6efa591d747603e513b6135))
+* **ui:** animated splash, scroll fix on all screens and web-parity login hero ([0f3e4c9](https://github.com/italofelipe/auraxis-app/commit/0f3e4c972f5afc8ef9e3b98d4a439b4a4c708ae4))
+* **ui:** F3 splash animado + fix de scroll global + login com hero (paridade web) ([79274ef](https://github.com/italofelipe/auraxis-app/commit/79274ef38677b9ddb74bbfd3d09a89b3b270e236))
+
+
+### Bug Fixes
+
+* **ci:** add timeout guard-rails and non-interactive env to expo export jobs ([e0b2878](https://github.com/italofelipe/auraxis-app/commit/e0b2878b59db29553b668497e05b9d568664d48d))
+* **ci:** capturar exit do KILL para a validação do artefato rodar (bash -e) ([fad71f2](https://github.com/italofelipe/auraxis-app/commit/fad71f2b2aa1fe61e0f1c5aa7c1f3fc7015bbe12))
+* **ci:** capture export kill exit code so artifact validation runs under bash -e ([63adce3](https://github.com/italofelipe/auraxis-app/commit/63adce352d18951063c82303dea012b7f026d21b))
+* **ci:** kill expo export on post-export teardown hang and validate artifact ([0b191ad](https://github.com/italofelipe/auraxis-app/commit/0b191add2981571894adcebfffc5c279fb32e9ca))
+* **ci:** timeout guard-rails nos jobs de expo export (mitigação [#510](https://github.com/italofelipe/auraxis-app/issues/510)) ([dcb7c76](https://github.com/italofelipe/auraxis-app/commit/dcb7c763e1968a646b1713327ff11773650209a6))
+* **errors:** componentStack nos detalhes técnicos + initPostHog defensivo (diagnóstico v2) ([4524d51](https://github.com/italofelipe/auraxis-app/commit/4524d512cb1de47f76ec726dbc7b52baad6e6b28))
+* **errors:** detalhes técnicos nos error boundaries de tela cheia (diagnóstico alfa) ([ef8dadd](https://github.com/italofelipe/auraxis-app/commit/ef8dadd3585b8bd4e5e09ea8d2b9d377f1a1b11c))
+* **errors:** expose technical details on full-screen error boundaries for alpha diagnostics ([ea7f879](https://github.com/italofelipe/auraxis-app/commit/ea7f879962f78735f4b464828894a1eb24e66147))
+* **errors:** show component stack in boundary diagnostics and harden posthog init ([d823a0f](https://github.com/italofelipe/auraxis-app/commit/d823a0f1ac8858963f38d4497be621f6fb7864b3))
+* **goals:** envelope real do Flask (items + Decimal-string) + guard central de isEmpty ([e3cca7a](https://github.com/italofelipe/auraxis-app/commit/e3cca7a91619a8e1bbdbf0117e6ea30f1d4cb940))
+* **goals:** unwrap real Flask envelope (items + decimal strings) and guard isEmpty centrally ([56b8b4a](https://github.com/italofelipe/auraxis-app/commit/56b8b4afe39ed9e87ca95f9bca0f330170beb4f7))
+* **release:** resolve submit credentials via EAS credentials service instead of runner env vars ([f98cd14](https://github.com/italofelipe/auraxis-app/commit/f98cd14e16caf5ff16552a85f3658a5e5cab3257))
+* **release:** submit usa EAS credentials service (env vars não existem no runner) ([aef1a51](https://github.com/italofelipe/auraxis-app/commit/aef1a51d9f94abd7fbb067df49e482abfdbc4f76))
+* **runtime:** desligar React Compiler — corrompia ordem de hooks em release (crash área pública) ([3583400](https://github.com/italofelipe/auraxis-app/commit/3583400e459fb9df3d2a5acad310237b3d377779))
+* **runtime:** disable experimental React Compiler that corrupts hook order in release builds ([3af17eb](https://github.com/italofelipe/auraxis-app/commit/3af17eb8cc33cca7aba21b3fd680fb0993ef152b))
+* **theme:** default light explícito (paridade com o web) independente do dark mode do aparelho ([4cd789b](https://github.com/italofelipe/auraxis-app/commit/4cd789be6186f5483dfc69c0fc22bcf52ccf8006))
+* **theme:** default to light preference for web parity regardless of device scheme ([70342a1](https://github.com/italofelipe/auraxis-app/commit/70342a174f4ee16206e4506e9fddda88d1946834))
+* **transactions:** filtros + insight rolam com a lista (FlashList header) ([e249a83](https://github.com/italofelipe/auraxis-app/commit/e249a83ec6f299bfa2d012ceacb399579b20a245))
+* **transactions:** scroll filters and insight with the list via FlashList header ([db355f1](https://github.com/italofelipe/auraxis-app/commit/db355f1e3868cdde8feb9677f939bb4ee8e2129a))
+* **ui:** use pressStyle scale instead of wrapper to preserve button flex ([23293cb](https://github.com/italofelipe/auraxis-app/commit/23293cb8d7d178d9399b4228440701bef2b717a8))
+
 ## [1.7.0](https://github.com/italofelipe/auraxis-app/compare/v1.6.1...v1.7.0) (2026-06-11)
 
 
