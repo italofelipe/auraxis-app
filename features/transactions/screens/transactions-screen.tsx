@@ -30,7 +30,6 @@ import { AppButton } from "@/shared/components/app-button";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
-import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { useListRefresh } from "@/shared/hooks/use-list-refresh";
@@ -80,20 +79,30 @@ export function TransactionsScreen(): ReactElement {
     );
   }
 
-  return (
-    <AppScreen scrollable={false}>
+  const listHeader = (
+    <YStack gap="$4" paddingBottom="$2">
       <FilterHeader controller={controller} />
       <AiInsightSurface
         dimension="transactions"
         onOpenHub={() => router.push(appRoutes.private.insights)}
       />
-      <YStack flex={1}>
-        {controller.viewMode === "calendar" ? (
-          <FinancialCalendar transactions={controller.transactions} />
-        ) : (
-          <TransactionsListCard controller={controller} />
-        )}
-      </YStack>
+    </YStack>
+  );
+
+  if (controller.viewMode === "calendar") {
+    return (
+      <AppScreen>
+        {listHeader}
+        <FinancialCalendar transactions={controller.transactions} />
+      </AppScreen>
+    );
+  }
+
+  // Lista: filtros + insight rolam JUNTO com os itens (ListHeaderComponent),
+  // em vez de ficarem fixos comendo a viewport.
+  return (
+    <AppScreen scrollable={false}>
+      <TransactionsListCard controller={controller} listHeader={listHeader} />
     </AppScreen>
   );
 }
@@ -340,29 +349,32 @@ function ExportSheet({
   );
 }
 
-function TransactionsListCard({ controller }: ControllerProps): ReactElement {
-  const queryStateOptions = useMemo(
-    () => ({
-      loading: {
-        title: "Carregando transacoes",
-        description: "Buscando suas movimentacoes.",
-      },
-      loadingPresentation: "skeleton" as const,
-      empty: {
-        title: "Nenhuma transacao no filtro atual",
-        description: "Crie uma nova transacao ou troque o filtro acima.",
-      },
-      error: {
-        fallbackTitle: "Nao foi possivel carregar as transacoes",
-        fallbackDescription: "Tente novamente em instantes.",
-      },
-      isEmpty: () => controller.transactions.length === 0,
-    }),
-    [controller.transactions.length],
-  );
+interface TransactionsListCardProps extends ControllerProps {
+  readonly listHeader: ReactElement;
+}
 
-  const emptyComponent = useMemo(
-    () => (
+function TransactionsListCard({
+  controller,
+  listHeader,
+}: TransactionsListCardProps): ReactElement {
+  const query = controller.transactionsQuery;
+
+  // Estado mostrado pela FlashList quando não há itens (header de filtros
+  // sempre visível via ListHeaderComponent, então tudo rola junto).
+  const listEmptyComponent = useMemo((): ReactElement => {
+    if (query.isPending) {
+      return <TransactionListSkeleton rows={5} />;
+    }
+    if (query.isError) {
+      return (
+        <AppErrorNotice
+          error={query.error}
+          fallbackTitle="Nao foi possivel carregar as transacoes"
+          fallbackDescription="Tente novamente em instantes."
+        />
+      );
+    }
+    return (
       <AppEmptyState
         illustration="transactions"
         title="Nenhuma transacao no filtro atual"
@@ -372,24 +384,29 @@ function TransactionsListCard({ controller }: ControllerProps): ReactElement {
           onPress: controller.handleOpenCreate,
         }}
       />
-    ),
-    [controller.handleOpenCreate],
-  );
+    );
+  }, [query.isPending, query.isError, query.error, controller.handleOpenCreate]);
 
   return (
-    <AppQueryState
-      query={controller.transactionsQuery}
-      options={queryStateOptions}
-      loadingComponent={<TransactionListSkeleton rows={5} />}
-      emptyComponent={emptyComponent}
-    >
-      {() => <TransactionsList controller={controller} />}
-    </AppQueryState>
+    <TransactionsList
+      controller={controller}
+      listHeader={listHeader}
+      listEmptyComponent={listEmptyComponent}
+    />
   );
 }
 
+interface TransactionsListProps extends ControllerProps {
+  readonly listHeader: ReactElement;
+  readonly listEmptyComponent: ReactElement;
+}
+
 // eslint-disable-next-line max-lines-per-function
-function TransactionsList({ controller }: ControllerProps): ReactElement {
+function TransactionsList({
+  controller,
+  listHeader,
+  listEmptyComponent,
+}: TransactionsListProps): ReactElement {
   const { refreshing, onRefresh } = useListRefresh(TRANSACTIONS_REFRESH_KEYS);
   const [detailTransactionId, setDetailTransactionId] = useState<string | null>(null);
   const [payTarget, setPayTarget] = useState<MarkPaidTarget | null>(null);
@@ -482,11 +499,14 @@ function TransactionsList({ controller }: ControllerProps): ReactElement {
         data={controller.transactions}
         keyExtractor={extractTransactionKey}
         renderItem={renderItem}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={listEmptyComponent}
         contentContainerStyle={listContainerStyle}
         ItemSeparatorComponent={ListSeparator}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
+        showsVerticalScrollIndicator={false}
         testID="transactions-flashlist"
       />
       <TransactionDetailModal
