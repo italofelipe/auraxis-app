@@ -7,7 +7,7 @@ import {
 import type { LayoutChangeEvent } from "react-native";
 
 import { useLocalSearchParams } from "expo-router";
-import { Paragraph, XStack, YStack } from "tamagui";
+import { Paragraph, YStack } from "tamagui";
 
 import { DashboardComparisonCard } from "@/features/dashboard/components/dashboard-comparison-card";
 import { DashboardCountsCard } from "@/features/dashboard/components/dashboard-counts-card";
@@ -44,8 +44,8 @@ import type {
   SavingsRateAssessment,
   SavingsRateLevel,
 } from "@/features/dashboard/services/savings-rate-calculator";
-import { AppButton } from "@/shared/components/app-button";
 import { AppMoneyText } from "@/shared/components/app-money-text";
+import { AppPeriodChips } from "@/shared/components/app-period-chips";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { DashboardSkeleton, MetricGridSkeleton } from "@/shared/skeletons";
 import {
@@ -285,6 +285,8 @@ function DashboardOverviewCards({
 function BalanceCard({ controller }: ControllerProps): ReactElement {
   return (
     <AppSurfaceCard
+      glow
+      accentBar
       title={controller.greetingName ? `Ola, ${controller.greetingName}` : "Ola"}
       description="Aqui esta o resumo das suas financas."
     >
@@ -375,17 +377,12 @@ function MonthSnapshotCard({ controller }: ControllerProps): ReactElement {
       description="Receitas, despesas e saldo do periodo selecionado."
     >
       <YStack gap="$3">
-        <XStack gap="$2" flexWrap="wrap">
-          {controller.monthOptions.map((month) => (
-            <AppButton
-              key={month.value}
-              tone={controller.selectedMonth === month.value ? "primary" : "secondary"}
-              onPress={() => controller.setSelectedMonth(month.value)}
-            >
-              {month.label}
-            </AppButton>
-          ))}
-        </XStack>
+        <AppPeriodChips
+          options={controller.monthOptions}
+          value={controller.selectedMonth}
+          onChange={controller.setSelectedMonth}
+          testID="dashboard-month-chips"
+        />
 
         <AppQueryState
           query={controller.trendsQuery}
