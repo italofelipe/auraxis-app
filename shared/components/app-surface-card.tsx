@@ -1,11 +1,9 @@
 import type { ComponentProps, ReactElement, ReactNode } from "react";
 
-import Animated from "react-native-reanimated";
 import { Paragraph, YStack, styled } from "tamagui";
 
 import { borderWidths } from "@/config/design-tokens";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
-import { usePressScaleAnimation } from "@/shared/animations/use-press-scale-animation";
 import { AppHeading } from "@/shared/components/app-heading";
 import {
   darkSemanticGlows,
@@ -93,7 +91,8 @@ function CardContent({
  * Shared card surface for mobile screens built on Tamagui.
  *
  * Variantes dão hierarquia visual; `interactive` (ou passar `onPress`) ativa
- * press-scale (Reanimated, respeitando reduced motion) e realce de borda.
+ * um press-scale via `pressStyle` (sem wrapper, preservando o layout) e
+ * realce de borda.
  *
  * @param props Card props, copy opcional e variante.
  * @returns A themed card container.
@@ -115,18 +114,15 @@ export function AppSurfaceCard({
     variant === "interactive" || typeof onPress === "function";
   const shadow =
     variant === "raised" ? semanticShadows.raised : semanticShadows.card;
-  const { animatedStyle, onPressIn, onPressOut } = usePressScaleAnimation();
 
   const interactiveProps = isInteractive
     ? {
         onPress,
-        onPressIn,
-        onPressOut,
-        pressStyle: { borderColor: "$borderColorHover" },
+        pressStyle: { borderColor: "$borderColorHover", scale: 0.98 },
       }
     : {};
 
-  const body = (
+  return (
     <SurfaceFrame
       {...rest}
       {...shadow}
@@ -138,10 +134,4 @@ export function AppSurfaceCard({
       </CardContent>
     </SurfaceFrame>
   );
-
-  if (!isInteractive) {
-    return body;
-  }
-
-  return <Animated.View style={animatedStyle}>{body}</Animated.View>;
 }

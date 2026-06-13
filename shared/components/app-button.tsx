@@ -6,7 +6,6 @@ import {
 } from "react";
 import type { GestureResponderEvent } from "react-native";
 
-import Animated from "react-native-reanimated";
 import { Button, Paragraph, styled } from "tamagui";
 
 import {
@@ -15,7 +14,6 @@ import {
   type ButtonSizeKey,
 } from "@/config/design-tokens";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
-import { usePressScaleAnimation } from "@/shared/animations/use-press-scale-animation";
 import {
   type HapticImpactTone,
   triggerHapticImpact,
@@ -25,12 +23,15 @@ import { darkSemanticGlows, lightSemanticGlows } from "@/shared/theme";
 // Botões pill (raio total) — paridade com os CTAs do web ("Entrar na
 // Auraxis", chips de período do dashboard). Altura e padding vêm de
 // `buttonSizing` (token) por tamanho — antes os frames herdavam o padding
-// apertado do `Button` do Tamagui e o texto ficava "sufocado".
+// apertado do `Button` do Tamagui e o texto ficava "sufocado". O press
+// aplica um leve `scale` via `pressStyle` (sem wrapper, para não quebrar o
+// `flex` de botões lado a lado).
 const PrimaryButtonFrame = styled(Button, {
   backgroundColor: "$primary",
   borderRadius: "$5",
   pressStyle: {
     backgroundColor: "$primaryPressed",
+    scale: 0.97,
   },
 });
 
@@ -42,6 +43,7 @@ const SecondaryButtonFrame = styled(Button, {
   pressStyle: {
     backgroundColor: "$surfaceRaised",
     borderColor: "$borderColorHover",
+    scale: 0.97,
   },
 });
 
@@ -50,6 +52,7 @@ const DangerButtonFrame = styled(Button, {
   borderRadius: "$5",
   pressStyle: {
     backgroundColor: "$dangerStrong",
+    scale: 0.97,
   },
 });
 
@@ -160,10 +163,10 @@ const renderButtonFrame = (
 /**
  * Shared button wrapper aligned to the Auraxis Tamagui theme.
  *
- * Fires tactile feedback on press-in via {@link triggerHapticImpact} and
- * animates a subtle press-scale (Reanimated, respecting reduced motion) so
- * every CTA gets free haptics + motion without each call site importing
- * `expo-haptics`/`reanimated` directly.
+ * Fires tactile feedback on press-in via {@link triggerHapticImpact} so
+ * every CTA gets free haptics without each call site importing
+ * `expo-haptics` directly. The press-scale comes from Tamagui `pressStyle`
+ * (no extra view), preserving caller layout such as `flex`.
  *
  * @param props Button content, tone, size, glow, and optional haptic override.
  * @returns Themed mobile button.
@@ -176,7 +179,6 @@ export function AppButton({
   fullWidth = false,
   hapticTone,
   onPressIn,
-  onPressOut,
   accessibilityLabel,
   accessibilityRole,
   accessibilityHint,
@@ -188,24 +190,13 @@ export function AppButton({
   const resolvedTheme = useResolvedTheme();
   const glows =
     resolvedTheme === "auraxis_dark" ? darkSemanticGlows : lightSemanticGlows;
-  const { animatedStyle, onPressIn: scaleIn, onPressOut: scaleOut } =
-    usePressScaleAnimation();
 
   const handlePressIn = useCallback(
     (event: GestureResponderEvent): void => {
       triggerHapticImpact(resolvedHapticTone);
-      scaleIn();
       onPressIn?.(event);
     },
-    [onPressIn, resolvedHapticTone, scaleIn],
-  );
-
-  const handlePressOut = useCallback(
-    (event: GestureResponderEvent): void => {
-      scaleOut();
-      onPressOut?.(event);
-    },
-    [onPressOut, scaleOut],
+    [onPressIn, resolvedHapticTone],
   );
 
   const sizing = buttonSizing[size];
@@ -214,22 +205,18 @@ export function AppButton({
     ...resolveButtonGlow(glow, tone, glows),
     height: sizing.minHeight,
     paddingHorizontal: sizing.px,
-    width: fullWidth ? "100%" : undefined,
+    width: fullWidth ? "100%" : rest.width,
     disabled,
     accessibilityLabel: resolveAccessibilityLabel(accessibilityLabel, children),
     accessibilityRole: accessibilityRole ?? "button",
     accessibilityHint,
     accessibilityState: { disabled: Boolean(disabled), ...accessibilityState },
     onPressIn: handlePressIn,
-    onPressOut: handlePressOut,
   };
-  const content = renderButtonContent(children, tone, sizing.fontToken);
 
-  return (
-    <Animated.View
-      style={[animatedStyle, fullWidth ? { alignSelf: "stretch" } : null]}
-    >
-      {renderButtonFrame(tone, sharedProps, content)}
-    </Animated.View>
+  return renderButtonFrame(
+    tone,
+    sharedProps,
+    renderButtonContent(children, tone, sizing.fontToken),
   );
 }
