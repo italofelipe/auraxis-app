@@ -201,7 +201,7 @@ function FilterHeaderControls({
         onClearFilters={controller.clearFilters}
       />
       <XStack gap="$2">
-        <AppButton flex={1} onPress={controller.handleOpenCreate}>
+        <AppButton flex={1} glow onPress={controller.handleOpenCreate}>
           Nova transacao
         </AppButton>
         <AppButton flex={1} tone="secondary" onPress={onOpenExport}>

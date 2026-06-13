@@ -73,6 +73,8 @@ export function LoginScreen(): ReactElement {
           </XStack>
 
           <AppButton
+            glow
+            size="lg"
             onPress={() => {
               void controller.handleSubmit();
             }}
