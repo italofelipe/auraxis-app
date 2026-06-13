@@ -32,7 +32,7 @@ export function AppPeriodChips<T extends string>({
   testID,
 }: AppPeriodChipsProps<T>): ReactElement {
   return (
-    <XStack gap="$2" testID={testID}>
+    <XStack gap="$2" flexWrap="wrap" testID={testID}>
       {options.map((option) => {
         const isActive = option.value === value;
         return (
