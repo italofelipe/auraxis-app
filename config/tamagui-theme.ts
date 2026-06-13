@@ -192,6 +192,7 @@ const buildModeTheme = (palette: SemanticColors) => {
     surfaceCard: palette.surface,
     surfaceRaised: palette.surfaceRaised,
     muted: palette.mutedForeground,
+    subdued: palette.subduedForeground,
     success: palette.success,
     danger: palette.danger,
     dangerStrong: palette.dangerStrong,

@@ -32,13 +32,13 @@ exports[`InsightHub agrupa o insight atual por dimensao 1`] = `
         "paddingLeft": 24,
         "paddingRight": 24,
         "paddingTop": 24,
-        "shadowColor": "rgb(10,22,40)",
+        "shadowColor": "rgb(0,0,0)",
         "shadowOffset": {
           "height": 2,
           "width": 0,
         },
         "shadowOpacity": 1,
-        "shadowRadius": 3,
+        "shadowRadius": 4,
       }
     }
   >
@@ -211,7 +211,15 @@ exports[`InsightHub agrupa o insight atual por dimensao 1`] = `
                 "flex": 1,
                 "flexDirection": "row",
                 "flexWrap": "nowrap",
+                "height": 48,
                 "justifyContent": "center",
+                "paddingLeft": 24,
+                "paddingRight": 24,
+                "transform": [
+                  {
+                    "scale": 1,
+                  },
+                ],
               }
             }
             tabIndex={0}

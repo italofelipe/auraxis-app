@@ -28,4 +28,18 @@ describe("AppMetricCard", () => {
 
     expect(getByText("Comparado ao mes anterior")).toBeTruthy();
   });
+
+  it("renderiza a tendência com seta direcional", () => {
+    const { getByText } = render(
+      <TestProviders>
+        <AppMetricCard
+          label="Saldo"
+          value="R$ 10,00"
+          trend={{ direction: "up", label: "+12%" }}
+        />
+      </TestProviders>,
+    );
+
+    expect(getByText("↑ +12%")).toBeTruthy();
+  });
 });

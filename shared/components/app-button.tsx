@@ -1,21 +1,37 @@
-import { type ComponentProps, type ReactElement, type ReactNode, useCallback } from "react";
+import {
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+  useCallback,
+} from "react";
 import type { GestureResponderEvent } from "react-native";
 
 import { Button, Paragraph, styled } from "tamagui";
 
-import { borderWidths } from "@/config/design-tokens";
+import {
+  borderWidths,
+  buttonSizing,
+  type ButtonSizeKey,
+} from "@/config/design-tokens";
+import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import {
   type HapticImpactTone,
   triggerHapticImpact,
 } from "@/shared/feedback/haptics";
+import { darkSemanticGlows, lightSemanticGlows } from "@/shared/theme";
 
 // Botões pill (raio total) — paridade com os CTAs do web ("Entrar na
-// Auraxis", chips de período do dashboard).
+// Auraxis", chips de período do dashboard). Altura e padding vêm de
+// `buttonSizing` (token) por tamanho — antes os frames herdavam o padding
+// apertado do `Button` do Tamagui e o texto ficava "sufocado". O press
+// aplica um leve `scale` via `pressStyle` (sem wrapper, para não quebrar o
+// `flex` de botões lado a lado).
 const PrimaryButtonFrame = styled(Button, {
   backgroundColor: "$primary",
   borderRadius: "$5",
   pressStyle: {
     backgroundColor: "$primaryPressed",
+    scale: 0.97,
   },
 });
 
@@ -27,6 +43,7 @@ const SecondaryButtonFrame = styled(Button, {
   pressStyle: {
     backgroundColor: "$surfaceRaised",
     borderColor: "$borderColorHover",
+    scale: 0.97,
   },
 });
 
@@ -35,23 +52,36 @@ const DangerButtonFrame = styled(Button, {
   borderRadius: "$5",
   pressStyle: {
     backgroundColor: "$dangerStrong",
+    scale: 0.97,
   },
 });
 
 const ButtonLabel = styled(Paragraph, {
   fontFamily: "$body",
-  fontSize: "$4",
   fontWeight: "$6",
   textAlign: "center",
 });
 
 type FrameProps = ComponentProps<typeof PrimaryButtonFrame>;
+type ButtonGlow = (typeof lightSemanticGlows)[keyof typeof lightSemanticGlows];
 
 export type AppButtonTone = "primary" | "secondary" | "danger";
 
 export interface AppButtonProps extends Omit<FrameProps, "children"> {
   readonly children: ReactNode;
   readonly tone?: AppButtonTone;
+  /**
+   * Tamanho do CTA. `md` (default) = altura 48 com respiro confortável;
+   * `sm` para ações secundárias densas; `lg` para CTAs de destaque.
+   */
+  readonly size?: ButtonSizeKey;
+  /**
+   * Aplica o glow de marca (sombra colorida) sob o botão — usar em CTAs
+   * primários de destaque (ex.: "Entrar", "Assinar"). Off por padrão.
+   */
+  readonly glow?: boolean;
+  /** Estica o botão para a largura disponível. */
+  readonly fullWidth?: boolean;
   /**
    * Tactile feedback fired on press-in. Defaults to `"light"` for primary
    * tone, `"medium"` for danger and `"none"` for secondary — matching
@@ -71,16 +101,6 @@ const defaultHapticTone = (tone: AppButtonTone): HapticImpactTone => {
   return "none";
 };
 
-/**
- * Shared button wrapper aligned to the Auraxis Tamagui theme.
- *
- * Fires tactile feedback on press-in via {@link triggerHapticImpact} so
- * every CTA in the app gets free haptics without each call site needing
- * to import `expo-haptics` directly.
- *
- * @param props Button content, tone, and optional haptic override.
- * @returns Primary or secondary mobile button.
- */
 const resolveAccessibilityLabel = (
   explicit: string | undefined,
   children: ReactNode,
@@ -97,19 +117,66 @@ const resolveAccessibilityLabel = (
   return undefined;
 };
 
-const renderButtonContent = (
-  children: ReactNode,
-  color: "$actionPrimaryForeground" | "$color",
-): ReactNode => {
-  if (typeof children === "string" || typeof children === "number") {
-    return <ButtonLabel color={color}>{children}</ButtonLabel>;
+const resolveButtonGlow = (
+  glow: boolean,
+  tone: AppButtonTone,
+  glows: typeof lightSemanticGlows,
+): ButtonGlow | Record<string, never> => {
+  if (!glow) {
+    return {};
   }
-  return children;
+  return glows[tone === "danger" ? "danger" : "brand"];
 };
 
+const renderButtonContent = (
+  children: ReactNode,
+  tone: AppButtonTone,
+  fontToken: string,
+): ReactNode => {
+  if (typeof children !== "string" && typeof children !== "number") {
+    return children;
+  }
+  const color = tone === "primary" ? "$actionPrimaryForeground" : "$color";
+  return (
+    <ButtonLabel color={color} fontSize={fontToken}>
+      {children}
+    </ButtonLabel>
+  );
+};
+
+const renderButtonFrame = (
+  tone: AppButtonTone,
+  frameProps: FrameProps,
+  content: ReactNode,
+): ReactElement => {
+  if (tone === "secondary") {
+    return (
+      <SecondaryButtonFrame {...frameProps}>{content}</SecondaryButtonFrame>
+    );
+  }
+  if (tone === "danger") {
+    return <DangerButtonFrame {...frameProps}>{content}</DangerButtonFrame>;
+  }
+  return <PrimaryButtonFrame {...frameProps}>{content}</PrimaryButtonFrame>;
+};
+
+/**
+ * Shared button wrapper aligned to the Auraxis Tamagui theme.
+ *
+ * Fires tactile feedback on press-in via {@link triggerHapticImpact} so
+ * every CTA gets free haptics without each call site importing
+ * `expo-haptics` directly. The press-scale comes from Tamagui `pressStyle`
+ * (no extra view), preserving caller layout such as `flex`.
+ *
+ * @param props Button content, tone, size, glow, and optional haptic override.
+ * @returns Themed mobile button.
+ */
 export function AppButton({
   children,
   tone = "primary",
+  size = "md",
+  glow = false,
+  fullWidth = false,
   hapticTone,
   onPressIn,
   accessibilityLabel,
@@ -120,6 +187,9 @@ export function AppButton({
   ...rest
 }: AppButtonProps): ReactElement {
   const resolvedHapticTone = hapticTone ?? defaultHapticTone(tone);
+  const resolvedTheme = useResolvedTheme();
+  const glows =
+    resolvedTheme === "auraxis_dark" ? darkSemanticGlows : lightSemanticGlows;
 
   const handlePressIn = useCallback(
     (event: GestureResponderEvent): void => {
@@ -129,56 +199,24 @@ export function AppButton({
     [onPressIn, resolvedHapticTone],
   );
 
-  const a11yLabel = resolveAccessibilityLabel(accessibilityLabel, children);
-  const a11yRole = accessibilityRole ?? "button";
-  const a11yState = {
-    disabled: Boolean(disabled),
-    ...accessibilityState,
+  const sizing = buttonSizing[size];
+  const sharedProps: FrameProps = {
+    ...rest,
+    ...resolveButtonGlow(glow, tone, glows),
+    height: sizing.minHeight,
+    paddingHorizontal: sizing.px,
+    width: fullWidth ? "100%" : rest.width,
+    disabled,
+    accessibilityLabel: resolveAccessibilityLabel(accessibilityLabel, children),
+    accessibilityRole: accessibilityRole ?? "button",
+    accessibilityHint,
+    accessibilityState: { disabled: Boolean(disabled), ...accessibilityState },
+    onPressIn: handlePressIn,
   };
 
-  if (tone === "secondary") {
-    return (
-      <SecondaryButtonFrame
-        {...rest}
-        disabled={disabled}
-        accessibilityLabel={a11yLabel}
-        accessibilityRole={a11yRole}
-        accessibilityHint={accessibilityHint}
-        accessibilityState={a11yState}
-        onPressIn={handlePressIn}
-      >
-        {renderButtonContent(children, "$color")}
-      </SecondaryButtonFrame>
-    );
-  }
-
-  if (tone === "danger") {
-    return (
-      <DangerButtonFrame
-        {...rest}
-        disabled={disabled}
-        accessibilityLabel={a11yLabel}
-        accessibilityRole={a11yRole}
-        accessibilityHint={accessibilityHint}
-        accessibilityState={a11yState}
-        onPressIn={handlePressIn}
-      >
-        {renderButtonContent(children, "$color")}
-      </DangerButtonFrame>
-    );
-  }
-
-  return (
-    <PrimaryButtonFrame
-      {...rest}
-      disabled={disabled}
-      accessibilityLabel={a11yLabel}
-      accessibilityRole={a11yRole}
-      accessibilityHint={accessibilityHint}
-      accessibilityState={a11yState}
-      onPressIn={handlePressIn}
-    >
-      {renderButtonContent(children, "$actionPrimaryForeground")}
-    </PrimaryButtonFrame>
+  return renderButtonFrame(
+    tone,
+    sharedProps,
+    renderButtonContent(children, tone, sizing.fontToken),
   );
 }
