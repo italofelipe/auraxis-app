@@ -1,8 +1,9 @@
 import type { ReactElement } from "react";
 
 import { Controller, type Control, type FieldErrors } from "react-hook-form";
-import { Paragraph, YStack } from "tamagui";
+import { Paragraph, XStack, YStack } from "tamagui";
 
+import { AuthDivider, AuthHero } from "@/features/auth/components/auth-hero";
 import { TurnstileChallenge } from "@/features/auth/components/turnstile-challenge";
 import {
   useLoginScreenController,
@@ -33,9 +34,15 @@ export function LoginScreen(): ReactElement {
 
   return (
     <AppScreen>
+      <AuthHero
+        badge="ACESSO SEGURO E PROTEGIDO"
+        title="Transforme controle em liberdade para crescer."
+        subtitle="Organize hoje, planeje amanhã e acompanhe cada conquista financeira com clareza."
+      />
+
       <AppSurfaceCard
-        title="Bem-vindo de volta"
-        description="Faca login na sua conta para continuar."
+        title="Entrar"
+        description="Acesse sua área privada e continue sua rotina financeira."
       >
         <YStack gap="$4">
           {controller.sessionFailureNotice ? (
@@ -52,13 +59,26 @@ export function LoginScreen(): ReactElement {
 
           <CaptchaBlock controller={controller} />
 
+          <XStack justifyContent="flex-end">
+            <Paragraph
+              accessibilityRole="button"
+              onPress={controller.handleForgotPassword}
+              fontFamily="$body"
+              fontWeight="$6"
+              fontSize="$3"
+              color="$primary"
+            >
+              Esqueceu sua senha?
+            </Paragraph>
+          </XStack>
+
           <AppButton
             onPress={() => {
               void controller.handleSubmit();
             }}
             disabled={controller.isSubmitting}
           >
-            {controller.isSubmitting ? "Entrando..." : "Entrar"}
+            {controller.isSubmitting ? "Entrando..." : "Entrar na Auraxis"}
           </AppButton>
 
           {controller.submitError ? (
@@ -71,13 +91,11 @@ export function LoginScreen(): ReactElement {
             />
           ) : null}
 
-          <AppButton tone="secondary" onPress={controller.handleForgotPassword}>
-            Esqueceu sua senha?
-          </AppButton>
+          <AuthDivider />
+
+          <RegisterCallToAction onPress={controller.handleRegister} />
         </YStack>
       </AppSurfaceCard>
-
-      <RegisterCallToAction onPress={controller.handleRegister} />
 
       <LegalLinks
         onOpenTerms={() => {
@@ -192,14 +210,21 @@ function SessionFailureNoticeBlock({
 
 function RegisterCallToAction({ onPress }: { readonly onPress: () => void }): ReactElement {
   return (
-    <YStack gap="$2" alignItems="center">
+    <XStack justifyContent="center" alignItems="center" gap="$2" flexWrap="wrap">
       <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-        Ainda nao tem conta?
+        Não tem conta?
       </Paragraph>
-      <AppButton tone="secondary" onPress={onPress}>
-        Criar conta
-      </AppButton>
-    </YStack>
+      <Paragraph
+        accessibilityRole="button"
+        onPress={onPress}
+        color="$primary"
+        fontFamily="$body"
+        fontWeight="$7"
+        fontSize="$3"
+      >
+        Criar conta gratuita
+      </Paragraph>
+    </XStack>
   );
 }
 
