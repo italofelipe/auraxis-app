@@ -6,6 +6,7 @@ import {
   type ThemePreference,
   useAppShellStore,
 } from "@/core/shell/app-shell-store";
+import { persistThemePreference } from "@/core/shell/theme-preference-storage";
 import { AppButton } from "@/shared/components/app-button";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { useT } from "@/shared/i18n";
@@ -55,6 +56,13 @@ export function AppearanceSection(): ReactElement {
   const setThemePreference = useAppShellStore(
     (state) => state.setThemePreference,
   );
+  const handleSelect = useCallback(
+    (preference: ThemePreference): void => {
+      setThemePreference(preference);
+      void persistThemePreference(preference);
+    },
+    [setThemePreference],
+  );
 
   return (
     <AppSurfaceCard
@@ -69,7 +77,7 @@ export function AppearanceSection(): ReactElement {
               option={option.value}
               label={t(option.key)}
               isActive={themePreference === option.value}
-              onSelect={setThemePreference}
+              onSelect={handleSelect}
             />
           ))}
         </XStack>

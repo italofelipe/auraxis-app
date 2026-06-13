@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   IBMPlexMono_400Regular,
@@ -22,6 +22,7 @@ import {
 } from "@/core/performance/performance-tracker";
 import { runDeviceIntegrityCheck } from "@/core/security/integrity-check";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
+import { loadPersistedThemePreference } from "@/core/shell/theme-preference-storage";
 import { useSessionStore } from "@/core/session/session-store";
 import { startupLogger } from "@/core/telemetry/domain-loggers";
 import { initI18n } from "@/shared/i18n";
@@ -94,6 +95,10 @@ export const useAppStartup = (): AppStartupState => {
   const setStartupReady = useAppShellStore((state) => state.setStartupReady);
   const bootstrapSession = useSessionStore((state) => state.bootstrapSession);
   const hydrated = useSessionStore((state) => state.hydrated);
+  const setThemePreference = useAppShellStore(
+    (state) => state.setThemePreference,
+  );
+  const [themeHydrated, setThemeHydrated] = useState(false);
   const startupMeasurementStarted = useRef(false);
   const [fontsLoaded] = useFonts({
     Inter_400Regular,
@@ -127,7 +132,23 @@ export const useAppStartup = (): AppStartupState => {
     setFontsReady(fontsLoaded);
   }, [fontsLoaded, setFontsReady]);
 
-  const ready = fontsLoaded && hydrated;
+  // Hidrata a preferência de tema persistida ANTES de `ready` para evitar um
+  // flash de tema (claro → escuro) no cold start de quem escolheu dark.
+  useEffect(() => {
+    let active = true;
+    void loadPersistedThemePreference().then((preference) => {
+      if (!active) {
+        return;
+      }
+      setThemePreference(preference);
+      setThemeHydrated(true);
+    });
+    return () => {
+      active = false;
+    };
+  }, [setThemePreference]);
+
+  const ready = fontsLoaded && hydrated && themeHydrated;
 
   useEffect(() => {
     setStartupReady(ready);
