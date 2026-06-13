@@ -88,17 +88,26 @@ function TabItem({
       accessibilityState={{ selected: isFocused }}
       testID={`tab-${tab.name}`}
       onPress={onPress}
-      style={{ flex: 1, alignItems: "center", gap: 2, paddingVertical: 6 }}
+      style={{ flex: 1, alignItems: "center" }}
     >
-      <MaterialCommunityIcons name={tab.icon} size={24} color={tint} />
-      <Paragraph
-        fontFamily="$body"
-        fontSize="$1"
-        color={tint}
-        fontWeight={isFocused ? "$6" : "$4"}
+      <YStack
+        alignItems="center"
+        gap="$1"
+        paddingHorizontal="$3"
+        paddingVertical="$1"
+        borderRadius="$5"
+        backgroundColor={isFocused ? "$primarySubtle" : "transparent"}
       >
-        {tab.title}
-      </Paragraph>
+        <MaterialCommunityIcons name={tab.icon} size={28} color={tint} />
+        <Paragraph
+          fontFamily="$body"
+          fontSize="$1"
+          color={tint}
+          fontWeight={isFocused ? "$6" : "$4"}
+        >
+          {tab.title}
+        </Paragraph>
+      </YStack>
     </Pressable>
   );
 }
@@ -131,9 +140,9 @@ function CenterActionButton({
           backgroundColor,
           shadowColor: backgroundColor,
           shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.35,
-          shadowRadius: 12,
-          elevation: 8,
+          shadowOpacity: 0.45,
+          shadowRadius: 18,
+          elevation: 10,
         }}
       >
         <MaterialCommunityIcons name="plus" size={30} color={iconColor} />
@@ -187,7 +196,7 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElemen
       tab={tab}
       isFocused={state.routes[state.index]?.name === tab.name}
       activeColor={palette.primary}
-      inactiveColor={palette.subduedForeground}
+      inactiveColor={palette.mutedForeground}
       onPress={() => navigateToTab(tab.name)}
     />
   );
