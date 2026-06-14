@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useState, type ReactElement } from "react";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { FlashList } from "@shopify/flash-list";
 import { useRouter } from "expo-router";
-import { Modal, RefreshControl } from "react-native";
+import { Modal, Pressable, RefreshControl } from "react-native";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { appRoutes } from "@/core/navigation/routes";
 import { queryKeys } from "@/core/query/query-keys";
+import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
 import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
 import { FinancialCalendar } from "@/features/transactions/components/financial-calendar";
@@ -16,35 +18,31 @@ import {
   type DeleteTarget,
   type MarkPaidTarget,
 } from "@/features/transactions/components/transaction-action-modals";
-import { TransactionFilters } from "@/features/transactions/components/transaction-filters";
+import { TransactionActionSheet } from "@/features/transactions/components/transaction-action-sheet";
+import { TransactionBottomSheet } from "@/features/transactions/components/transaction-bottom-sheet";
+import {
+  PeriodNavigator,
+  TransactionFilterControls,
+} from "@/features/transactions/components/transaction-filters";
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
+import { TransactionRow } from "@/features/transactions/components/transaction-row";
 import { useTransactionsExport } from "@/features/transactions/hooks/use-transactions-export";
 import {
   useTransactionsScreenController,
   type TransactionsScreenController,
-  type TransactionsViewMode,
   type TransactionViewModel,
 } from "@/features/transactions/hooks/use-transactions-screen-controller";
-import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
-import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
-import { useListRefresh } from "@/shared/hooks/use-list-refresh";
 import { isFeatureEnabled } from "@/shared/feature-flags";
+import { useListRefresh } from "@/shared/hooks/use-list-refresh";
 import { useT } from "@/shared/i18n";
 import { TransactionListSkeleton } from "@/shared/skeletons";
-import { formatShortDate } from "@/shared/utils/formatters";
-
-const STATUS_TONE: Record<string, "default" | "primary" | "danger"> = {
-  paid: "primary",
-  pending: "default",
-  overdue: "danger",
-  cancelled: "default",
-  postponed: "default",
-};
+import { darkSemanticColors, lightSemanticColors } from "@/shared/theme";
+import { formatCurrency } from "@/shared/utils/formatters";
 
 const TRANSACTIONS_REFRESH_KEYS = [
   queryKeys.transactions.list(),
@@ -54,11 +52,10 @@ const TRANSACTIONS_REFRESH_KEYS = [
 /**
  * Canonical transactions screen composition for the mobile app.
  *
- * @returns List with filters and create/edit/delete actions or active form.
+ * @returns List with collapsed header and swipe/tap actions, or active form.
  */
 export function TransactionsScreen(): ReactElement {
   const controller = useTransactionsScreenController();
-  const router = useRouter();
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -82,10 +79,7 @@ export function TransactionsScreen(): ReactElement {
   const listHeader = (
     <YStack gap="$4" paddingBottom="$2">
       <FilterHeader controller={controller} />
-      <AiInsightSurface
-        dimension="transactions"
-        onOpenHub={() => router.push(appRoutes.private.insights)}
-      />
+      <AiInsightSurface dimension="transactions" />
     </YStack>
   );
 
@@ -98,8 +92,8 @@ export function TransactionsScreen(): ReactElement {
     );
   }
 
-  // Lista: filtros + insight rolam JUNTO com os itens (ListHeaderComponent),
-  // em vez de ficarem fixos comendo a viewport.
+  // Lista: filtros colapsados + insight rolam JUNTO com os itens
+  // (ListHeaderComponent), deixando as transações visíveis na dobra.
   return (
     <AppScreen scrollable={false}>
       <TransactionsListCard controller={controller} listHeader={listHeader} />
@@ -111,10 +105,118 @@ interface ControllerProps {
   readonly controller: TransactionsScreenController;
 }
 
+interface HeaderIconButtonProps {
+  readonly icon: keyof typeof MaterialCommunityIcons.glyphMap;
+  readonly accessibilityLabel: string;
+  readonly color: string;
+  readonly onPress: () => void;
+  readonly badgeColor?: string;
+}
+
+/** Botão só-ícone do cabeçalho (44×44), com dot opcional de filtro ativo. */
+function HeaderIconButton({
+  icon,
+  accessibilityLabel,
+  color,
+  onPress,
+  badgeColor,
+}: HeaderIconButtonProps): ReactElement {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel}
+      onPress={onPress}
+      style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}
+    >
+      <MaterialCommunityIcons name={icon} size={24} color={color} />
+      {badgeColor ? (
+        <YStack
+          position="absolute"
+          top={9}
+          right={9}
+          width={9}
+          height={9}
+          borderRadius={9}
+          backgroundColor={badgeColor}
+        />
+      ) : null}
+    </Pressable>
+  );
+}
+
+interface HeaderActionsRowProps extends ControllerProps {
+  readonly iconColor: string;
+  readonly badgeColor: string;
+  readonly onOpenFilters: () => void;
+  readonly onOpenExport: () => void;
+}
+
+/** Saldo do período (esquerda) + ações em ícones (direita). */
+function HeaderActionsRow({
+  controller,
+  iconColor,
+  badgeColor,
+  onOpenFilters,
+  onOpenExport,
+}: HeaderActionsRowProps): ReactElement {
+  const positive = controller.monthBalance >= 0;
+  return (
+    <XStack alignItems="center" justifyContent="space-between">
+      <YStack>
+        <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+          Saldo do período
+        </Paragraph>
+        <Paragraph
+          color={positive ? "$success" : "$danger"}
+          fontFamily="$body"
+          fontSize="$6"
+          fontWeight="$7"
+        >
+          {formatCurrency(controller.monthBalance)}
+        </Paragraph>
+      </YStack>
+      <XStack alignItems="center">
+        <HeaderIconButton
+          icon={
+            controller.viewMode === "list"
+              ? "calendar-month-outline"
+              : "format-list-bulleted"
+          }
+          accessibilityLabel={
+            controller.viewMode === "list" ? "Ver calendário" : "Ver lista"
+          }
+          color={iconColor}
+          onPress={() =>
+            controller.setViewMode(
+              controller.viewMode === "list" ? "calendar" : "list",
+            )
+          }
+        />
+        <HeaderIconButton
+          icon="filter-variant"
+          accessibilityLabel="Filtros"
+          color={iconColor}
+          onPress={onOpenFilters}
+          badgeColor={controller.hasActiveFilters ? badgeColor : undefined}
+        />
+        <HeaderIconButton
+          icon="tray-arrow-up"
+          accessibilityLabel="Exportar"
+          color={iconColor}
+          onPress={onOpenExport}
+        />
+      </XStack>
+    </XStack>
+  );
+}
+
 function FilterHeader({ controller }: ControllerProps): ReactElement {
   const { t } = useT();
   const router = useRouter();
+  const isDark = useResolvedTheme() === "auraxis_dark";
+  const palette = isDark ? darkSemanticColors : lightSemanticColors;
   const [exportSheetOpen, setExportSheetOpen] = useState<boolean>(false);
+  const [filterSheetOpen, setFilterSheetOpen] = useState<boolean>(false);
   const exportRunner = useTransactionsExport();
   const importEnabled = isFeatureEnabled(IMPORT_FEATURE_FLAG_KEY);
 
@@ -125,23 +227,35 @@ function FilterHeader({ controller }: ControllerProps): ReactElement {
     },
     [exportRunner],
   );
-  const handleOpenImport = useCallback(() => {
-    router.push(appRoutes.private.importTransactions);
-  }, [router]);
 
   return (
-    <AppSurfaceCard
-      title="Transacoes"
-      description={`${controller.total} registradas`}
-    >
-      <FilterHeaderControls
+    <YStack gap="$3">
+      <PeriodNavigator
+        periodLabel={controller.periodLabel}
+        onPreviousMonth={controller.goToPreviousMonth}
+        onNextMonth={controller.goToNextMonth}
+      />
+      <HeaderActionsRow
         controller={controller}
-        importEnabled={importEnabled}
-        listLabel={t("transactions.view.list")}
-        calendarLabel={t("transactions.view.calendar")}
-        exportLabel={t("transactions.export.title")}
+        iconColor={palette.mutedForeground}
+        badgeColor={palette.primary}
+        onOpenFilters={() => setFilterSheetOpen(true)}
         onOpenExport={() => setExportSheetOpen(true)}
-        onOpenImport={handleOpenImport}
+      />
+      {importEnabled ? (
+        <AppButton
+          tone="secondary"
+          size="sm"
+          onPress={() => router.push(appRoutes.private.importTransactions)}
+        >
+          Importar planilha
+        </AppButton>
+      ) : null}
+      <InstallmentGroupFilterNotice controller={controller} />
+      <FilterSheet
+        visible={filterSheetOpen}
+        controller={controller}
+        onClose={() => setFilterSheetOpen(false)}
       />
       <Modal
         visible={exportSheetOpen}
@@ -158,63 +272,36 @@ function FilterHeader({ controller }: ControllerProps): ReactElement {
           translate={t}
         />
       </Modal>
-    </AppSurfaceCard>
+    </YStack>
   );
 }
 
-interface FilterHeaderControlsProps extends ControllerProps {
-  readonly importEnabled: boolean;
-  readonly listLabel: string;
-  readonly calendarLabel: string;
-  readonly exportLabel: string;
-  readonly onOpenExport: () => void;
-  readonly onOpenImport: () => void;
+interface FilterSheetProps extends ControllerProps {
+  readonly visible: boolean;
+  readonly onClose: () => void;
 }
 
-function FilterHeaderControls({
-  controller,
-  importEnabled,
-  listLabel,
-  calendarLabel,
-  exportLabel,
-  onOpenExport,
-  onOpenImport,
-}: FilterHeaderControlsProps): ReactElement {
+function FilterSheet({ visible, controller, onClose }: FilterSheetProps): ReactElement {
   return (
-    <YStack gap="$3">
-      <ViewToggle
-        mode={controller.viewMode}
-        onChange={controller.setViewMode}
-        listLabel={listLabel}
-        calendarLabel={calendarLabel}
-      />
-      <TransactionFilters
+    <TransactionBottomSheet
+      visible={visible}
+      onClose={onClose}
+      testID="transaction-filter-sheet"
+    >
+      <Paragraph fontFamily="$body" fontWeight="$7" fontSize="$5" color="$color">
+        Filtros
+      </Paragraph>
+      <TransactionFilterControls
         typeFilter={controller.typeFilter}
         onTypeFilterChange={controller.setTypeFilter}
         statusFilter={controller.statusFilter}
         onStatusFilterChange={controller.setStatusFilter}
         tagFilter={controller.tagFilter}
         onTagFilterChange={controller.setTagFilter}
-        periodLabel={controller.periodLabel}
-        onPreviousMonth={controller.goToPreviousMonth}
-        onNextMonth={controller.goToNextMonth}
         onClearFilters={controller.clearFilters}
       />
-      <XStack gap="$2">
-        <AppButton flex={1} glow onPress={controller.handleOpenCreate}>
-          Nova transacao
-        </AppButton>
-        <AppButton flex={1} tone="secondary" onPress={onOpenExport}>
-          {exportLabel}
-        </AppButton>
-      </XStack>
-      {importEnabled ? (
-        <AppButton tone="secondary" onPress={onOpenImport}>
-          Importar planilha
-        </AppButton>
-      ) : null}
-      <InstallmentGroupFilterNotice controller={controller} />
-    </YStack>
+      <AppButton onPress={onClose}>Aplicar</AppButton>
+    </TransactionBottomSheet>
   );
 }
 
@@ -230,43 +317,12 @@ function InstallmentGroupFilterNotice({
       <Paragraph color="$muted" flex={1} fontFamily="$body" fontSize="$2">
         Mostrando parcelas da mesma compra.
       </Paragraph>
-      <AppButton tone="secondary" onPress={controller.handleClearInstallmentGroupFilter}>
+      <AppButton
+        tone="secondary"
+        size="sm"
+        onPress={controller.handleClearInstallmentGroupFilter}
+      >
         Mostrar todas
-      </AppButton>
-    </XStack>
-  );
-}
-
-interface ViewToggleProps {
-  readonly mode: TransactionsViewMode;
-  readonly onChange: (mode: TransactionsViewMode) => void;
-  readonly listLabel: string;
-  readonly calendarLabel: string;
-}
-
-function ViewToggle({
-  mode,
-  onChange,
-  listLabel,
-  calendarLabel,
-}: ViewToggleProps): ReactElement {
-  return (
-    <XStack gap="$2">
-      <AppButton
-        flex={1}
-        tone={mode === "list" ? "primary" : "secondary"}
-        onPress={() => onChange("list")}
-        accessibilityState={{ selected: mode === "list" }}
-      >
-        {listLabel}
-      </AppButton>
-      <AppButton
-        flex={1}
-        tone={mode === "calendar" ? "primary" : "secondary"}
-        onPress={() => onChange("calendar")}
-        accessibilityState={{ selected: mode === "calendar" }}
-      >
-        {calendarLabel}
       </AppButton>
     </XStack>
   );
@@ -359,8 +415,6 @@ function TransactionsListCard({
 }: TransactionsListCardProps): ReactElement {
   const query = controller.transactionsQuery;
 
-  // Estado mostrado pela FlashList quando não há itens (header de filtros
-  // sempre visível via ListHeaderComponent, então tudo rola junto).
   const listEmptyComponent = useMemo((): ReactElement => {
     if (query.isPending) {
       return <TransactionListSkeleton rows={5} />;
@@ -378,14 +432,10 @@ function TransactionsListCard({
       <AppEmptyState
         illustration="transactions"
         title="Nenhuma transacao no filtro atual"
-        description="Crie uma nova transacao ou troque o filtro acima para visualizar movimentos."
-        cta={{
-          label: "Nova transacao",
-          onPress: controller.handleOpenCreate,
-        }}
+        description="Crie uma nova transacao no botao central ou troque o filtro para visualizar movimentos."
       />
     );
-  }, [query.isPending, query.isError, query.error, controller.handleOpenCreate]);
+  }, [query.isPending, query.isError, query.error]);
 
   return (
     <TransactionsList
@@ -408,30 +458,30 @@ function TransactionsList({
   listEmptyComponent,
 }: TransactionsListProps): ReactElement {
   const { refreshing, onRefresh } = useListRefresh(TRANSACTIONS_REFRESH_KEYS);
-  const [detailTransactionId, setDetailTransactionId] = useState<string | null>(null);
+  const [actionTarget, setActionTarget] = useState<TransactionViewModel | null>(null);
   const [payTarget, setPayTarget] = useState<MarkPaidTarget | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<DeleteTarget | null>(null);
-  const detailTransaction = useMemo(
-    () => controller.transactions.find((item) => item.id === detailTransactionId) ?? null,
-    [controller.transactions, detailTransactionId],
-  );
 
-  const handleEdit = useCallback(
-    (txId: string): void => {
-      const record = controller.transactionsQuery.data?.transactions.find(
-        (item) => item.id === txId,
-      );
-      if (record) {
-        controller.handleOpenEdit(record);
-      }
-    },
-    [controller],
-  );
+  const openActions = useCallback((tx: TransactionViewModel): void => {
+    setActionTarget(tx);
+  }, []);
 
-  const handleDelete = useCallback(
+  const requestPay = useCallback(
     (txId: string): void => {
       const tx = controller.transactions.find((item) => item.id === txId);
       if (tx) {
+        setActionTarget(null);
+        setPayTarget({ id: tx.id, title: tx.title });
+      }
+    },
+    [controller.transactions],
+  );
+
+  const requestDelete = useCallback(
+    (txId: string): void => {
+      const tx = controller.transactions.find((item) => item.id === txId);
+      if (tx) {
+        setActionTarget(null);
         setDeleteTarget({
           id: tx.id,
           title: tx.title,
@@ -442,55 +492,45 @@ function TransactionsList({
     [controller.transactions],
   );
 
-  const handleMarkPaid = useCallback(
+  const handleEdit = useCallback(
     (txId: string): void => {
-      const tx = controller.transactions.find((item) => item.id === txId);
-      if (tx) {
-        setPayTarget({ id: tx.id, title: tx.title });
+      const record = controller.transactionsQuery.data?.transactions.find(
+        (item) => item.id === txId,
+      );
+      if (record) {
+        setActionTarget(null);
+        controller.handleOpenEdit(record);
       }
     },
-    [controller.transactions],
+    [controller],
   );
 
   const handleDuplicate = useCallback(
     (txId: string): void => {
+      setActionTarget(null);
       void controller.handleDuplicate(txId);
     },
     [controller],
   );
 
-  const handleDetails = useCallback((txId: string): void => {
-    setDetailTransactionId(txId);
-  }, []);
-
-  const handleCloseDetails = useCallback((): void => {
-    setDetailTransactionId(null);
-  }, []);
+  const handleShowInstallmentGroup = useCallback(
+    (installmentGroupId: string): void => {
+      setActionTarget(null);
+      controller.handleShowInstallmentGroup(installmentGroupId);
+    },
+    [controller],
+  );
 
   const renderItem = useCallback(
     ({ item }: { readonly item: TransactionViewModel }) => (
       <TransactionRow
         tx={item}
-        isDeleting={controller.deletingTransactionId === item.id}
-        isDuplicating={controller.duplicatingTransactionId === item.id}
-        isPaying={controller.payingTransactionId === item.id}
-        onDetails={handleDetails}
-        onEdit={handleEdit}
-        onDelete={handleDelete}
-        onMarkPaid={handleMarkPaid}
-        onDuplicate={handleDuplicate}
+        onOpenActions={openActions}
+        onMarkPaid={requestPay}
+        onDelete={requestDelete}
       />
     ),
-    [
-      controller.deletingTransactionId,
-      controller.duplicatingTransactionId,
-      controller.payingTransactionId,
-      handleDelete,
-      handleDetails,
-      handleDuplicate,
-      handleEdit,
-      handleMarkPaid,
-    ],
+    [openActions, requestPay, requestDelete],
   );
 
   return (
@@ -502,17 +542,24 @@ function TransactionsList({
         ListHeaderComponent={listHeader}
         ListEmptyComponent={listEmptyComponent}
         contentContainerStyle={listContainerStyle}
-        ItemSeparatorComponent={ListSeparator}
+        ItemSeparatorComponent={RowSeparator}
         refreshControl={
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
         showsVerticalScrollIndicator={false}
         testID="transactions-flashlist"
       />
-      <TransactionDetailModal
-        transaction={detailTransaction}
-        onClose={handleCloseDetails}
-        onShowInstallmentGroup={controller.handleShowInstallmentGroup}
+      <TransactionActionSheet
+        transaction={actionTarget}
+        isPaying={controller.payingTransactionId !== null}
+        isDuplicating={controller.duplicatingTransactionId !== null}
+        isDeleting={controller.deletingTransactionId !== null}
+        onClose={() => setActionTarget(null)}
+        onMarkPaid={requestPay}
+        onEdit={handleEdit}
+        onDuplicate={handleDuplicate}
+        onDelete={requestDelete}
+        onShowInstallmentGroup={handleShowInstallmentGroup}
       />
       <MarkPaidConfirmModal
         target={payTarget}
@@ -540,174 +587,6 @@ const extractTransactionKey = (item: TransactionViewModel): string => item.id;
 
 const listContainerStyle = { paddingBottom: 24 } as const;
 
-function ListSeparator(): ReactElement {
-  return <YStack height="$2" />;
+function RowSeparator(): ReactElement {
+  return <YStack height={1} backgroundColor="$borderColor" />;
 }
-
-interface TransactionRowProps {
-  readonly tx: TransactionViewModel;
-  readonly isDeleting: boolean;
-  readonly isDuplicating: boolean;
-  readonly isPaying: boolean;
-  readonly onDetails: (txId: string) => void;
-  readonly onEdit: (txId: string) => void;
-  readonly onDelete: (txId: string) => void;
-  readonly onMarkPaid: (txId: string) => void;
-  readonly onDuplicate: (txId: string) => void;
-}
-
- 
-const TransactionRow = function TransactionRow({
-  tx,
-  isDeleting,
-  isDuplicating,
-  isPaying,
-  onDetails,
-  onEdit,
-  onDelete,
-  onMarkPaid,
-  onDuplicate,
-}: TransactionRowProps): ReactElement {
-  const installmentLabel = getInstallmentLabel(tx);
-  const isBusy = isDeleting || isDuplicating || isPaying;
-  const handleDetails = useCallback(() => {
-    onDetails(tx.id);
-  }, [onDetails, tx.id]);
-
-  const handleEdit = useCallback(() => {
-    onEdit(tx.id);
-  }, [onEdit, tx.id]);
-
-  const handleDelete = useCallback(() => {
-    onDelete(tx.id);
-  }, [onDelete, tx.id]);
-
-  const handleMarkPaid = useCallback(() => {
-    onMarkPaid(tx.id);
-  }, [onMarkPaid, tx.id]);
-
-  const handleDuplicate = useCallback(() => {
-    onDuplicate(tx.id);
-  }, [onDuplicate, tx.id]);
-
-  return (
-    <YStack gap="$2">
-      <AppKeyValueRow
-        label={tx.title}
-        value={
-          <XStack alignItems="center" gap="$2">
-            <YStack alignItems="flex-end" gap="$1">
-              <Paragraph
-                color={tx.type === "income" ? "$success" : "$danger"}
-                fontFamily="$body"
-                fontSize="$4"
-              >
-                {tx.type === "income" ? "+" : "-"}
-                {tx.amount}
-              </Paragraph>
-              <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-                {formatShortDate(tx.dueDate)}
-              </Paragraph>
-              {installmentLabel ? (
-                <AppBadge tone="default">{installmentLabel}</AppBadge>
-              ) : null}
-            </YStack>
-            <AppBadge tone={STATUS_TONE[tx.status] ?? "default"}>{tx.status}</AppBadge>
-          </XStack>
-        }
-      />
-      <XStack gap="$2" flexWrap="wrap">
-        <AppButton tone="secondary" onPress={handleDetails} disabled={isBusy}>
-          Detalhes
-        </AppButton>
-        {tx.status !== "paid" ? (
-          <AppButton onPress={handleMarkPaid} disabled={isBusy}>
-            {isPaying ? "Pagando..." : "Pagar"}
-          </AppButton>
-        ) : null}
-        <AppButton tone="secondary" onPress={handleEdit} disabled={isBusy}>
-          Editar
-        </AppButton>
-        <AppButton tone="secondary" onPress={handleDuplicate} disabled={isBusy}>
-          {isDuplicating ? "Duplicando..." : "Duplicar"}
-        </AppButton>
-        <AppButton tone="secondary" onPress={handleDelete} disabled={isBusy}>
-          {isDeleting ? "Excluindo..." : "Excluir"}
-        </AppButton>
-      </XStack>
-    </YStack>
-  );
-};
-
-interface TransactionDetailModalProps {
-  readonly transaction: TransactionViewModel | null;
-  readonly onClose: () => void;
-  readonly onShowInstallmentGroup: (installmentGroupId: string) => void;
-}
-
-function TransactionDetailModal({
-  transaction,
-  onClose,
-  onShowInstallmentGroup,
-}: TransactionDetailModalProps): ReactElement {
-  const installmentLabel = transaction ? getInstallmentLabel(transaction) : null;
-  const installmentGroupId = transaction?.installmentGroupId ?? null;
-  const visible = Boolean(transaction);
-
-  return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
-      <YStack flex={1} backgroundColor="rgba(0,0,0,0.45)" justifyContent="flex-end">
-        <YStack
-          backgroundColor="$background"
-          padding="$4"
-          gap="$3"
-          borderTopLeftRadius="$3"
-          borderTopRightRadius="$3"
-        >
-          {transaction ? (
-            <AppSurfaceCard title="Detalhes da transacao" description={transaction.title}>
-              <YStack gap="$3">
-                <AppKeyValueRow
-                  label="Valor"
-                  value={`${transaction.type === "income" ? "+" : "-"}${transaction.amount}`}
-                  helperText={formatShortDate(transaction.dueDate)}
-                />
-                <AppKeyValueRow label="Status" value={transaction.status} />
-                {installmentLabel ? (
-                  <AppKeyValueRow label="Parcelamento" value={installmentLabel} />
-                ) : null}
-                {installmentGroupId ? (
-                  <AppButton
-                    tone="secondary"
-                    onPress={() => {
-                      onShowInstallmentGroup(installmentGroupId);
-                      onClose();
-                    }}
-                  >
-                    Ver outras parcelas
-                  </AppButton>
-                ) : null}
-                <AppButton onPress={onClose}>Fechar</AppButton>
-              </YStack>
-            </AppSurfaceCard>
-          ) : null}
-        </YStack>
-      </YStack>
-    </Modal>
-  );
-}
-
-const getInstallmentLabel = (tx: TransactionViewModel): string | null => {
-  if (!tx.isInstallment || !tx.installmentCount) {
-    return null;
-  }
-  if (tx.installmentNumber) {
-    return `Parcela ${tx.installmentNumber}/${tx.installmentCount}`;
-  }
-  return `Parcelado em ${tx.installmentCount}x`;
-};
