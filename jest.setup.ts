@@ -58,6 +58,7 @@ jest.mock("react-native-reanimated", () => {
     useSharedValue: (initial: unknown) => ({ value: initial }),
     useAnimatedStyle: () => ({}),
     withTiming: (value: unknown) => value,
+    withSpring: (value: unknown) => value,
   };
 });
 /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */

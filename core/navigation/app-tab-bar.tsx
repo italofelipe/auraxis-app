@@ -1,19 +1,129 @@
-import { useCallback, useState, type ReactElement } from "react";
+import { useCallback, useEffect, useState, type ReactElement } from "react";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import type { BottomTabBarProps } from "@react-navigation/bottom-tabs";
-import { Modal, Pressable } from "react-native";
+import {
+  Modal,
+  Pressable,
+  type LayoutChangeEvent,
+  type StyleProp,
+  type ViewStyle,
+} from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+  withTiming,
+} from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { appRoutes, privateTabDefinitions } from "@/core/navigation/routes";
+import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { AppButton } from "@/shared/components/app-button";
 import { triggerHapticImpact } from "@/shared/feedback/haptics";
-import { darkSemanticColors, lightSemanticColors, semanticShadows } from "@/shared/theme";
+import {
+  darkSemanticColors,
+  darkSemanticGlows,
+  lightSemanticColors,
+  lightSemanticGlows,
+  semanticShadows,
+} from "@/shared/theme";
+import { motionDurations } from "@/shared/theme/motion";
 
 const TAB_BAR_RADIUS = 24;
 const CENTER_BUTTON_SIZE = 56;
+const INDICATOR_WIDTH = 28;
+const INDICATOR_HEIGHT = 3;
+// Spring suave (sem overshoot exagerado): o sublinhado desliza entre abas
+// com um "settle" premium, não um bounce de brinquedo.
+const INDICATOR_SPRING = { damping: 20, stiffness: 210, mass: 0.6 } as const;
+
+/** Posição/largura de uma aba, medidas via onLayout, relativas à tab bar. */
+type TabLayout = { readonly x: number; readonly width: number };
+type TabLayoutMap = Record<string, TabLayout>;
+
+interface ActiveTabIndicator {
+  readonly indicatorStyle: StyleProp<ViewStyle>;
+  readonly handleTabLayout: (name: string, layout: TabLayout) => void;
+}
+
+/**
+ * Anima o sublinhado da aba ativa: mede cada aba via onLayout e desliza o
+ * indicador (translateX) para a aba focada com spring. Respeita
+ * `reducedMotionEnabled` (posiciona sem animar).
+ */
+function useActiveTabIndicator(
+  activeRouteName: string | undefined,
+  reducedMotion: boolean,
+): ActiveTabIndicator {
+  const [tabLayouts, setTabLayouts] = useState<TabLayoutMap>({});
+  const indicatorX = useSharedValue(0);
+  const indicatorOpacity = useSharedValue(0);
+
+  const handleTabLayout = useCallback((name: string, layout: TabLayout): void => {
+    setTabLayouts((previous) => {
+      const current = previous[name];
+      if (current && current.x === layout.x && current.width === layout.width) {
+        return previous;
+      }
+      return { ...previous, [name]: layout };
+    });
+  }, []);
+
+  useEffect(() => {
+    const layout = activeRouteName ? tabLayouts[activeRouteName] : undefined;
+    if (!layout) {
+      return;
+    }
+    const target = layout.x + (layout.width - INDICATOR_WIDTH) / 2;
+    if (reducedMotion) {
+      indicatorX.value = target;
+      indicatorOpacity.value = 1;
+      return;
+    }
+    indicatorX.value = withSpring(target, INDICATOR_SPRING);
+    indicatorOpacity.value = withTiming(1, { duration: motionDurations.normal });
+  }, [activeRouteName, tabLayouts, reducedMotion, indicatorX, indicatorOpacity]);
+
+  const indicatorStyle = useAnimatedStyle(() => ({
+    opacity: indicatorOpacity.value,
+    transform: [{ translateX: indicatorX.value }],
+  }));
+
+  return { indicatorStyle: indicatorStyle as StyleProp<ViewStyle>, handleTabLayout };
+}
+
+interface QuickCreateActions {
+  readonly visible: boolean;
+  readonly open: () => void;
+  readonly close: () => void;
+  readonly navigateToCreate: () => void;
+}
+
+/** Estado + handlers do sheet de ação rápida do botão central [+]. */
+function useQuickCreateActions(
+  navigation: BottomTabBarProps["navigation"],
+): QuickCreateActions {
+  const [visible, setVisible] = useState(false);
+
+  const open = useCallback((): void => {
+    triggerHapticImpact("medium");
+    setVisible(true);
+  }, []);
+
+  const close = useCallback((): void => {
+    setVisible(false);
+  }, []);
+
+  const navigateToCreate = useCallback((): void => {
+    setVisible(false);
+    navigation.navigate("transacoes", { intent: "create" });
+  }, [navigation]);
+
+  return { visible, open, close, navigateToCreate };
+}
 
 interface QuickActionsSheetProps {
   readonly visible: boolean;
@@ -65,12 +175,43 @@ function QuickActionsSheet({
   );
 }
 
+interface TabActiveIndicatorProps {
+  readonly color: string;
+  readonly animatedStyle: StyleProp<ViewStyle>;
+}
+
+/** O sublinhado animado que desliza sob a aba ativa. */
+function TabActiveIndicator({
+  color,
+  animatedStyle,
+}: TabActiveIndicatorProps): ReactElement {
+  return (
+    <Animated.View
+      testID="tab-active-indicator"
+      pointerEvents="none"
+      style={[
+        {
+          position: "absolute",
+          top: 0,
+          left: 0,
+          width: INDICATOR_WIDTH,
+          height: INDICATOR_HEIGHT,
+          borderRadius: INDICATOR_HEIGHT,
+          backgroundColor: color,
+        },
+        animatedStyle,
+      ]}
+    />
+  );
+}
+
 interface TabItemProps {
   readonly tab: (typeof privateTabDefinitions)[number];
   readonly isFocused: boolean;
   readonly activeColor: string;
   readonly inactiveColor: string;
   readonly onPress: () => void;
+  readonly onMeasure: (name: string, layout: TabLayout) => void;
 }
 
 function TabItem({
@@ -79,6 +220,7 @@ function TabItem({
   activeColor,
   inactiveColor,
   onPress,
+  onMeasure,
 }: TabItemProps): ReactElement {
   const tint = isFocused ? activeColor : inactiveColor;
   return (
@@ -88,7 +230,17 @@ function TabItem({
       accessibilityState={{ selected: isFocused }}
       testID={`tab-${tab.name}`}
       onPress={onPress}
-      style={{ flex: 1, alignItems: "center", gap: 2, paddingVertical: 6 }}
+      onLayout={(event: LayoutChangeEvent) => {
+        const { x, width } = event.nativeEvent.layout;
+        onMeasure(tab.name, { x, width });
+      }}
+      // Press-scale aplicado direto no Pressable (transform é pós-layout, não
+      // afeta o flex:1) — evita o wrapper Animated.View que quebra a divisão
+      // de linha de itens flex lado a lado.
+      style={({ pressed }) => [
+        { flex: 1, alignItems: "center", gap: 2, paddingVertical: 6 },
+        pressed ? { opacity: 0.7, transform: [{ scale: 0.92 }] } : null,
+      ]}
     >
       <MaterialCommunityIcons name={tab.icon} size={24} color={tint} />
       <Paragraph
@@ -107,12 +259,14 @@ function TabItem({
 interface CenterActionButtonProps {
   readonly backgroundColor: string;
   readonly iconColor: string;
+  readonly glow: ViewStyle;
   readonly onPress: () => void;
 }
 
 function CenterActionButton({
   backgroundColor,
   iconColor,
+  glow,
   onPress,
 }: CenterActionButtonProps): ReactElement {
   return (
@@ -122,7 +276,7 @@ function CenterActionButton({
         accessibilityLabel="Registrar movimento"
         testID="tab-quick-actions"
         onPress={onPress}
-        style={{
+        style={({ pressed }) => ({
           width: CENTER_BUTTON_SIZE,
           height: CENTER_BUTTON_SIZE,
           borderRadius: CENTER_BUTTON_SIZE / 2,
@@ -130,12 +284,11 @@ function CenterActionButton({
           alignItems: "center",
           justifyContent: "center",
           backgroundColor,
-          shadowColor: backgroundColor,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.45,
-          shadowRadius: 18,
-          elevation: 10,
-        }}
+          // Glow de marca (shadowColor colorido) resolvido por tema — 100%
+          // OTA-able, sem gradiente/blur nativo.
+          ...glow,
+          transform: pressed ? [{ scale: 0.94 }] : undefined,
+        })}
       >
         <MaterialCommunityIcons name="plus" size={30} color={iconColor} />
       </Pressable>
@@ -144,43 +297,33 @@ function CenterActionButton({
 }
 
 /**
- * Tab bar customizada do redesign (F2 — épico #540): superfície com
- * cantos superiores arredondados, quatro destinos e botão central [+]
- * elevado para registro rápido de transações.
+ * Tab bar customizada do redesign (F2 — épico #540, refinamento premium #570):
+ * superfície com cantos superiores arredondados, quatro destinos e botão
+ * central [+] elevado. A aba ativa ganha um indicador (sublinhado) que desliza
+ * entre as abas com spring, respeitando `reducedMotionEnabled`.
  */
 export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElement {
   const insets = useSafeAreaInsets();
-  const resolvedTheme = useResolvedTheme();
-  const palette =
-    resolvedTheme === "auraxis_dark" ? darkSemanticColors : lightSemanticColors;
-  const [quickActionsVisible, setQuickActionsVisible] = useState(false);
+  const isDark = useResolvedTheme() === "auraxis_dark";
+  const palette = isDark ? darkSemanticColors : lightSemanticColors;
+  const glows = isDark ? darkSemanticGlows : lightSemanticGlows;
+  const reducedMotion = useAppShellStore((store) => store.reducedMotionEnabled);
+
+  const activeRouteName = state.routes[state.index]?.name;
+  const { indicatorStyle, handleTabLayout } = useActiveTabIndicator(
+    activeRouteName,
+    reducedMotion,
+  );
+  const quickActions = useQuickCreateActions(navigation);
 
   const navigateToTab = useCallback(
     (routeName: string): void => {
-      const target = state.routes.find((route) => route.name === routeName);
-      if (!target) {
-        return;
-      }
-      const isFocused = state.routes[state.index]?.name === routeName;
-      if (!isFocused) {
-        navigation.navigate(target.name);
+      if (state.routes[state.index]?.name !== routeName) {
+        navigation.navigate(routeName);
       }
     },
     [navigation, state.index, state.routes],
   );
-
-  const handleOpenQuickActions = useCallback((): void => {
-    triggerHapticImpact("medium");
-    setQuickActionsVisible(true);
-  }, []);
-
-  const handleNavigateToCreate = useCallback((): void => {
-    setQuickActionsVisible(false);
-    navigation.navigate("transacoes", { intent: "create" });
-  }, [navigation]);
-
-  const leftTabs = privateTabDefinitions.slice(0, 2);
-  const rightTabs = privateTabDefinitions.slice(2);
 
   const renderTab = (tab: (typeof privateTabDefinitions)[number]): ReactElement => (
     <TabItem
@@ -190,6 +333,7 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElemen
       activeColor={palette.primary}
       inactiveColor={palette.mutedForeground}
       onPress={() => navigateToTab(tab.name)}
+      onMeasure={handleTabLayout}
     />
   );
 
@@ -208,18 +352,20 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElemen
         alignItems="center"
         {...semanticShadows.lg}
       >
-        {leftTabs.map(renderTab)}
+        <TabActiveIndicator color={palette.primary} animatedStyle={indicatorStyle} />
+        {privateTabDefinitions.slice(0, 2).map(renderTab)}
         <CenterActionButton
           backgroundColor={palette.primary}
           iconColor={palette.primaryForeground}
-          onPress={handleOpenQuickActions}
+          glow={glows.brand}
+          onPress={quickActions.open}
         />
-        {rightTabs.map(renderTab)}
+        {privateTabDefinitions.slice(2).map(renderTab)}
       </XStack>
       <QuickActionsSheet
-        visible={quickActionsVisible}
-        onClose={() => setQuickActionsVisible(false)}
-        onNavigateToCreate={handleNavigateToCreate}
+        visible={quickActions.visible}
+        onClose={quickActions.close}
+        onNavigateToCreate={quickActions.navigateToCreate}
       />
     </>
   );
