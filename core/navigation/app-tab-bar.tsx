@@ -88,26 +88,18 @@ function TabItem({
       accessibilityState={{ selected: isFocused }}
       testID={`tab-${tab.name}`}
       onPress={onPress}
-      style={{ flex: 1, alignItems: "center" }}
+      style={{ flex: 1, alignItems: "center", gap: 2, paddingVertical: 6 }}
     >
-      <YStack
-        alignItems="center"
-        gap="$1"
-        paddingHorizontal="$3"
-        paddingVertical="$1"
-        borderRadius="$5"
-        backgroundColor={isFocused ? "$primarySubtle" : "transparent"}
+      <MaterialCommunityIcons name={tab.icon} size={24} color={tint} />
+      <Paragraph
+        numberOfLines={1}
+        fontFamily="$body"
+        fontSize="$1"
+        color={tint}
+        fontWeight={isFocused ? "$6" : "$4"}
       >
-        <MaterialCommunityIcons name={tab.icon} size={28} color={tint} />
-        <Paragraph
-          fontFamily="$body"
-          fontSize="$1"
-          color={tint}
-          fontWeight={isFocused ? "$6" : "$4"}
-        >
-          {tab.title}
-        </Paragraph>
-      </YStack>
+        {tab.title}
+      </Paragraph>
     </Pressable>
   );
 }
