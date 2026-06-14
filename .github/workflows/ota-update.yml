@@ -64,7 +64,13 @@ jobs:
           if [ -z "${MESSAGE:-}" ]; then
             MESSAGE="$(git log -1 --pretty=%s)"
           fi
+          # `--environment` é OBRIGATÓRIO: o Expo inlina `EXPO_PUBLIC_*` em
+          # build-time. Sem ele, o bundle do OTA sai com essas envs `undefined`
+          # (incl. EXPO_PUBLIC_API_URL → fallback localhost), quebrando todas as
+          # chamadas à API no device. O `--environment` puxa as EAS env vars do
+          # ambiente correspondente ao canal. Ver issue #564.
           eas update \
             --channel "$CHANNEL" \
+            --environment "$CHANNEL" \
             --message "$MESSAGE" \
             --non-interactive
