@@ -2,6 +2,7 @@ import { fireEvent, render } from "@testing-library/react-native";
 
 import { AppTabBar } from "@/core/navigation/app-tab-bar";
 import { AppProviders } from "@/core/providers/app-providers";
+import { resetAppShellStore } from "@/core/shell/app-shell-store";
 
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 20, left: 0, right: 0 }),
@@ -27,6 +28,10 @@ const buildProps = (activeIndex = 0) => {
 };
 
 describe("AppTabBar", () => {
+  afterEach(() => {
+    resetAppShellStore();
+  });
+
   it("renderiza os quatro destinos e o botao central de acao rapida", () => {
     const { props } = buildProps();
     const { getByTestId } = render(
@@ -69,5 +74,30 @@ describe("AppTabBar", () => {
     fireEvent.press(getByTestId("quick-action-create"));
 
     expect(navigate).toHaveBeenCalledWith("transacoes", { intent: "create" });
+  });
+
+  it("renderiza o indicador animado da aba ativa", () => {
+    const { props } = buildProps(0);
+    const { getByTestId } = render(
+      <AppProviders>
+        <AppTabBar {...props} />
+      </AppProviders>,
+    );
+
+    expect(getByTestId("tab-active-indicator")).toBeTruthy();
+  });
+
+  it("renderiza com reduced motion ativo sem quebrar a navegacao", () => {
+    resetAppShellStore({ reducedMotionEnabled: true });
+    const { props, navigate } = buildProps(1);
+    const { getByTestId } = render(
+      <AppProviders>
+        <AppTabBar {...props} />
+      </AppProviders>,
+    );
+
+    expect(getByTestId("tab-active-indicator")).toBeTruthy();
+    fireEvent.press(getByTestId("tab-dashboard"));
+    expect(navigate).toHaveBeenCalledWith("dashboard");
   });
 });
