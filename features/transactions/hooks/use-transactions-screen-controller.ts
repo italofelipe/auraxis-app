@@ -37,6 +37,7 @@ export interface TransactionViewModel {
   readonly type: "income" | "expense";
   readonly dueDate: string;
   readonly status: string;
+  readonly description: string | null;
   readonly isRecurring: boolean;
   readonly isInstallment: boolean;
   readonly installmentCount: number | null;
@@ -53,6 +54,10 @@ export interface TransactionsScreenController {
   readonly transactionsQuery: ReturnType<typeof useTransactionsQuery>;
   readonly transactions: readonly TransactionViewModel[];
   readonly total: number;
+  /** Net do período carregado (receitas − despesas, ignora canceladas). */
+  readonly monthBalance: number;
+  /** True quando algum filtro de tipo/status/tag está ativo. */
+  readonly hasActiveFilters: boolean;
   readonly typeFilter: TransactionsTypeFilter;
   readonly setTypeFilter: (filter: TransactionsTypeFilter) => void;
   readonly statusFilter: TransactionsStatusFilter;
@@ -98,6 +103,7 @@ const toViewModel = (
   type: record.type,
   dueDate: record.dueDate,
   status: record.status,
+  description: record.description,
   isRecurring: record.isRecurring,
   isInstallment: record.isInstallment,
   installmentCount: record.installmentCount,
@@ -404,6 +410,39 @@ function useTransactionsActions({
   };
 }
 
+const computeMonthBalance = (records: readonly TransactionRecord[]): number =>
+  records.reduce((sum, record) => {
+    if (record.status === "cancelled") {
+      return sum;
+    }
+    const value = Number.parseFloat(record.amount);
+    if (Number.isNaN(value)) {
+      return sum;
+    }
+    return record.type === "income" ? sum + value : sum - value;
+  }, 0);
+
+interface TransactionsDerived {
+  readonly monthBalance: number;
+  readonly hasActiveFilters: boolean;
+}
+
+/** Deriva o saldo do período (net) e se há filtro de tipo/status/tag ativo. */
+function useTransactionsDerived(
+  transactionsQuery: ReturnType<typeof useTransactionsQuery>,
+  filters: TransactionsFiltersState,
+): TransactionsDerived {
+  const monthBalance = useMemo<number>(
+    () => computeMonthBalance(transactionsQuery.data?.transactions ?? []),
+    [transactionsQuery.data],
+  );
+  const hasActiveFilters =
+    filters.typeFilter !== "all" ||
+    filters.statusFilter !== "all" ||
+    filters.tagFilter !== "all";
+  return { monthBalance, hasActiveFilters };
+}
+
 /**
  * Canonical controller for the transactions screen. Owns the create/edit
  * form state machine, server-side filters (type, status, tag and monthly
@@ -411,6 +450,7 @@ function useTransactionsActions({
  * mutations. The screen remains view-only.
  */
  
+// eslint-disable-next-line max-lines-per-function -- agregador: mapeia ~35 campos do controller
 export function useTransactionsScreenController(): TransactionsScreenController {
   const filters = useTransactionsFilters();
   const transactionsQuery = useTransactionsQuery(filters.listQuery);
@@ -447,10 +487,14 @@ export function useTransactionsScreenController(): TransactionsScreenController 
       .map((record) => toViewModel(record, installmentNumbers.get(record.id) ?? null));
   }, [installmentGroupFilter, transactionsQuery.data, filters.typeFilter]);
 
+  const derived = useTransactionsDerived(transactionsQuery, filters);
+
   return {
     transactionsQuery,
     transactions,
     total: transactionsQuery.data?.pagination.total ?? 0,
+    monthBalance: derived.monthBalance,
+    hasActiveFilters: derived.hasActiveFilters,
     typeFilter: filters.typeFilter,
     setTypeFilter: filters.setTypeFilter,
     statusFilter: filters.statusFilter,

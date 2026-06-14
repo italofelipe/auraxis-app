@@ -422,3 +422,56 @@ describe("useTransactionsScreenController quick-create intent (tab [+])", () => 
     (useLocalSearchParams as jest.Mock).mockReturnValue({});
   });
 });
+
+describe("useTransactionsScreenController period balance + active filters", () => {
+  it("expoe a descricao no view model", () => {
+    mockedUseQuery.mockReturnValue({
+      data: {
+        transactions: [buildRecord({ id: "a", description: "Conta de luz" })],
+        pagination: { total: 1 },
+      },
+    } as never);
+
+    const { result } = renderHook(() => useTransactionsScreenController());
+
+    expect(result.current.transactions[0]).toEqual(
+      expect.objectContaining({ description: "Conta de luz" }),
+    );
+  });
+
+  it("computa o saldo do periodo (receitas - despesas, ignorando canceladas)", () => {
+    mockedUseQuery.mockReturnValue({
+      data: {
+        transactions: [
+          buildRecord({ id: "a", type: "income", amount: "1000.00" }),
+          buildRecord({ id: "b", type: "expense", amount: "300.50" }),
+          buildRecord({
+            id: "c",
+            type: "expense",
+            amount: "999.99",
+            status: "cancelled",
+          }),
+        ],
+        pagination: { total: 3 },
+      },
+    } as never);
+
+    const { result } = renderHook(() => useTransactionsScreenController());
+
+    expect(result.current.monthBalance).toBeCloseTo(699.5, 2);
+  });
+
+  it("hasActiveFilters reflete filtros de tipo, status e tag", () => {
+    mockedUseQuery.mockReturnValue({
+      data: { transactions: [], pagination: { total: 0 } },
+    } as never);
+
+    const { result } = renderHook(() => useTransactionsScreenController());
+    expect(result.current.hasActiveFilters).toBe(false);
+
+    act(() => {
+      result.current.setStatusFilter("pending");
+    });
+    expect(result.current.hasActiveFilters).toBe(true);
+  });
+});

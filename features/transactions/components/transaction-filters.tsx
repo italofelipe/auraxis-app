@@ -67,13 +67,13 @@ function FilterChip({ label, selected, onPress }: FilterChipProps): ReactElement
   );
 }
 
-interface PeriodNavigatorProps {
+export interface PeriodNavigatorProps {
   readonly periodLabel: string;
   readonly onPreviousMonth: () => void;
   readonly onNextMonth: () => void;
 }
 
-function PeriodNavigator({
+export function PeriodNavigator({
   periodLabel,
   onPreviousMonth,
   onNextMonth,
@@ -143,29 +143,31 @@ function TagFilterRow({
   );
 }
 
+export interface TransactionFilterControlsProps {
+  readonly typeFilter: TransactionsTypeFilter;
+  readonly onTypeFilterChange: (filter: TransactionsTypeFilter) => void;
+  readonly statusFilter: TransactionsStatusFilter;
+  readonly onStatusFilterChange: (filter: TransactionsStatusFilter) => void;
+  readonly tagFilter: TransactionsTagFilter;
+  readonly onTagFilterChange: (filter: TransactionsTagFilter) => void;
+  readonly onClearFilters: () => void;
+}
+
 /**
- * Filter bar for the transactions screen: monthly period navigation, type,
- * status and tag filters plus a reset action. Mirrors the web filters.
+ * Chips de tipo, status e tags + limpar — sem o navegador de período (que
+ * fica no cabeçalho colapsado). Renderizado dentro do filter sheet.
  */
-export function TransactionFilters({
+export function TransactionFilterControls({
   typeFilter,
   onTypeFilterChange,
   statusFilter,
   onStatusFilterChange,
   tagFilter,
   onTagFilterChange,
-  periodLabel,
-  onPreviousMonth,
-  onNextMonth,
   onClearFilters,
-}: TransactionFiltersProps): ReactElement {
+}: TransactionFilterControlsProps): ReactElement {
   return (
     <YStack gap="$3">
-      <PeriodNavigator
-        periodLabel={periodLabel}
-        onPreviousMonth={onPreviousMonth}
-        onNextMonth={onNextMonth}
-      />
       <XStack gap="$2" flexWrap="wrap">
         {TYPE_ORDER.map((filter) => (
           <FilterChip
@@ -190,6 +192,43 @@ export function TransactionFilters({
       <AppButton tone="secondary" onPress={onClearFilters}>
         Limpar filtros
       </AppButton>
+    </YStack>
+  );
+}
+
+/**
+ * Filter bar completa (período + controles). Mirrors the web filters.
+ * Mantida para retrocompat; o cabeçalho novo usa PeriodNavigator +
+ * TransactionFilterControls diretamente.
+ */
+export function TransactionFilters({
+  typeFilter,
+  onTypeFilterChange,
+  statusFilter,
+  onStatusFilterChange,
+  tagFilter,
+  onTagFilterChange,
+  periodLabel,
+  onPreviousMonth,
+  onNextMonth,
+  onClearFilters,
+}: TransactionFiltersProps): ReactElement {
+  return (
+    <YStack gap="$3">
+      <PeriodNavigator
+        periodLabel={periodLabel}
+        onPreviousMonth={onPreviousMonth}
+        onNextMonth={onNextMonth}
+      />
+      <TransactionFilterControls
+        typeFilter={typeFilter}
+        onTypeFilterChange={onTypeFilterChange}
+        statusFilter={statusFilter}
+        onStatusFilterChange={onStatusFilterChange}
+        tagFilter={tagFilter}
+        onTagFilterChange={onTagFilterChange}
+        onClearFilters={onClearFilters}
+      />
     </YStack>
   );
 }
