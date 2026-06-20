@@ -6,27 +6,46 @@ import { appRoutes } from "@/core/navigation/routes";
 import type {
   CreditCard,
   CreditCardBillRecord,
-  CreditCardBillTransaction,
 } from "@/features/credit-cards/contracts";
 import { useCreditCardBillQuery } from "@/features/credit-cards/hooks/use-credit-card-bill-query";
 import { useCreditCardsQuery } from "@/features/credit-cards/hooks/use-credit-cards-query";
+import {
+  billWindowStartDate,
+  monthEndDate,
+} from "@/features/credit-cards/model/billing-month";
+import {
+  type CreditCardBillTransactionGroup,
+  formatCreditCardBillCycleLabel,
+  formatCreditCardBillMonthLabel,
+  getCurrentCreditCardBillMonth,
+  groupCreditCardBillTransactionsByDate,
+  shiftCreditCardBillMonth,
+} from "@/features/credit-cards/model/credit-card-bill-format";
+import { enrichCardTransactions } from "@/features/credit-cards/model/card-transactions";
+import {
+  buildCreditCardInvoiceViewModel,
+  type CreditCardInvoiceViewModel,
+} from "@/features/credit-cards/model/credit-card-invoice";
+import { useTagsQuery } from "@/features/tags/hooks/use-tags-query";
+import { useTransactionsQuery } from "@/features/transactions/hooks/use-transactions-query";
 
-const dateFormatter = new Intl.DateTimeFormat("pt-BR", {
-  day: "2-digit",
-  month: "short",
-  year: "numeric",
-});
+// Re-exporta os helpers puros (movidos para o modelo) para preservar os imports
+// existentes a partir deste controller.
+export {
+  type CreditCardBillTransactionGroup,
+  formatCreditCardBillCycleLabel,
+  formatCreditCardBillDate,
+  formatCreditCardBillMonthLabel,
+  getCurrentCreditCardBillMonth,
+  groupCreditCardBillTransactionsByDate,
+  shiftCreditCardBillMonth,
+} from "@/features/credit-cards/model/credit-card-bill-format";
 
-const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
-  month: "long",
-  year: "numeric",
-});
+/** Quantidade de meses da janela de transações da fatura (inclui o mês atual). */
+export const CREDIT_CARD_BILL_WINDOW_MONTHS = 2;
 
-export interface CreditCardBillTransactionGroup {
-  readonly key: string;
-  readonly label: string;
-  readonly transactions: readonly CreditCardBillTransaction[];
-}
+/** Tamanho de página pedido ao listar transações da fatura. */
+export const CREDIT_CARD_BILL_TRANSACTION_PAGE_SIZE = 500;
 
 export interface CreditCardBillScreenController {
   readonly creditCardId: string;
@@ -36,11 +55,17 @@ export interface CreditCardBillScreenController {
   readonly bill: CreditCardBillRecord | null;
   readonly billQuery: ReturnType<typeof useCreditCardBillQuery>;
   readonly creditCardsQuery: ReturnType<typeof useCreditCardsQuery>;
+  readonly tagsQuery: ReturnType<typeof useTagsQuery>;
+  readonly transactionsQuery: ReturnType<typeof useTransactionsQuery>;
   readonly groupedTransactions: readonly CreditCardBillTransactionGroup[];
   readonly cycleLabel: string | null;
+  /** View-model derivado da fatura; null quando o cartão não existe. */
+  readonly invoice: CreditCardInvoiceViewModel | null;
   readonly handlePreviousMonth: () => void;
   readonly handleNextMonth: () => void;
   readonly handleBack: () => void;
+  /** Placeholder — pagar fatura ainda não tem backend (no-op intencional). */
+  readonly handlePayBill: () => void;
 }
 
 export interface CreditCardBillScreenControllerOptions {
@@ -55,68 +80,41 @@ const resolveStringParam = (value: string | string[] | undefined): string => {
   return value ?? "";
 };
 
-const padMonth = (value: number): string => value.toString().padStart(2, "0");
+/** Argumentos para derivar o view-model da fatura. */
+interface InvoiceViewModelArgs {
+  readonly creditCard: CreditCard | null;
+  readonly transactions: readonly TransactionRecordLike[];
+  readonly tags: ReturnType<typeof useTagsQuery>["data"];
+  readonly bill: CreditCardBillRecord | null;
+  readonly month: string;
+}
 
-export const getCurrentCreditCardBillMonth = (): string => {
-  const now = new Date();
-  return `${now.getFullYear()}-${padMonth(now.getMonth() + 1)}`;
-};
+/** Forma mínima de transação consumida aqui (alias do contrato cru). */
+type TransactionRecordLike = Parameters<typeof enrichCardTransactions>[0][number];
 
-export const shiftCreditCardBillMonth = (
-  month: string,
-  offset: number,
-): string => {
-  const [yearRaw, monthRaw] = month.split("-");
-  const year = Number.parseInt(yearRaw ?? "", 10);
-  const monthIndex = Number.parseInt(monthRaw ?? "", 10) - 1;
-  const date = new Date(year, monthIndex + offset, 1);
-  return `${date.getFullYear()}-${padMonth(date.getMonth() + 1)}`;
-};
-
-export const formatCreditCardBillMonthLabel = (month: string): string => {
-  const [yearRaw, monthRaw] = month.split("-");
-  const year = Number.parseInt(yearRaw ?? "", 10);
-  const monthIndex = Number.parseInt(monthRaw ?? "", 10) - 1;
-  const date = new Date(year, monthIndex, 1);
-  return monthFormatter.format(date);
-};
-
-export const formatCreditCardBillDate = (value: string): string => {
-  const [yearRaw, monthRaw, dayRaw] = value.split("-");
-  const year = Number.parseInt(yearRaw ?? "", 10);
-  const month = Number.parseInt(monthRaw ?? "", 10);
-  const day = Number.parseInt(dayRaw ?? "", 10);
-  return dateFormatter.format(new Date(year, month - 1, day));
-};
-
-export const formatCreditCardBillCycleLabel = (
-  bill: CreditCardBillRecord,
-): string => {
-  return `${formatCreditCardBillDate(bill.cycle.startDate)} a ${formatCreditCardBillDate(
-    bill.cycle.endDate,
-  )} · vence ${formatCreditCardBillDate(bill.cycle.dueDate)}`;
-};
-
-export const groupCreditCardBillTransactionsByDate = (
-  transactions: readonly CreditCardBillTransaction[],
-): readonly CreditCardBillTransactionGroup[] => {
-  const sortedTransactions = [...transactions].sort((left, right) => {
-    const leftDate = left.dueDate ?? "9999-12-31";
-    const rightDate = right.dueDate ?? "9999-12-31";
-    return leftDate.localeCompare(rightDate);
-  });
-  const groups = new Map<string, CreditCardBillTransaction[]>();
-
-  for (const transaction of sortedTransactions) {
-    const key = transaction.dueDate ?? "without-date";
-    groups.set(key, [...(groups.get(key) ?? []), transaction]);
-  }
-
-  return [...groups.entries()].map(([key, transactionsForDate]) => ({
-    key,
-    label: key === "without-date" ? "Sem data" : formatCreditCardBillDate(key),
-    transactions: transactionsForDate,
-  }));
+/**
+ * Deriva o view-model da fatura cruzando transações + tags com a fatura oficial.
+ * Isolado do controller para mantê-lo enxuto (DRY/legibilidade).
+ *
+ * @param args Cartão, transações, tags, fatura oficial e mês.
+ * @returns View-model da fatura, ou null quando o cartão não existe.
+ */
+const useInvoiceViewModel = (
+  args: InvoiceViewModelArgs,
+): CreditCardInvoiceViewModel | null => {
+  return useMemo<CreditCardInvoiceViewModel | null>(() => {
+    if (args.creditCard === null) {
+      return null;
+    }
+    const enriched = enrichCardTransactions(args.transactions, [args.creditCard]);
+    return buildCreditCardInvoiceViewModel({
+      card: args.creditCard,
+      transactions: enriched,
+      tags: args.tags?.tags ?? [],
+      bill: args.bill,
+      month: args.month,
+    });
+  }, [args.creditCard, args.transactions, args.tags, args.bill, args.month]);
 };
 
 export function useCreditCardBillScreenController(
@@ -130,7 +128,15 @@ export function useCreditCardBillScreenController(
   );
 
   const creditCardsQuery = useCreditCardsQuery();
+  const tagsQuery = useTagsQuery();
   const billQuery = useCreditCardBillQuery(creditCardId, selectedMonth);
+  const transactionsQuery = useTransactionsQuery({
+    type: "expense",
+    creditCardId,
+    startDate: billWindowStartDate(selectedMonth, CREDIT_CARD_BILL_WINDOW_MONTHS),
+    endDate: monthEndDate(selectedMonth),
+    perPage: CREDIT_CARD_BILL_TRANSACTION_PAGE_SIZE,
+  });
   const creditCard = useMemo(() => {
     return (
       creditCardsQuery.data?.creditCards.find((entry) => entry.id === creditCardId) ??
@@ -146,6 +152,14 @@ export function useCreditCardBillScreenController(
     () => (bill === null ? null : formatCreditCardBillCycleLabel(bill)),
     [bill],
   );
+
+  const invoice = useInvoiceViewModel({
+    creditCard,
+    transactions: transactionsQuery.data?.transactions ?? [],
+    tags: tagsQuery.data,
+    bill,
+    month: selectedMonth,
+  });
 
   const handlePreviousMonth = useCallback((): void => {
     setSelectedMonth((current) => shiftCreditCardBillMonth(current, -1));
@@ -171,10 +185,22 @@ export function useCreditCardBillScreenController(
     bill,
     billQuery,
     creditCardsQuery,
+    tagsQuery,
+    transactionsQuery,
     groupedTransactions,
     cycleLabel,
+    invoice,
     handlePreviousMonth,
     handleNextMonth,
     handleBack,
+    handlePayBill: noopPayBill,
   };
 }
+
+/**
+ * Placeholder da ação "Pagar fatura" — ainda sem backend. Mantido nomeado para
+ * deixar explícito que é um no-op intencional (ver PR/handoff).
+ */
+const noopPayBill = (): void => {
+  /* Sem backend para pagamento de fatura ainda. */
+};
