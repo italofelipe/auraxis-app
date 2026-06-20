@@ -39,3 +39,19 @@ export {
   motionTranslate,
   type MotionEasingKey,
 } from "@/shared/theme/motion";
+export {
+  allCardsGradient,
+  cardGradientPalette,
+  resolveCardGradient,
+  type CardGradientInput,
+  type GradientStops,
+} from "@/shared/theme/card-gradients";
+export {
+  categoryPalette,
+  resolveCategoryColor,
+  type CategoryColorInput,
+} from "@/shared/theme/category-palette";
+export {
+  chartSeriesPalette,
+  resolveSeriesColor,
+} from "@/shared/theme/chart-palette";
