@@ -55,3 +55,10 @@ repos/
 # Stryker mutation testing artifacts
 reports/mutation/
 .stryker-tmp/
+
+# EAS submit credentials — NUNCA commitar
+*.p8
+AuthKey_*.p8
+gen-lang-client-*.json
+*service-account*.json
+*.keystore
