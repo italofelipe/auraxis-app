@@ -48,6 +48,7 @@ export {
 } from "@/shared/theme/card-gradients";
 export {
   categoryPalette,
+  NO_CATEGORY_COLOR,
   resolveCategoryColor,
   type CategoryColorInput,
 } from "@/shared/theme/category-palette";

@@ -18,6 +18,9 @@ export const categoryPalette: readonly string[] = [
   "#3FB6A8",
 ];
 
+/** Cor neutra para lançamentos/grupos sem categoria definida. */
+export const NO_CATEGORY_COLOR = "#7C8B99";
+
 const HEX_PATTERN = /^#([0-9a-f]{3}|[0-9a-f]{6})$/i;
 
 /** Entrada mínima para resolver a cor de uma categoria. */
