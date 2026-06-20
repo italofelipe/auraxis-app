@@ -60,3 +60,7 @@ export {
   chartSeriesPalette,
   resolveSeriesColor,
 } from "@/shared/theme/chart-palette";
+export {
+  coachMarks,
+  type CoachMarksTokenKey,
+} from "@/shared/theme/coach-marks-tokens";

@@ -56,9 +56,19 @@ jest.mock("react-native-reanimated", () => {
     SlideInRight: fadeStub,
     SlideOutLeft: fadeStub,
     useSharedValue: (initial: unknown) => ({ value: initial }),
-    useAnimatedStyle: () => ({}),
+    useAnimatedStyle: (factory: () => unknown) =>
+      typeof factory === "function" ? factory() : {},
     withTiming: (value: unknown) => value,
     withSpring: (value: unknown) => value,
+    withDelay: (_delay: unknown, value: unknown) => value,
+    Easing: {
+      bezier: () => (t: number) => t,
+      linear: (t: number) => t,
+      ease: (t: number) => t,
+      in: (fn: unknown) => fn,
+      out: (fn: unknown) => fn,
+      inOut: (fn: unknown) => fn,
+    },
   };
 });
 /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */
