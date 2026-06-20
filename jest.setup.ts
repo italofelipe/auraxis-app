@@ -63,6 +63,48 @@ jest.mock("react-native-reanimated", () => {
 });
 /* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */
 
+// Lean mock for @gorhom/bottom-sheet under jest. The real package pulls in
+// react-native-gesture-handler + reanimated worklets that don't initialise
+// outside a real RN runtime. We render children inline and expose the
+// imperative `present`/`dismiss` ref API so host suites can drive open/close.
+/* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */
+jest.mock("@gorhom/bottom-sheet", () => {
+  const React = require("react");
+  const { View, ScrollView } = require("react-native");
+  const Passthrough = ({ children }: any) =>
+    React.createElement(React.Fragment, null, children);
+  const ForwardedModal = React.forwardRef(({ children }: any, ref: any) => {
+    const [presented, setPresented] = React.useState(false);
+    React.useImperativeHandle(ref, () => ({
+      present: () => setPresented(true),
+      dismiss: () => setPresented(false),
+      close: () => setPresented(false),
+      expand: () => setPresented(true),
+      snapToIndex: () => setPresented(true),
+    }));
+    return presented
+      ? React.createElement(View, { testID: "bottom-sheet-modal" }, children)
+      : null;
+  });
+  const ForwardedScroll = React.forwardRef(
+    ({ children, ...rest }: any, ref: any) =>
+      React.createElement(ScrollView, { ...rest, ref }, children),
+  );
+  const Backdrop = (props: any) =>
+    React.createElement(View, { testID: "bottom-sheet-backdrop", ...props });
+  return {
+    __esModule: true,
+    default: ForwardedModal,
+    BottomSheetModal: ForwardedModal,
+    BottomSheetModalProvider: Passthrough,
+    BottomSheetView: View,
+    BottomSheetScrollView: ForwardedScroll,
+    BottomSheetBackdrop: Backdrop,
+    BottomSheetTextInput: View,
+  };
+});
+/* eslint-enable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */
+
 // Default-mock react-native-webview: the package's iOS/Android entry
 // registers a native turbo module that fails outside a real RN
 // runtime. Suites that need to assert on bridge messages still

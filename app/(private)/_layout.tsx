@@ -8,6 +8,7 @@ import { AppTabBar } from "@/core/navigation/app-tab-bar";
 import { privateTabDefinitions } from "@/core/navigation/routes";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
+import { ExpenseSheetHost } from "@/features/credit-cards/components/expense-sheet/expense-sheet-host";
 import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
 import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 import { WEEKLY_INSIGHT_FEATURE_FLAG_KEY } from "@/features/insights/weekly-insight-config";
@@ -61,41 +62,50 @@ function PrivateLayoutContent(): ReactElement | null {
   }
 
   return (
-    <Tabs
-      tabBar={(props) => <AppTabBar {...props} />}
-      screenOptions={{
-        headerShown: false,
-        tabBarActiveTintColor: tabTheme.primary,
-        tabBarInactiveTintColor: tabTheme.subduedForeground,
-        tabBarStyle: {
-          backgroundColor: tabTheme.surface,
-          borderTopColor: tabTheme.border,
-        },
-      }}>
-      {privateTabDefinitions.map((tab) => {
-        return (
-          <Tabs.Screen
-            key={tab.name}
-            name={tab.name}
-            options={{
-              title: tab.title,
-              tabBarBadge:
-                tab.name === "dashboard" && weeklyInsightEnabled && weeklyInsight.isNew
-                  ? "1"
-                  : undefined,
-              tabBarIcon: ({ color, size }) => {
-                return (
-                  <MaterialCommunityIcons name={tab.icon} color={color} size={size} />
-                );
-              },
-            }}
-          />
-        );
-      })}
-      {HIDDEN_TAB_NAMES.map((name) => (
-        <Tabs.Screen key={name} name={name} options={{ href: null }} />
-      ))}
-    </Tabs>
+    <>
+      <Tabs
+        tabBar={(props) => <AppTabBar {...props} />}
+        screenOptions={{
+          headerShown: false,
+          tabBarActiveTintColor: tabTheme.primary,
+          tabBarInactiveTintColor: tabTheme.subduedForeground,
+          tabBarStyle: {
+            backgroundColor: tabTheme.surface,
+            borderTopColor: tabTheme.border,
+          },
+        }}>
+        {privateTabDefinitions.map((tab) => {
+          return (
+            <Tabs.Screen
+              key={tab.name}
+              name={tab.name}
+              options={{
+                title: tab.title,
+                tabBarBadge:
+                  tab.name === "dashboard" &&
+                  weeklyInsightEnabled &&
+                  weeklyInsight.isNew
+                    ? "1"
+                    : undefined,
+                tabBarIcon: ({ color, size }) => {
+                  return (
+                    <MaterialCommunityIcons
+                      name={tab.icon}
+                      color={color}
+                      size={size}
+                    />
+                  );
+                },
+              }}
+            />
+          );
+        })}
+        {HIDDEN_TAB_NAMES.map((name) => (
+          <Tabs.Screen key={name} name={name} options={{ href: null }} />
+        ))}
+      </Tabs>
+      <ExpenseSheetHost />
+    </>
   );
 }
 

@@ -23,6 +23,7 @@ import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { AppButton } from "@/shared/components/app-button";
 import { triggerHapticImpact } from "@/shared/feedback/haptics";
+import { useExpenseSheetStore } from "@/stores/expense-sheet-store";
 import {
   darkSemanticColors,
   darkSemanticGlows,
@@ -261,6 +262,7 @@ interface CenterActionButtonProps {
   readonly iconColor: string;
   readonly glow: ViewStyle;
   readonly onPress: () => void;
+  readonly onLongPress: () => void;
 }
 
 function CenterActionButton({
@@ -268,14 +270,17 @@ function CenterActionButton({
   iconColor,
   glow,
   onPress,
+  onLongPress,
 }: CenterActionButtonProps): ReactElement {
   return (
     <YStack width={CENTER_BUTTON_SIZE + 16} alignItems="center">
       <Pressable
         accessibilityRole="button"
-        accessibilityLabel="Registrar movimento"
-        testID="tab-quick-actions"
+        accessibilityLabel="Lançar despesa"
+        accessibilityHint="Toque para lançar uma despesa. Pressione e segure para mais ações."
+        testID="tour-fab"
         onPress={onPress}
+        onLongPress={onLongPress}
         style={({ pressed }) => ({
           width: CENTER_BUTTON_SIZE,
           height: CENTER_BUTTON_SIZE,
@@ -315,6 +320,12 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElemen
     reducedMotion,
   );
   const quickActions = useQuickCreateActions(navigation);
+  const openExpenseSheet = useExpenseSheetStore((store) => store.open);
+
+  const handleFabPress = useCallback((): void => {
+    triggerHapticImpact("medium");
+    openExpenseSheet();
+  }, [openExpenseSheet]);
 
   const navigateToTab = useCallback(
     (routeName: string): void => {
@@ -358,7 +369,8 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElemen
           backgroundColor={palette.primary}
           iconColor={palette.primaryForeground}
           glow={glows.brand}
-          onPress={quickActions.open}
+          onPress={handleFabPress}
+          onLongPress={quickActions.open}
         />
         {privateTabDefinitions.slice(2).map(renderTab)}
       </XStack>
