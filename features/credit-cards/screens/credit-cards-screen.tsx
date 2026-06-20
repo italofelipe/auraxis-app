@@ -1,5 +1,6 @@
-import { useMemo, type ReactElement } from "react";
+import { useCallback, useMemo, useRef, type ReactElement } from "react";
 
+import type { LayoutChangeEvent } from "react-native";
 import { useRouter } from "expo-router";
 import { Paragraph, XStack, YStack, useTheme } from "tamagui";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
@@ -10,6 +11,10 @@ import {
 } from "@/core/navigation/routes";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
+import {
+  CardsTour,
+  type CardsTourHandle,
+} from "@/features/credit-cards/cards-tour/cards-tour";
 import { AnaliticoView } from "@/features/credit-cards/components/analitico-view";
 import { CardCarousel } from "@/features/credit-cards/components/card-carousel";
 import { CardsSegmented } from "@/features/credit-cards/components/cards-segmented";
@@ -22,9 +27,17 @@ import {
   type CardsHomeController,
 } from "@/features/credit-cards/hooks/use-cards-home-controller";
 import { useCreditCardsScreenController } from "@/features/credit-cards/hooks/use-credit-cards-screen-controller";
+import {
+  useTourAnchor,
+  useTourAnchorContext,
+  type TourAnchorView,
+} from "@/shared/coach-marks/tour-anchor-context";
 import { AppGradient } from "@/shared/components/app-gradient";
 import { AppQueryState } from "@/shared/components/app-query-state";
-import { AppScreen } from "@/shared/components/app-screen";
+import {
+  AppScreen,
+  type AppScreenScrollHandle,
+} from "@/shared/components/app-screen";
 import {
   darkSemanticGradients,
   iconSizes,
@@ -43,15 +56,38 @@ const CONSOLIDATED_EYEBROW = "Fatura consolidada";
  *
  * @returns Tela de Cartões.
  */
+// Composição de tela (refs do tour + query state + corpo): acima do limite por
+// ser orquestração declarativa, sem lógica de negócio (que vive nos hooks).
+// eslint-disable-next-line max-lines-per-function
 export function CreditCardsScreen(): ReactElement {
   const home = useCardsHomeController();
   const crud = useCreditCardsScreenController();
   const router = useRouter();
 
+  // Ref do ScrollView (rolar até o alvo do tour) e ref imperativa do tour
+  // (replay pelo botão "?"). A medição das âncoras vem do contexto montado em
+  // app/(private)/_layout.tsx (compartilhado com a tab bar / FAB).
+  const scrollRef = useRef<AppScreenScrollHandle>(null);
+  const tourRef = useRef<CardsTourHandle>(null);
+  const scrollOriginAnchor = useTourAnchor("__scroll_origin");
+  const { measureAnchor } = useTourAnchorContext();
+
   const cards = useMemo<readonly CreditCard[]>(
     () => home.cardsQuery.data?.creditCards ?? [],
     [home.cardsQuery.data?.creditCards],
   );
+
+  const handleReplayTour = useCallback((): void => {
+    tourRef.current?.open();
+  }, []);
+
+  const tourHandlers = useMemo(
+    () => ({ setView: home.setView, selectCard: home.selectCard }),
+    [home.setView, home.selectCard],
+  );
+
+  // Auto-abre só quando há cartões (não faz sentido sobre spinner/empty).
+  const tourAutoOpenEnabled = cards.length > 0;
 
   if (crud.formMode.kind !== "closed") {
     return (
@@ -71,8 +107,20 @@ export function CreditCardsScreen(): ReactElement {
   }
 
   return (
-    <AppScreen testID="credit-cards-screen">
-      <CardsHero cards={cards} onAddCard={crud.handleOpenCreate} />
+    <AppScreen testID="credit-cards-screen" scrollViewRef={scrollRef}>
+      {/* Marca a origem (topo) do conteúdo rolável: o tour usa a posição em
+          janela desta View para converter offsets ao rolar até um alvo. */}
+      <YStack
+        ref={scrollOriginAnchor.ref}
+        onLayout={scrollOriginAnchor.onLayout}
+        height={0}
+        testID="tour-scroll-origin"
+      />
+      <CardsHero
+        cards={cards}
+        onAddCard={crud.handleOpenCreate}
+        onReplayTour={handleReplayTour}
+      />
       <AppQueryState
         query={home.cardsQuery}
         options={{
@@ -95,6 +143,13 @@ export function CreditCardsScreen(): ReactElement {
           <HomeBody home={home} cards={cards} router={router} />
         )}
       </AppQueryState>
+      <CardsTour
+        handlers={tourHandlers}
+        scrollRef={scrollRef}
+        measureAnchor={measureAnchor}
+        autoOpenEnabled={tourAutoOpenEnabled}
+        controllerRef={tourRef}
+      />
     </AppScreen>
   );
 }
@@ -102,13 +157,15 @@ export function CreditCardsScreen(): ReactElement {
 interface HeroProps {
   readonly cards: readonly CreditCard[];
   readonly onAddCard: () => void;
+  readonly onReplayTour: () => void;
 }
 
-function CardsHero({ cards, onAddCard }: HeroProps): ReactElement {
+function CardsHero({ cards, onAddCard, onReplayTour }: HeroProps): ReactElement {
   const resolvedTheme = useResolvedTheme();
   const setThemePreference = useAppShellStore(
     (state) => state.setThemePreference,
   );
+  const themeAnchor = useTourAnchor("theme");
   const heroGradient =
     resolvedTheme === "auraxis_dark"
       ? darkSemanticGradients.hero
@@ -151,15 +208,17 @@ function CardsHero({ cards, onAddCard }: HeroProps): ReactElement {
             icon={isDark ? "white-balance-sunny" : "weather-night"}
             accessibilityLabel="Alternar tema"
             testID="tour-theme"
+            anchorRef={themeAnchor.ref}
+            anchorOnLayout={themeAnchor.onLayout}
             onPress={() =>
               setThemePreference(isDark ? "light" : "dark")
             }
           />
           <HeroRoundButton
             icon="help-circle-outline"
-            accessibilityLabel="Ajuda"
+            accessibilityLabel="Rever o guia de Cartões"
             testID="cards-help-button"
-            onPress={noop}
+            onPress={onReplayTour}
           />
           <HeroRoundButton
             icon="credit-card-plus-outline"
@@ -178,6 +237,10 @@ interface HeroRoundButtonProps {
   readonly accessibilityLabel: string;
   readonly onPress: () => void;
   readonly testID?: string;
+  /** Ref de âncora do tour (registra o botão como alvo do spotlight). */
+  readonly anchorRef?: (node: TourAnchorView | null) => void;
+  /** onLayout de âncora do tour (gatilho de registro barato). */
+  readonly anchorOnLayout?: (event: LayoutChangeEvent) => void;
 }
 
 function HeroRoundButton({
@@ -185,9 +248,13 @@ function HeroRoundButton({
   accessibilityLabel,
   onPress,
   testID,
+  anchorRef,
+  anchorOnLayout,
 }: HeroRoundButtonProps): ReactElement {
   return (
     <YStack
+      ref={anchorRef}
+      onLayout={anchorOnLayout}
       width={44}
       height={44}
       borderRadius="$5"
@@ -216,6 +283,11 @@ interface HomeBodyProps {
 }
 
 function HomeBody({ home, cards, router }: HomeBodyProps): ReactElement {
+  const cardsAnchor = useTourAnchor("cards");
+  const viewsAnchor = useTourAnchor("views");
+  const monthsAnchor = useTourAnchor("months");
+  const faturaAnchor = useTourAnchor("fatura");
+
   const monthTotalsByCard = useMemo<Record<string, number>>(() => {
     const record: Record<string, number> = {};
     for (const entry of home.faturas.railTotals) {
@@ -238,7 +310,7 @@ function HomeBody({ home, cards, router }: HomeBodyProps): ReactElement {
 
   return (
     <YStack gap="$4">
-      <YStack testID="tour-cards">
+      <YStack ref={cardsAnchor.ref} onLayout={cardsAnchor.onLayout} testID="tour-cards">
         <CardCarousel
           cards={cards}
           selectedCardId={home.selectedCardId}
@@ -256,20 +328,20 @@ function HomeBody({ home, cards, router }: HomeBodyProps): ReactElement {
         />
       ) : null}
 
-      <YStack testID="tour-views">
+      <YStack ref={viewsAnchor.ref} onLayout={viewsAnchor.onLayout} testID="tour-views">
         <CardsSegmented value={home.view} onChange={home.setView} />
       </YStack>
 
       {home.view === "faturas" ? (
         <YStack gap="$4">
-          <YStack testID="tour-months">
+          <YStack ref={monthsAnchor.ref} onLayout={monthsAnchor.onLayout} testID="tour-months">
             <MonthChips
               months={home.months}
               selectedMonth={home.selectedMonth}
               onSelect={home.selectMonth}
             />
           </YStack>
-          <YStack testID="tour-fatura">
+          <YStack ref={faturaAnchor.ref} onLayout={faturaAnchor.onLayout} testID="tour-fatura">
             <FaturasView
               faturas={home.faturas}
               eyebrow={eyebrow}
@@ -334,8 +406,4 @@ const resolveEyebrow = (
     return CONSOLIDATED_EYEBROW;
   }
   return cards.find((card) => card.id === selectedCardId)?.name ?? "Cartão";
-};
-
-const noop = (): void => {
-  /* placeholder do replay de onboarding (F4) */
 };

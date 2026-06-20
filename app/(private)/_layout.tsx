@@ -12,6 +12,7 @@ import { ExpenseSheetHost } from "@/features/credit-cards/components/expense-she
 import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
 import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 import { WEEKLY_INSIGHT_FEATURE_FLAG_KEY } from "@/features/insights/weekly-insight-config";
+import { TourAnchorProvider } from "@/shared/coach-marks/tour-anchor-context";
 import { isFeatureEnabled } from "@/shared/feature-flags";
 import { darkSemanticColors, lightSemanticColors } from "@/shared/theme";
 
@@ -62,7 +63,7 @@ function PrivateLayoutContent(): ReactElement | null {
   }
 
   return (
-    <>
+    <TourAnchorProvider>
       <Tabs
         tabBar={(props) => <AppTabBar {...props} />}
         screenOptions={{
@@ -105,7 +106,7 @@ function PrivateLayoutContent(): ReactElement | null {
         ))}
       </Tabs>
       <ExpenseSheetHost />
-    </>
+    </TourAnchorProvider>
   );
 }
 

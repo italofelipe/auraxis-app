@@ -21,6 +21,10 @@ import { Paragraph, XStack, YStack } from "tamagui";
 import { appRoutes, privateTabDefinitions } from "@/core/navigation/routes";
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
+import {
+  useTourAnchor,
+  type MeasurableHandle,
+} from "@/shared/coach-marks/tour-anchor-context";
 import { AppButton } from "@/shared/components/app-button";
 import { triggerHapticImpact } from "@/shared/feedback/haptics";
 import { useExpenseSheetStore } from "@/stores/expense-sheet-store";
@@ -263,6 +267,10 @@ interface CenterActionButtonProps {
   readonly glow: ViewStyle;
   readonly onPress: () => void;
   readonly onLongPress: () => void;
+  /** Ref de âncora do tour (registra o FAB como alvo do spotlight). */
+  readonly anchorRef: (node: MeasurableHandle | null) => void;
+  /** onLayout de âncora do tour (gatilho de registro barato). */
+  readonly anchorOnLayout: (event: LayoutChangeEvent) => void;
 }
 
 function CenterActionButton({
@@ -271,16 +279,20 @@ function CenterActionButton({
   glow,
   onPress,
   onLongPress,
+  anchorRef,
+  anchorOnLayout,
 }: CenterActionButtonProps): ReactElement {
   return (
     <YStack width={CENTER_BUTTON_SIZE + 16} alignItems="center">
       <Pressable
+        ref={anchorRef}
         accessibilityRole="button"
         accessibilityLabel="Lançar despesa"
         accessibilityHint="Toque para lançar uma despesa. Pressione e segure para mais ações."
         testID="tour-fab"
         onPress={onPress}
         onLongPress={onLongPress}
+        onLayout={anchorOnLayout}
         style={({ pressed }) => ({
           width: CENTER_BUTTON_SIZE,
           height: CENTER_BUTTON_SIZE,
@@ -321,6 +333,7 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElemen
   );
   const quickActions = useQuickCreateActions(navigation);
   const openExpenseSheet = useExpenseSheetStore((store) => store.open);
+  const fabAnchor = useTourAnchor("fab");
 
   const handleFabPress = useCallback((): void => {
     triggerHapticImpact("medium");
@@ -371,6 +384,8 @@ export function AppTabBar({ state, navigation }: BottomTabBarProps): ReactElemen
           glow={glows.brand}
           onPress={handleFabPress}
           onLongPress={quickActions.open}
+          anchorRef={fabAnchor.ref}
+          anchorOnLayout={fabAnchor.onLayout}
         />
         {privateTabDefinitions.slice(2).map(renderTab)}
       </XStack>
