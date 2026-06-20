@@ -217,6 +217,7 @@ export type BillTransactionType = {
   amount: Scalars['DecimalScalar']['output'];
   dueDate?: Maybe<Scalars['String']['output']>;
   id: Scalars['String']['output'];
+  impactPolicy?: Maybe<Scalars['String']['output']>;
   status?: Maybe<Scalars['String']['output']>;
   title: Scalars['String']['output'];
   type?: Maybe<Scalars['String']['output']>;
@@ -1052,6 +1053,7 @@ export type MutationCreateTransactionArgs = {
   description?: InputMaybe<Scalars['String']['input']>;
   dueDate: Scalars['String']['input'];
   endDate?: InputMaybe<Scalars['String']['input']>;
+  impactPolicy?: InputMaybe<Scalars['String']['input']>;
   installmentCount?: InputMaybe<Scalars['Int']['input']>;
   isInstallment?: InputMaybe<Scalars['Boolean']['input']>;
   isRecurring?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1273,6 +1275,7 @@ export type MutationUpdateTransactionArgs = {
   description?: InputMaybe<Scalars['String']['input']>;
   dueDate?: InputMaybe<Scalars['String']['input']>;
   endDate?: InputMaybe<Scalars['String']['input']>;
+  impactPolicy?: InputMaybe<Scalars['String']['input']>;
   installmentCount?: InputMaybe<Scalars['Int']['input']>;
   isInstallment?: InputMaybe<Scalars['Boolean']['input']>;
   isRecurring?: InputMaybe<Scalars['Boolean']['input']>;
@@ -1930,6 +1933,7 @@ export type TransactionTypeObject = {
   endDate?: Maybe<Scalars['String']['output']>;
   externalId?: Maybe<Scalars['String']['output']>;
   id: Scalars['ID']['output'];
+  impactPolicy: Scalars['String']['output'];
   installmentCount?: Maybe<Scalars['Int']['output']>;
   installmentGroupId?: Maybe<Scalars['String']['output']>;
   isInstallment: Scalars['Boolean']['output'];
