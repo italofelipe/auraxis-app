@@ -49,6 +49,21 @@ export const centsInputToAmountString = (raw: string): string => {
 };
 
 /**
+ * Serializa um valor numérico em reais como a string decimal canônica que a API
+ * espera (ex.: `120.25` → `"120.25"`). Sempre com duas casas decimais e ponto
+ * como separador. NaN-safe: valores não finitos viram `"0.00"`.
+ *
+ * Espelha `serializeCurrencyAmount` do auraxis-web e usa a mesma convenção
+ * `toFixed(2)` dos demais helpers deste módulo.
+ *
+ * @param value Valor numérico em reais.
+ * @returns String decimal com duas casas (ou `"0.00"` quando inválido).
+ */
+export const serializeAmount = (value: number): string => {
+  return Number.isFinite(value) ? value.toFixed(2) : "0.00";
+};
+
+/**
  * Formats any persisted/display value as BRL currency without ever rendering
  * `NaN`. Accepts numbers, numeric strings (`"120.25"`), null or undefined.
  *

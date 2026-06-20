@@ -3,6 +3,7 @@ import {
   formatCurrencyInput,
   parseCurrencyCentsInput,
   safeFormatCurrency,
+  serializeAmount,
 } from "@/shared/utils/currency";
 
 describe("parseCurrencyCentsInput", () => {
@@ -49,6 +50,26 @@ describe("centsInputToAmountString", () => {
   it("returns an empty string when nothing parseable was typed", () => {
     expect(centsInputToAmountString("")).toBe("");
     expect(centsInputToAmountString("R$ ,")).toBe("");
+  });
+});
+
+describe("serializeAmount", () => {
+  it("turns a numeric amount into the canonical decimal string for the API", () => {
+    expect(serializeAmount(120.25)).toBe("120.25");
+    expect(serializeAmount(1.2)).toBe("1.20");
+    expect(serializeAmount(0)).toBe("0.00");
+    expect(serializeAmount(1000)).toBe("1000.00");
+  });
+
+  it("rounds to two fractional digits (half-up)", () => {
+    expect(serializeAmount(33.333333)).toBe("33.33");
+    expect(serializeAmount(33.335)).toBe("33.34");
+  });
+
+  it("falls back to 0.00 for non-finite values (no NaN)", () => {
+    expect(serializeAmount(Number.NaN)).toBe("0.00");
+    expect(serializeAmount(Number.POSITIVE_INFINITY)).toBe("0.00");
+    expect(serializeAmount(Number.NEGATIVE_INFINITY)).toBe("0.00");
   });
 });
 
