@@ -1,5 +1,6 @@
 import type { ReactElement } from "react";
 
+import Animated from "react-native-reanimated";
 import { Paragraph, XStack, YStack, useTheme } from "tamagui";
 import Svg, { Rect } from "react-native-svg";
 
@@ -9,6 +10,7 @@ import type {
   InsightSeries,
 } from "@/features/insights/fluida/contracts";
 import { buildChartBars, selectSeriesValues } from "@/features/insights/fluida/series";
+import { useBarGrowAnimation } from "@/shared/animations/use-bar-grow-animation";
 import { maxValue } from "@/shared/utils/chart-geometry";
 import { formatCurrency } from "@/shared/utils/formatters";
 
@@ -24,6 +26,49 @@ const CHART_HEIGHT = 90;
 const MIN_BAR_HEIGHT = 4;
 const BAR_GAP = 6;
 const BAR_CORNER = 4;
+
+const AnimatedRect = Animated.createAnimatedComponent(Rect);
+
+interface ChartBarRectProps {
+  readonly x: number;
+  readonly width: number;
+  readonly height: number;
+  readonly fill: string;
+  readonly index: number;
+}
+
+/**
+ * A single rhythm-chart bar that grows up from the baseline to its final
+ * `height` over ~0.5s, staggered by `index`. The grow animation lives in
+ * {@link useBarGrowAnimation}; the rest state is the fully-drawn bar, so the
+ * bar is never left stuck invisible (and honours "reduce motion").
+ *
+ * @param props The bar's x/width, final height, fill colour and row index.
+ * @returns An animated `<Rect>` driven by the grow animation.
+ */
+function ChartBarRect({
+  x,
+  width,
+  height,
+  fill,
+  index,
+}: ChartBarRectProps): ReactElement {
+  const { animatedProps } = useBarGrowAnimation({
+    height,
+    chartHeight: CHART_HEIGHT,
+    index,
+  });
+
+  return (
+    <AnimatedRect
+      x={x}
+      width={width}
+      rx={BAR_CORNER}
+      fill={fill}
+      animatedProps={animatedProps}
+    />
+  );
+}
 
 const TITLE_BY_CADENCE: Record<InsightCadence, string> = {
   daily: "Saídas · últimos 7 dias",
@@ -80,16 +125,14 @@ export function ChartBeat({ series, cadence, testID }: ChartBeatProps): ReactEle
         {bars.map((bar, index) => {
           const barHeight = Math.max(MIN_BAR_HEIGHT, bar.ratio * CHART_HEIGHT);
           const x = slot * index + BAR_GAP / 2;
-          const y = CHART_HEIGHT - barHeight;
           return (
-            <Rect
+            <ChartBarRect
               key={bar.label}
               x={x}
-              y={y}
               width={barWidth}
               height={barHeight}
-              rx={BAR_CORNER}
               fill={bar.isPeak ? peakColor : trackColor}
+              index={index}
             />
           );
         })}
