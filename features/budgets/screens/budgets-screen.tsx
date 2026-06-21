@@ -17,11 +17,16 @@ import {
   sortBudgetsByRisk,
 } from "@/features/budgets/services/budget-risk";
 import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
+import { useInsightSection } from "@/features/insights/hooks/use-insight-section";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import {
+  InsightSection,
+  buildInsightFluidaParams,
+} from "@/shared/insights";
 import { BudgetsListSkeleton } from "@/shared/skeletons";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -29,6 +34,7 @@ import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 export function BudgetsScreen(): ReactElement {
   const controller = useBudgetsScreenController();
   const router = useRouter();
+  const insightSection = useInsightSection("budgets");
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -52,6 +58,10 @@ export function BudgetsScreen(): ReactElement {
   return (
     <AppScreen>
       <SummaryCard controller={controller} />
+      <InsightSection
+        vm={insightSection}
+        onReadFull={() => router.push(buildInsightFluidaParams("budgets"))}
+      />
       <AiInsightSurface
         dimension="budgets"
         onOpenHub={() => router.push(appRoutes.private.insights)}

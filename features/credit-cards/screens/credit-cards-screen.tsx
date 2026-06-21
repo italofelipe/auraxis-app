@@ -27,6 +27,7 @@ import {
   type CardsHomeController,
 } from "@/features/credit-cards/hooks/use-cards-home-controller";
 import { useCreditCardsScreenController } from "@/features/credit-cards/hooks/use-credit-cards-screen-controller";
+import { useInsightSection } from "@/features/insights/hooks/use-insight-section";
 import {
   useTourAnchor,
   useTourAnchorContext,
@@ -38,6 +39,10 @@ import {
   AppScreen,
   type AppScreenScrollHandle,
 } from "@/shared/components/app-screen";
+import {
+  InsightSection,
+  buildInsightFluidaParams,
+} from "@/shared/insights";
 import {
   darkSemanticGradients,
   iconSizes,
@@ -63,6 +68,7 @@ export function CreditCardsScreen(): ReactElement {
   const home = useCardsHomeController();
   const crud = useCreditCardsScreenController();
   const router = useRouter();
+  const insightSection = useInsightSection("credit_cards");
 
   // Ref do ScrollView (rolar até o alvo do tour) e ref imperativa do tour
   // (replay pelo botão "?"). A medição das âncoras vem do contexto montado em
@@ -120,6 +126,10 @@ export function CreditCardsScreen(): ReactElement {
         cards={cards}
         onAddCard={crud.handleOpenCreate}
         onReplayTour={handleReplayTour}
+      />
+      <InsightSection
+        vm={insightSection}
+        onReadFull={() => router.push(buildInsightFluidaParams("credit_cards"))}
       />
       <AppQueryState
         query={home.cardsQuery}

@@ -4,6 +4,7 @@ import type { ReactElement } from "react";
 import { Paragraph, XStack, YStack } from "tamagui";
 
 import { appRoutes, buildTickerDetailPath } from "@/core/navigation/routes";
+import { useInsightSection } from "@/features/insights/hooks/use-insight-section";
 import { WalletEntryForm } from "@/features/wallet/components/wallet-entry-form";
 import { WalletValuationCard } from "@/features/wallet/components/wallet-valuation-card";
 import { WalletValuationHistoryCard } from "@/features/wallet/components/wallet-valuation-history-card";
@@ -16,6 +17,10 @@ import { AppButton } from "@/shared/components/app-button";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import {
+  InsightSection,
+  buildInsightFluidaParams,
+} from "@/shared/insights";
 import { WalletEntryListSkeleton } from "@/shared/skeletons";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
@@ -34,6 +39,10 @@ const formatChangePercent = (value: number): string => {
 export function WalletScreen(): ReactElement {
   const controller = useWalletScreenController();
   const router = useRouter();
+  // Carteira has no dedicated insight dimension in the mobile contract
+  // (`wallet` only exists on the web side), so the recorte falls back to the
+  // `general` reading until the backend ships a wallet slice.
+  const insightSection = useInsightSection("general");
   const handleOpenOperations = (entryId: string): void => {
     router.push({
       pathname: appRoutes.private.walletOperations,
@@ -64,6 +73,10 @@ export function WalletScreen(): ReactElement {
   return (
     <AppScreen>
       <SummaryCard controller={controller} />
+      <InsightSection
+        vm={insightSection}
+        onReadFull={() => router.push(buildInsightFluidaParams("general"))}
+      />
       <WalletValuationCard />
       <WalletValuationHistoryCard />
       <AssetsListCard

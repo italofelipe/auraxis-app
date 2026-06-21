@@ -8,6 +8,7 @@ import { YStack, useTheme } from "tamagui";
 import { appRoutes } from "@/core/navigation/routes";
 import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
 import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
+import { useInsightSection } from "@/features/insights/hooks/use-insight-section";
 import { PeriodNavigator } from "@/features/transactions/components/transaction-filters";
 import {
   ExportSheet,
@@ -22,6 +23,10 @@ import { RevealInView } from "@/shared/animations/reveal-in-view";
 import { AppButton } from "@/shared/components/app-button";
 import { isFeatureEnabled } from "@/shared/feature-flags";
 import { useT } from "@/shared/i18n";
+import {
+  InsightSection,
+  buildInsightFluidaParams,
+} from "@/shared/insights";
 import { iconSizes } from "@/shared/theme";
 
 interface ToolbarButtonProps {
@@ -86,6 +91,7 @@ function FeedToolbar({
   const router = useRouter();
   const theme = useTheme();
   const importEnabled = isFeatureEnabled(IMPORT_FEATURE_FLAG_KEY);
+  const insightSection = useInsightSection("transactions");
   const iconColor = theme.muted?.val ?? theme.color?.val ?? "#000000";
   const badgeColor = theme.primary?.val ?? iconColor;
 
@@ -138,6 +144,10 @@ function FeedToolbar({
           <TxCategoryBreakdown categories={controller.categoryBars} />
         </RevealInView>
       ) : null}
+      <InsightSection
+        vm={insightSection}
+        onReadFull={() => router.push(buildInsightFluidaParams("transactions"))}
+      />
       <AiInsightSurface dimension="transactions" />
     </YStack>
   );
