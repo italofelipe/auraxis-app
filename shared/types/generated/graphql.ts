@@ -60,6 +60,14 @@ export type AiInsightFeedbackPayload = {
   usefulness?: Maybe<Scalars['Int']['output']>;
 };
 
+/** One calculated per-theme highlight for the Fluida screen (#1501). */
+export type AiInsightHighlightType = {
+  __typename?: 'AIInsightHighlightType';
+  label: Scalars['String']['output'];
+  sub: Scalars['String']['output'];
+  value: Scalars['Float']['output'];
+};
+
 export type AiInsightHistoryResultType = {
   __typename?: 'AIInsightHistoryResultType';
   items: Array<AiInsightType>;
@@ -76,6 +84,23 @@ export type AiInsightItemType = {
   message: Scalars['String']['output'];
   title: Scalars['String']['output'];
   type: Scalars['String']['output'];
+};
+
+/** One calculated retrospective metric for the Fluida screen (#1501). */
+export type AiInsightRetroEntryType = {
+  __typename?: 'AIInsightRetroEntryType';
+  caption: Scalars['String']['output'];
+  key: Scalars['String']['output'];
+  label: Scalars['String']['output'];
+  sign: Scalars['String']['output'];
+  value: Scalars['Float']['output'];
+};
+
+/** Calculated outflow series: daily over 7 days, weekly over 6 weeks. */
+export type AiInsightSeriesType = {
+  __typename?: 'AIInsightSeriesType';
+  daily: Array<Maybe<Scalars['Float']['output']>>;
+  weekly: Array<Maybe<Scalars['Float']['output']>>;
 };
 
 export type AiInsightType = {
@@ -513,14 +538,18 @@ export type GenerateAiInsightPayload = {
   contextVersion?: Maybe<Scalars['String']['output']>;
   costUsd?: Maybe<Scalars['Float']['output']>;
   forecast?: Maybe<Scalars['Boolean']['output']>;
+  highlights?: Maybe<Array<Maybe<AiInsightHighlightType>>>;
   id?: Maybe<Scalars['String']['output']>;
   items?: Maybe<Array<Maybe<AiInsightItemType>>>;
   model?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
+  paragraphs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
   periodEnd?: Maybe<Scalars['String']['output']>;
   periodLabel?: Maybe<Scalars['String']['output']>;
   periodStart?: Maybe<Scalars['String']['output']>;
   periodType?: Maybe<Scalars['String']['output']>;
+  retro?: Maybe<Array<Maybe<AiInsightRetroEntryType>>>;
+  series?: Maybe<AiInsightSeriesType>;
   summary?: Maybe<Scalars['String']['output']>;
   tokensUsed?: Maybe<Scalars['Int']['output']>;
 };
