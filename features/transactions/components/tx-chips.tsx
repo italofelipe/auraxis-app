@@ -10,6 +10,7 @@ import {
   statusVisual,
   type StatusVisualTone,
 } from "@/features/transactions/utils/transaction-presentation";
+import { useT } from "@/shared/i18n";
 import { iconSizes } from "@/shared/theme";
 
 /** Fundo do chip de categoria como fração de opacidade da cor da categoria. */
@@ -75,6 +76,60 @@ export function TxStatusChip({ status, type }: TxStatusChipProps): ReactElement 
       />
       <Paragraph fontFamily="$body" fontWeight="$7" fontSize="$1" color={toneColor}>
         {label}
+      </Paragraph>
+    </XStack>
+  );
+}
+
+/** Opacidade do fundo do selo de fatura (sutil, sobre a cor neutra). */
+const INVOICE_CHIP_BG_OPACITY = 0.1;
+
+/** Props do selo discreto de fatura. */
+export interface TxInvoiceChipProps {
+  /** Rótulo curto do mês da fatura (ex.: "jul/26"). */
+  readonly month: string;
+}
+
+/**
+ * Selo discreto "fatura {mmm/aa}" para lançamentos de cartão cuja compra caiu
+ * na fatura de outro mês (agrupados pelo ciclo de fechamento). Usa tom neutro
+ * (`$muted`) com fundo de baixa opacidade — mesmo idioma visual dos chips do
+ * feed, porém mais quieto, por ser apenas informativo. O texto vem do i18n.
+ *
+ * @param props Mês curto da fatura.
+ * @returns Selo informativo de fatura.
+ */
+export function TxInvoiceChip({ month }: TxInvoiceChipProps): ReactElement {
+  const { t } = useT();
+  const theme = useTheme();
+  const toneColor = theme.muted?.val ?? theme.color?.val ?? "#000000";
+
+  return (
+    <XStack
+      alignItems="center"
+      gap="$1"
+      paddingHorizontal="$2"
+      paddingVertical="$1"
+      borderRadius="$5"
+      overflow="hidden"
+      testID="tx-invoice-chip"
+    >
+      <YStack
+        position="absolute"
+        top={0}
+        left={0}
+        right={0}
+        bottom={0}
+        backgroundColor={toneColor}
+        opacity={INVOICE_CHIP_BG_OPACITY}
+      />
+      <MaterialCommunityIcons
+        name="credit-card-outline"
+        size={iconSizes.xs}
+        color={toneColor}
+      />
+      <Paragraph fontFamily="$body" fontWeight="$6" fontSize="$1" color={toneColor}>
+        {t("transactions.feed.invoiceBadge", { month })}
       </Paragraph>
     </XStack>
   );

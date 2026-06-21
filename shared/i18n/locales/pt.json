@@ -111,6 +111,9 @@
       "duplicateDescription": "Cria uma copia com a data de hoje.",
       "title": "Acoes"
     },
+    "feed": {
+      "invoiceBadge": "fatura {{month}}"
+    },
     "export": {
       "title": "Exportar transacoes",
       "description": "Escolha o formato; geramos o arquivo e abrimos o compartilhamento.",

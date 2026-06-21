@@ -7,8 +7,13 @@ import { TxCard } from "@/features/transactions/components/tx-card";
 import { TxCategoryBreakdown } from "@/features/transactions/components/tx-category-breakdown";
 import { TxHero } from "@/features/transactions/components/tx-hero";
 import { TxModeToggle } from "@/features/transactions/components/tx-mode-toggle";
-import { TxCategoryChip, TxStatusChip } from "@/features/transactions/components/tx-chips";
+import {
+  TxCategoryChip,
+  TxInvoiceChip,
+  TxStatusChip,
+} from "@/features/transactions/components/tx-chips";
 import type { CategoryBar, TransactionFeedItem } from "@/features/transactions/model/transactions-feed";
+import { initI18n } from "@/shared/i18n";
 
 // Mocka o ReanimatedSwipeable: renderiza as right actions + os children, para
 // exercitar tap/Pagar/Excluir sem o wrapper nativo (mesmo padrão do row).
@@ -58,6 +63,7 @@ const item: TransactionFeedItem = {
   dateDisplay: "em 9 dias",
   signedDisplay: "− R$ 2.000,00",
   percentOfFlow: 10,
+  invoiceBadgeMonth: "jul/26",
 };
 
 const incomeItem: TransactionFeedItem = {
@@ -69,12 +75,17 @@ const incomeItem: TransactionFeedItem = {
   signedDisplay: "+ R$ 27.675,37",
   categoryColor: "#11A36B",
   percentOfFlow: 100,
+  invoiceBadgeMonth: null,
 };
 
 const bars: readonly CategoryBar[] = [
   { tagId: "t1", name: "Cartão", color: "#FF8A3D", total: 11000 },
   { tagId: "t2", name: "Financiamento", color: "#0E6376", total: 2650 },
 ];
+
+beforeAll(async () => {
+  await initI18n("pt");
+});
 
 describe("TxHero", () => {
   it("mostra título, período + contagem e o resultado", () => {
@@ -169,6 +180,32 @@ describe("TxCard", () => {
     expect(getByText("Recebido")).toBeTruthy();
     expect(getByText("100% do total")).toBeTruthy();
   });
+
+  it("mostra o selo de fatura quando o lançamento de cartão veio de outro mês", () => {
+    const { getByText } = wrap(
+      <TxCard
+        item={item}
+        analytic={false}
+        onPress={jest.fn()}
+        onMarkPaid={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(getByText("fatura jul/26")).toBeTruthy();
+  });
+
+  it("não mostra o selo de fatura quando invoiceBadgeMonth é null", () => {
+    const { queryByTestId } = wrap(
+      <TxCard
+        item={incomeItem}
+        analytic={false}
+        onPress={jest.fn()}
+        onMarkPaid={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+    expect(queryByTestId("tx-invoice-chip")).toBeNull();
+  });
 });
 
 describe("TxCategoryBreakdown", () => {
@@ -195,5 +232,11 @@ describe("tx-chips", () => {
       <TxCategoryChip color="#E5484D" icon="tax" name="Impostos" />,
     );
     expect(toJSON()).toBeTruthy();
+  });
+
+  it("TxInvoiceChip compõe o rótulo 'fatura {mmm/aa}' via i18n", () => {
+    const { getByText, getByTestId } = wrap(<TxInvoiceChip month="jul/26" />);
+    expect(getByTestId("tx-invoice-chip")).toBeTruthy();
+    expect(getByText("fatura jul/26")).toBeTruthy();
   });
 });
