@@ -45,7 +45,7 @@ export interface TransactionViewModel {
   readonly installmentNumber: number | null;
 }
 
-interface SelectedMonth {
+export interface SelectedMonth {
   readonly year: number;
   readonly month: number;
 }
@@ -65,6 +65,8 @@ export interface TransactionsScreenController {
   readonly tagFilter: TransactionsTagFilter;
   readonly setTagFilter: (filter: TransactionsTagFilter) => void;
   readonly periodLabel: string;
+  /** Mês selecionado no feed (year + month 0-indexado), para o selo de fatura. */
+  readonly selectedMonth: SelectedMonth;
   readonly goToPreviousMonth: () => void;
   readonly goToNextMonth: () => void;
   readonly resetToCurrentMonth: () => void;
@@ -229,6 +231,7 @@ interface TransactionsFiltersState {
   readonly tagFilter: TransactionsTagFilter;
   readonly setTagFilter: (filter: TransactionsTagFilter) => void;
   readonly periodLabel: string;
+  readonly selectedMonth: SelectedMonth;
   readonly goToPreviousMonth: () => void;
   readonly goToNextMonth: () => void;
   readonly resetToCurrentMonth: () => void;
@@ -258,6 +261,7 @@ function useTransactionsFilters(): TransactionsFiltersState {
     tagFilter,
     setTagFilter,
     periodLabel: formatMonthLabel(selectedMonth),
+    selectedMonth,
     goToPreviousMonth: () => setSelectedMonth((current) => shiftMonth(current, -1)),
     goToNextMonth: () => setSelectedMonth((current) => shiftMonth(current, 1)),
     resetToCurrentMonth: () => setSelectedMonth(currentMonth()),
@@ -502,6 +506,7 @@ export function useTransactionsScreenController(): TransactionsScreenController 
     tagFilter: filters.tagFilter,
     setTagFilter: filters.setTagFilter,
     periodLabel: filters.periodLabel,
+    selectedMonth: filters.selectedMonth,
     goToPreviousMonth: filters.goToPreviousMonth,
     goToNextMonth: filters.goToNextMonth,
     resetToCurrentMonth: filters.resetToCurrentMonth,

@@ -111,6 +111,9 @@
       "duplicateDescription": "Creates a copy dated today.",
       "title": "Actions"
     },
+    "feed": {
+      "invoiceBadge": "invoice {{month}}"
+    },
     "export": {
       "title": "Export transactions",
       "description": "Pick a format; we generate the file and open share.",

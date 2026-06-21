@@ -13,6 +13,10 @@ import type {
   TransactionStatus,
   TransactionType,
 } from "@/features/transactions/contracts";
+import {
+  resolveInvoiceBadgeMonth,
+  type SelectedMonthRef,
+} from "@/features/transactions/model/invoice-badge";
 import type { Tag } from "@/features/tags/contracts";
 import { NO_CATEGORY_COLOR, resolveCategoryColor } from "@/shared/theme";
 import { formatCurrencySigned } from "@/shared/utils/formatters";
@@ -75,6 +79,11 @@ export interface TransactionFeedItem {
   readonly signedDisplay: string;
   /** Participação do lançamento no fluxo do seu tipo (0..100, inteiro). */
   readonly percentOfFlow: number;
+  /**
+   * Rótulo "mmm/aa" do mês da fatura (= mês selecionado) quando o lançamento é
+   * de cartão e a compra veio de outro mês; null quando o selo não se aplica.
+   */
+  readonly invoiceBadgeMonth: string | null;
 }
 
 /**
@@ -273,6 +282,11 @@ export interface ToFeedItemArgs {
   readonly kpis: FeedKpis;
   /** Data de referência (`YYYY-MM-DD`) para o rótulo relativo. */
   readonly today: string;
+  /**
+   * Mês selecionado no feed (para o selo de fatura). Ausente/null quando não há
+   * um mês único de referência — nesse caso o selo nunca aparece.
+   */
+  readonly selectedMonth?: SelectedMonthRef | null;
 }
 
 /**
@@ -289,6 +303,7 @@ export const toFeedItem = ({
   tags,
   kpis,
   today,
+  selectedMonth = null,
 }: ToFeedItemArgs): TransactionFeedItem => {
   const tagById = new Map(tags.map((tag) => [tag.id, tag]));
   const category = resolveCategory(tx.tagId, tagById);
@@ -313,5 +328,10 @@ export const toFeedItem = ({
     dateDisplay: relativeDate ?? shortDateLabel(tx.dueDate),
     signedDisplay: formatCurrencySigned(signed),
     percentOfFlow: percentOfTotal(amount, flow),
+    invoiceBadgeMonth: resolveInvoiceBadgeMonth({
+      creditCardId: tx.creditCardId,
+      dueDate: tx.dueDate,
+      selectedMonth,
+    }),
   };
 };

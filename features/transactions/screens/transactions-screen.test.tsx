@@ -31,6 +31,7 @@ const feedItem: TransactionFeedItem = {
   dateDisplay: "em 9 dias",
   signedDisplay: "− R$ 2.000,00",
   percentOfFlow: 10,
+  invoiceBadgeMonth: null,
 };
 
 const viewModel: TransactionViewModel = {
@@ -66,6 +67,7 @@ const mockBaseController: TransactionsFeedController = {
   tagFilter: "all",
   setTagFilter: jest.fn(),
   periodLabel: "Junho de 2026",
+  selectedMonth: { year: 2026, month: 5 },
   goToPreviousMonth: jest.fn(),
   goToNextMonth: jest.fn(),
   resetToCurrentMonth: jest.fn(),

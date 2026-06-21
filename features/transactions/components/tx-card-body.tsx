@@ -5,7 +5,11 @@ import { Pressable } from "react-native";
 import { Paragraph, XStack, YStack, useTheme } from "tamagui";
 
 import type { TransactionFeedItem } from "@/features/transactions/model/transactions-feed";
-import { TxCategoryChip, TxStatusChip } from "@/features/transactions/components/tx-chips";
+import {
+  TxCategoryChip,
+  TxInvoiceChip,
+  TxStatusChip,
+} from "@/features/transactions/components/tx-chips";
 import { AppMoneyText } from "@/shared/components/app-money-text";
 import { AppText } from "@/shared/components/app-text";
 import { colorPalette, iconSizes } from "@/shared/theme";
@@ -164,6 +168,9 @@ export function TxCardBody({ item, analytic }: TxCardBodyProps): ReactElement {
         ) : null}
         <XStack alignItems="center" gap="$2" flexWrap="wrap">
           <TxStatusChip status={item.status} type={item.type} />
+          {item.invoiceBadgeMonth ? (
+            <TxInvoiceChip month={item.invoiceBadgeMonth} />
+          ) : null}
           <XStack alignItems="center" gap="$1">
             <MaterialCommunityIcons
               name="calendar-blank-outline"

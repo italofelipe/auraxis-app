@@ -112,8 +112,10 @@ export function useTransactionsFeedController(): TransactionsFeedController {
           (tx) => tx.installmentGroupId === base.installmentGroupFilter,
         )
       : records;
-    return visible.map((tx) => toFeedItem({ tx, tags, kpis: heroKpis, today }));
-  }, [records, tags, heroKpis, base.installmentGroupFilter]);
+    return visible.map((tx) =>
+      toFeedItem({ tx, tags, kpis: heroKpis, today, selectedMonth: base.selectedMonth }),
+    );
+  }, [records, tags, heroKpis, base.installmentGroupFilter, base.selectedMonth]);
 
   return {
     ...base,
