@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { YStack } from "tamagui";
 
 import { borderWidths } from "@/config/design-tokens";
+import type { InsightDimension } from "@/features/insights/contracts";
 import { ChartBeat } from "@/features/insights/fluida/components/chart-beat";
 import { CompareBeat } from "@/features/insights/fluida/components/compare-beat";
 import { InsightLead } from "@/features/insights/fluida/components/insight-lead";
@@ -11,6 +12,14 @@ import { PullStat } from "@/features/insights/fluida/components/pull-stat";
 import { TextBeat } from "@/features/insights/fluida/components/text-beat";
 import { useInsightsFluidaScreenController } from "@/features/insights/hooks/use-insights-fluida-screen-controller";
 import { AppScreen } from "@/shared/components/app-screen";
+
+export interface InsightsFluidaScreenProps {
+  /**
+   * Dimension to pre-select when the screen mounts, e.g. opened from a feature
+   * page's "ler na íntegra" CTA. Defaults to `general`.
+   */
+  readonly initialDimension?: InsightDimension;
+}
 
 /** Hairline divider between editorial beats. */
 function BeatDivider(): ReactElement {
@@ -25,10 +34,13 @@ function BeatDivider(): ReactElement {
  * paragraph paired with a pull-stat. The closing beats (attention list,
  * "where to go next", AI provenance) land in etapa 3.
  *
+ * @param props Optional initial dimension (deep link from a feature page).
  * @returns The composed Fluida screen.
  */
-export function InsightsFluidaScreen(): ReactElement {
-  const controller = useInsightsFluidaScreenController();
+export function InsightsFluidaScreen({
+  initialDimension,
+}: InsightsFluidaScreenProps = {}): ReactElement {
+  const controller = useInsightsFluidaScreenController({ initialDimension });
   const { vm } = controller;
   const [firstParagraph, secondParagraph] = vm.paragraphs;
   const pullStat = vm.highlights[0];

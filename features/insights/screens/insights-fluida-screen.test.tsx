@@ -27,6 +27,18 @@ describe("InsightsFluidaScreen", () => {
     expect(getByText("Ontem em foco: muita saída, nenhuma entrada")).toBeTruthy();
   });
 
+  it("starts focused on the dimension passed in (deep link)", () => {
+    const { getByText } = render(
+      <TestProviders>
+        <InsightsFluidaScreen initialDimension="transactions" />
+      </TestProviders>,
+    );
+
+    expect(
+      getByText("Dia leve, mas dentro de um mês concentrado"),
+    ).toBeTruthy();
+  });
+
   it("swaps the lead when another theme tab is selected", () => {
     const { getByTestId, getByText } = render(
       <TestProviders>
