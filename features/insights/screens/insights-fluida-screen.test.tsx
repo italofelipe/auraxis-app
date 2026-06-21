@@ -50,4 +50,32 @@ describe("InsightsFluidaScreen", () => {
 
     expect(getByText("A semana puxada pela fatura em atraso")).toBeTruthy();
   });
+
+  it("renders the comparative, chart and pull-stat beats on the general dimension", () => {
+    const { getByTestId, getByText } = render(
+      <TestProviders>
+        <InsightsFluidaScreen />
+      </TestProviders>,
+    );
+
+    expect(getByTestId("insights-compare-beat")).toBeTruthy();
+    expect(getByText("Como se compara")).toBeTruthy();
+    expect(getByTestId("insights-chart-beat")).toBeTruthy();
+    expect(getByText("Saídas · últimos 7 dias")).toBeTruthy();
+    expect(getByTestId("insights-pull-stat")).toBeTruthy();
+  });
+
+  it("hides the comparative beat on a non-general dimension but keeps the chart", () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders>
+        <InsightsFluidaScreen />
+      </TestProviders>,
+    );
+
+    fireEvent.press(getByTestId("insights-theme-tab-transactions"));
+
+    expect(queryByTestId("insights-compare-beat")).toBeNull();
+    expect(getByTestId("insights-chart-beat")).toBeTruthy();
+    expect(getByTestId("insights-pull-stat")).toBeTruthy();
+  });
 });

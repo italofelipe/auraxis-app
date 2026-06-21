@@ -2,7 +2,7 @@ import { act, renderHook } from "@testing-library/react-native";
 
 import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
-import { selectFluidaLead } from "@/features/insights/mocks/fluida-lead";
+import { selectFluidaVM } from "@/features/insights/mocks/fluida-vm";
 import { useInsightsFluidaScreenController } from "@/features/insights/hooks/use-insights-fluida-screen-controller";
 
 jest.mock("@/core/shell/use-resolved-theme", () => ({
@@ -28,15 +28,15 @@ describe("useInsightsFluidaScreenController", () => {
     expect(result.current.cadence).toBe("daily");
   });
 
-  it("derives the lead VM from the mock for the active dimension × cadence", () => {
+  it("derives the full VM from the mock for the active dimension × cadence", () => {
     const { result } = renderHook(() => useInsightsFluidaScreenController());
 
-    expect(result.current.lead).toEqual(
-      selectFluidaLead({ dimension: "general", cadence: "daily" }),
+    expect(result.current.vm).toEqual(
+      selectFluidaVM({ dimension: "general", cadence: "daily" }),
     );
   });
 
-  it("re-derives the lead when the dimension changes", () => {
+  it("re-derives the VM when the dimension changes", () => {
     const { result } = renderHook(() => useInsightsFluidaScreenController());
 
     act(() => {
@@ -44,12 +44,12 @@ describe("useInsightsFluidaScreenController", () => {
     });
 
     expect(result.current.dimension).toBe("transactions");
-    expect(result.current.lead).toEqual(
-      selectFluidaLead({ dimension: "transactions", cadence: "daily" }),
+    expect(result.current.vm).toEqual(
+      selectFluidaVM({ dimension: "transactions", cadence: "daily" }),
     );
   });
 
-  it("re-derives the lead when the cadence changes", () => {
+  it("re-derives the VM when the cadence changes", () => {
     const { result } = renderHook(() => useInsightsFluidaScreenController());
 
     act(() => {
@@ -57,9 +57,22 @@ describe("useInsightsFluidaScreenController", () => {
     });
 
     expect(result.current.cadence).toBe("weekly");
-    expect(result.current.lead).toEqual(
-      selectFluidaLead({ dimension: "general", cadence: "weekly" }),
+    expect(result.current.vm).toEqual(
+      selectFluidaVM({ dimension: "general", cadence: "weekly" }),
     );
+  });
+
+  it("exposes comparative cards only on the general dimension", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    expect(result.current.showCompare).toBe(true);
+    expect(result.current.vm.retro.length).toBeGreaterThan(0);
+
+    act(() => {
+      result.current.selectDimension("transactions");
+    });
+
+    expect(result.current.showCompare).toBe(false);
   });
 
   it("exposes the resolved colour scheme as a boolean isDark flag", () => {
