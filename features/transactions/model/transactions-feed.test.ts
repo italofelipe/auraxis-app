@@ -308,6 +308,49 @@ describe("toFeedItem", () => {
     });
     expect(item.dateDisplay).toBe("Hoje");
   });
+
+  it("marca o selo de fatura quando o lançamento de cartão veio de outro mês", () => {
+    const item = toFeedItem({
+      tx: tx({ creditCardId: "cc-1", dueDate: "2026-06-19" }),
+      tags: [],
+      kpis,
+      today,
+      selectedMonth: { year: 2026, month: 6 },
+    });
+    expect(item.invoiceBadgeMonth).toBe("jul/26");
+  });
+
+  it("não marca o selo quando o mês do dueDate coincide com o selecionado", () => {
+    const item = toFeedItem({
+      tx: tx({ creditCardId: "cc-1", dueDate: "2026-07-10" }),
+      tags: [],
+      kpis,
+      today,
+      selectedMonth: { year: 2026, month: 6 },
+    });
+    expect(item.invoiceBadgeMonth).toBeNull();
+  });
+
+  it("não marca o selo para lançamento sem cartão", () => {
+    const item = toFeedItem({
+      tx: tx({ creditCardId: null, dueDate: "2026-06-19" }),
+      tags: [],
+      kpis,
+      today,
+      selectedMonth: { year: 2026, month: 6 },
+    });
+    expect(item.invoiceBadgeMonth).toBeNull();
+  });
+
+  it("não marca o selo quando não há mês selecionado (sem range/mês de referência)", () => {
+    const item = toFeedItem({
+      tx: tx({ creditCardId: "cc-1", dueDate: "2026-06-19" }),
+      tags: [],
+      kpis,
+      today,
+    });
+    expect(item.invoiceBadgeMonth).toBeNull();
+  });
 });
 
 describe("shortDateLabel", () => {
