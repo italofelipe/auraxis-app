@@ -1,0 +1,109 @@
+import { act, renderHook } from "@testing-library/react-native";
+
+import { useAppShellStore } from "@/core/shell/app-shell-store";
+import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
+import { selectFluidaLead } from "@/features/insights/mocks/fluida-lead";
+import { useInsightsFluidaScreenController } from "@/features/insights/hooks/use-insights-fluida-screen-controller";
+
+jest.mock("@/core/shell/use-resolved-theme", () => ({
+  useResolvedTheme: jest.fn(),
+}));
+
+const mockedUseResolvedTheme = jest.mocked(useResolvedTheme);
+const setThemePreference = jest.fn();
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  mockedUseResolvedTheme.mockReturnValue("auraxis_light");
+  jest
+    .spyOn(useAppShellStore, "getState")
+    .mockReturnValue({ setThemePreference } as never);
+});
+
+describe("useInsightsFluidaScreenController", () => {
+  it("starts on the general dimension and the daily cadence", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    expect(result.current.dimension).toBe("general");
+    expect(result.current.cadence).toBe("daily");
+  });
+
+  it("derives the lead VM from the mock for the active dimension × cadence", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    expect(result.current.lead).toEqual(
+      selectFluidaLead({ dimension: "general", cadence: "daily" }),
+    );
+  });
+
+  it("re-derives the lead when the dimension changes", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    act(() => {
+      result.current.selectDimension("transactions");
+    });
+
+    expect(result.current.dimension).toBe("transactions");
+    expect(result.current.lead).toEqual(
+      selectFluidaLead({ dimension: "transactions", cadence: "daily" }),
+    );
+  });
+
+  it("re-derives the lead when the cadence changes", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    act(() => {
+      result.current.selectCadence("weekly");
+    });
+
+    expect(result.current.cadence).toBe("weekly");
+    expect(result.current.lead).toEqual(
+      selectFluidaLead({ dimension: "general", cadence: "weekly" }),
+    );
+  });
+
+  it("exposes the resolved colour scheme as a boolean isDark flag", () => {
+    mockedUseResolvedTheme.mockReturnValue("auraxis_dark");
+
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    expect(result.current.isDark).toBe(true);
+  });
+
+  it("pins the opposite preference when the theme is toggled (light → dark)", () => {
+    mockedUseResolvedTheme.mockReturnValue("auraxis_light");
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    act(() => {
+      result.current.toggleTheme();
+    });
+
+    expect(setThemePreference).toHaveBeenCalledWith("dark");
+  });
+
+  it("pins light when toggled away from a dark scheme (dark → light)", () => {
+    mockedUseResolvedTheme.mockReturnValue("auraxis_dark");
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    act(() => {
+      result.current.toggleTheme();
+    });
+
+    expect(setThemePreference).toHaveBeenCalledWith("light");
+  });
+
+  it("lists the five theme tabs in the canonical order with labels", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    expect(result.current.dimensionTabs.map((tab) => tab.value)).toEqual([
+      "general",
+      "transactions",
+      "goals",
+      "budgets",
+      "credit_cards",
+    ]);
+    result.current.dimensionTabs.forEach((tab) => {
+      expect(tab.label.length).toBeGreaterThan(0);
+    });
+  });
+});
