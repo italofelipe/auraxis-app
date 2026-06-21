@@ -1,6 +1,7 @@
 import {
   formatCurrency,
   formatCurrencyShort,
+  formatCurrencySigned,
   formatPercent,
   formatShortDate,
 } from "@/shared/utils/formatters";
@@ -46,5 +47,40 @@ describe("formatCurrencyShort", () => {
   it("trata negativos preservando o sinal", () => {
     expect(formatCurrencyShort(-2500)).toContain("-");
     expect(formatCurrencyShort(-2500)).toContain("2,5");
+  });
+});
+
+describe("formatCurrencySigned", () => {
+  // Intl.NumberFormat (pt-BR/BRL) usa espaço não separável (U+00A0) entre
+  // "R$" e o número; normalizamos para espaço comum nas comparações exatas.
+  const normalizeSpaces = (value: string): string => value.replace(/ /g, " ");
+
+  it("prefixa valores positivos com sinal de mais e o valor absoluto", () => {
+    const result = formatCurrencySigned(27675.37);
+    expect(result.startsWith("+ ")).toBe(true);
+    expect(result).toContain("R$");
+    expect(result).toContain("27.675,37");
+    expect(result).not.toContain("-");
+    expect(result).not.toContain("−");
+  });
+
+  it("prefixa valores negativos com sinal de menos tipográfico (U+2212)", () => {
+    const result = formatCurrencySigned(-2000);
+    expect(result.startsWith("− ")).toBe(true);
+    expect(result).toContain("R$");
+    expect(result).toContain("2.000,00");
+    // Usa o valor absoluto: o "-" do Intl não vaza para dentro da string.
+    expect(result).not.toContain("-");
+  });
+
+  it("formata zero sem sinal", () => {
+    const result = formatCurrencySigned(0);
+    expect(normalizeSpaces(result)).toBe("R$ 0,00");
+    expect(result).not.toContain("+");
+    expect(result).not.toContain("−");
+  });
+
+  it("trata -0 como zero (sem sinal)", () => {
+    expect(normalizeSpaces(formatCurrencySigned(-0))).toBe("R$ 0,00");
   });
 });
