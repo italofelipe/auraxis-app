@@ -94,6 +94,9 @@ export const motionDurations = {
   normal: 180,
   slow: 260,
   deliberate: 320,
+  // ~0.5s growth for data viz (bars/meters animating their fill). Slower than
+  // UI feedback on purpose, so the magnitude of a value reads as it fills.
+  expressive: 500,
 } as const;
 
 export const motionScales = {
