@@ -4,20 +4,25 @@ import { TestProviders } from "@/shared/testing/test-providers";
 
 import { CreditCardDetailScreen } from "@/features/credit-cards/screens/credit-card-detail-screen";
 import type { CreditCardDetailScreenController } from "@/features/credit-cards/hooks/use-credit-card-detail-screen-controller";
+import type { CreditCardDetailViewModel } from "@/features/credit-cards/model/credit-card-detail";
+import { resolveCardGradient } from "@/shared/theme";
 
 const mockHandleBack = jest.fn();
 const mockHandleViewBill = jest.fn();
+const mockHandleLaunchExpense = jest.fn();
+const mockHandleBlockCard = jest.fn();
+const mockHandleOpenSettings = jest.fn();
 let mockController: Partial<CreditCardDetailScreenController> = {};
 
-const creditCard = {
+const mockCreditCard = {
   id: "cc-1",
-  name: "Nubank",
+  name: "Inter padrão",
   brand: "mastercard" as const,
-  limitAmount: 5000,
-  closingDay: 10,
-  dueDay: 17,
-  lastFourDigits: "1234",
-  bank: "Nu",
+  limitAmount: 25000,
+  closingDay: 28,
+  dueDay: 10,
+  lastFourDigits: "4000",
+  bank: "Inter",
   description: null,
   benefits: [],
   validityDate: null,
@@ -25,26 +30,67 @@ const creditCard = {
   updatedAt: null,
 };
 
-const utilization = {
-  cycle: { startDate: "2026-06-01", endDate: "2026-06-30", dueDate: "2026-07-10", status: "open" },
-  committedAmount: 2000,
-  availableAmount: 3000,
-  limitAmount: 5000,
-  utilizationPct: 40,
+const mockDetail: CreditCardDetailViewModel = {
+  subtitle: "Inter · mastercard",
+  gradient: resolveCardGradient({ id: "cc-1", bank: "Inter", name: "Inter padrão" }),
+  currentBillTotal: 8144.01,
+  limit: {
+    usedPct: 33,
+    limitAmount: 25000,
+    availableAmount: 16855.99,
+    currentBillTotal: 8144.01,
+    tone: "primary",
+  },
+  evolution: [
+    { label: "Jan", value: 100 },
+    { label: "Jun", value: 8144.01 },
+  ],
+  topCategories: [
+    {
+      tagId: "tag-compras",
+      name: "Compras",
+      color: "#9B5DE5",
+      total: 3486.55,
+      count: 2,
+      items: [],
+    },
+  ],
+  recentTransactions: [
+    {
+      id: "tx-1",
+      title: "Renner",
+      amount: 938.57,
+      purchaseDate: "2026-06-25",
+      tagId: "tag-compras",
+      creditCardId: "cc-1",
+      billMonth: "2026-06",
+      isInstallment: false,
+      installmentCount: null,
+      installmentGroupId: null,
+      status: "paid",
+    },
+  ],
 };
 
 jest.mock("@/features/credit-cards/hooks/use-credit-card-detail-screen-controller", () => ({
-  useCreditCardDetailScreenController: () => ({
-    creditCardId: "cc-1",
-    creditCardsQuery: { isLoading: false } as never,
-    creditCard,
-    hasCycleConfig: true,
-    utilizationQuery: { data: utilization, isLoading: false, isError: false } as never,
-    notFound: false,
-    handleViewBill: mockHandleViewBill,
-    handleBack: mockHandleBack,
-    ...mockController,
-  }),
+  useCreditCardDetailScreenController: (): CreditCardDetailScreenController =>
+    ({
+      creditCardId: "cc-1",
+      creditCardsQuery: { isLoading: false } as never,
+      creditCard: mockCreditCard,
+      hasCycleConfig: true,
+      utilizationQuery: { data: null } as never,
+      tagsQuery: { data: null } as never,
+      transactionsQuery: { data: null } as never,
+      notFound: false,
+      detail: mockDetail,
+      handleViewBill: mockHandleViewBill,
+      handleBack: mockHandleBack,
+      handleLaunchExpense: mockHandleLaunchExpense,
+      handleBlockCard: mockHandleBlockCard,
+      handleOpenSettings: mockHandleOpenSettings,
+      ...mockController,
+    }) as CreditCardDetailScreenController,
 }));
 
 const renderScreen = () =>
@@ -60,39 +106,59 @@ beforeEach(() => {
 });
 
 describe("CreditCardDetailScreen", () => {
-  it("exibe nome, banco, marca, limite e ciclo", () => {
-    const { getByText } = renderScreen();
-    expect(getByText("Nubank")).toBeTruthy();
-    expect(getByText("mastercard")).toBeTruthy();
-    expect(getByText("final 1234")).toBeTruthy();
+  it("exibe nome, subtitulo e secoes principais", () => {
+    const { getAllByText, getByText } = renderScreen();
+    // O nome aparece na AppBar e na face do cartão.
+    expect(getAllByText("Inter padrão").length).toBeGreaterThanOrEqual(1);
+    expect(getByText("Inter · mastercard")).toBeTruthy();
+    expect(getByText("Top categorias")).toBeTruthy();
+    expect(getByText("Lançamentos recentes")).toBeTruthy();
   });
 
-  it("mostra a utilizacao quando ciclo configurado", () => {
+  it("renderiza a linha do bloco de limite", () => {
     const { getByText } = renderScreen();
-    expect(getByText("40.0%")).toBeTruthy();
+    expect(getByText("Limite total")).toBeTruthy();
+    expect(getByText("Disponível")).toBeTruthy();
+    expect(getByText("Fatura atual")).toBeTruthy();
   });
 
-  it("navega para a fatura", () => {
-    const { getByText } = renderScreen();
-    fireEvent.press(getByText("Ver fatura"));
+  it("renderiza as 4 acoes rapidas", () => {
+    const { getByTestId } = renderScreen();
+    expect(getByTestId("card-quick-action-launch")).toBeTruthy();
+    expect(getByTestId("card-quick-action-invoice")).toBeTruthy();
+    expect(getByTestId("card-quick-action-block")).toBeTruthy();
+    expect(getByTestId("card-quick-action-settings")).toBeTruthy();
+  });
+
+  it("Lançar abre o sheet de despesa", () => {
+    const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("card-quick-action-launch"));
+    expect(mockHandleLaunchExpense).toHaveBeenCalled();
+  });
+
+  it("Bloquear e Ajustes chamam os placeholders", () => {
+    const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("card-quick-action-block"));
+    fireEvent.press(getByTestId("card-quick-action-settings"));
+    expect(mockHandleBlockCard).toHaveBeenCalled();
+    expect(mockHandleOpenSettings).toHaveBeenCalled();
+  });
+
+  it("CTA fixo navega para a fatura completa", () => {
+    const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("card-detail-cta"));
     expect(mockHandleViewBill).toHaveBeenCalled();
   });
 
-  it("mostra alerta de ciclo nao configurado e desabilita fatura", () => {
-    mockController = { hasCycleConfig: false };
-    const { getByText } = renderScreen();
-    expect(getByText("Ciclo nao configurado")).toBeTruthy();
+  it("volta ao tocar em voltar", () => {
+    const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("card-app-bar-back"));
+    expect(mockHandleBack).toHaveBeenCalled();
   });
 
   it("mostra empty state quando o cartao nao existe", () => {
-    mockController = { creditCard: null, notFound: true };
+    mockController = { creditCard: null, notFound: true, detail: null };
     const { getByText } = renderScreen();
-    expect(getByText("Cartao nao encontrado")).toBeTruthy();
-  });
-
-  it("volta ao tocar em voltar", () => {
-    const { getByText } = renderScreen();
-    fireEvent.press(getByText("Voltar"));
-    expect(mockHandleBack).toHaveBeenCalled();
+    expect(getByText("Cartão não encontrado")).toBeTruthy();
   });
 });

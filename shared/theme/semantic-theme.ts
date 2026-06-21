@@ -264,6 +264,12 @@ export const lightSemanticGradients = {
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   },
+  // Hero da área de Cartões (handoff): teal escuro descendo para quase-preto.
+  hero: {
+    colors: ["#0F5E6F", "#0A2F38"] as const,
+    start: { x: 0, y: 0 },
+    end: { x: 1, y: 1 },
+  },
 } as const;
 
 export const darkSemanticGradients = {
@@ -274,6 +280,12 @@ export const darkSemanticGradients = {
   },
   secondary: {
     colors: [colorPalette.cyan500, colorPalette.violet500] as const,
+    start: { x: 0, y: 0 },
+    end: { x: 1, y: 1 },
+  },
+  // Hero da área de Cartões (handoff dark): teal profundo para quase-preto.
+  hero: {
+    colors: ["#0D4A58", "#071F25"] as const,
     start: { x: 0, y: 0 },
     end: { x: 1, y: 1 },
   },

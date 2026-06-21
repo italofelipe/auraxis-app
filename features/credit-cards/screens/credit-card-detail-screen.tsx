@@ -1,54 +1,55 @@
 import { type ReactElement } from "react";
 
-import { Paragraph, XStack, YStack } from "tamagui";
+import { ScrollView, YStack } from "tamagui";
 
-import type {
-  CreditCard,
-  CreditCardUtilizationRecord,
-} from "@/features/credit-cards/contracts";
+import type { CreditCard } from "@/features/credit-cards/contracts";
+import { CardAppBar, CardAppBarButton } from "@/features/credit-cards/components/card-app-bar";
+import { CardEvolution } from "@/features/credit-cards/components/card-evolution";
+import { CardFace } from "@/features/credit-cards/components/card-face";
+import { CardLimitBlock } from "@/features/credit-cards/components/card-limit-block";
+import {
+  CardQuickActions,
+  type CardQuickAction,
+} from "@/features/credit-cards/components/card-quick-actions";
+import { CardRecentTransactions } from "@/features/credit-cards/components/card-recent-transactions";
+import { CardStickyCta } from "@/features/credit-cards/components/card-sticky-cta";
+import { CardTopCategories } from "@/features/credit-cards/components/card-top-categories";
 import {
   useCreditCardDetailScreenController,
   type CreditCardDetailScreenController,
 } from "@/features/credit-cards/hooks/use-credit-card-detail-screen-controller";
-import { AppBadge } from "@/shared/components/app-badge";
-import { AppButton } from "@/shared/components/app-button";
+import type { CreditCardDetailViewModel } from "@/features/credit-cards/model/credit-card-detail";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
-import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
-import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
-import { AppSurfaceCard } from "@/shared/components/app-surface-card";
-import { formatCurrency } from "@/shared/utils/formatters";
-
-const dash = (value: string | number | null | undefined): string =>
-  value === null || value === undefined || value === "" ? "-" : `${value}`;
+import { AppSkeletonBlock } from "@/shared/components/app-skeleton-block";
 
 /**
- * Credit card detail screen (parity with the web `credit-cards/[id]` page):
- * card info (brand/bank/limit/cycle), a missing-cycle warning, limit
- * utilization and quick access to the bill.
+ * Tela "Detalhe do cartão" redesenhada: AppBar (voltar + nome + emissor·bandeira
+ * + menu), face grande do cartão, ações rápidas, bloco de limite (anel +
+ * linhas), evolução da fatura, top categorias, lançamentos recentes e um CTA
+ * fixo "Ver fatura completa". View-only — toda derivação vem do controller.
+ *
+ * @returns Tela de detalhe do cartão.
  */
 export function CreditCardDetailScreen(): ReactElement {
   const controller = useCreditCardDetailScreenController();
 
   if (controller.creditCardsQuery.isLoading && controller.creditCard === null) {
     return (
-      <AppScreen>
-        <AppSurfaceCard title="Carregando cartao" description="Buscando dados.">
-          <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-            Aguarde um instante.
-          </Paragraph>
-        </AppSurfaceCard>
+      <AppScreen testID="credit-card-detail-screen">
+        <AppSkeletonBlock title="Carregando cartão" lines={6} />
       </AppScreen>
     );
   }
 
-  if (controller.notFound || controller.creditCard === null) {
+  if (controller.notFound || controller.creditCard === null || controller.detail === null) {
     return (
-      <AppScreen>
+      <AppScreen testID="credit-card-detail-screen">
+        <CardAppBar title="Cartão" onBack={controller.handleBack} />
         <AppEmptyState
           illustration="transactions"
-          title="Cartao nao encontrado"
-          description="Esse cartao nao existe ou foi removido."
+          title="Cartão não encontrado"
+          description="Esse cartão não existe ou foi removido."
           cta={{ label: "Voltar", onPress: controller.handleBack }}
         />
       </AppScreen>
@@ -56,139 +57,95 @@ export function CreditCardDetailScreen(): ReactElement {
   }
 
   return (
-    <AppScreen>
-      <CreditCardDetailContent
+    <AppScreen scrollable={false} testID="credit-card-detail-screen">
+      <CardAppBar
+        title={controller.creditCard.name}
+        subtitle={controller.detail.subtitle}
+        onBack={controller.handleBack}
+        right={
+          <CardAppBarButton
+            icon="dots-horizontal"
+            accessibilityLabel="Mais ações"
+            onPress={controller.handleOpenSettings}
+            testID="card-detail-menu"
+          />
+        }
+      />
+      <CreditCardDetailBody
         controller={controller}
         creditCard={controller.creditCard}
+        detail={controller.detail}
+      />
+      <CardStickyCta
+        label="Ver fatura completa"
+        icon="chevron-right"
+        onPress={controller.handleViewBill}
+        testID="card-detail-cta"
       />
     </AppScreen>
   );
 }
 
-interface CreditCardDetailContentProps {
+interface CreditCardDetailBodyProps {
   readonly controller: CreditCardDetailScreenController;
   readonly creditCard: CreditCard;
+  readonly detail: CreditCardDetailViewModel;
 }
 
-function CreditCardDetailContent({
+function CreditCardDetailBody({
   controller,
   creditCard,
-}: CreditCardDetailContentProps): ReactElement {
+  detail,
+}: CreditCardDetailBodyProps): ReactElement {
+  const quickActions: readonly CardQuickAction[] = [
+    {
+      key: "launch",
+      icon: "credit-card-plus-outline",
+      label: "Lançar",
+      onPress: controller.handleLaunchExpense,
+    },
+    {
+      key: "invoice",
+      icon: "file-document-outline",
+      label: "Fatura",
+      onPress: controller.handleViewBill,
+    },
+    {
+      key: "block",
+      icon: "lock-outline",
+      label: "Bloquear",
+      onPress: controller.handleBlockCard,
+    },
+    {
+      key: "settings",
+      icon: "cog-outline",
+      label: "Ajustes",
+      onPress: controller.handleOpenSettings,
+    },
+  ];
+
   return (
-    <YStack gap="$3">
-      <AppButton tone="secondary" onPress={controller.handleBack}>
-        Voltar
-      </AppButton>
-
-      <AppSurfaceCard
-        title={creditCard.name}
-        description={creditCard.bank ?? "Cartao de credito"}
-      >
-        <YStack gap="$3">
-          <XStack gap="$2" flexWrap="wrap">
-            {creditCard.brand ? (
-              <AppBadge tone="default">{creditCard.brand}</AppBadge>
-            ) : null}
-            {creditCard.lastFourDigits ? (
-              <AppBadge tone="default">{`final ${creditCard.lastFourDigits}`}</AppBadge>
-            ) : null}
-          </XStack>
-          <AppKeyValueRow
-            label="Limite"
-            value={
-              creditCard.limitAmount !== null
-                ? formatCurrency(creditCard.limitAmount)
-                : "-"
-            }
-          />
-          <AppKeyValueRow label="Fechamento" value={dash(creditCard.closingDay)} />
-          <AppKeyValueRow label="Vencimento" value={dash(creditCard.dueDay)} />
-        </YStack>
-      </AppSurfaceCard>
-
-      {controller.hasCycleConfig ? (
-        <UtilizationCard controller={controller} />
-      ) : (
-        <AppSurfaceCard
-          title="Ciclo nao configurado"
-          description="Defina o dia de fechamento e de vencimento para ver fatura e utilizacao."
-        >
-          <AppBadge tone="danger">Acao necessaria</AppBadge>
-        </AppSurfaceCard>
-      )}
-
-      <AppButton onPress={controller.handleViewBill} disabled={!controller.hasCycleConfig}>
-        Ver fatura
-      </AppButton>
-    </YStack>
-  );
-}
-
-interface UtilizationCardProps {
-  readonly controller: CreditCardDetailScreenController;
-}
-
-function UtilizationCard({ controller }: UtilizationCardProps): ReactElement {
-  return (
-    <AppSurfaceCard
-      title="Utilizacao do limite"
-      description="Quanto do limite ja esta comprometido no ciclo atual."
+    <ScrollView
+      flex={1}
+      showsVerticalScrollIndicator={false}
+      contentContainerStyle={{ gap: 16, paddingTop: 16, paddingBottom: 16 }}
     >
-      <AppQueryState
-        query={controller.utilizationQuery}
-        options={{
-          loading: { title: "Calculando utilizacao" },
-          loadingPresentation: "notice",
-          empty: { title: "Sem dados de utilizacao" },
-          error: { fallbackTitle: "Nao foi possivel calcular a utilizacao" },
-        }}
-      >
-        {(utilization) => <UtilizationBody utilization={utilization} />}
-      </AppQueryState>
-    </AppSurfaceCard>
-  );
-}
-
-interface UtilizationBodyProps {
-  readonly utilization: CreditCardUtilizationRecord;
-}
-
-function UtilizationBody({ utilization }: UtilizationBodyProps): ReactElement {
-  const pct = utilization.utilizationPct ?? 0;
-  const width = Math.min(100, Math.max(0, pct));
-  const color = pct >= 90 ? "$danger" : pct >= 70 ? "$muted" : "$primary";
-  return (
-    <YStack gap="$3">
-      <XStack alignItems="center" justifyContent="space-between">
-        <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
-          Comprometido
-        </Paragraph>
-        <Paragraph color="$color" fontFamily="$heading" fontSize="$5">
-          {pct.toFixed(1)}%
-        </Paragraph>
-      </XStack>
-      <YStack
-        height={10}
-        borderRadius="$10"
-        backgroundColor="$backgroundPress"
-        overflow="hidden"
-        accessibilityRole="progressbar"
-        accessibilityValue={{ now: Math.round(width), min: 0, max: 100 }}
-      >
-        <YStack height="100%" width={`${width}%`} backgroundColor={color} />
+      <YStack alignItems="center">
+        <CardFace
+          card={creditCard}
+          currentBillTotal={detail.currentBillTotal}
+          usagePct={detail.limit.usedPct}
+        />
       </YStack>
-      <AppKeyValueRow
-        label="Comprometido"
-        value={formatCurrency(utilization.committedAmount)}
+
+      <CardQuickActions actions={quickActions} />
+      <CardLimitBlock limit={detail.limit} />
+      <CardEvolution points={detail.evolution} color={detail.gradient.colors[0]} />
+      <CardTopCategories categories={detail.topCategories} />
+      <CardRecentTransactions
+        transactions={detail.recentTransactions}
+        onSeeInvoice={controller.handleViewBill}
       />
-      <AppKeyValueRow
-        label="Disponivel"
-        value={
-          utilization.availableAmount !== null
-            ? formatCurrency(utilization.availableAmount)
-            : "-"
-        }
-      />
-    </YStack>
+    </ScrollView>
   );
 }

@@ -39,3 +39,28 @@ export {
   motionTranslate,
   type MotionEasingKey,
 } from "@/shared/theme/motion";
+export {
+  allCardsGradient,
+  cardGradientPalette,
+  resolveCardGradient,
+  type CardGradientInput,
+  type GradientStops,
+} from "@/shared/theme/card-gradients";
+export {
+  categoryPalette,
+  NO_CATEGORY_COLOR,
+  resolveCategoryColor,
+  type CategoryColorInput,
+} from "@/shared/theme/category-palette";
+export {
+  onDarkSurfaceColors,
+  type OnDarkSurfaceColorKey,
+} from "@/shared/theme/on-dark-surface";
+export {
+  chartSeriesPalette,
+  resolveSeriesColor,
+} from "@/shared/theme/chart-palette";
+export {
+  coachMarks,
+  type CoachMarksTokenKey,
+} from "@/shared/theme/coach-marks-tokens";

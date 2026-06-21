@@ -3,6 +3,10 @@ import { fireEvent, render } from "@testing-library/react-native";
 import { AppTabBar } from "@/core/navigation/app-tab-bar";
 import { AppProviders } from "@/core/providers/app-providers";
 import { resetAppShellStore } from "@/core/shell/app-shell-store";
+import {
+  resetExpenseSheetStore,
+  useExpenseSheetStore,
+} from "@/stores/expense-sheet-store";
 
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 20, left: 0, right: 0 }),
@@ -30,6 +34,7 @@ const buildProps = (activeIndex = 0) => {
 describe("AppTabBar", () => {
   afterEach(() => {
     resetAppShellStore();
+    resetExpenseSheetStore();
   });
 
   it("renderiza os quatro destinos e o botao central de acao rapida", () => {
@@ -44,7 +49,7 @@ describe("AppTabBar", () => {
     expect(getByTestId("tab-transacoes")).toBeTruthy();
     expect(getByTestId("tab-planejamento")).toBeTruthy();
     expect(getByTestId("tab-mais")).toBeTruthy();
-    expect(getByTestId("tab-quick-actions")).toBeTruthy();
+    expect(getByTestId("tour-fab")).toBeTruthy();
   });
 
   it("navega ao tocar numa tab nao focada e ignora a tab ja ativa", () => {
@@ -62,7 +67,20 @@ describe("AppTabBar", () => {
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 
-  it("abre o sheet de acao rapida e navega para criar transacao", () => {
+  it("abre o sheet de despesa ao tocar no FAB central", () => {
+    const { props } = buildProps();
+    const { getByTestId } = render(
+      <AppProviders>
+        <AppTabBar {...props} />
+      </AppProviders>,
+    );
+
+    expect(useExpenseSheetStore.getState().isOpen).toBe(false);
+    fireEvent.press(getByTestId("tour-fab"));
+    expect(useExpenseSheetStore.getState().isOpen).toBe(true);
+  });
+
+  it("ao pressionar e segurar o FAB abre as acoes rapidas e navega para criar transacao", () => {
     const { props, navigate } = buildProps();
     const { getByTestId } = render(
       <AppProviders>
@@ -70,7 +88,7 @@ describe("AppTabBar", () => {
       </AppProviders>,
     );
 
-    fireEvent.press(getByTestId("tab-quick-actions"));
+    fireEvent(getByTestId("tour-fab"), "longPress");
     fireEvent.press(getByTestId("quick-action-create"));
 
     expect(navigate).toHaveBeenCalledWith("transacoes", { intent: "create" });

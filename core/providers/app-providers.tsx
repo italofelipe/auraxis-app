@@ -1,5 +1,6 @@
 import type { PropsWithChildren, ReactElement } from "react";
 
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { TamaguiProvider, Theme } from "tamagui";
 
@@ -20,7 +21,9 @@ const ThemedProviderTree = ({
   return (
     <RuntimeProvider enabled={enableRuntime}>
       <TamaguiProvider config={tamaguiConfig} defaultTheme={themeName}>
-        <Theme name={themeName}>{children}</Theme>
+        <Theme name={themeName}>
+          <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+        </Theme>
       </TamaguiProvider>
     </RuntimeProvider>
   );
