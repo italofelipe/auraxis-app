@@ -8,6 +8,7 @@ import { TransactionFeed } from "@/features/transactions/components/transaction-
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { TxHero } from "@/features/transactions/components/tx-hero";
 import { useTransactionsFeedController } from "@/features/transactions/hooks/use-transactions-feed-controller";
+import { RevealInView } from "@/shared/animations/reveal-in-view";
 import { AppScreen } from "@/shared/components/app-screen";
 
 /**
@@ -46,14 +47,16 @@ export function TransactionsScreen(): ReactElement {
   }
 
   const hero = (
-    <TxHero
-      periodLabel={controller.periodLabel}
-      kpis={controller.heroKpis}
-      isDark={isDark}
-      onToggleTheme={() => setThemePreference(isDark ? "light" : "dark")}
-      onToggleCalendar={controller.toggleCalendar}
-      calendarActive={controller.calendarActive}
-    />
+    <RevealInView index={0}>
+      <TxHero
+        periodLabel={controller.periodLabel}
+        kpis={controller.heroKpis}
+        isDark={isDark}
+        onToggleTheme={() => setThemePreference(isDark ? "light" : "dark")}
+        onToggleCalendar={controller.toggleCalendar}
+        calendarActive={controller.calendarActive}
+      />
+    </RevealInView>
   );
 
   if (controller.calendarActive) {

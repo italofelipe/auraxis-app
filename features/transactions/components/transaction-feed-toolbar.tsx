@@ -18,6 +18,7 @@ import { TxCategoryBreakdown } from "@/features/transactions/components/tx-categ
 import { TxModeToggle } from "@/features/transactions/components/tx-mode-toggle";
 import type { TransactionsFeedController } from "@/features/transactions/hooks/use-transactions-feed-controller";
 import { useTransactionsExport } from "@/features/transactions/hooks/use-transactions-export";
+import { RevealInView } from "@/shared/animations/reveal-in-view";
 import { AppButton } from "@/shared/components/app-button";
 import { isFeatureEnabled } from "@/shared/feature-flags";
 import { useT } from "@/shared/i18n";
@@ -133,7 +134,9 @@ function FeedToolbar({
       ) : null}
       <InstallmentGroupFilterNotice controller={controller} />
       {controller.viewMode === "analitico" ? (
-        <TxCategoryBreakdown categories={controller.categoryBars} />
+        <RevealInView index={1}>
+          <TxCategoryBreakdown categories={controller.categoryBars} />
+        </RevealInView>
       ) : null}
       <AiInsightSurface dimension="transactions" />
     </YStack>

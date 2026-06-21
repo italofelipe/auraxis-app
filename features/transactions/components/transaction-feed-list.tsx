@@ -18,6 +18,7 @@ import {
 } from "@/features/transactions/hooks/use-transaction-feed-actions";
 import type { TransactionsFeedController } from "@/features/transactions/hooks/use-transactions-feed-controller";
 import type { TransactionFeedItem } from "@/features/transactions/model/transactions-feed";
+import { RevealInView } from "@/shared/animations/reveal-in-view";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { useListRefresh } from "@/shared/hooks/use-list-refresh";
@@ -49,14 +50,22 @@ function FeedList({
   const { refreshing, onRefresh } = useListRefresh(TRANSACTIONS_REFRESH_KEYS);
 
   const renderItem = useCallback(
-    ({ item }: { readonly item: TransactionFeedItem }) => (
-      <TxCard
-        item={item}
-        analytic={controller.viewMode === "analitico"}
-        onPress={handlers.openActions}
-        onMarkPaid={handlers.requestPay}
-        onDelete={handlers.requestDelete}
-      />
+    ({
+      item,
+      index,
+    }: {
+      readonly item: TransactionFeedItem;
+      readonly index: number;
+    }) => (
+      <RevealInView index={index}>
+        <TxCard
+          item={item}
+          analytic={controller.viewMode === "analitico"}
+          onPress={handlers.openActions}
+          onMarkPaid={handlers.requestPay}
+          onDelete={handlers.requestDelete}
+        />
+      </RevealInView>
     ),
     [controller.viewMode, handlers],
   );
