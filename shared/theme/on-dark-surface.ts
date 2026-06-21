@@ -27,6 +27,10 @@ export const onDarkSurfaceColors = {
   gloss: "rgba(255,255,255,0.12)",
   /** Glifo do chip dourado da face do cartão. */
   chip: "#E9C877",
+  /** Verde de receita/positivo legível sobre o hero teal escuro. */
+  positive: "#7FE3B8",
+  /** Vermelho de despesa/negativo legível sobre o hero teal escuro. */
+  negative: "#FF9EA1",
 } as const;
 
 export type OnDarkSurfaceColorKey = keyof typeof onDarkSurfaceColors;
