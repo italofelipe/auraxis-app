@@ -75,6 +75,49 @@ describe("useInsightsFluidaScreenController", () => {
     expect(result.current.showCompare).toBe(false);
   });
 
+  it("keeps every beat coherent when cadence changes after a dimension change", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    act(() => {
+      result.current.selectDimension("transactions");
+    });
+    act(() => {
+      result.current.selectCadence("weekly");
+    });
+
+    // No stale state: dimension + cadence both reflected, VM fully re-derived.
+    expect(result.current.dimension).toBe("transactions");
+    expect(result.current.cadence).toBe("weekly");
+    expect(result.current.showCompare).toBe(false);
+    expect(result.current.vm).toEqual(
+      selectFluidaVM({ dimension: "transactions", cadence: "weekly" }),
+    );
+    expect(result.current.vm.retro).toHaveLength(0);
+  });
+
+  it("re-derives the chart series and compare flag together when switching back to general", () => {
+    const { result } = renderHook(() => useInsightsFluidaScreenController());
+
+    act(() => {
+      result.current.selectCadence("weekly");
+    });
+    act(() => {
+      result.current.selectDimension("budgets");
+    });
+    act(() => {
+      result.current.selectDimension("general");
+    });
+
+    // Back on general at the weekly cadence: compare returns AND the weekly
+    // series is the one exposed — nothing pinned from the daily/budgets path.
+    expect(result.current.cadence).toBe("weekly");
+    expect(result.current.showCompare).toBe(true);
+    expect(result.current.vm.retro.length).toBeGreaterThan(0);
+    expect(result.current.vm.series).toEqual(
+      selectFluidaVM({ dimension: "general", cadence: "weekly" }).series,
+    );
+  });
+
   it("exposes the resolved colour scheme as a boolean isDark flag", () => {
     mockedUseResolvedTheme.mockReturnValue("auraxis_dark");
 
