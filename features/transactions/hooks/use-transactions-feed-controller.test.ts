@@ -120,6 +120,15 @@ describe("useTransactionsFeedController — modo de visualização", () => {
     act(() => result.current.setViewMode("analitico"));
     expect(result.current.viewMode).toBe("analitico");
   });
+
+  it("inicia com o calendário inativo e alterna via toggleCalendar", () => {
+    const { result } = renderHook(() => useTransactionsFeedController());
+    expect(result.current.calendarActive).toBe(false);
+    act(() => result.current.toggleCalendar());
+    expect(result.current.calendarActive).toBe(true);
+    act(() => result.current.toggleCalendar());
+    expect(result.current.calendarActive).toBe(false);
+  });
 });
 
 describe("useTransactionsFeedController — view-models derivados", () => {

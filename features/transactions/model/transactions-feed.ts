@@ -69,6 +69,8 @@ export interface TransactionFeedItem {
   readonly categoryIcon: string | null;
   /** Rótulo relativo ("Hoje", "em 3 dias") ou null para fallback "DD mmm". */
   readonly relativeDate: string | null;
+  /** Rótulo de data pronto: o relativo quando há, senão o fallback "DD mmm". */
+  readonly dateDisplay: string;
   /** Valor monetário formatado com sinal (ex.: "+ R$ 250,00"). */
   readonly signedDisplay: string;
   /** Participação do lançamento no fluxo do seu tipo (0..100, inteiro). */
@@ -130,6 +132,24 @@ export const relativeDateLabel = (
     return `há ${Math.abs(delta)} dias`;
   }
   return null;
+};
+
+/** Abreviações de mês em pt-BR (índice 0 = janeiro), para o fallback "DD mmm". */
+const MONTH_ABBR_PT = [
+  "jan", "fev", "mar", "abr", "mai", "jun",
+  "jul", "ago", "set", "out", "nov", "dez",
+];
+
+/**
+ * Rótulo curto "DD mmm" (ex.: "20 jun") a partir de uma data `YYYY-MM-DD`,
+ * com parsing date-only/timezone-safe.
+ *
+ * @param dueDate Data de vencimento (`YYYY-MM-DD`).
+ * @returns Rótulo curto pt-BR.
+ */
+export const shortDateLabel = (dueDate: string): string => {
+  const date = toDateOnly(dueDate);
+  return `${date.getDate()} ${MONTH_ABBR_PT[date.getMonth()] ?? ""}`.trim();
 };
 
 /** Converte o amount string da API em número, tratando valores inválidos. */
@@ -276,6 +296,7 @@ export const toFeedItem = ({
   const amount = parseAmount(tx.amount);
   const signed = tx.type === "income" ? amount : -amount;
   const flow = tx.type === "income" ? kpis.income : kpis.expense;
+  const relativeDate = relativeDateLabel(tx.dueDate, today);
   return {
     id: tx.id,
     title: tx.title,
@@ -288,7 +309,8 @@ export const toFeedItem = ({
     categoryName: category.name,
     categoryColor: category.color,
     categoryIcon: tag?.icon ?? null,
-    relativeDate: relativeDateLabel(tx.dueDate, today),
+    relativeDate,
+    dateDisplay: relativeDate ?? shortDateLabel(tx.dueDate),
     signedDisplay: formatCurrencySigned(signed),
     percentOfFlow: percentOfTotal(amount, flow),
   };

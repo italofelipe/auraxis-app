@@ -7,6 +7,7 @@ import {
   groupExpensesByCategory,
   percentOfTotal,
   relativeDateLabel,
+  shortDateLabel,
   toFeedItem,
   type FeedKpis,
 } from "@/features/transactions/model/transactions-feed";
@@ -294,5 +295,25 @@ describe("toFeedItem", () => {
     expect(item.isRecurring).toBe(true);
     expect(item.isInstallment).toBe(true);
     expect(item.relativeDate).toBeNull();
+    // Fora da janela relativa, o display cai para "DD mmm".
+    expect(item.dateDisplay).toBe("25 dez");
+  });
+
+  it("usa o rótulo relativo no dateDisplay quando está na janela", () => {
+    const item = toFeedItem({
+      tx: tx({ dueDate: "2026-06-20" }),
+      tags: [],
+      kpis,
+      today,
+    });
+    expect(item.dateDisplay).toBe("Hoje");
+  });
+});
+
+describe("shortDateLabel", () => {
+  it("formata 'DD mmm' em pt-BR (date-only)", () => {
+    expect(shortDateLabel("2026-06-20")).toBe("20 jun");
+    expect(shortDateLabel("2026-01-05")).toBe("5 jan");
+    expect(shortDateLabel("2026-12-31")).toBe("31 dez");
   });
 });

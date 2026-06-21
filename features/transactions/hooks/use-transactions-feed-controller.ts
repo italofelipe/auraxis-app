@@ -12,7 +12,7 @@
  * (espelha o controller da home de Cartões).
  */
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import {
   type TransactionsScreenController,
@@ -45,9 +45,10 @@ const todayIso = (): string => {
 /**
  * Contrato do controller do feed: o controller base + os extras do feed.
  *
- * `viewMode`/`setViewMode` do controller base (list | calendar — conceito
- * legado) são substituídos pelo modo do redesign (Fácil | Analítico); por isso
- * são omitidos da base e redeclarados aqui.
+ * `viewMode`/`setViewMode` do controller base (list | calendar) são o eixo do
+ * redesign (Fácil | Analítico); por isso são omitidos da base e redeclarados
+ * aqui. O toggle de calendário (que reusa a flag list/calendar do controller
+ * base) é exposto separadamente via `calendarActive`/`toggleCalendar`.
  */
 export interface TransactionsFeedController
   extends Omit<TransactionsScreenController, "viewMode" | "setViewMode"> {
@@ -55,6 +56,10 @@ export interface TransactionsFeedController
   readonly viewMode: TransactionsFeedViewMode;
   /** Alterna o modo de visualização. */
   readonly setViewMode: (mode: TransactionsFeedViewMode) => void;
+  /** True quando a visão de calendário está ativa (reusa o estado base). */
+  readonly calendarActive: boolean;
+  /** Alterna entre a lista (feed) e o calendário. */
+  readonly toggleCalendar: () => void;
   /** KPIs agregados do período para o herói. */
   readonly heroKpis: FeedKpis;
   /** Barras de "Gastos por categoria" (modo Analítico). */
@@ -70,9 +75,18 @@ export interface TransactionsFeedController
  * @returns Controller do feed (base + extras).
  */
 export function useTransactionsFeedController(): TransactionsFeedController {
-  const base = useTransactionsScreenController();
+  const {
+    viewMode: baseViewMode,
+    setViewMode: setBaseViewMode,
+    ...base
+  } = useTransactionsScreenController();
   const tagsQuery = useTagsQuery();
   const [viewMode, setViewMode] = useState<TransactionsFeedViewMode>("facil");
+
+  const calendarActive = baseViewMode === "calendar";
+  const toggleCalendar = useCallback((): void => {
+    setBaseViewMode(baseViewMode === "calendar" ? "list" : "calendar");
+  }, [baseViewMode, setBaseViewMode]);
 
   const records = useMemo(
     () => base.transactionsQuery.data?.transactions ?? [],
@@ -88,10 +102,27 @@ export function useTransactionsFeedController(): TransactionsFeedController {
     () => groupExpensesByCategory(records, tags),
     [records, tags],
   );
+  // O feed visível respeita o filtro client-side de grupo de parcelas
+  // ("mostrar a mesma compra"); os KPIs/barras seguem o conjunto do período
+  // (paridade com o `monthBalance` do controller base, que usa tudo).
   const feedItems = useMemo<readonly TransactionFeedItem[]>(() => {
     const today = todayIso();
-    return records.map((tx) => toFeedItem({ tx, tags, kpis: heroKpis, today }));
-  }, [records, tags, heroKpis]);
+    const visible = base.installmentGroupFilter
+      ? records.filter(
+          (tx) => tx.installmentGroupId === base.installmentGroupFilter,
+        )
+      : records;
+    return visible.map((tx) => toFeedItem({ tx, tags, kpis: heroKpis, today }));
+  }, [records, tags, heroKpis, base.installmentGroupFilter]);
 
-  return { ...base, viewMode, setViewMode, heroKpis, categoryBars, feedItems };
+  return {
+    ...base,
+    viewMode,
+    setViewMode,
+    calendarActive,
+    toggleCalendar,
+    heroKpis,
+    categoryBars,
+    feedItems,
+  };
 }
