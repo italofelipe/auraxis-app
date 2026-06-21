@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.10.0](https://github.com/italofelipe/auraxis-app/compare/v1.9.0...v1.10.0) (2026-06-21)
+
+
+### Features
+
+* **credit-cards:** redesign da área de Cartões + onboarding guiado ([#589](https://github.com/italofelipe/auraxis-app/issues/589)) ([640af6d](https://github.com/italofelipe/auraxis-app/commit/640af6dc7c910ed4f56f108da2c5605f5e9ff643))
+* **navigation:** tab bar refinada premium — indicador deslizante + glow (OTA) ([#571](https://github.com/italofelipe/auraxis-app/issues/571)) ([1aa05a5](https://github.com/italofelipe/auraxis-app/commit/1aa05a504628e37dbe3337d7bdc46277a4109a41))
+* **transactions:** linha compacta com swipe + header colapsado (OTA) ([#572](https://github.com/italofelipe/auraxis-app/issues/572)) ([4c8bcb8](https://github.com/italofelipe/auraxis-app/commit/4c8bcb85b46d956d17235df562a0c01670f3dde9))
+
+
+### Bug Fixes
+
+* **ci:** pass --environment to eas update so OTA bundles keep EXPO_PUBLIC vars ([0d21a89](https://github.com/italofelipe/auraxis-app/commit/0d21a89e3529aaa503df049d55ed5387d05a14df))
+* **navigation:** revert heavy active-tab pill to light color indicator and stop label wrap ([efdfdd2](https://github.com/italofelipe/auraxis-app/commit/efdfdd2469ceb63dcca74b7977850d0b39e1fc78))
+
 ## [1.9.0](https://github.com/italofelipe/auraxis-app/compare/v1.8.0...v1.9.0) (2026-06-13)
 
 
