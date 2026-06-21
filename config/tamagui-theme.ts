@@ -72,6 +72,32 @@ const headingFont = createFont({
   },
 });
 
+// Headline serifada da leitura editorial "Fluida" dos Insights de IA.
+// Usada SÓ na headline do lead (peso 500–600); o restante segue Inter.
+const serifFont = createFont({
+  family: "Newsreader_600SemiBold",
+  size: {
+    6: fontSizes.xl,
+    7: fontSizes["2xl"],
+    8: fontSizes["3xl"],
+    9: fontSizes["4xl"],
+  },
+  lineHeight: {
+    6: 28,
+    7: 32,
+    8: 34,
+    9: 42,
+  },
+  weight: {
+    5: "500",
+    6: "600",
+  },
+  face: {
+    500: { normal: "Newsreader_500Medium" },
+    600: { normal: "Newsreader_600SemiBold" },
+  },
+});
+
 // Valores financeiros (R$) — assinatura visual do dashboard web.
 const monoFont = createFont({
   family: "IBMPlexMono_500Medium",
@@ -194,9 +220,12 @@ const buildModeTheme = (palette: SemanticColors) => {
     muted: palette.mutedForeground,
     subdued: palette.subduedForeground,
     success: palette.success,
+    successSubtle: palette.successSubtle,
     danger: palette.danger,
     dangerStrong: palette.dangerStrong,
+    dangerSubtle: palette.dangerSubtle,
     warning: palette.warning,
+    warningSubtle: palette.warningSubtle,
     info: palette.info,
   } as const;
 };
@@ -220,6 +249,7 @@ export const tamaguiConfig = createTamagui({
     body: bodyFont,
     heading: headingFont,
     mono: monoFont,
+    serif: serifFont,
   },
   defaultTheme: auraxisDefaultTheme,
   settings: {

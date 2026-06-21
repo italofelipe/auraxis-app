@@ -11,6 +11,10 @@ import {
   Inter_600SemiBold,
   Inter_700Bold,
 } from "@expo-google-fonts/inter";
+import {
+  Newsreader_500Medium,
+  Newsreader_600SemiBold,
+} from "@expo-google-fonts/newsreader";
 import { useFonts } from "expo-font";
 import * as SplashScreen from "expo-splash-screen";
 
@@ -108,6 +112,8 @@ export const useAppStartup = (): AppStartupState => {
     IBMPlexMono_400Regular,
     IBMPlexMono_500Medium,
     IBMPlexMono_600SemiBold,
+    Newsreader_500Medium,
+    Newsreader_600SemiBold,
   });
 
   useEffect(() => {

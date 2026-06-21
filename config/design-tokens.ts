@@ -54,6 +54,10 @@ export const typography = {
   bodySemiBold: "Inter_600SemiBold",
   mono: "IBMPlexMono_500Medium",
   monoRegular: "IBMPlexMono_400Regular",
+  // Headline serifada (Newsreader) — só usada na leitura editorial "Fluida"
+  // dos Insights de IA, no peso 500–600.
+  serif: "Newsreader_600SemiBold",
+  serifMedium: "Newsreader_500Medium",
 } as const;
 
 export const spacing = (step: number): number => {
