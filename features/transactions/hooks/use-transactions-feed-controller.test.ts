@@ -96,15 +96,24 @@ beforeEach(() => {
       tags: [{ id: "tag-1", name: "Alimentação", color: "#11A36B", icon: "cart" }],
     },
   } as never);
+  // Datas derivadas do MESMO relógio fake via getters locais (igual ao
+  // todayIso do controller), para o rótulo relativo ser estável em qualquer
+  // timezone (o CI roda em UTC, o dev pode estar em UTC-3).
+  const now = new Date();
+  const pad = (value: number): string => `${value}`.padStart(2, "0");
+  const localDate = (date: Date): string =>
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   setQuery([
-    buildRecord(),
+    buildRecord({ dueDate: localDate(now) }),
     buildRecord({
       id: "tx-2",
       title: "Mercado",
       type: "expense",
       amount: "300.00",
       tagId: "tag-1",
-      dueDate: "2026-06-19",
+      dueDate: localDate(
+        new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1),
+      ),
     }),
   ]);
 });
