@@ -26,6 +26,15 @@ export interface InsightCadenceOption {
   readonly label: string;
 }
 
+export interface UseInsightsFluidaScreenControllerOptions {
+  /**
+   * Dimension to pre-select on mount, e.g. when the screen is opened from a
+   * feature page's "ler na íntegra" CTA (`/insights?dimension=goals`).
+   * Defaults to `general` when omitted.
+   */
+  readonly initialDimension?: InsightDimension;
+}
+
 export interface InsightsFluidaScreenController {
   readonly cadence: InsightCadence;
   readonly dimension: InsightDimension;
@@ -68,12 +77,16 @@ const CADENCE_OPTIONS: readonly InsightCadenceOption[] = [
  * INTEGRATION POINT: {@link selectFluidaVM} is the single seam to the
  * AI-generation backend — swap it for a query hook once the contract ships.
  *
+ * @param options Optional initial dimension (e.g. from a deep link).
  * @returns The derived state and handlers for the Fluida screen.
  */
-export const useInsightsFluidaScreenController =
-  (): InsightsFluidaScreenController => {
+export const useInsightsFluidaScreenController = (
+  options: UseInsightsFluidaScreenControllerOptions = {},
+): InsightsFluidaScreenController => {
     const [cadence, setCadence] = useState<InsightCadence>("daily");
-    const [dimension, setDimension] = useState<InsightDimension>("general");
+    const [dimension, setDimension] = useState<InsightDimension>(
+      options.initialDimension ?? "general",
+    );
     const resolvedTheme = useResolvedTheme();
     const isDark = resolvedTheme === "auraxis_dark";
 

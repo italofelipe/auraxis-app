@@ -19,6 +19,7 @@ import {
   type GoalsScreenController,
 } from "@/features/goals/hooks/use-goals-screen-controller";
 import { AiInsightSurface } from "@/features/insights/components/ai-insight-surface";
+import { useInsightSection } from "@/features/insights/hooks/use-insight-section";
 import type { GoalProgressView } from "@/features/goals/services/goal-progress-calculator";
 import { AppButton } from "@/shared/components/app-button";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
@@ -26,6 +27,10 @@ import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import {
+  InsightSection,
+  buildInsightFluidaParams,
+} from "@/shared/insights";
 import { useListRefresh } from "@/shared/hooks/use-list-refresh";
 import { GoalListSkeleton } from "@/shared/skeletons";
 import { formatCurrency } from "@/shared/utils/formatters";
@@ -66,6 +71,7 @@ function ListSeparator(): ReactElement {
 export function GoalsScreen(): ReactElement {
   const controller = useGoalsScreenController();
   const router = useRouter();
+  const insightSection = useInsightSection("goals");
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -87,6 +93,10 @@ export function GoalsScreen(): ReactElement {
   return (
     <AppScreen scrollable={false}>
       <SummaryCard controller={controller} />
+      <InsightSection
+        vm={insightSection}
+        onReadFull={() => router.push(buildInsightFluidaParams("goals"))}
+      />
       <AiInsightSurface
         dimension="goals"
         onOpenHub={() => router.push(appRoutes.private.insights)}

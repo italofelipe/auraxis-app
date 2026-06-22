@@ -28,6 +28,40 @@ describe("useInsightsFluidaScreenController", () => {
     expect(result.current.cadence).toBe("daily");
   });
 
+  it("starts on the dimension passed in (deep-link from a feature page)", () => {
+    const { result } = renderHook(() =>
+      useInsightsFluidaScreenController({ initialDimension: "transactions" }),
+    );
+
+    expect(result.current.dimension).toBe("transactions");
+    expect(result.current.cadence).toBe("daily");
+    expect(result.current.vm).toEqual(
+      selectFluidaVM({ dimension: "transactions", cadence: "daily" }),
+    );
+  });
+
+  it("ignores an undefined initial dimension and keeps the general default", () => {
+    const { result } = renderHook(() =>
+      useInsightsFluidaScreenController({ initialDimension: undefined }),
+    );
+
+    expect(result.current.dimension).toBe("general");
+  });
+
+  it("still lets the user switch dimension after a deep-linked start", () => {
+    const { result } = renderHook(() =>
+      useInsightsFluidaScreenController({ initialDimension: "budgets" }),
+    );
+
+    expect(result.current.dimension).toBe("budgets");
+
+    act(() => {
+      result.current.selectDimension("goals");
+    });
+
+    expect(result.current.dimension).toBe("goals");
+  });
+
   it("derives the full VM from the mock for the active dimension × cadence", () => {
     const { result } = renderHook(() => useInsightsFluidaScreenController());
 
