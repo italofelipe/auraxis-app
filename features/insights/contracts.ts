@@ -18,6 +18,50 @@ export interface InsightItem {
 
 export type InsightSummary = Readonly<Record<string, unknown>>;
 
+/**
+ * Direction of a comparative figure as emitted by the backend: `pos`
+ * (favourable / less spending), `neg` (unfavourable / more spending) and
+ * `neutral` (no movement). Structurally identical to the Fluida `InsightSign`;
+ * redeclared here so this contract owns no dependency on the `fluida/` surface
+ * (the dependency arrow points fluida → contracts, never the reverse).
+ */
+export type InsightRetroSign = "pos" | "neg" | "neutral";
+
+/**
+ * One calculated retrospective metric of the structured "Fluida" payload
+ * (backend PR #1502, additive). Belongs to the `general` dimension. `value` is
+ * a **decimal amount** (a raw number, not a formatted string) — the Fluida
+ * mapper formats it for display.
+ */
+export interface InsightRetroEntry {
+  readonly key: string;
+  readonly label: string;
+  readonly value: number;
+  readonly caption: string;
+  readonly sign: InsightRetroSign;
+}
+
+/**
+ * Outflow series of the structured "Fluida" payload: daily figures over the
+ * last 7 days and weekly figures over the last 6 weeks, oldest → newest. Both
+ * are raw decimal amounts.
+ */
+export interface InsightSeriesData {
+  readonly daily: readonly number[];
+  readonly weekly: readonly number[];
+}
+
+/**
+ * One per-theme numeric highlight of the structured "Fluida" payload. `value`
+ * is a **decimal amount** (a raw number) — distinct from the Fluida VM's
+ * `InsightHighlight`, whose `value` is a preformatted string.
+ */
+export interface InsightHighlightData {
+  readonly label: string;
+  readonly value: number;
+  readonly sub: string;
+}
+
 export interface InsightMetadata {
   readonly model: string | null;
   readonly tokensUsed: number | null;
@@ -40,6 +84,21 @@ export interface UserInsight {
   readonly generatedAt: string;
   readonly readAt: string | null;
   readonly metadata: InsightMetadata;
+  /**
+   * Structured "Fluida" fields (backend PR #1502 — additive). Each is optional
+   * and may be absent on older insights or endpoints not yet enriched, so the
+   * mobile mapper must stay absence-safe. Present, they feed the editorial
+   * "Fluida" reading directly.
+   *
+   * `paragraphs` — AI prose split into short paragraphs.
+   * `retro` — outflow retrospective (the `general` dimension only).
+   * `series` — daily/weekly outflow series for the rhythm chart.
+   * `highlights` — per-theme numeric highlights (raw decimal amounts).
+   */
+  readonly paragraphs?: readonly string[];
+  readonly retro?: readonly InsightRetroEntry[];
+  readonly series?: InsightSeriesData;
+  readonly highlights?: readonly InsightHighlightData[];
 }
 
 export interface LatestInsightResponse {

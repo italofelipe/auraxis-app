@@ -7,11 +7,15 @@ import type {
   GeneratedInsightResponse,
   GenerateInsightCommand,
   InsightDimension,
+  InsightHighlightData,
   InsightHistoryQuery,
   InsightHistoryResponse,
   InsightItem,
   InsightGenerationPeriodType,
   InsightPeriodType,
+  InsightRetroEntry,
+  InsightRetroSign,
+  InsightSeriesData,
   InsightStatus,
   InsightSummary,
   UserInsight,
@@ -40,6 +44,10 @@ interface UserInsightPayload {
   readonly cached?: boolean | null;
   readonly context_version?: string | null;
   readonly context_schema_version?: string | null;
+  readonly paragraphs?: unknown;
+  readonly retro?: unknown;
+  readonly series?: unknown;
+  readonly highlights?: unknown;
 }
 
 interface GeneratedInsightPayload {
@@ -57,6 +65,10 @@ interface GeneratedInsightPayload {
   readonly cached?: boolean | null;
   readonly generated_at?: string | null;
   readonly created_at?: string | null;
+  readonly paragraphs?: unknown;
+  readonly retro?: unknown;
+  readonly series?: unknown;
+  readonly highlights?: unknown;
 }
 
 interface InsightHistoryPayload {
@@ -160,6 +172,128 @@ const mapDimension = (dimension: unknown): InsightDimension => {
   return INSIGHT_DIMENSIONS.has(dimension as InsightDimension)
     ? (dimension as InsightDimension)
     : "general";
+};
+
+const RETRO_SIGNS = new Set<InsightRetroSign>(["pos", "neg", "neutral"]);
+
+const mapRetroSign = (value: unknown): InsightRetroSign => {
+  return RETRO_SIGNS.has(value as InsightRetroSign)
+    ? (value as InsightRetroSign)
+    : "neutral";
+};
+
+const mapParagraphs = (value: unknown): readonly string[] | undefined => {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const paragraphs = value.filter(
+    (entry): entry is string => typeof entry === "string" && entry.trim().length > 0,
+  );
+  return paragraphs.length > 0 ? paragraphs : undefined;
+};
+
+const mapRetroEntry = (value: unknown): InsightRetroEntry | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const key = pickString(value.key);
+  const amount = pickNumber(value.value);
+  if (!key || amount === null) {
+    return null;
+  }
+  return {
+    key,
+    label: pickString(value.label),
+    value: amount,
+    caption: pickString(value.caption),
+    sign: mapRetroSign(value.sign),
+  };
+};
+
+const mapRetro = (value: unknown): readonly InsightRetroEntry[] | undefined => {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const entries = value
+    .map(mapRetroEntry)
+    .filter((entry): entry is InsightRetroEntry => entry !== null);
+  return entries.length > 0 ? entries : undefined;
+};
+
+const mapNumberArray = (value: unknown): readonly number[] | null => {
+  if (!Array.isArray(value)) {
+    return null;
+  }
+  const allFinite = value.every(
+    (entry) => typeof entry === "number" && Number.isFinite(entry),
+  );
+  return allFinite ? (value as readonly number[]) : null;
+};
+
+const mapSeries = (value: unknown): InsightSeriesData | undefined => {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+  const daily = mapNumberArray(value.daily);
+  const weekly = mapNumberArray(value.weekly);
+  if (daily === null || weekly === null) {
+    return undefined;
+  }
+  return { daily, weekly };
+};
+
+const mapHighlightData = (value: unknown): InsightHighlightData | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const amount = pickNumber(value.value);
+  if (amount === null) {
+    return null;
+  }
+  return {
+    label: pickString(value.label),
+    value: amount,
+    sub: pickString(value.sub),
+  };
+};
+
+const mapHighlights = (value: unknown): readonly InsightHighlightData[] | undefined => {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  const highlights = value
+    .map(mapHighlightData)
+    .filter((entry): entry is InsightHighlightData => entry !== null);
+  return highlights.length > 0 ? highlights : undefined;
+};
+
+interface StructuredFluidaSource {
+  readonly paragraphs?: unknown;
+  readonly retro?: unknown;
+  readonly series?: unknown;
+  readonly highlights?: unknown;
+}
+
+/**
+ * Maps the additive structured "Fluida" fields (backend PR #1502) onto the
+ * insight, omitting any field that is absent or unusable. Returned as a partial
+ * so spreading it into the mapped insight leaves legacy payloads untouched
+ * (absence-safe — the keys simply don't appear).
+ */
+const mapStructuredFluidaFields = (
+  source: StructuredFluidaSource,
+): Pick<UserInsight, "paragraphs" | "retro" | "series" | "highlights"> => {
+  const paragraphs = mapParagraphs(source.paragraphs);
+  const retro = mapRetro(source.retro);
+  const series = mapSeries(source.series);
+  const highlights = mapHighlights(source.highlights);
+
+  return {
+    ...(paragraphs ? { paragraphs } : {}),
+    ...(retro ? { retro } : {}),
+    ...(series ? { series } : {}),
+    ...(highlights ? { highlights } : {}),
+  };
 };
 
 const mapInsightItem = (value: unknown): InsightItem | null => {
@@ -296,6 +430,7 @@ const mapInsight = (payload: UserInsightPayload): UserInsight => {
       cached: pickBoolean(payload.cached),
       contextVersion: resolveContextVersion(payload),
     },
+    ...mapStructuredFluidaFields(payload),
   };
 };
 
@@ -341,6 +476,7 @@ const mapGeneratedPayload = (payload: GeneratedInsightPayload): UserInsight => {
       cached: pickBoolean(payload.cached),
       contextVersion: pickNullableString(payload.context_version),
     },
+    ...mapStructuredFluidaFields(payload),
   };
 };
 
