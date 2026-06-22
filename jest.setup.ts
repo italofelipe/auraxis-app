@@ -47,16 +47,20 @@ jest.mock("react-native-reanimated", () => {
       return React.createElement(View, { style, ref, ...rest }, children);
     },
   );
+  const createAnimatedComponent = (component: unknown) => component;
   return {
     __esModule: true,
-    default: { View: ForwardedView },
+    default: { View: ForwardedView, createAnimatedComponent },
     View: ForwardedView,
+    createAnimatedComponent,
     FadeIn: fadeStub,
     FadeOut: fadeStub,
     SlideInRight: fadeStub,
     SlideOutLeft: fadeStub,
     useSharedValue: (initial: unknown) => ({ value: initial }),
     useAnimatedStyle: (factory: () => unknown) =>
+      typeof factory === "function" ? factory() : {},
+    useAnimatedProps: (factory: () => unknown) =>
       typeof factory === "function" ? factory() : {},
     withTiming: (value: unknown) => value,
     withSpring: (value: unknown) => value,
