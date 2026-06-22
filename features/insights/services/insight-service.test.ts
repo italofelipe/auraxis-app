@@ -211,7 +211,134 @@ describe("insightService - campos Fluida (payload completo)", () => {
 
 });
 
+describe("insightService - lead editorial (payload completo)", () => {
+  it("mapeia o lead editorial snake_case -> camelCase", async () => {
+    const client = createClient();
+    client.get.mockResolvedValue({
+      data: {
+        data: {
+          insight: {
+            id: "ins-lead-1",
+            content: "Resumo consolidado.",
+            key_metric: "Saldo da semana",
+            period_start: "2026-06-20T00:00:00.000Z",
+            period_end: "2026-06-20T23:59:59.000Z",
+            status: "delivered",
+            generated_at: "2026-06-20T09:00:00.000Z",
+            read_at: null,
+            lead: {
+              severity: "alert",
+              read_min: 4,
+              title: "A semana puxada pela fatura em atraso",
+              lead: "A semana fechou acima da anterior por causa da fatura.",
+              next_step: "Quite a fatura de maio antes do vencimento.",
+            },
+          },
+        },
+      },
+    });
+
+    const service = createInsightService(client as unknown as AxiosInstance);
+    const result = await service.getLatest();
+
+    expect(result?.lead).toEqual({
+      severity: "alert",
+      readMinutes: 4,
+      title: "A semana puxada pela fatura em atraso",
+      lead: "A semana fechou acima da anterior por causa da fatura.",
+      nextStep: "Quite a fatura de maio antes do vencimento.",
+    });
+  });
+
+  it("normaliza severity desconhecida do lead para attention", async () => {
+    const client = createClient();
+    client.get.mockResolvedValue({
+      data: {
+        data: {
+          insight: {
+            id: "ins-lead-2",
+            content: "Resumo.",
+            key_metric: "Saldo",
+            period_start: "2026-06-20T00:00:00.000Z",
+            period_end: "2026-06-20T23:59:59.000Z",
+            status: "delivered",
+            generated_at: "2026-06-20T09:00:00.000Z",
+            read_at: null,
+            lead: {
+              severity: "catastrophe",
+              read_min: 0,
+              title: "Título",
+              lead: "Lead.",
+              next_step: "",
+            },
+          },
+        },
+      },
+    });
+
+    const service = createInsightService(client as unknown as AxiosInstance);
+    const result = await service.getLatest();
+
+    expect(result?.lead?.severity).toBe("attention");
+    expect(result?.lead?.readMinutes).toBe(0);
+    expect(result?.lead?.nextStep).toBe("");
+  });
+});
+
 describe("insightService - campos Fluida (ausencia-safe)", () => {
+  it("deixa o lead ausente quando o backend nao o envia", async () => {
+    const client = createClient();
+    client.get.mockResolvedValue({
+      data: {
+        data: {
+          insight: {
+            id: "ins-no-lead-1",
+            content: "Resumo sem lead.",
+            key_metric: "Saldo",
+            period_start: "2026-06-01T00:00:00.000Z",
+            period_end: "2026-06-07T23:59:59.000Z",
+            status: "delivered",
+            generated_at: "2026-06-08T09:00:00.000Z",
+            read_at: null,
+          },
+        },
+      },
+    });
+
+    const service = createInsightService(client as unknown as AxiosInstance);
+    const result = await service.getLatest();
+
+    expect(result?.lead).toBeUndefined();
+  });
+
+  it("ignora um lead malformado (campos faltando) deixando-o ausente", async () => {
+    const client = createClient();
+    client.get.mockResolvedValue({
+      data: {
+        data: {
+          insight: {
+            id: "ins-bad-lead-1",
+            content: "Resumo.",
+            key_metric: "Saldo",
+            period_start: "2026-06-01T00:00:00.000Z",
+            period_end: "2026-06-07T23:59:59.000Z",
+            status: "delivered",
+            generated_at: "2026-06-08T09:00:00.000Z",
+            read_at: null,
+            lead: { severity: "ok" },
+          },
+        },
+      },
+    });
+
+    const service = createInsightService(client as unknown as AxiosInstance);
+    const result = await service.getLatest();
+
+    expect(result?.lead).toBeUndefined();
+  });
+});
+
+describe("insightService - campos Fluida (ausencia-safe legado)", () => {
   it("deixa os campos Fluida ausentes quando o backend legado nao os envia", async () => {
     const client = createClient();
     client.get.mockResolvedValue({

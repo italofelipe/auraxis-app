@@ -62,6 +62,34 @@ export interface InsightHighlightData {
   readonly sub: string;
 }
 
+/**
+ * Editorial severity of an insight lead as emitted by the backend (REST
+ * field `severity`): `ok`, `attention` or `alert`. Structurally identical to
+ * the Fluida `InsightSeverity`; redeclared here so this contract owns no
+ * dependency on the `fluida/` surface (the dependency arrow points
+ * fluida → contracts, never the reverse).
+ */
+export type InsightLeadSeverity = "ok" | "attention" | "alert";
+
+/**
+ * Editorial **lead** of an insight (backend PR #1508, additive). Mirrors the
+ * backend `InsightLeadVM` — the opening beat of the "Fluida" reading: a
+ * severity, a serif headline (`title`), the opening paragraph (`lead`), the
+ * estimated reading time (`readMinutes`, REST `read_min`) and the "where to go
+ * next" call to action (`nextStep`, REST `next_step`).
+ *
+ * Optional on {@link UserInsight} and absence-safe: legacy insights (and
+ * endpoints not yet enriched) omit it, in which case the Fluida mapper falls
+ * back to the editorial mock.
+ */
+export interface InsightLead {
+  readonly severity: InsightLeadSeverity;
+  readonly title: string;
+  readonly lead: string;
+  readonly readMinutes: number;
+  readonly nextStep: string;
+}
+
 export interface InsightMetadata {
   readonly model: string | null;
   readonly tokensUsed: number | null;
@@ -90,11 +118,14 @@ export interface UserInsight {
    * mobile mapper must stay absence-safe. Present, they feed the editorial
    * "Fluida" reading directly.
    *
+   * `lead` — editorial lead (severity/title/lead/reading time/next step;
+   *   backend PR #1508). Drives the Fluida reading's opening beat directly.
    * `paragraphs` — AI prose split into short paragraphs.
    * `retro` — outflow retrospective (the `general` dimension only).
    * `series` — daily/weekly outflow series for the rhythm chart.
    * `highlights` — per-theme numeric highlights (raw decimal amounts).
    */
+  readonly lead?: InsightLead;
   readonly paragraphs?: readonly string[];
   readonly retro?: readonly InsightRetroEntry[];
   readonly series?: InsightSeriesData;

@@ -146,6 +146,73 @@ describe("insightToFluidaVM — real payload", () => {
   });
 });
 
+describe("insightToFluidaVM — editorial lead", () => {
+  const realLead = {
+    severity: "alert" as const,
+    title: "Título real do backend",
+    lead: "Lead editorial real vindo do backend.",
+    readMinutes: 4,
+    nextStep: "Quite a fatura de maio.",
+  };
+
+  it("derives the lead (severity/title/lead/readMinutes) from the backend when present", () => {
+    const insight: UserInsight = { ...fullInsight, lead: realLead };
+
+    const vm = insightToFluidaVM(insight, { dimension: "general", cadence: "daily" });
+
+    expect(vm.severity).toBe("alert");
+    expect(vm.title).toBe("Título real do backend");
+    expect(vm.lead).toBe("Lead editorial real vindo do backend.");
+    expect(vm.readMinutes).toBe(4);
+  });
+
+  it("still derives the body from the real insight alongside the real lead", () => {
+    const insight: UserInsight = { ...fullInsight, lead: realLead };
+
+    const vm = insightToFluidaVM(insight, { dimension: "general", cadence: "daily" });
+
+    expect(vm.paragraphs).toEqual(fullInsight.paragraphs);
+    expect(vm.series).toEqual(fullInsight.series);
+  });
+
+  it("keeps dimension/cadence from the active params, not the backend lead", () => {
+    const insight: UserInsight = { ...fullInsight, lead: realLead };
+
+    const vm = insightToFluidaVM(insight, { dimension: "general", cadence: "weekly" });
+
+    expect(vm.dimension).toBe("general");
+    expect(vm.cadence).toBe("weekly");
+  });
+
+  it("uses the real lead even when the body falls back to the mock (lead-only insight)", () => {
+    const leadOnly: UserInsight = { ...baseInsight, lead: realLead };
+    const mock = selectFluidaVM({ dimension: "general", cadence: "daily" });
+
+    const vm = insightToFluidaVM(leadOnly, { dimension: "general", cadence: "daily" });
+
+    // Lead from the backend...
+    expect(vm.severity).toBe("alert");
+    expect(vm.title).toBe("Título real do backend");
+    expect(vm.lead).toBe("Lead editorial real vindo do backend.");
+    expect(vm.readMinutes).toBe(4);
+    // ...body from the mock (no usable backend body).
+    expect(vm.paragraphs).toEqual(mock.paragraphs);
+    expect(vm.series).toEqual(mock.series);
+    expect(vm.highlights).toEqual(mock.highlights);
+  });
+
+  it("falls back to the mock lead when the insight has no lead (legacy/real body only)", () => {
+    const mock = selectFluidaVM({ dimension: "general", cadence: "daily" });
+
+    const vm = insightToFluidaVM(fullInsight, { dimension: "general", cadence: "daily" });
+
+    expect(vm.severity).toBe(mock.severity);
+    expect(vm.title).toBe(mock.title);
+    expect(vm.lead).toBe(mock.lead);
+    expect(vm.readMinutes).toBe(mock.readMinutes);
+  });
+});
+
 describe("insightToFluidaVM — fallback to the mock", () => {
   it("falls back to the mock VM when the insight is null (backend 404)", () => {
     const vm = insightToFluidaVM(null, { dimension: "general", cadence: "daily" });

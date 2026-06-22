@@ -106,15 +106,23 @@ const hasUsableBody = (insight: UserInsight): boolean => {
  * insight, falling back to the mock fixture when the insight is absent or lacks
  * the structured payload.
  *
- * Fallback rule (ausência-safe — the screen is never empty):
- * - `insight === null` (no insight yet / backend 404) ⇒ mock.
- * - insight present but with neither `paragraphs` nor `series` (legacy backend,
- *   additive fields not yet shipped) ⇒ mock.
- * - otherwise ⇒ real reading: the editorial **lead** (severity, headline,
- *   opening lead, reading time) is taken from the mock recorte for the
- *   dimension/cadence (the backend supplies prose + numbers, not the per-theme
- *   editorial framing), while `paragraphs`, `series`, `highlights` and `retro`
- *   come from the insight.
+ * The **lead** and the **body** fall back independently (ausência-safe — the
+ * screen is never empty):
+ *
+ * - Lead (severity / headline / opening lead / reading time): taken from the
+ *   backend `insight.lead` (PR #1508) when present; otherwise from the mock
+ *   recorte for the dimension/cadence. `nextStep` rides along on the contract
+ *   but has no slot in this VM yet (etapa 3). `dimension`/`cadence` always come
+ *   from the active params, never from the backend lead.
+ * - Body (`paragraphs` / `series` / `highlights` / `retro`): taken from the
+ *   insight when it carries usable prose or a series; otherwise from the mock.
+ *
+ * Consequences:
+ * - `insight === null` (no insight yet / backend 404) ⇒ full mock.
+ * - insight with neither a usable body nor a `lead` (legacy backend) ⇒ full
+ *   mock.
+ * - insight with a real `lead` but no usable body ⇒ real lead + mock body.
+ * - insight with a usable body but no `lead` ⇒ mock lead + real body.
  *
  * Pure and side-effect free — safe to unit test and to call inside a `useMemo`.
  *
@@ -128,8 +136,28 @@ export const insightToFluidaVM = (
 ): InsightFluidaVM => {
   const mock = selectFluidaVM(params);
 
-  if (!insight || !hasUsableBody(insight)) {
+  if (!insight) {
     return mock;
+  }
+
+  const lead = insight.lead;
+  const leadFields = lead
+    ? {
+        severity: lead.severity,
+        title: lead.title,
+        lead: lead.lead,
+        readMinutes: lead.readMinutes,
+      }
+    : {
+        severity: mock.severity,
+        title: mock.title,
+        lead: mock.lead,
+        readMinutes: mock.readMinutes,
+      };
+
+  if (!hasUsableBody(insight)) {
+    // No usable backend body: keep the mock body, but still honour a real lead.
+    return { ...mock, ...leadFields };
   }
 
   const series = hasUsableSeries(insight.series) ? insight.series : mock.series;
@@ -137,10 +165,7 @@ export const insightToFluidaVM = (
   return {
     dimension: mock.dimension,
     cadence: mock.cadence,
-    severity: mock.severity,
-    title: mock.title,
-    lead: mock.lead,
-    readMinutes: mock.readMinutes,
+    ...leadFields,
     paragraphs: insight.paragraphs ?? [],
     retro: mapRetro(insight, params.dimension),
     highlights: mapHighlights(insight.highlights),

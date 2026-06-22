@@ -12,6 +12,8 @@ import type {
   InsightHistoryResponse,
   InsightItem,
   InsightGenerationPeriodType,
+  InsightLead,
+  InsightLeadSeverity,
   InsightPeriodType,
   InsightRetroEntry,
   InsightRetroSign,
@@ -44,6 +46,7 @@ interface UserInsightPayload {
   readonly cached?: boolean | null;
   readonly context_version?: string | null;
   readonly context_schema_version?: string | null;
+  readonly lead?: unknown;
   readonly paragraphs?: unknown;
   readonly retro?: unknown;
   readonly series?: unknown;
@@ -65,6 +68,7 @@ interface GeneratedInsightPayload {
   readonly cached?: boolean | null;
   readonly generated_at?: string | null;
   readonly created_at?: string | null;
+  readonly lead?: unknown;
   readonly paragraphs?: unknown;
   readonly retro?: unknown;
   readonly series?: unknown;
@@ -174,6 +178,40 @@ const mapDimension = (dimension: unknown): InsightDimension => {
     : "general";
 };
 
+const LEAD_SEVERITIES = new Set<InsightLeadSeverity>(["ok", "attention", "alert"]);
+
+const mapLeadSeverity = (value: unknown): InsightLeadSeverity => {
+  return LEAD_SEVERITIES.has(value as InsightLeadSeverity)
+    ? (value as InsightLeadSeverity)
+    : "attention";
+};
+
+/**
+ * Maps the additive editorial **lead** (backend PR #1508) snake_case→camelCase
+ * (`read_min`→`readMinutes`, `next_step`→`nextStep`). A lead is only usable
+ * when it carries both `title` and `lead` prose; an absent or partial object
+ * yields `null` so the Fluida mapper falls back to the editorial mock.
+ * `readMinutes` defaults to 0 and `nextStep` to "" when missing — the lead can
+ * still be authoritative without a reading time or a next step.
+ */
+const mapLead = (value: unknown): InsightLead | null => {
+  if (!isRecord(value)) {
+    return null;
+  }
+  const title = pickString(value.title);
+  const lead = pickString(value.lead);
+  if (!title || !lead) {
+    return null;
+  }
+  return {
+    severity: mapLeadSeverity(value.severity),
+    title,
+    lead,
+    readMinutes: pickNonNegativeNumber(value.read_min, 0),
+    nextStep: pickString(value.next_step),
+  };
+};
+
 const RETRO_SIGNS = new Set<InsightRetroSign>(["pos", "neg", "neutral"]);
 
 const mapRetroSign = (value: unknown): InsightRetroSign => {
@@ -268,6 +306,7 @@ const mapHighlights = (value: unknown): readonly InsightHighlightData[] | undefi
 };
 
 interface StructuredFluidaSource {
+  readonly lead?: unknown;
   readonly paragraphs?: unknown;
   readonly retro?: unknown;
   readonly series?: unknown;
@@ -275,20 +314,23 @@ interface StructuredFluidaSource {
 }
 
 /**
- * Maps the additive structured "Fluida" fields (backend PR #1502) onto the
- * insight, omitting any field that is absent or unusable. Returned as a partial
- * so spreading it into the mapped insight leaves legacy payloads untouched
- * (absence-safe — the keys simply don't appear).
+ * Maps the additive structured "Fluida" fields (backend PRs #1502 + #1508 —
+ * the editorial `lead`) onto the insight, omitting any field that is absent or
+ * unusable. Returned as a partial so spreading it into the mapped insight
+ * leaves legacy payloads untouched (absence-safe — the keys simply don't
+ * appear).
  */
 const mapStructuredFluidaFields = (
   source: StructuredFluidaSource,
-): Pick<UserInsight, "paragraphs" | "retro" | "series" | "highlights"> => {
+): Pick<UserInsight, "lead" | "paragraphs" | "retro" | "series" | "highlights"> => {
+  const lead = mapLead(source.lead);
   const paragraphs = mapParagraphs(source.paragraphs);
   const retro = mapRetro(source.retro);
   const series = mapSeries(source.series);
   const highlights = mapHighlights(source.highlights);
 
   return {
+    ...(lead ? { lead } : {}),
     ...(paragraphs ? { paragraphs } : {}),
     ...(retro ? { retro } : {}),
     ...(series ? { series } : {}),
