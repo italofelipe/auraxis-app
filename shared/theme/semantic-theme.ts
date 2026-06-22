@@ -21,9 +21,12 @@ export const darkSemanticColors = {
   border: "rgba(255,255,255,0.10)",
   borderStrong: "rgba(68,212,255,0.40)",
   success: colorPalette.lime500,
+  successSubtle: "rgba(66,232,169,0.16)",
   danger: colorPalette.red500,
   dangerStrong: colorPalette.red700,
+  dangerSubtle: "rgba(255,111,121,0.16)",
   warning: colorPalette.orange500,
+  warningSubtle: "rgba(255,184,97,0.16)",
   info: colorPalette.cyan500,
 } as const;
 
@@ -48,9 +51,12 @@ export const lightSemanticColors = {
   border: "#D8E3EF",
   borderStrong: "#087FA7",
   success: "#087F5B",
+  successSubtle: "#DCF2EA",
   danger: "#C2414D",
   dangerStrong: "#A33440",
+  dangerSubtle: "#FBE4E6",
   warning: "#B7791F",
+  warningSubtle: "#FBEFD9",
   info: "#2563EB",
 } as const;
 

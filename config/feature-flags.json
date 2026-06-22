@@ -99,6 +99,16 @@
       "status": "enabled-prod",
       "description": "Controla o hub mobile de insights de IA e a filtragem contextual por dimensao.",
       "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
+    },
+    {
+      "key": "app.insights.fluida",
+      "owner": "platform",
+      "createdAt": "2026-06-21",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "draft",
+      "description": "Controla a nova leitura editorial Fluida dos insights de IA no app (entrega incremental, default OFF).",
+      "repositories": ["auraxis-app", "auraxis-api"]
     }
   ]
 }
