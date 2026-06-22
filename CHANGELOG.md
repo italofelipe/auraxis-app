@@ -1,5 +1,37 @@
 # Changelog
 
+## [1.11.0](https://github.com/italofelipe/auraxis-app/compare/v1.10.0...v1.11.0) (2026-06-22)
+
+
+### Features
+
+* **animations:** add bar-grow animation hook for data viz ([1785e5e](https://github.com/italofelipe/auraxis-app/commit/1785e5e0512f212d448c89412c863e74838384c0))
+* **insights:** add fluida beat components (compare, chart, pull-stat) ([d6eee2c](https://github.com/italofelipe/auraxis-app/commit/d6eee2cba57137e187bb37c659b8e94169fd753d))
+* **insights:** add fluida etapa-2 vm, sign and series logic ([9f54679](https://github.com/italofelipe/auraxis-app/commit/9f54679273ef31c30a77313d21a2372c74a44d72))
+* **insights:** add fluida masthead and editorial lead (etapa 1) ([7ba1e30](https://github.com/italofelipe/auraxis-app/commit/7ba1e3005cf7695938f6a442683e93ae291f0c41)), closes [#599](https://github.com/italofelipe/auraxis-app/issues/599)
+* **insights:** add pure insightToFluidaVM mapper with mock fallback ([7bea7fb](https://github.com/italofelipe/auraxis-app/commit/7bea7fbd718b07e560d976fb71d9157cf783d54f))
+* **insights:** add shared InsightSection + compact recorte logic ([55e400f](https://github.com/italofelipe/auraxis-app/commit/55e400fd8eba8f860f6df0d72e6c15a6bfbdd616)), closes [#605](https://github.com/italofelipe/auraxis-app/issues/605)
+* **insights:** animate fluida chart bars growing from baseline ([ab2b5b8](https://github.com/italofelipe/auraxis-app/commit/ab2b5b8e2ab885e71a60428b5f582d8623c372e7))
+* **insights:** compose fluida etapa-2 beats into the screen ([86c2c93](https://github.com/italofelipe/auraxis-app/commit/86c2c9330d094bfcc1390e54af26e107cea08386)), closes [#601](https://github.com/italofelipe/auraxis-app/issues/601)
+* **insights:** conectar a tela Fluida aos dados reais da IA (mock-&gt;DTO) ([69804f1](https://github.com/italofelipe/auraxis-app/commit/69804f15975a4e99f8322e6c9b4a43089c189004))
+* **insights:** etapa 4 — recorte de insights por página de feature ([f1babd6](https://github.com/italofelipe/auraxis-app/commit/f1babd6604fbc9561f87051435af6f74425ad5db))
+* **insights:** expose section selector and deep-link the Fluida screen ([9841037](https://github.com/italofelipe/auraxis-app/commit/984103700026e13ead59d5627eee8aad95946c59)), closes [#605](https://github.com/italofelipe/auraxis-app/issues/605)
+* **insights:** fluida — etapa 1 (masthead + lead editorial) ([b374486](https://github.com/italofelipe/auraxis-app/commit/b374486bade8815146106ac4de984411f5605560))
+* **insights:** fluida etapa 3 — refino de cadência e temas ([6aa8dda](https://github.com/italofelipe/auraxis-app/commit/6aa8dda192008ad541d28e7b3fb10426507ebee9))
+* **insights:** gate fluida screen behind app.insights.fluida flag ([c55044b](https://github.com/italofelipe/auraxis-app/commit/c55044b80f716a86223480f0abada2f2e8f78613)), closes [#599](https://github.com/italofelipe/auraxis-app/issues/599)
+* **insights:** Insights Fluida — etapa 2 (beats: comparativos, gráfico, pull-stat) ([509c55f](https://github.com/italofelipe/auraxis-app/commit/509c55f25f71bd773615de712badbe24cf505a7f))
+* **insights:** map additive fluida fields in insight contract ([678be6e](https://github.com/italofelipe/auraxis-app/commit/678be6e2577573aff49d03fbc0f829837c5c3e74)), closes [#607](https://github.com/italofelipe/auraxis-app/issues/607)
+* **insights:** plug InsightSection into the five feature pages ([e90f5b8](https://github.com/italofelipe/auraxis-app/commit/e90f5b831c098cd8efb213583c68933d7f819a4d)), closes [#605](https://github.com/italofelipe/auraxis-app/issues/605)
+* **insights:** wire fluida screen and section to the real insight ([7824394](https://github.com/italofelipe/auraxis-app/commit/78243946248dea0696cde17e9bc10241268e41c5))
+* **insights:** wire real editorial lead into fluida vm ([aff088c](https://github.com/italofelipe/auraxis-app/commit/aff088c09c08d7921cf8ff6e55b20dc400e9a93e))
+* **theme:** add severity-subtle tokens and newsreader serif font ([b5758f6](https://github.com/italofelipe/auraxis-app/commit/b5758f6bfa034a1ad7b111f95e63f17ae1e60244)), closes [#599](https://github.com/italofelipe/auraxis-app/issues/599)
+* **transactions:** add invoice-badge helper for credit-card feed rows ([c5a20c6](https://github.com/italofelipe/auraxis-app/commit/c5a20c6cab2b07acb14de4a064caf912f2eb07ed)), closes [#597](https://github.com/italofelipe/auraxis-app/issues/597)
+* **transactions:** animações de entrada transform-only no feed ([#596](https://github.com/italofelipe/auraxis-app/issues/596)) ([4350026](https://github.com/italofelipe/auraxis-app/commit/435002604a669e841a57991c1a51f2ae3578b472))
+* **transactions:** derive invoiceBadgeMonth in the feed view-model ([397f65c](https://github.com/italofelipe/auraxis-app/commit/397f65ceff8afbad5ae356b1583c9c7139990597)), closes [#597](https://github.com/italofelipe/auraxis-app/issues/597)
+* **transactions:** redesign da tela de Transações (feed Fácil/Analítico) ([#591](https://github.com/italofelipe/auraxis-app/issues/591)) ([6780859](https://github.com/italofelipe/auraxis-app/commit/67808596187282fd072b581c33a9f85c4fc9e939))
+* **transactions:** render discreet "fatura {month}" chip on feed cards ([c1b25d4](https://github.com/italofelipe/auraxis-app/commit/c1b25d406331ecb4f0a6a779860796014df588c0)), closes [#597](https://github.com/italofelipe/auraxis-app/issues/597)
+* **transactions:** selo "fatura {mês}" em lançamentos de cartão no feed ([c93b794](https://github.com/italofelipe/auraxis-app/commit/c93b794da7ec67a74bada286fdab18b379f4d56a))
+
 ## [1.10.0](https://github.com/italofelipe/auraxis-app/compare/v1.9.0...v1.10.0) (2026-06-21)
 
 
