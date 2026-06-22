@@ -86,6 +86,23 @@ export type AiInsightItemType = {
   type: Scalars['String']['output'];
 };
 
+/**
+ * Editorial lead (masthead) for the Fluida screen (#1503).
+ *
+ * ``severity`` is a deterministic heuristic over the calculated retro/highlights
+ * (``ok`` | ``attention`` | ``alert``); ``read_min`` is fixed by cadence;
+ * ``title`` / ``lead`` / ``next_step`` are derived from the AI ``summary`` (no
+ * extra LLM call).
+ */
+export type AiInsightLeadType = {
+  __typename?: 'AIInsightLeadType';
+  lead: Scalars['String']['output'];
+  nextStep: Scalars['String']['output'];
+  readMin: Scalars['Int']['output'];
+  severity: Scalars['String']['output'];
+  title: Scalars['String']['output'];
+};
+
 /** One calculated retrospective metric for the Fluida screen (#1501). */
 export type AiInsightRetroEntryType = {
   __typename?: 'AIInsightRetroEntryType';
@@ -541,6 +558,7 @@ export type GenerateAiInsightPayload = {
   highlights?: Maybe<Array<Maybe<AiInsightHighlightType>>>;
   id?: Maybe<Scalars['String']['output']>;
   items?: Maybe<Array<Maybe<AiInsightItemType>>>;
+  lead?: Maybe<AiInsightLeadType>;
   model?: Maybe<Scalars['String']['output']>;
   ok: Scalars['Boolean']['output'];
   paragraphs?: Maybe<Array<Maybe<Scalars['String']['output']>>>;
