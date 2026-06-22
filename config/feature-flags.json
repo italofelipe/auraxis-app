@@ -106,8 +106,8 @@
       "createdAt": "2026-06-21",
       "removeBy": "2026-12-31",
       "type": "release",
-      "status": "draft",
-      "description": "Controla a nova leitura editorial Fluida dos insights de IA no app (entrega incremental, default OFF).",
+      "status": "enabled-prod",
+      "description": "Controla a nova leitura editorial Fluida dos insights de IA no app (ativada em producao).",
       "repositories": ["auraxis-app", "auraxis-api"]
     }
   ]
