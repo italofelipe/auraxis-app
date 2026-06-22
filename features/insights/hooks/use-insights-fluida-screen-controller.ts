@@ -5,10 +5,10 @@ import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import type { InsightDimension } from "@/features/insights/contracts";
 import type {
   InsightCadence,
-  InsightLeadVM,
+  InsightFluidaVM,
 } from "@/features/insights/fluida/contracts";
 import { getInsightDimensionLabel } from "@/features/insights/hooks/use-insights-by-dimension";
-import { selectFluidaLead } from "@/features/insights/mocks/fluida-lead";
+import { selectFluidaVM } from "@/features/insights/mocks/fluida-vm";
 
 /**
  * A selectable theme tab in the masthead (one per insight dimension).
@@ -29,7 +29,9 @@ export interface InsightCadenceOption {
 export interface InsightsFluidaScreenController {
   readonly cadence: InsightCadence;
   readonly dimension: InsightDimension;
-  readonly lead: InsightLeadVM;
+  readonly vm: InsightFluidaVM;
+  /** Whether the "Como se compara" beat renders (general dimension only). */
+  readonly showCompare: boolean;
   readonly isDark: boolean;
   readonly cadenceOptions: readonly InsightCadenceOption[];
   readonly dimensionTabs: readonly InsightDimensionTab[];
@@ -57,11 +59,14 @@ const CADENCE_OPTIONS: readonly InsightCadenceOption[] = [
 ];
 
 /**
- * Screen controller for the "Fluida" insights screen (etapa 1). Owns the
- * selected cadence and dimension, derives the editorial lead VM from the
- * mock fixture, and bridges the light/dark toggle to the app shell theme
- * preference. View-only components consume this; no business logic lives
- * in the screen itself.
+ * Screen controller for the "Fluida" insights screen (etapa 1 + 2). Owns the
+ * selected cadence and dimension, derives the full reading VM from the mock
+ * fixture, flags whether the comparative beat applies (general only), and
+ * bridges the light/dark toggle to the app shell theme preference. View-only
+ * components consume this; no business logic lives in the screen itself.
+ *
+ * INTEGRATION POINT: {@link selectFluidaVM} is the single seam to the
+ * AI-generation backend — swap it for a query hook once the contract ships.
  *
  * @returns The derived state and handlers for the Fluida screen.
  */
@@ -72,10 +77,11 @@ export const useInsightsFluidaScreenController =
     const resolvedTheme = useResolvedTheme();
     const isDark = resolvedTheme === "auraxis_dark";
 
-    const lead = useMemo(
-      () => selectFluidaLead({ dimension, cadence }),
+    const vm = useMemo(
+      () => selectFluidaVM({ dimension, cadence }),
       [cadence, dimension],
     );
+    const showCompare = dimension === "general";
 
     const dimensionTabs = useMemo<readonly InsightDimensionTab[]>(
       () =>
@@ -93,7 +99,8 @@ export const useInsightsFluidaScreenController =
     return {
       cadence,
       dimension,
-      lead,
+      vm,
+      showCompare,
       isDark,
       cadenceOptions: CADENCE_OPTIONS,
       dimensionTabs,
