@@ -7,8 +7,9 @@ import type {
   InsightCadence,
   InsightFluidaVM,
 } from "@/features/insights/fluida/contracts";
+import { insightToFluidaVM } from "@/features/insights/fluida/insight-to-fluida-vm";
 import { getInsightDimensionLabel } from "@/features/insights/hooks/use-insights-by-dimension";
-import { selectFluidaVM } from "@/features/insights/mocks/fluida-vm";
+import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 
 /**
  * A selectable theme tab in the masthead (one per insight dimension).
@@ -69,13 +70,16 @@ const CADENCE_OPTIONS: readonly InsightCadenceOption[] = [
 
 /**
  * Screen controller for the "Fluida" insights screen (etapa 1 + 2). Owns the
- * selected cadence and dimension, derives the full reading VM from the mock
- * fixture, flags whether the comparative beat applies (general only), and
- * bridges the light/dark toggle to the app shell theme preference. View-only
- * components consume this; no business logic lives in the screen itself.
+ * selected cadence and dimension, derives the full reading VM from the **real**
+ * insight (the latest AI insight loaded via {@link useWeeklyInsight}), flags
+ * whether the comparative beat applies (general only), and bridges the
+ * light/dark toggle to the app shell theme preference. View-only components
+ * consume this; no business logic lives in the screen itself.
  *
- * INTEGRATION POINT: {@link selectFluidaVM} is the single seam to the
- * AI-generation backend — swap it for a query hook once the contract ships.
+ * The VM is derived by {@link insightToFluidaVM}, which falls back to the mock
+ * fixture when the insight is absent (404 / not yet loaded) or lacks the
+ * additive structured fields (`paragraphs`/`retro`/`series`/`highlights` —
+ * backend not yet deployed). The screen is therefore never empty.
  *
  * @param options Optional initial dimension (e.g. from a deep link).
  * @returns The derived state and handlers for the Fluida screen.
@@ -90,9 +94,11 @@ export const useInsightsFluidaScreenController = (
     const resolvedTheme = useResolvedTheme();
     const isDark = resolvedTheme === "auraxis_dark";
 
+    const { insight } = useWeeklyInsight();
+
     const vm = useMemo(
-      () => selectFluidaVM({ dimension, cadence }),
-      [cadence, dimension],
+      () => insightToFluidaVM(insight, { dimension, cadence }),
+      [insight, cadence, dimension],
     );
     const showCompare = dimension === "general";
 

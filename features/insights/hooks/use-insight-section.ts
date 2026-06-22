@@ -1,7 +1,8 @@
 import { useMemo } from "react";
 
 import type { InsightDimension } from "@/features/insights/contracts";
-import { selectFluidaVM } from "@/features/insights/mocks/fluida-vm";
+import { insightToFluidaVM } from "@/features/insights/fluida/insight-to-fluida-vm";
+import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 import { AI_INSIGHTS_FLUIDA_FEATURE_FLAG_KEY } from "@/features/insights/insights-config";
 import { isFeatureEnabled } from "@/shared/feature-flags";
 import {
@@ -27,17 +28,19 @@ const resolveSectionDimension = (dimension: string): InsightDimension => {
 /**
  * Reusable insights selector that feeds the per-feature "Insights de IA"
  * section. Gated by the `app.insights.fluida` flag: returns `null` when the
- * flag is OFF (the feature page then renders no section). When ON, it selects
- * the daily Fluida VM for the requested dimension from the mock fixture and
- * condenses it into the compact {@link InsightSectionVM} (lead + at most two
- * highlights).
+ * flag is OFF (the feature page then renders no section). When ON, it derives
+ * the daily Fluida VM for the requested dimension from the **real** latest
+ * insight ({@link useWeeklyInsight}) and condenses it into the compact
+ * {@link InsightSectionVM} (lead + at most two highlights).
+ *
+ * The derivation goes through {@link insightToFluidaVM}, which falls back to the
+ * mock fixture when the insight is absent or lacks the additive structured
+ * fields — so the section is never empty while the backend rolls out.
  *
  * Lives in `features/insights` (the cross-cutting insights provider) on
  * purpose: the section UI is the shared, reusable piece — the data seam stays
- * next to the insights mock so the shared component never depends on a feature.
- *
- * INTEGRATION POINT: {@link selectFluidaVM} is the single seam to the
- * AI-generation backend — swap it for a query hook once the contract ships.
+ * next to the insights provider so the shared component never depends on a
+ * feature.
  *
  * @param dimension Feature dimension to slice (e.g. `transactions`, `goals`).
  * @returns The compact section VM, or `null` when the flag is OFF.
@@ -46,6 +49,7 @@ export const useInsightSection = (
   dimension: string,
 ): InsightSectionVM | null => {
   const enabled = isFeatureEnabled(AI_INSIGHTS_FLUIDA_FEATURE_FLAG_KEY);
+  const { insight } = useWeeklyInsight({ enabled });
 
   return useMemo<InsightSectionVM | null>(() => {
     if (!enabled) {
@@ -53,7 +57,10 @@ export const useInsightSection = (
     }
 
     const resolved = resolveSectionDimension(dimension);
-    const fullVM = selectFluidaVM({ dimension: resolved, cadence: "daily" });
+    const fullVM = insightToFluidaVM(insight, {
+      dimension: resolved,
+      cadence: "daily",
+    });
     return toInsightSectionVM(fullVM);
-  }, [dimension, enabled]);
+  }, [dimension, enabled, insight]);
 };
