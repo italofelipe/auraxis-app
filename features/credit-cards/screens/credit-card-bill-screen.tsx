@@ -7,11 +7,14 @@ import { InvoiceGroupedItems } from "@/features/credit-cards/components/invoice-
 import { InvoiceHero } from "@/features/credit-cards/components/invoice-hero";
 import { CardStickyCta } from "@/features/credit-cards/components/card-sticky-cta";
 import { OndeFoiGasto } from "@/features/credit-cards/components/onde-foi-gasto";
+import { CREDIT_CARD_EXPENSE_ACTIONS_FEATURE_FLAG_KEY } from "@/features/credit-cards/expense-actions-config";
 import {
   type CreditCardBillScreenController,
   useCreditCardBillScreenController,
 } from "@/features/credit-cards/hooks/use-credit-card-bill-screen-controller";
 import type { CreditCardInvoiceViewModel } from "@/features/credit-cards/model/credit-card-invoice";
+import { DeleteConfirmModal } from "@/features/transactions/components/transaction-action-modals";
+import { isFeatureEnabled } from "@/shared/feature-flags";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSkeletonBlock } from "@/shared/components/app-skeleton-block";
@@ -58,6 +61,22 @@ export function CreditCardBillScreen(): ReactElement {
         onBack={controller.handleBack}
       />
       <CreditCardBillBody controller={controller} invoice={controller.invoice} />
+      <DeleteConfirmModal
+        target={controller.deleteTarget}
+        isDeleting={controller.isDeletingExpense}
+        title="Remover despesa?"
+        description={
+          controller.deleteTarget
+            ? `${controller.deleteTarget.title} será removida desta fatura e das Transações. Esta ação não pode ser desfeita.`
+            : ""
+        }
+        occurrenceLabel="Remover"
+        showSeriesOption={false}
+        onClose={controller.closeDeleteExpense}
+        onConfirm={() => {
+          void controller.confirmDeleteExpense();
+        }}
+      />
       <CardStickyCta
         label={`Pagar fatura · ${formatCurrency(controller.invoice.total)}`}
         icon="lightning-bolt"
@@ -77,6 +96,9 @@ function CreditCardBillBody({
   controller,
   invoice,
 }: CreditCardBillBodyProps): ReactElement {
+  const expenseActionsEnabled = isFeatureEnabled(
+    CREDIT_CARD_EXPENSE_ACTIONS_FEATURE_FLAG_KEY,
+  );
   return (
     <ScrollView
       flex={1}
@@ -93,7 +115,22 @@ function CreditCardBillBody({
         onNextMonth={controller.handleNextMonth}
       />
       <OndeFoiGasto categories={invoice.groupedByCategory} />
-      <InvoiceGroupedItems groups={invoice.groupedByCategory} />
+      <InvoiceGroupedItems
+        groups={invoice.groupedByCategory}
+        onEditExpense={
+          expenseActionsEnabled ? controller.handleEditExpense : undefined
+        }
+        onDuplicateExpense={
+          expenseActionsEnabled
+            ? (item) => {
+                void controller.handleDuplicateExpense(item);
+              }
+            : undefined
+        }
+        onRequestDeleteExpense={
+          expenseActionsEnabled ? controller.requestDeleteExpense : undefined
+        }
+      />
     </ScrollView>
   );
 }

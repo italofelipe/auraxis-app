@@ -14,6 +14,7 @@ import { OndeFoiGasto } from "@/features/credit-cards/components/onde-foi-gasto"
 import type { CreditCard } from "@/features/credit-cards/contracts";
 import type { AnalyticsViewModel } from "@/features/credit-cards/model/credit-card-analytics";
 import type { StatementViewModel } from "@/features/credit-cards/model/credit-card-statement";
+import { transactionFixture } from "@/features/transactions/mocks";
 
 const card: CreditCard = {
   id: "card-1",
@@ -51,6 +52,16 @@ const categories: StatementViewModel["categories"] = [
         installmentCount: null,
         installmentGroupId: null,
         status: "posted",
+        transaction: {
+          ...transactionFixture,
+          id: "tx-1",
+          title: "Renner",
+          amount: "938.57",
+          dueDate: "2026-06-25",
+          tagId: "t1",
+          creditCardId: "card-1",
+          status: "pending",
+        },
       },
     ],
   },

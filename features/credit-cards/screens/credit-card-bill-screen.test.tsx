@@ -5,12 +5,18 @@ import { TestProviders } from "@/shared/testing/test-providers";
 import { CreditCardBillScreen } from "@/features/credit-cards/screens/credit-card-bill-screen";
 import type { CreditCardBillScreenController } from "@/features/credit-cards/hooks/use-credit-card-bill-screen-controller";
 import type { CreditCardInvoiceViewModel } from "@/features/credit-cards/model/credit-card-invoice";
+import type { TransactionRecord } from "@/features/transactions/contracts";
 import { resolveCardGradient } from "@/shared/theme";
 
 const mockHandleBack = jest.fn();
 const mockHandlePreviousMonth = jest.fn();
 const mockHandleNextMonth = jest.fn();
 const mockHandlePayBill = jest.fn();
+const mockHandleEditExpense = jest.fn();
+const mockHandleDuplicateExpense = jest.fn();
+const mockRequestDeleteExpense = jest.fn();
+const mockConfirmDeleteExpense = jest.fn();
+const mockCloseDeleteExpense = jest.fn();
 let mockController: Partial<CreditCardBillScreenController> = {};
 
 const mockCreditCard = {
@@ -25,6 +31,35 @@ const mockCreditCard = {
   description: null,
   benefits: [],
   validityDate: null,
+  createdAt: null,
+  updatedAt: null,
+};
+
+const mockTransaction: TransactionRecord = {
+  id: "tx-1",
+  title: "Renner",
+  amount: "938.57",
+  type: "expense",
+  dueDate: "2026-06-25",
+  startDate: null,
+  endDate: null,
+  description: null,
+  observation: null,
+  isRecurring: false,
+  isInstallment: false,
+  installmentCount: null,
+  recurrenceInterval: 1,
+  recurrenceUnit: "month",
+  tagId: "tag-compras",
+  accountId: null,
+  creditCardId: "card-1",
+  status: "paid",
+  currency: "BRL",
+  source: "manual",
+  externalId: null,
+  bankName: null,
+  installmentGroupId: null,
+  paidAt: null,
   createdAt: null,
   updatedAt: null,
 };
@@ -58,6 +93,7 @@ const mockInvoice: CreditCardInvoiceViewModel = {
           installmentCount: null,
           installmentGroupId: null,
           status: "paid",
+          transaction: mockTransaction,
         },
       ],
     },
@@ -83,6 +119,15 @@ jest.mock("@/features/credit-cards/hooks/use-credit-card-bill-screen-controller"
       handleNextMonth: mockHandleNextMonth,
       handleBack: mockHandleBack,
       handlePayBill: mockHandlePayBill,
+      handleEditExpense: mockHandleEditExpense,
+      handleDuplicateExpense: mockHandleDuplicateExpense,
+      requestDeleteExpense: mockRequestDeleteExpense,
+      confirmDeleteExpense: mockConfirmDeleteExpense,
+      closeDeleteExpense: mockCloseDeleteExpense,
+      deleteTarget: null,
+      isDeletingExpense: false,
+      duplicatingTransactionId: null,
+      expenseActionError: null,
       ...mockController,
     }) as CreditCardBillScreenController,
 }));
@@ -118,6 +163,18 @@ describe("CreditCardBillScreen", () => {
     expect(getByText("Onde foi gasto")).toBeTruthy();
     expect(getByText("Itens da fatura")).toBeTruthy();
     expect(getByText("Renner")).toBeTruthy();
+  });
+
+  it("encaminha ações de despesa para o controller", () => {
+    const { getByTestId } = renderScreen();
+
+    fireEvent.press(getByTestId("invoice-item-edit-tx-1"));
+    fireEvent.press(getByTestId("invoice-item-duplicate-tx-1"));
+    fireEvent.press(getByTestId("invoice-item-delete-tx-1"));
+
+    expect(mockHandleEditExpense).toHaveBeenCalled();
+    expect(mockHandleDuplicateExpense).toHaveBeenCalled();
+    expect(mockRequestDeleteExpense).toHaveBeenCalled();
   });
 
   it("navega entre meses pelo hero", () => {

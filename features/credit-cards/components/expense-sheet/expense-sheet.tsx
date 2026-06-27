@@ -40,10 +40,12 @@ export interface ExpenseSheetProps {
 }
 
 interface SheetHeaderProps {
+  readonly controller: ExpenseFormController;
   readonly onClose: () => void;
 }
 
-function SheetHeader({ onClose }: SheetHeaderProps): ReactElement {
+function SheetHeader({ controller, onClose }: SheetHeaderProps): ReactElement {
+  const isEdit = controller.formMode === "edit";
   return (
     <XStack
       paddingHorizontal="$5"
@@ -52,9 +54,11 @@ function SheetHeader({ onClose }: SheetHeaderProps): ReactElement {
       justifyContent="space-between"
     >
       <YStack>
-        <AppHeading level={2}>Lançar despesa</AppHeading>
+        <AppHeading level={2}>
+          {isEdit ? "Detalhes da despesa" : "Lançar despesa"}
+        </AppHeading>
         <AppText size="bodySm" tone="muted">
-          Compra, fatura e impacto
+          {isEdit ? "Editar despesa vinculada" : "Compra, fatura e impacto"}
         </AppText>
       </YStack>
       <XStack
@@ -80,6 +84,7 @@ interface SheetFooterProps {
 
 function SheetFooter({ controller, onSubmit }: SheetFooterProps): ReactElement {
   const insets = useSafeAreaInsets();
+  const isEdit = controller.formMode === "edit";
   return (
     <YStack
       paddingHorizontal="$5"
@@ -91,19 +96,27 @@ function SheetFooter({ controller, onSubmit }: SheetFooterProps): ReactElement {
       backgroundColor="$surfaceCard"
     >
       <AppText size="caption" tone="muted" textAlign="center">
-        {controller.creditCardId
-          ? "Lançar no cartão selecionado"
-          : "O cartão pode ser escolhido depois"}
+        {isEdit
+          ? "Alterações refletem em Cartões e Transações"
+          : controller.creditCardId
+            ? "Lançar no cartão selecionado"
+            : "O cartão pode ser escolhido depois"}
       </AppText>
       <AppButton
         fullWidth
         glow
         disabled={!controller.canSubmit || controller.isSubmitting}
-        accessibilityLabel="Lançar despesa"
+        accessibilityLabel={isEdit ? "Salvar alterações" : "Lançar despesa"}
         testID="expense-sheet-submit"
         onPress={onSubmit}
       >
-        {controller.isSubmitting ? "Lançando…" : "Lançar despesa"}
+        {controller.isSubmitting
+          ? isEdit
+            ? "Salvando…"
+            : "Lançando…"
+          : isEdit
+            ? "Salvar alterações"
+            : "Lançar despesa"}
       </AppButton>
     </YStack>
   );
@@ -124,13 +137,44 @@ interface SheetBodyProps {
   readonly controller: ExpenseFormController;
 }
 
+function SyncBanner(): ReactElement {
+  const theme = useTheme();
+  return (
+    <XStack
+      gap="$3"
+      padding="$3"
+      borderRadius="$3"
+      borderWidth={borderWidths.hairline}
+      borderColor="$primarySubtle"
+      backgroundColor="$surfaceRaised"
+      alignItems="flex-start"
+    >
+      <MaterialCommunityIcons
+        name="swap-horizontal"
+        size={iconSizes.md}
+        color={theme.primary?.val}
+      />
+      <YStack flex={1} gap="$1">
+        <AppText size="bodySm" fontWeight="$7">
+          Vinculada às Transações
+        </AppText>
+        <AppText size="caption" tone="muted">
+          Qualquer alteração aqui é refletida em Cartões e Transações.
+        </AppText>
+      </YStack>
+    </XStack>
+  );
+}
+
 /** Conteúdo rolável do sheet (todas as seções do formulário). */
 function SheetBody({ controller }: SheetBodyProps): ReactElement {
+  const isEdit = controller.formMode === "edit";
   return (
     <BottomSheetScrollView
       contentContainerStyle={{ paddingHorizontal: 20, paddingBottom: 24, gap: 16 }}
       keyboardShouldPersistTaps="handled"
     >
+      {isEdit ? <SyncBanner /> : null}
       <AmountField
         value={controller.amountText}
         onChangeAmount={controller.setAmountText}
@@ -158,8 +202,18 @@ function SheetBody({ controller }: SheetBodyProps): ReactElement {
           value={controller.purchaseDate}
           onChangeText={controller.setPurchaseDate}
         />
+        <AppInputField
+          id="expense-description"
+          label="Observações"
+          placeholder="Detalhes, contexto ou nota livre"
+          value={controller.description}
+          onChangeText={controller.setDescription}
+          multiline
+          numberOfLines={3}
+          testID="expense-description-input"
+        />
       </YStack>
-      {controller.installmentsEnabled ? (
+      {controller.installmentsEnabled && !isEdit ? (
         <InstallmentSection
           mode={controller.mode}
           installments={controller.installments}
@@ -221,7 +275,7 @@ export const ExpenseSheet = forwardRef<BottomSheetModal, ExpenseSheetProps>(
         onDismiss={onClose}
       >
         <YStack flex={1} testID="expense-sheet">
-          <SheetHeader onClose={onClose} />
+          <SheetHeader controller={controller} onClose={onClose} />
           <SheetBody controller={controller} />
           <SheetFooter controller={controller} onSubmit={onSubmit} />
         </YStack>

@@ -44,6 +44,7 @@ const buildController = (
   title: "",
   amountText: "120.00",
   amount: 120,
+  formMode: "create",
   purchaseDate: "2026-06-20",
   creditCardId: null,
   tagId: null,
@@ -53,6 +54,7 @@ const buildController = (
   installments: 3,
   hasDownPayment: false,
   downPaymentText: "",
+  description: "",
   plan: { downPayment: 0, financed: 120, perInstallment: 40 },
   distribution: [
     { key: "full", label: "jul", sub: "à vista", value: 120, isEntry: false },
@@ -80,6 +82,7 @@ const buildController = (
   setInstallments: jest.fn(),
   toggleDownPayment: jest.fn(),
   setDownPaymentText: jest.fn(),
+  setDescription: jest.fn(),
   submit: jest.fn(),
   reset: jest.fn(),
   ...overrides,
@@ -114,6 +117,7 @@ describe("ExpenseSheet", () => {
     expect(screen.getAllByText("Lançar despesa").length).toBeGreaterThanOrEqual(1);
     expect(screen.getByTestId("expense-amount-field")).toBeTruthy();
     expect(screen.getByTestId("expense-card-chips")).toBeTruthy();
+    expect(screen.getByTestId("expense-description-input")).toBeTruthy();
     expect(screen.getByTestId("installment-section")).toBeTruthy();
     expect(screen.getByTestId("classification-section")).toBeTruthy();
     expect(screen.getByTestId("fatura-preview")).toBeTruthy();
@@ -163,5 +167,22 @@ describe("ExpenseSheet", () => {
     expect(screen.getByTestId("distribution-chip-p0")).toBeTruthy();
     expect(screen.getByTestId("distribution-chip-p1")).toBeTruthy();
     expect(screen.getByTestId("installment-down-payment-toggle")).toBeTruthy();
+  });
+
+  it("em modo edição exibe banner de vínculo e CTA de salvar", () => {
+    renderSheet(
+      buildController({
+        formMode: "edit",
+        creditCardId: "cc-1",
+        description: "Compra importada",
+      }),
+      { onClose: jest.fn(), onSubmit: jest.fn() },
+    );
+
+    expect(screen.getByText("Detalhes da despesa")).toBeTruthy();
+    expect(screen.getByText("Vinculada às Transações")).toBeTruthy();
+    expect(screen.getByText(/Qualquer alteração aqui é refletida/u)).toBeTruthy();
+    expect(screen.getByText("Salvar alterações")).toBeTruthy();
+    expect(screen.queryByTestId("installment-section")).toBeNull();
   });
 });

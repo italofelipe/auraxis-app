@@ -5,6 +5,7 @@ import type {
 import { buildAnalytics } from "@/features/credit-cards/model/credit-card-analytics";
 import type { EnrichedTransaction } from "@/features/credit-cards/model/card-transactions";
 import type { Tag } from "@/features/tags/contracts";
+import { transactionFixture } from "@/features/transactions/mocks";
 
 /**
  * Monta uma EnrichedTransaction com defaults para os testes.
@@ -12,20 +13,38 @@ import type { Tag } from "@/features/tags/contracts";
  * @param partial Campos a sobrescrever.
  * @returns EnrichedTransaction completa.
  */
-const etx = (partial: Partial<EnrichedTransaction>): EnrichedTransaction => ({
-  id: "tx-1",
-  title: "Compra",
-  amount: 100,
-  purchaseDate: "2026-06-02",
-  tagId: null,
-  creditCardId: "cc-1",
-  billMonth: "2026-06",
-  isInstallment: false,
-  installmentCount: null,
-  installmentGroupId: null,
-  status: "pending",
-  ...partial,
-});
+const etx = (partial: Partial<EnrichedTransaction>): EnrichedTransaction => {
+  const item = {
+    id: "tx-1",
+    title: "Compra",
+    amount: 100,
+    purchaseDate: "2026-06-02",
+    tagId: null,
+    creditCardId: "cc-1",
+    billMonth: "2026-06",
+    isInstallment: false,
+    installmentCount: null,
+    installmentGroupId: null,
+    status: "pending",
+    ...partial,
+  };
+  return {
+    ...item,
+    transaction: partial.transaction ?? {
+      ...transactionFixture,
+      id: item.id,
+      title: item.title,
+      amount: item.amount.toFixed(2),
+      dueDate: item.purchaseDate,
+      tagId: item.tagId,
+      creditCardId: item.creditCardId,
+      isInstallment: item.isInstallment,
+      installmentCount: item.installmentCount,
+      installmentGroupId: item.installmentGroupId,
+      status: "pending",
+    },
+  };
+};
 
 /**
  * Monta um CreditCard completo com defaults para os testes.

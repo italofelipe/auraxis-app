@@ -16,6 +16,7 @@ import { InvoiceGroupedItems } from "@/features/credit-cards/components/invoice-
 import { InvoiceHero } from "@/features/credit-cards/components/invoice-hero";
 import type { CategoryGroup } from "@/features/credit-cards/model/credit-card-aggregation";
 import type { EnrichedTransaction } from "@/features/credit-cards/model/card-transactions";
+import { transactionFixture } from "@/features/transactions/mocks";
 import { resolveCardGradient } from "@/shared/theme";
 
 const wrap = (node: React.ReactElement) =>
@@ -23,20 +24,38 @@ const wrap = (node: React.ReactElement) =>
 
 const gradient = resolveCardGradient({ id: "card-1", bank: "Inter", name: "Inter" });
 
-const tx = (overrides: Partial<EnrichedTransaction> = {}): EnrichedTransaction => ({
-  id: "tx-1",
-  title: "Renner",
-  amount: 938.57,
-  purchaseDate: "2026-06-25",
-  tagId: "tag-compras",
-  creditCardId: "card-1",
-  billMonth: "2026-06",
-  isInstallment: false,
-  installmentCount: null,
-  installmentGroupId: null,
-  status: "paid",
-  ...overrides,
-});
+const tx = (overrides: Partial<EnrichedTransaction> = {}): EnrichedTransaction => {
+  const item = {
+    id: "tx-1",
+    title: "Renner",
+    amount: 938.57,
+    purchaseDate: "2026-06-25",
+    tagId: "tag-compras",
+    creditCardId: "card-1",
+    billMonth: "2026-06",
+    isInstallment: false,
+    installmentCount: null,
+    installmentGroupId: null,
+    status: "paid",
+    ...overrides,
+  };
+  return {
+    ...item,
+    transaction: overrides.transaction ?? {
+      ...transactionFixture,
+      id: item.id,
+      title: item.title,
+      amount: item.amount.toFixed(2),
+      dueDate: item.purchaseDate,
+      tagId: item.tagId,
+      creditCardId: item.creditCardId,
+      isInstallment: item.isInstallment,
+      installmentCount: item.installmentCount,
+      installmentGroupId: item.installmentGroupId,
+      status: "paid",
+    },
+  };
+};
 
 const category: CategoryGroup = {
   tagId: "tag-compras",

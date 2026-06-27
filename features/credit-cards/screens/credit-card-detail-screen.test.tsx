@@ -5,6 +5,7 @@ import { TestProviders } from "@/shared/testing/test-providers";
 import { CreditCardDetailScreen } from "@/features/credit-cards/screens/credit-card-detail-screen";
 import type { CreditCardDetailScreenController } from "@/features/credit-cards/hooks/use-credit-card-detail-screen-controller";
 import type { CreditCardDetailViewModel } from "@/features/credit-cards/model/credit-card-detail";
+import { transactionFixture } from "@/features/transactions/mocks";
 import { resolveCardGradient } from "@/shared/theme";
 
 const mockHandleBack = jest.fn();
@@ -68,6 +69,16 @@ const mockDetail: CreditCardDetailViewModel = {
       installmentCount: null,
       installmentGroupId: null,
       status: "paid",
+      transaction: {
+        ...transactionFixture,
+        id: "tx-1",
+        title: "Renner",
+        amount: "938.57",
+        dueDate: "2026-06-25",
+        tagId: "tag-compras",
+        creditCardId: "cc-1",
+        status: "paid",
+      },
     },
   ],
 };

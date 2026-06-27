@@ -35,6 +35,8 @@ export interface EnrichedTransaction {
   readonly installmentCount: number | null;
   readonly installmentGroupId: string | null;
   readonly status: string;
+  /** Registro canônico de Transações usado para editar/duplicar/remover. */
+  readonly transaction: TransactionRecord;
 }
 
 /**
@@ -93,6 +95,7 @@ export const enrichCardTransactions = (
         installmentCount: tx.installmentCount,
         installmentGroupId: tx.installmentGroupId,
         status: tx.status,
+        transaction: tx,
       };
     });
 };

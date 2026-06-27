@@ -3,6 +3,7 @@ import type {
   CreditCardBillRecord,
 } from "@/features/credit-cards/contracts";
 import type { Tag } from "@/features/tags/contracts";
+import { transactionFixture } from "@/features/transactions/mocks";
 
 import type { EnrichedTransaction } from "./card-transactions";
 import {
@@ -33,20 +34,38 @@ const tags: readonly Tag[] = [
 
 const buildTx = (
   overrides: Partial<EnrichedTransaction> = {},
-): EnrichedTransaction => ({
-  id: "tx-1",
-  title: "Renner",
-  amount: 938.57,
-  purchaseDate: "2026-05-05",
-  tagId: "tag-compras",
-  creditCardId: "card-1",
-  billMonth: "2026-05",
-  isInstallment: false,
-  installmentCount: null,
-  installmentGroupId: null,
-  status: "paid",
-  ...overrides,
-});
+): EnrichedTransaction => {
+  const item = {
+    id: "tx-1",
+    title: "Renner",
+    amount: 938.57,
+    purchaseDate: "2026-05-05",
+    tagId: "tag-compras",
+    creditCardId: "card-1",
+    billMonth: "2026-05",
+    isInstallment: false,
+    installmentCount: null,
+    installmentGroupId: null,
+    status: "paid",
+    ...overrides,
+  };
+  return {
+    ...item,
+    transaction: overrides.transaction ?? {
+      ...transactionFixture,
+      id: item.id,
+      title: item.title,
+      amount: item.amount.toFixed(2),
+      dueDate: item.purchaseDate,
+      tagId: item.tagId,
+      creditCardId: item.creditCardId,
+      isInstallment: item.isInstallment,
+      installmentCount: item.installmentCount,
+      installmentGroupId: item.installmentGroupId,
+      status: "paid",
+    },
+  };
+};
 
 const buildBill = (
   overrides: Partial<CreditCardBillRecord> = {},

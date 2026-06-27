@@ -91,6 +91,16 @@
       "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
     },
     {
+      "key": "app.credit-cards.expense-actions",
+      "owner": "platform",
+      "createdAt": "2026-06-27",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-dev",
+      "description": "Controla as acoes mobile de editar, duplicar e remover despesas dentro da fatura do cartao.",
+      "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
+    },
+    {
       "key": "app.insights.contextual",
       "owner": "platform",
       "createdAt": "2026-05-19",
