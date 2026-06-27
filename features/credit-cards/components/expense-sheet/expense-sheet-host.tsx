@@ -20,8 +20,9 @@ import { useExpenseSheetStore } from "@/stores/expense-sheet-store";
  */
 export function ExpenseSheetHost(): ReactElement {
   const isOpen = useExpenseSheetStore((state) => state.isOpen);
+  const request = useExpenseSheetStore((state) => state.request);
   const close = useExpenseSheetStore((state) => state.close);
-  const controller = useExpenseForm();
+  const controller = useExpenseForm(request);
   const sheetRef = useRef<BottomSheetModal>(null);
   const { reset } = controller;
 

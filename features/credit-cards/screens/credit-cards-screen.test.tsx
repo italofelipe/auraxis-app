@@ -7,6 +7,7 @@ import type { CardsHomeController } from "@/features/credit-cards/hooks/use-card
 import type { CreditCardsScreenController } from "@/features/credit-cards/hooks/use-credit-cards-screen-controller";
 import type { StatementViewModel } from "@/features/credit-cards/model/credit-card-statement";
 import type { AnalyticsViewModel } from "@/features/credit-cards/model/credit-card-analytics";
+import { transactionFixture } from "@/features/transactions/mocks";
 
 const mockSetView = jest.fn();
 const mockSelectCard = jest.fn();
@@ -61,6 +62,16 @@ const mockFaturas: StatementViewModel = {
           installmentCount: null,
           installmentGroupId: null,
           status: "posted",
+          transaction: {
+            ...transactionFixture,
+            id: "tx-1",
+            title: "Renner",
+            amount: "938.57",
+            dueDate: "2026-06-25",
+            tagId: "t1",
+            creditCardId: "card-1",
+            status: "pending",
+          },
         },
       ],
     },

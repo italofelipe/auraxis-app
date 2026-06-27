@@ -14,11 +14,18 @@ import { useCreditCardsQuery } from "@/features/credit-cards/hooks/use-credit-ca
 import { useTagsQuery } from "@/features/tags/hooks/use-tags-query";
 import type { TransactionRecord } from "@/features/transactions/contracts";
 import { useTransactionsQuery } from "@/features/transactions/hooks/use-transactions-query";
+import {
+  resetExpenseSheetStore,
+  useExpenseSheetStore,
+} from "@/stores/expense-sheet-store";
 import { resolveCardGradient } from "@/shared/theme";
 
 const mockRouterBack = jest.fn();
 const mockRouterReplace = jest.fn();
 let mockCanGoBack = true;
+const mockCreateTransaction = jest.fn<Promise<unknown>, [unknown]>();
+const mockDeleteTransaction = jest.fn<Promise<unknown>, [unknown]>();
+const mockInvalidateQueries = jest.fn<Promise<void>, [unknown]>();
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({
@@ -42,6 +49,25 @@ jest.mock("@/features/tags/hooks/use-tags-query", () => ({
 jest.mock("@/features/transactions/hooks/use-transactions-query", () => ({
   useTransactionsQuery: jest.fn(),
 }));
+jest.mock("@/features/transactions/hooks/use-transaction-mutations", () => ({
+  useCreateTransactionMutation: () => ({
+    mutateAsync: (command: unknown) => mockCreateTransaction(command),
+    isPending: false,
+  }),
+  useDeleteTransactionMutation: () => ({
+    mutateAsync: (command: unknown) => mockDeleteTransaction(command),
+    isPending: false,
+  }),
+}));
+jest.mock("@tanstack/react-query", () => {
+  const actual = jest.requireActual("@tanstack/react-query");
+  return {
+    ...actual,
+    useQueryClient: () => ({
+      invalidateQueries: (command: unknown) => mockInvalidateQueries(command),
+    }),
+  };
+});
 
 const mockedUseBillQuery = jest.mocked(useCreditCardBillQuery);
 const mockedUseCardsQuery = jest.mocked(useCreditCardsQuery);
@@ -123,6 +149,10 @@ const setTransactions = (transactions: readonly TransactionRecord[]): void => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  resetExpenseSheetStore();
+  mockCreateTransaction.mockResolvedValue(undefined);
+  mockDeleteTransaction.mockResolvedValue(undefined);
+  mockInvalidateQueries.mockResolvedValue(undefined);
   mockCanGoBack = true;
   mockedUseCardsQuery.mockReturnValue({
     data: { creditCards: [buildCard()] },
@@ -156,6 +186,99 @@ beforeEach(() => {
       dueDate: "2026-05-08",
     }),
   ]);
+});
+
+describe("useCreditCardBillScreenController — ações de despesa", () => {
+  it("abre o sheet em modo edição com a transação original", () => {
+    const { result } = renderHook(() =>
+      useCreditCardBillScreenController({
+        creditCardId: "card-1",
+        initialMonth: "2026-05",
+      }),
+    );
+    const item = result.current.invoice?.groupedByCategory[0]?.items[0];
+
+    expect(item?.transaction.id).toBe("tx-1");
+    act(() => {
+      if (item) {
+        result.current.handleEditExpense(item);
+      }
+    });
+
+    expect(useExpenseSheetStore.getState().request).toEqual({
+      mode: "edit",
+      transaction: item?.transaction,
+    });
+  });
+
+  it("duplica despesa como uma transação simples pendente", async () => {
+    const { result } = renderHook(() =>
+      useCreditCardBillScreenController({
+        creditCardId: "card-1",
+        initialMonth: "2026-05",
+      }),
+    );
+    const item = result.current.invoice?.groupedByCategory[0]?.items[0];
+
+    await act(async () => {
+      if (item) {
+        await result.current.handleDuplicateExpense(item);
+      }
+    });
+
+    expect(mockCreateTransaction).toHaveBeenCalledWith({
+      title: "Renner (cópia)",
+      amount: "938.57",
+      type: "expense",
+      dueDate: "2026-05-05",
+      status: "pending",
+      tagId: "tag-compras",
+      accountId: null,
+      creditCardId: "card-1",
+      description: null,
+      currency: "BRL",
+      isRecurring: false,
+      isInstallment: false,
+      installmentCount: null,
+    });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["credit-cards"],
+    });
+  });
+
+  it("remove a ocorrência após confirmação", async () => {
+    const { result } = renderHook(() =>
+      useCreditCardBillScreenController({
+        creditCardId: "card-1",
+        initialMonth: "2026-05",
+      }),
+    );
+    const item = result.current.invoice?.groupedByCategory[0]?.items[0];
+
+    act(() => {
+      if (item) {
+        result.current.requestDeleteExpense(item);
+      }
+    });
+
+    expect(result.current.deleteTarget).toEqual({
+      id: "tx-1",
+      title: "Renner",
+      isSeries: false,
+    });
+
+    await act(async () => {
+      await result.current.confirmDeleteExpense();
+    });
+
+    expect(mockDeleteTransaction).toHaveBeenCalledWith({
+      transactionId: "tx-1",
+      scope: "occurrence",
+    });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ["credit-cards"],
+    });
+  });
 });
 
 describe("useCreditCardBillScreenController — base", () => {

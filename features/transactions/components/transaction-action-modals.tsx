@@ -125,6 +125,10 @@ export interface DeleteConfirmModalProps {
   readonly isDeleting: boolean;
   readonly onConfirm: (transactionId: string, scope: TransactionDeleteScope) => void;
   readonly onClose: () => void;
+  readonly title?: string;
+  readonly description?: string;
+  readonly occurrenceLabel?: string;
+  readonly showSeriesOption?: boolean;
 }
 
 /**
@@ -137,18 +141,25 @@ export function DeleteConfirmModal({
   isDeleting,
   onConfirm,
   onClose,
+  title = "Excluir transacao",
+  description,
+  occurrenceLabel,
+  showSeriesOption = true,
 }: DeleteConfirmModalProps): ReactElement {
+  const resolvedDescription =
+    description ??
+    (target
+      ? target.isSeries
+        ? `"${target.title}" faz parte de uma serie. O que deseja excluir?`
+        : `Excluir "${target.title}"? Ela vai para a lixeira.`
+      : "");
+  const shouldShowSeriesOption = showSeriesOption && target?.isSeries;
+
   return (
     <ActionSheet visible={Boolean(target)} onClose={onClose}>
       <AppSurfaceCard
-        title="Excluir transacao"
-        description={
-          target
-            ? target.isSeries
-              ? `"${target.title}" faz parte de uma serie. O que deseja excluir?`
-              : `Excluir "${target.title}"? Ela vai para a lixeira.`
-            : ""
-        }
+        title={title}
+        description={resolvedDescription}
       >
         <YStack gap="$3">
           <AppButton
@@ -161,9 +172,9 @@ export function DeleteConfirmModal({
             disabled={isDeleting}
             testID="delete-occurrence"
           >
-            {target?.isSeries ? "Excluir somente esta" : "Excluir"}
+            {occurrenceLabel ?? (target?.isSeries ? "Excluir somente esta" : "Excluir")}
           </AppButton>
-          {target?.isSeries ? (
+          {shouldShowSeriesOption ? (
             <AppButton
               tone="danger"
               onPress={() => onConfirm(target.id, "series")}
