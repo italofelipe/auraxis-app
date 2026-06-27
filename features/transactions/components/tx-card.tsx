@@ -1,6 +1,6 @@
 import { memo, type ReactElement } from "react";
 
-import { Pressable, type AccessibilityActionEvent } from "react-native";
+import { Platform, Pressable, type AccessibilityActionEvent } from "react-native";
 import ReanimatedSwipeable from "react-native-gesture-handler/ReanimatedSwipeable";
 import { XStack } from "tamagui";
 
@@ -52,6 +52,26 @@ function TxCardComponent({
     }
   };
 
+  const card = (
+    <Pressable
+      testID={`tx-card-${item.id}`}
+      accessibilityRole="button"
+      accessibilityLabel={`${item.title}, ${item.signedDisplay}, ${item.categoryName}. Toque para ações.`}
+      accessibilityActions={[
+        ...(canPay ? [{ name: "pay", label: "Pagar" }] : []),
+        { name: "delete", label: "Excluir" },
+      ]}
+      onAccessibilityAction={handleAccessibilityAction}
+      onPress={() => onPress(item.id)}
+    >
+      <TxCardBody item={item} analytic={analytic} />
+    </Pressable>
+  );
+
+  if (Platform.OS === "android") {
+    return card;
+  }
+
   return (
     <ReanimatedSwipeable
       friction={1.6}
@@ -84,19 +104,7 @@ function TxCardComponent({
         </XStack>
       )}
     >
-      <Pressable
-        testID={`tx-card-${item.id}`}
-        accessibilityRole="button"
-        accessibilityLabel={`${item.title}, ${item.signedDisplay}, ${item.categoryName}. Toque para ações.`}
-        accessibilityActions={[
-          ...(canPay ? [{ name: "pay", label: "Pagar" }] : []),
-          { name: "delete", label: "Excluir" },
-        ]}
-        onAccessibilityAction={handleAccessibilityAction}
-        onPress={() => onPress(item.id)}
-      >
-        <TxCardBody item={item} analytic={analytic} />
-      </Pressable>
+      {card}
     </ReanimatedSwipeable>
   );
 }
