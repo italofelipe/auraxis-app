@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { fireEvent, render } from "@testing-library/react-native";
+import { Platform } from "react-native";
 
 import { TestProviders } from "@/shared/testing/test-providers";
 
@@ -33,7 +34,7 @@ jest.mock("react-native-gesture-handler/ReanimatedSwipeable", () => {
   }): React.ReactNode =>
     ReactInner.createElement(
       View,
-      null,
+      { testID: "reanimated-swipeable" },
       renderRightActions
         ? renderRightActions({ value: 0 }, { value: 0 }, { close: () => undefined })
         : null,
@@ -44,6 +45,13 @@ jest.mock("react-native-gesture-handler/ReanimatedSwipeable", () => {
 
 const wrap = (node: React.ReactElement) =>
   render(<TestProviders>{node}</TestProviders>);
+
+const setPlatformOS = (os: typeof Platform.OS): void => {
+  Object.defineProperty(Platform, "OS", {
+    configurable: true,
+    get: () => os,
+  });
+};
 
 const kpis = { income: 27675.37, expense: 19906.3, result: 7769.07, count: 10 };
 
@@ -85,6 +93,10 @@ const bars: readonly CategoryBar[] = [
 
 beforeAll(async () => {
   await initI18n("pt");
+});
+
+afterEach(() => {
+  setPlatformOS("ios");
 });
 
 describe("TxHero", () => {
@@ -205,6 +217,35 @@ describe("TxCard", () => {
       />,
     );
     expect(queryByTestId("tx-invoice-chip")).toBeNull();
+  });
+
+  it("no Android evita montar o ReanimatedSwipeable e mantém o tap de ações", () => {
+    setPlatformOS("android");
+    const onPress = jest.fn();
+    const onMarkPaid = jest.fn();
+    const onDelete = jest.fn();
+    const { getByTestId, queryByTestId } = wrap(
+      <TxCard
+        item={item}
+        analytic={false}
+        onPress={onPress}
+        onMarkPaid={onMarkPaid}
+        onDelete={onDelete}
+      />,
+    );
+
+    expect(queryByTestId("reanimated-swipeable")).toBeNull();
+    fireEvent.press(getByTestId("tx-card-tx-1"));
+    fireEvent(getByTestId("tx-card-tx-1"), "accessibilityAction", {
+      nativeEvent: { actionName: "pay" },
+    });
+    fireEvent(getByTestId("tx-card-tx-1"), "accessibilityAction", {
+      nativeEvent: { actionName: "delete" },
+    });
+
+    expect(onPress).toHaveBeenCalledWith("tx-1");
+    expect(onMarkPaid).toHaveBeenCalledWith("tx-1");
+    expect(onDelete).toHaveBeenCalledWith("tx-1");
   });
 });
 
