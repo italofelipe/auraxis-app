@@ -1,0 +1,33 @@
+{
+  "source": "Auraxis regional cost-of-living seed, mirrored from auraxis-web.",
+  "updatedAt": "2026-06-29",
+  "data": {
+    "AC": { "name": "Acre", "avgIncome": 4200, "avgCost": 3100 },
+    "AL": { "name": "Alagoas", "avgIncome": 3900, "avgCost": 2900 },
+    "AP": { "name": "Amapá", "avgIncome": 4300, "avgCost": 3200 },
+    "AM": { "name": "Amazonas", "avgIncome": 4400, "avgCost": 3300 },
+    "BA": { "name": "Bahia", "avgIncome": 4100, "avgCost": 3000 },
+    "CE": { "name": "Ceará", "avgIncome": 4000, "avgCost": 2950 },
+    "DF": { "name": "Distrito Federal", "avgIncome": 8200, "avgCost": 5200 },
+    "ES": { "name": "Espírito Santo", "avgIncome": 5400, "avgCost": 3900 },
+    "GO": { "name": "Goiás", "avgIncome": 5100, "avgCost": 3700 },
+    "MA": { "name": "Maranhão", "avgIncome": 3600, "avgCost": 2700 },
+    "MT": { "name": "Mato Grosso", "avgIncome": 5300, "avgCost": 3800 },
+    "MS": { "name": "Mato Grosso do Sul", "avgIncome": 5200, "avgCost": 3750 },
+    "MG": { "name": "Minas Gerais", "avgIncome": 5000, "avgCost": 3600 },
+    "PA": { "name": "Pará", "avgIncome": 4000, "avgCost": 3000 },
+    "PB": { "name": "Paraíba", "avgIncome": 3950, "avgCost": 2900 },
+    "PR": { "name": "Paraná", "avgIncome": 5600, "avgCost": 4000 },
+    "PE": { "name": "Pernambuco", "avgIncome": 4200, "avgCost": 3100 },
+    "PI": { "name": "Piauí", "avgIncome": 3800, "avgCost": 2850 },
+    "RJ": { "name": "Rio de Janeiro", "avgIncome": 6400, "avgCost": 4600 },
+    "RN": { "name": "Rio Grande do Norte", "avgIncome": 4100, "avgCost": 3050 },
+    "RS": { "name": "Rio Grande do Sul", "avgIncome": 5700, "avgCost": 4100 },
+    "RO": { "name": "Rondônia", "avgIncome": 4600, "avgCost": 3400 },
+    "RR": { "name": "Roraima", "avgIncome": 4500, "avgCost": 3350 },
+    "SC": { "name": "Santa Catarina", "avgIncome": 6000, "avgCost": 4300 },
+    "SP": { "name": "São Paulo", "avgIncome": 6800, "avgCost": 4800 },
+    "SE": { "name": "Sergipe", "avgIncome": 4050, "avgCost": 3000 },
+    "TO": { "name": "Tocantins", "avgIncome": 4400, "avgCost": 3250 }
+  }
+}

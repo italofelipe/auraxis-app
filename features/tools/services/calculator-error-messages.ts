@@ -34,6 +34,8 @@ const MESSAGES: Readonly<Record<string, string>> = {
   "errors.contributionRequired": "Informe quanto pretende aportar por mês.",
   // orcamento-50-30-20
   "errors.incomeRequired": "Informe sua renda líquida mensal.",
+  // custo-de-vida-regional
+  "errors.ufRequired": "Informe uma UF válida.",
   // conversor-moeda
   "errors.amountRequired": "Informe um valor maior que zero.",
   "errors.rateRequired": "Informe a taxa manual ou aguarde a cotação.",

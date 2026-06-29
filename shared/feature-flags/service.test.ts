@@ -78,6 +78,15 @@ describe("feature flag service - local fallback", () => {
     expect(isFeatureEnabled("app.insights.weekly")).toBe(true);
   });
 
+  it("mantem parcelamento e acoes de fatura promovidos para producao", () => {
+    expect(getLocalFlag("app.transactions.installments")?.status).toBe(
+      "enabled-prod",
+    );
+    expect(getLocalFlag("app.credit-cards.expense-actions")?.status).toBe(
+      "enabled-prod",
+    );
+  });
+
   it("respeita decisao explicita do provider externo", () => {
     expect(isFeatureEnabled("app.tools.salary-raise-calculator", true)).toBe(true);
     expect(isFeatureEnabled("app.tools.salary-raise-calculator", false)).toBe(false);

@@ -49,13 +49,26 @@
     },
     "login": {
       "title": "Sign in",
+      "overline": "SECURE AND PROTECTED ACCESS",
+      "headlinePrefix": "Organize your money with",
+      "headlineAccent": "clarity.",
+      "subtitle": "Access your private area and continue your financial routine with confidence.",
       "emailLabel": "Email",
+      "emailLabelPremium": "EMAIL",
       "passwordLabel": "Password",
+      "passwordLabelPremium": "PASSWORD",
       "submit": "Sign in",
+      "submitPremium": "Sign in to Auraxis",
       "submitting": "Signing in...",
       "forgotPassword": "I forgot my password",
+      "forgotPasswordPremium": "Forgot your password?",
+      "divider": "OR",
       "noAccount": "Don't have an account yet?",
-      "createAccount": "Create account"
+      "noAccountPremium": "Don't have an account?",
+      "createAccount": "Create account",
+      "createAccountPremium": "Create a free account",
+      "terms": "Terms of Use",
+      "privacy": "Privacy"
     },
     "register": {
       "title": "Create account",

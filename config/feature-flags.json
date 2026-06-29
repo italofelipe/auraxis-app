@@ -76,7 +76,7 @@
       "createdAt": "2026-05-17",
       "removeBy": "2026-12-31",
       "type": "release",
-      "status": "enabled-dev",
+      "status": "enabled-prod",
       "description": "Controla o fluxo mobile installments_v1 para selecionar cartao de credito e parcelar transacoes.",
       "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
     },
@@ -96,7 +96,7 @@
       "createdAt": "2026-06-27",
       "removeBy": "2026-12-31",
       "type": "release",
-      "status": "enabled-dev",
+      "status": "enabled-prod",
       "description": "Controla as acoes mobile de editar, duplicar e remover despesas dentro da fatura do cartao.",
       "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
     },

@@ -7,6 +7,7 @@ import {
   type LoginFormValues,
 } from "@/features/auth/validators";
 import { useLoginScreenController } from "@/features/auth/hooks/use-login-screen-controller";
+import { initI18n } from "@/shared/i18n";
 
 jest.mock("@/features/auth/hooks/use-login-screen-controller", () => ({
   useLoginScreenController: jest.fn(),
@@ -15,6 +16,10 @@ jest.mock("@/features/auth/hooks/use-login-screen-controller", () => ({
 const mockedUseLoginScreenController = jest.mocked(useLoginScreenController);
 
 describe("LoginScreen", () => {
+  beforeAll(async () => {
+    await initI18n("pt");
+  });
+
   afterEach(() => {
     mockedUseLoginScreenController.mockReset();
   });
@@ -46,14 +51,16 @@ describe("LoginScreen", () => {
       handleOpenPrivacy: jest.fn().mockResolvedValue(undefined),
     });
 
-    const { getAllByText, getByText } = render(
+    const { getByTestId, getByText } = render(
       <AppProviders>
         <LoginScreen />
       </AppProviders>,
     );
 
-    expect(getAllByText("Entrar").length).toBeGreaterThan(0);
+    expect(getByTestId("login-premium-screen")).toBeTruthy();
+    expect(getByText("Entrar na Auraxis")).toBeTruthy();
     expect(getByText("Esqueceu sua senha?")).toBeTruthy();
     expect(getByText("Termos de Uso")).toBeTruthy();
+    expect(getByText("Privacidade")).toBeTruthy();
   });
 });

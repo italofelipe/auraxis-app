@@ -20,6 +20,14 @@ Só comece se a issue estiver em "Todo" e não reclamada.
 
 Atualizar `.context/active_agents.json` na platform antes de escrever código.
 
+## Entrega obrigatória
+
+Toda entrega deve ter:
+- branch própria antes das mudanças;
+- issue no GitHub descrevendo o escopo;
+- card correspondente no GitHub Projects;
+- PR contendo todo o diff da entrega e referenciando a issue com `Closes #<número>`.
+
 ## Setup
 
 ```bash
