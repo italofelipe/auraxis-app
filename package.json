@@ -118,7 +118,7 @@
     "lint-staged": "^16.4.0",
     "msw": "^2.14.6",
     "openapi-typescript": "^7.13.0",
-    "prettier": "^3.8.4",
+    "prettier": "^3.9.3",
     "react-test-renderer": "19.2.7",
     "ts-jest": "^29.4.11",
     "typescript": "~5.9.2"
