@@ -43,6 +43,7 @@ const FUNCTIONAL_ROUTES: ReadonlyMap<string, string> = new Map([
   ["rent-vs-buy", "/alugar-vs-comprar"],
   ["split-bill", "/dividir-conta"],
   ["cost-of-lifestyle", "/custo-estilo-de-vida"],
+  ["regional-cost-of-living", "/custo-de-vida-regional"],
   ["aposentadoria", "/aposentadoria"],
   ["desconto-markup", "/desconto-markup"],
 ]);
@@ -55,6 +56,7 @@ const PREMIUM_TOOL_IDS = new Set([
   "debt-payoff",
   "split-bill",
   "cost-of-lifestyle",
+  "regional-cost-of-living",
   "desconto-markup",
 ]);
 
@@ -140,6 +142,7 @@ const DAILY_LIFE: readonly ToolSeed[] = [
   ["monthly-fuel", "combustivel-mensal", "Combustível mensal", "Estime gasto de combustível por preço, KM e consumo."],
   ["subscription-audit", "auditoria-assinaturas", "Auditoria de assinaturas", "Liste todas as assinaturas recorrentes e o impacto anual."],
   ["cost-of-lifestyle", "custo-estilo-de-vida", "Custo do estilo de vida", "Quanto custa o padrão de vida que você quer ter."],
+  ["regional-cost-of-living", "custo-de-vida-regional", "Custo de vida regional", "Compare seu custo mensal com médias por UF e veja sua sustentabilidade financeira."],
   ["desconto-markup", "desconto-markup", "Desconto, markup e margem", "Calcule preço final, lucro, margem ou recupere o valor antes do desconto."],
 ];
 

@@ -68,6 +68,20 @@ describe("tools catalog", () => {
     expect(ids.has("goal-simulator")).toBe(true);
   });
 
+  it("inclui Custo de Vida Regional como ferramenta funcional premium", () => {
+    const catalog = getCanonicalToolsCatalog();
+    const tool = catalog.tools.find((entry) => entry.id === "regional-cost-of-living");
+
+    expect(tool).toMatchObject({
+      slug: "custo-de-vida-regional",
+      name: "Custo de vida regional",
+      category: "daily-life",
+      enabled: true,
+      requiresPremium: true,
+      route: "/custo-de-vida-regional",
+    });
+  });
+
   it("marca como premium as ferramentas avançadas equivalentes ao web", () => {
     const catalog = getCanonicalToolsCatalog();
     const premiumIds = new Set([
@@ -78,6 +92,7 @@ describe("tools catalog", () => {
       "debt-payoff",
       "split-bill",
       "cost-of-lifestyle",
+      "regional-cost-of-living",
       "desconto-markup",
     ]);
 
