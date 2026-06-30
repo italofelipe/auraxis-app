@@ -42,6 +42,7 @@ interface TransactionPayload {
   readonly external_id: string | null;
   readonly bank_name: string | null;
   readonly installment_group_id: string | null;
+  readonly auto_settle?: boolean;
   readonly paid_at: string | null;
   readonly created_at: string | null;
   readonly updated_at: string | null;
@@ -84,6 +85,7 @@ const mapTransaction = (payload: TransactionPayload): TransactionRecord => {
     externalId: payload.external_id,
     bankName: payload.bank_name,
     installmentGroupId: payload.installment_group_id,
+    autoSettle: payload.auto_settle ?? false,
     paidAt: payload.paid_at,
     createdAt: payload.created_at,
     updatedAt: payload.updated_at,
@@ -147,6 +149,7 @@ const buildTransactionPayload = (
     tag_id: command.tagId,
     account_id: command.accountId,
     credit_card_id: command.creditCardId,
+    auto_settle: command.autoSettle,
     status: command.status,
     currency: command.currency,
     source: command.source,
