@@ -191,6 +191,15 @@ export type AlertPreferenceType = {
   globalOptOut: Scalars['Boolean']['output'];
 };
 
+export type AskFinancialQuestionPayload = {
+  __typename?: 'AskFinancialQuestionPayload';
+  answer?: Maybe<Scalars['String']['output']>;
+  costUsd?: Maybe<Scalars['Float']['output']>;
+  model?: Maybe<Scalars['String']['output']>;
+  ok: Scalars['Boolean']['output'];
+  tokensUsed?: Maybe<Scalars['Int']['output']>;
+};
+
 export type AuthPayloadType = {
   __typename?: 'AuthPayloadType';
   message: Scalars['String']['output'];
@@ -841,6 +850,13 @@ export type Mutation = {
   addTicker?: Maybe<AddTickerPayload>;
   /** @deprecated ADR-0002: use POST /wallet */
   addWalletEntry?: Maybe<AddWalletEntryMutation>;
+  /**
+   * GraphQL parity for POST /ai/chat (Ask anything).
+   *
+   * Snapshot-grounded finance chat. Entitlement, LGPD consent, per-user cost
+   * budget and audit are enforced inside AIAdvisoryService.
+   */
+  askFinancialQuestion?: Maybe<AskFinancialQuestionPayload>;
   /** @deprecated ADR-0002: use DELETE /fiscal/receivables/{id} */
   cancelReceivable?: Maybe<ReceivablePayload>;
   /** @deprecated ADR-0004: use POST /subscription/cancel */
@@ -983,6 +999,11 @@ export type MutationAddWalletEntryArgs = {
 };
 
 
+export type MutationAskFinancialQuestionArgs = {
+  question: Scalars['String']['input'];
+};
+
+
 export type MutationCancelReceivableArgs = {
   entryId: Scalars['UUID']['input'];
 };
@@ -1094,6 +1115,7 @@ export type MutationCreateTagArgs = {
 export type MutationCreateTransactionArgs = {
   accountId?: InputMaybe<Scalars['UUID']['input']>;
   amount: Scalars['String']['input'];
+  autoSettle?: InputMaybe<Scalars['Boolean']['input']>;
   category?: InputMaybe<Scalars['String']['input']>;
   creditCardId?: InputMaybe<Scalars['UUID']['input']>;
   currency?: InputMaybe<Scalars['String']['input']>;
@@ -1316,6 +1338,7 @@ export type MutationUpdateTagArgs = {
 export type MutationUpdateTransactionArgs = {
   accountId?: InputMaybe<Scalars['UUID']['input']>;
   amount?: InputMaybe<Scalars['String']['input']>;
+  autoSettle?: InputMaybe<Scalars['Boolean']['input']>;
   category?: InputMaybe<Scalars['String']['input']>;
   creditCardId?: InputMaybe<Scalars['UUID']['input']>;
   currency?: InputMaybe<Scalars['String']['input']>;
@@ -1970,6 +1993,7 @@ export type TransactionTypeObject = {
   __typename?: 'TransactionTypeObject';
   accountId?: Maybe<Scalars['String']['output']>;
   amount: Scalars['String']['output'];
+  autoSettle?: Maybe<Scalars['Boolean']['output']>;
   bankName?: Maybe<Scalars['String']['output']>;
   category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['String']['output']>;

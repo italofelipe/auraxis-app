@@ -12,27 +12,40 @@ import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { usePressScaleAnimation } from "@/shared/animations/use-press-scale-animation";
 import { AppHeading } from "@/shared/components/app-heading";
 import { AppScreen } from "@/shared/components/app-screen";
+import { triggerHapticImpact } from "@/shared/feedback/haptics";
 import { darkSemanticColors, lightSemanticColors } from "@/shared/theme";
+import { useExpenseSheetStore } from "@/stores/expense-sheet-store";
 
 type HubIconName =
   | "wallet-outline"
+  | "plus-circle-outline"
   | "tools"
   | "bell-outline"
-  | "lightbulb-on-outline"
+  | "target"
   | "account-circle-outline"
-  | "credit-card-outline"
   | "bank-outline"
   | "tag-multiple-outline"
   | "crown-outline"
   | "shield-account-outline";
 
-interface HubItem {
+interface HubBaseItem {
   readonly key: string;
   readonly title: string;
   readonly description: string;
   readonly icon: HubIconName;
-  readonly href: Href;
 }
+
+interface HubRouteItem extends HubBaseItem {
+  readonly href: Href;
+  readonly action?: never;
+}
+
+interface HubActionItem extends HubBaseItem {
+  readonly href?: never;
+  readonly action: "quickTransaction";
+}
+
+type HubItem = HubRouteItem | HubActionItem;
 
 const HUB_ITEMS: readonly HubItem[] = [
   {
@@ -41,6 +54,20 @@ const HUB_ITEMS: readonly HubItem[] = [
     description: "Investimentos e patrimônio",
     icon: "wallet-outline",
     href: appRoutes.private.wallet,
+  },
+  {
+    key: "quickTransaction",
+    title: "Nova transação",
+    description: "Registrar despesa rapidamente",
+    icon: "plus-circle-outline",
+    action: "quickTransaction",
+  },
+  {
+    key: "planning",
+    title: "Planejamento",
+    description: "Metas, orçamento e foco",
+    icon: "target",
+    href: appRoutes.private.planning,
   },
   {
     key: "tools",
@@ -57,25 +84,11 @@ const HUB_ITEMS: readonly HubItem[] = [
     href: appRoutes.private.alerts,
   },
   {
-    key: "insights",
-    title: "Insights",
-    description: "Leituras com IA",
-    icon: "lightbulb-on-outline",
-    href: appRoutes.private.insights,
-  },
-  {
     key: "accounts",
     title: "Contas",
     description: "Contas bancárias",
     icon: "bank-outline",
     href: appRoutes.private.accounts,
-  },
-  {
-    key: "creditCards",
-    title: "Cartões",
-    description: "Faturas e ciclos",
-    icon: "credit-card-outline",
-    href: appRoutes.private.creditCards,
   },
   {
     key: "tags",
@@ -157,6 +170,7 @@ function HubCard({ item, accentColor, onPress }: HubCardProps): ReactElement {
 export function MoreHubScreen(): ReactElement {
   const router = useRouter();
   const resolvedTheme = useResolvedTheme();
+  const openExpenseSheet = useExpenseSheetStore((store) => store.open);
   const palette =
     resolvedTheme === "auraxis_dark" ? darkSemanticColors : lightSemanticColors;
 
@@ -172,7 +186,14 @@ export function MoreHubScreen(): ReactElement {
               key={item.key}
               item={item}
               accentColor={palette.primary}
-              onPress={() => router.push(item.href)}
+              onPress={() => {
+                if (item.action === "quickTransaction") {
+                  triggerHapticImpact("medium");
+                  openExpenseSheet();
+                  return;
+                }
+                router.push(item.href);
+              }}
             />
           ))}
         </XStack>

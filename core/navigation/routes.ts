@@ -7,7 +7,10 @@ type MaterialCommunityIconName =
   | "bell-outline"
   | "flag-outline"
   | "swap-horizontal"
+  | "star-four-points-outline"
+  | "credit-card-outline"
   | "target"
+  | "dots-horizontal"
   | "view-grid-outline";
 
 export const appRoutes = {
@@ -145,15 +148,14 @@ export interface AppRouteDefinition {
 }
 
 export interface PrivateTabDefinition {
-  readonly name: "dashboard" | "transacoes" | "planejamento" | "mais";
+  readonly name: "dashboard" | "transacoes" | "insights" | "cartoes" | "mais";
   readonly href: PrivateAppRoute;
   readonly title: string;
   readonly icon: MaterialCommunityIconName;
 }
 
-// Destinos das tabs (redesign F2 — épico #540): Transações ganha lugar de
-// destaque; Carteira/Ferramentas/Alertas/Metas vivem no hub "Mais" e no
-// Planejamento. O slot central [+] é renderizado pela AppTabBar.
+// Destinos das tabs (handoff menu liquido): Insights e Cartoes ganham acesso
+// direto; Planejamento e demais destinos ficam no hub "Mais".
 export const privateTabDefinitions: readonly PrivateTabDefinition[] = [
   {
     name: "dashboard",
@@ -168,16 +170,22 @@ export const privateTabDefinitions: readonly PrivateTabDefinition[] = [
     icon: "swap-horizontal",
   },
   {
-    name: "planejamento",
-    href: appRoutes.private.planning,
-    title: "Planejar",
-    icon: "target",
+    name: "insights",
+    href: appRoutes.private.insights,
+    title: "Insights",
+    icon: "star-four-points-outline",
+  },
+  {
+    name: "cartoes",
+    href: appRoutes.private.creditCards,
+    title: "Cartões",
+    icon: "credit-card-outline",
   },
   {
     name: "mais",
     href: appRoutes.private.moreHub,
     title: "Mais",
-    icon: "view-grid-outline",
+    icon: "dots-horizontal",
   },
 ] as const;
 
@@ -291,7 +299,7 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     key: "planning",
     path: appRoutes.private.planning,
     access: "private",
-    tabVisible: true,
+    tabVisible: false,
     supportsHostedCheckoutReturn: false,
   },
   {
@@ -361,7 +369,7 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     key: "creditCards",
     path: appRoutes.private.creditCards,
     access: "private",
-    tabVisible: false,
+    tabVisible: true,
     supportsHostedCheckoutReturn: false,
   },
   {
@@ -375,7 +383,7 @@ export const appRouteRegistry: readonly AppRouteDefinition[] = [
     key: "insights",
     path: appRoutes.private.insights,
     access: "private",
-    tabVisible: false,
+    tabVisible: true,
     supportsHostedCheckoutReturn: false,
   },
   {

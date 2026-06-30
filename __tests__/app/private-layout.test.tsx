@@ -13,16 +13,20 @@ const mockTabsScreens: {
   options?: Record<string, unknown>;
 }[] = [];
 let mockTabsScreenOptions: Record<string, unknown> | undefined;
+let mockTabsProps: Record<string, unknown> | undefined;
 
 jest.mock("expo-router", () => {
   function MockTabs({
     children,
     screenOptions,
+    ...props
   }: {
     readonly children: ReactNode;
     readonly screenOptions?: Record<string, unknown>;
+    readonly detachInactiveScreens?: boolean;
   }): ReactNode {
     mockTabsScreenOptions = screenOptions;
+    mockTabsProps = props;
     return children;
   }
 
@@ -92,6 +96,7 @@ describe("PrivateLayout", () => {
   beforeEach(() => {
     mockTabsScreens.length = 0;
     mockTabsScreenOptions = undefined;
+    mockTabsProps = undefined;
     mockedUsePrivateRouteGuard.mockReturnValue({ ready: true, redirectTo: null });
     mockedUseWeeklyInsight.mockReturnValue(buildInsightState(false));
     mockedIsFeatureEnabled.mockReturnValue(true);
@@ -142,5 +147,41 @@ describe("PrivateLayout", () => {
         borderTopColor: "#D8E3EF",
       },
     });
+  });
+
+  it("expõe as cinco tabs do handoff e move planejamento para rota oculta", () => {
+    renderPrivateLayout();
+
+    const visibleTabs = mockTabsScreens
+      .filter((screen) => screen.options?.href !== null)
+      .map((screen) => screen.name);
+    const hiddenTabs = mockTabsScreens
+      .filter((screen) => screen.options?.href === null)
+      .map((screen) => screen.name);
+
+    expect(visibleTabs).toEqual([
+      "dashboard",
+      "transacoes",
+      "insights",
+      "cartoes",
+      "mais",
+    ]);
+    expect(hiddenTabs).toContain("planejamento");
+    expect(hiddenTabs).not.toContain("insights");
+    expect(hiddenTabs).not.toContain("cartoes");
+  });
+
+  it("configura transição horizontal de tabs com timing fixo", () => {
+    renderPrivateLayout();
+
+    expect(mockTabsScreenOptions?.transitionSpec).toMatchObject({
+      animation: "timing",
+      config: { duration: 480 },
+    });
+    expect(mockTabsScreenOptions?.sceneStyleInterpolator).toEqual(expect.any(Function));
+    expect(mockTabsScreenOptions).toMatchObject({
+      lazy: false,
+    });
+    expect(mockTabsProps).toMatchObject({ detachInactiveScreens: false });
   });
 });

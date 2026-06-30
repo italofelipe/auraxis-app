@@ -29,6 +29,16 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - The visual layer is now a dedicated premium auth shell using the brand gradient, glass fields, white primary CTA and light status bar requested by the mobile handoff.
 - Login copy is read from `shared/i18n/locales/*.json`; the screen should not introduce new hardcoded product strings.
 
+## Private Navigation
+
+- The logged-in mobile shell uses Expo Router `Tabs` with a custom `AppTabBar` instead of native tabs.
+- The bottom navigation follows the mobile liquid menu handoff with five visible tabs: `Início`, `Transações`, `Insights`, `Cartões` and `Mais`.
+- `Planejamento` is no longer a first-level tab; it is exposed through `MoreHubScreen` together with other secondary destinations.
+- The former center `+` action is removed from the tab bar. Quick transaction creation remains available from the `Mais` hub through the shared expense sheet store.
+- Tab content transitions use `core/navigation/tab-carousel-transition.ts`, which provides a fixed 480 ms full-width horizontal scene interpolation while keeping tab screens mounted.
+- The active tab affordance lives in `core/navigation/app-tab-bar.tsx` as a Reanimated liquid blob with fixed spring parameters, a gradient surface and the active icon rendered in white.
+- The credit-cards guided tour no longer targets a `fab` anchor; its quick-transaction step is centered copy that points users to `Mais`.
+
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.

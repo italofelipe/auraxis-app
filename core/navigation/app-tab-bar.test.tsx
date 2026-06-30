@@ -3,10 +3,7 @@ import { fireEvent, render } from "@testing-library/react-native";
 import { AppTabBar } from "@/core/navigation/app-tab-bar";
 import { AppProviders } from "@/core/providers/app-providers";
 import { resetAppShellStore } from "@/core/shell/app-shell-store";
-import {
-  resetExpenseSheetStore,
-  useExpenseSheetStore,
-} from "@/stores/expense-sheet-store";
+import { resetExpenseSheetStore } from "@/stores/expense-sheet-store";
 
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: () => ({ top: 0, bottom: 20, left: 0, right: 0 }),
@@ -16,7 +13,8 @@ const buildProps = (activeIndex = 0) => {
   const routes = [
     { key: "dashboard-key", name: "dashboard" },
     { key: "transacoes-key", name: "transacoes" },
-    { key: "planejamento-key", name: "planejamento" },
+    { key: "insights-key", name: "insights" },
+    { key: "cartoes-key", name: "cartoes" },
     { key: "mais-key", name: "mais" },
   ];
   const navigate = jest.fn();
@@ -37,9 +35,9 @@ describe("AppTabBar", () => {
     resetExpenseSheetStore();
   });
 
-  it("renderiza os quatro destinos e o botao central de acao rapida", () => {
+  it("renderiza os cinco destinos do handoff sem botao central", () => {
     const { props } = buildProps();
-    const { getByTestId } = render(
+    const { getByTestId, queryByTestId } = render(
       <AppProviders>
         <AppTabBar {...props} />
       </AppProviders>,
@@ -47,9 +45,10 @@ describe("AppTabBar", () => {
 
     expect(getByTestId("tab-dashboard")).toBeTruthy();
     expect(getByTestId("tab-transacoes")).toBeTruthy();
-    expect(getByTestId("tab-planejamento")).toBeTruthy();
+    expect(getByTestId("tab-insights")).toBeTruthy();
+    expect(getByTestId("tab-cartoes")).toBeTruthy();
     expect(getByTestId("tab-mais")).toBeTruthy();
-    expect(getByTestId("tour-fab")).toBeTruthy();
+    expect(queryByTestId("tour-fab")).toBeNull();
   });
 
   it("navega ao tocar numa tab nao focada e ignora a tab ja ativa", () => {
@@ -60,41 +59,14 @@ describe("AppTabBar", () => {
       </AppProviders>,
     );
 
-    fireEvent.press(getByTestId("tab-transacoes"));
-    expect(navigate).toHaveBeenCalledWith("transacoes");
+    fireEvent.press(getByTestId("tab-cartoes"));
+    expect(navigate).toHaveBeenCalledWith("cartoes");
 
     fireEvent.press(getByTestId("tab-dashboard"));
     expect(navigate).toHaveBeenCalledTimes(1);
   });
 
-  it("abre o sheet de despesa ao tocar no FAB central", () => {
-    const { props } = buildProps();
-    const { getByTestId } = render(
-      <AppProviders>
-        <AppTabBar {...props} />
-      </AppProviders>,
-    );
-
-    expect(useExpenseSheetStore.getState().isOpen).toBe(false);
-    fireEvent.press(getByTestId("tour-fab"));
-    expect(useExpenseSheetStore.getState().isOpen).toBe(true);
-  });
-
-  it("ao pressionar e segurar o FAB abre as acoes rapidas e navega para criar transacao", () => {
-    const { props, navigate } = buildProps();
-    const { getByTestId } = render(
-      <AppProviders>
-        <AppTabBar {...props} />
-      </AppProviders>,
-    );
-
-    fireEvent(getByTestId("tour-fab"), "longPress");
-    fireEvent.press(getByTestId("quick-action-create"));
-
-    expect(navigate).toHaveBeenCalledWith("transacoes", { intent: "create" });
-  });
-
-  it("renderiza o indicador animado da aba ativa", () => {
+  it("renderiza o blob liquido com o icone da aba ativa", () => {
     const { props } = buildProps(0);
     const { getByTestId } = render(
       <AppProviders>
@@ -102,7 +74,10 @@ describe("AppTabBar", () => {
       </AppProviders>,
     );
 
-    expect(getByTestId("tab-active-indicator")).toBeTruthy();
+    expect(getByTestId("tab-liquid-blob")).toBeTruthy();
+    expect(getByTestId("tab-liquid-blob-icon").props.accessibilityLabel).toBe(
+      "Ícone ativo view-dashboard-outline",
+    );
   });
 
   it("renderiza com reduced motion ativo sem quebrar a navegacao", () => {
@@ -114,7 +89,7 @@ describe("AppTabBar", () => {
       </AppProviders>,
     );
 
-    expect(getByTestId("tab-active-indicator")).toBeTruthy();
+    expect(getByTestId("tab-liquid-blob")).toBeTruthy();
     fireEvent.press(getByTestId("tab-dashboard"));
     expect(navigate).toHaveBeenCalledWith("dashboard");
   });
