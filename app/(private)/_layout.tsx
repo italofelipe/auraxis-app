@@ -10,6 +10,7 @@ import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { ExpenseSheetHost } from "@/features/credit-cards/components/expense-sheet/expense-sheet-host";
 import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
+import { PaymentAssistantHost } from "@/features/payments-assistant/screens/payment-assistant-host";
 import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 import { WEEKLY_INSIGHT_FEATURE_FLAG_KEY } from "@/features/insights/weekly-insight-config";
 import { TourAnchorProvider } from "@/shared/coach-marks/tour-anchor-context";
@@ -106,6 +107,7 @@ function PrivateLayoutContent(): ReactElement | null {
         ))}
       </Tabs>
       <ExpenseSheetHost />
+      <PaymentAssistantHost />
     </TourAnchorProvider>
   );
 }

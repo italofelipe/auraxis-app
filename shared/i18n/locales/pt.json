@@ -256,5 +256,33 @@
         "empty": "Sua carteira esta vazia."
       }
     }
+  },
+  "paymentsAssistant": {
+    "title": "Pendências em aberto",
+    "progress": "{{current}} de {{total}}",
+    "statusHint": "Marcar aqui só atualiza o status no Auraxis — não move dinheiro de verdade.",
+    "emptyTitle": "Tudo em dia",
+    "emptyBody": "Você não tem contas em aberto vencidas há mais de um mês.",
+    "type": {
+      "income": "Receita",
+      "expense": "Despesa"
+    },
+    "fields": {
+      "createdAt": "Criada em",
+      "dueDate": "Vencimento",
+      "observation": "Observações"
+    },
+    "confirmDeleteTitle": "Excluir transação",
+    "confirmDelete": "Tem certeza? Você pode desfazer logo em seguida.",
+    "actions": {
+      "payExpense": "Marcar como pago",
+      "payIncome": "Marcar como recebido",
+      "delete": "Excluir",
+      "skip": "Pular",
+      "markAllPaid": "Marcar todas como pagas",
+      "undo": "Desfazer",
+      "close": "Fechar",
+      "cancel": "Cancelar"
+    }
   }
 }

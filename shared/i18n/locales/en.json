@@ -256,5 +256,33 @@
         "empty": "Wallet is empty."
       }
     }
+  },
+  "paymentsAssistant": {
+    "title": "Open items",
+    "progress": "{{current}} of {{total}}",
+    "statusHint": "Marking here only updates the status in Auraxis — no real money moves.",
+    "emptyTitle": "All caught up",
+    "emptyBody": "You have no open bills overdue by more than a month.",
+    "type": {
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "fields": {
+      "createdAt": "Created on",
+      "dueDate": "Due date",
+      "observation": "Notes"
+    },
+    "confirmDeleteTitle": "Delete transaction",
+    "confirmDelete": "Are you sure? You can undo right after.",
+    "actions": {
+      "payExpense": "Mark as paid",
+      "payIncome": "Mark as received",
+      "delete": "Delete",
+      "skip": "Skip",
+      "markAllPaid": "Mark all as paid",
+      "undo": "Undo",
+      "close": "Close",
+      "cancel": "Cancel"
+    }
   }
 }
