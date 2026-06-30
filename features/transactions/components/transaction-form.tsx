@@ -59,6 +59,7 @@ const transactionToFormValues = (
       recurrenceInterval: 1,
       recurrenceUnit: "month",
       creditCardId: null,
+      autoSettle: false,
       isInstallment: false,
       installmentCount: null,
     };
@@ -75,6 +76,7 @@ const transactionToFormValues = (
     recurrenceInterval: transaction.recurrenceInterval,
     recurrenceUnit: transaction.recurrenceUnit,
     creditCardId: transaction.creditCardId,
+    autoSettle: transaction.autoSettle ?? false,
     isInstallment: transaction.isInstallment,
     installmentCount: transaction.installmentCount,
   };
@@ -131,6 +133,7 @@ export function TransactionForm({
           errors={form.formState.errors}
           setValue={form.setValue}
         />
+        <AutoSettleField control={form.control} />
         {installmentsEnabled ? (
           <TransactionInstallmentFields
             control={form.control}
@@ -191,6 +194,28 @@ function TypeToggle({
             Receita
           </AppButton>
         </XStack>
+      )}
+    />
+  );
+}
+
+function AutoSettleField({
+  control,
+}: {
+  readonly control: Control<CreateTransactionFormValues>;
+}): ReactElement {
+  return (
+    <Controller
+      control={control}
+      name="autoSettle"
+      render={({ field: { value, onChange } }) => (
+        <AppToggleRow
+          label="Marcar como pago/recebido automaticamente"
+          description="No vencimento, o Auraxis marca esta transacao como paga/recebida automaticamente. Voce pode desfazer quando quiser."
+          checked={Boolean(value)}
+          testID="transaction-auto-settle-toggle"
+          onCheckedChange={onChange}
+        />
       )}
     />
   );

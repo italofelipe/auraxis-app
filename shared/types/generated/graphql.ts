@@ -1094,6 +1094,7 @@ export type MutationCreateTagArgs = {
 export type MutationCreateTransactionArgs = {
   accountId?: InputMaybe<Scalars['UUID']['input']>;
   amount: Scalars['String']['input'];
+  autoSettle?: InputMaybe<Scalars['Boolean']['input']>;
   category?: InputMaybe<Scalars['String']['input']>;
   creditCardId?: InputMaybe<Scalars['UUID']['input']>;
   currency?: InputMaybe<Scalars['String']['input']>;
@@ -1316,6 +1317,7 @@ export type MutationUpdateTagArgs = {
 export type MutationUpdateTransactionArgs = {
   accountId?: InputMaybe<Scalars['UUID']['input']>;
   amount?: InputMaybe<Scalars['String']['input']>;
+  autoSettle?: InputMaybe<Scalars['Boolean']['input']>;
   category?: InputMaybe<Scalars['String']['input']>;
   creditCardId?: InputMaybe<Scalars['UUID']['input']>;
   currency?: InputMaybe<Scalars['String']['input']>;
@@ -1970,6 +1972,7 @@ export type TransactionTypeObject = {
   __typename?: 'TransactionTypeObject';
   accountId?: Maybe<Scalars['String']['output']>;
   amount: Scalars['String']['output'];
+  autoSettle?: Maybe<Scalars['Boolean']['output']>;
   bankName?: Maybe<Scalars['String']['output']>;
   category?: Maybe<Scalars['String']['output']>;
   createdAt?: Maybe<Scalars['String']['output']>;

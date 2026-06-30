@@ -77,6 +77,7 @@ const formValues = (
   recurrenceInterval: 1,
   recurrenceUnit: "month",
   creditCardId: null,
+  autoSettle: false,
   isInstallment: false,
   installmentCount: null,
   ...overrides,
