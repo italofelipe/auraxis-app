@@ -158,6 +158,7 @@ const buildSubmitPayload = (values: CreateTransactionFormValues) => ({
   dueDate: values.dueDate,
   description: values.description,
   isRecurring: values.isRecurring ?? false,
+  autoSettle: values.autoSettle ?? false,
   creditCardId: values.type === "expense" ? values.creditCardId : null,
   isInstallment:
     values.type === "expense" && values.creditCardId ? values.isInstallment : false,
