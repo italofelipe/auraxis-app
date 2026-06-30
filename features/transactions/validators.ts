@@ -111,6 +111,7 @@ export const createTransactionFieldsSchema = z.object({
     .default(1),
   recurrenceUnit: recurrenceUnitSchema.default("month"),
   creditCardId: creditCardIdSchema.default(null),
+  autoSettle: z.boolean().default(false),
   isInstallment: z.boolean().default(false),
   installmentCount: installmentCountSchema.default(null),
 });
@@ -132,6 +133,7 @@ export const updateTransactionSchema = z
     recurrenceInterval: z.number().int().min(1).max(365).optional(),
     recurrenceUnit: recurrenceUnitSchema.optional(),
     creditCardId: creditCardIdSchema.optional(),
+    autoSettle: z.boolean().optional(),
     isInstallment: z.boolean().optional(),
     installmentCount: installmentCountSchema.optional(),
     status: z

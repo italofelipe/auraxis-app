@@ -40,6 +40,8 @@ export interface TransactionRecord {
   readonly externalId: string | null;
   readonly bankName: string | null;
   readonly installmentGroupId: string | null;
+  /** Opt-in: auto-mark as paid/received when it comes due. */
+  readonly autoSettle?: boolean;
   readonly paidAt: string | null;
   readonly createdAt: string | null;
   readonly updatedAt: string | null;
@@ -101,6 +103,8 @@ export interface UpsertTransactionCommand {
   readonly tagId?: string | null;
   readonly accountId?: string | null;
   readonly creditCardId?: string | null;
+  /** Opt-in: auto-mark as paid/received when it comes due. Defaults to false. */
+  readonly autoSettle?: boolean;
   readonly status?: TransactionStatus;
   readonly currency?: string;
   readonly source?: string;
