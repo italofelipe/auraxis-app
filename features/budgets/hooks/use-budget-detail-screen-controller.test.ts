@@ -48,6 +48,8 @@ beforeAll(() => {
 afterAll(() => jest.useRealTimers());
 
 beforeEach(() => {
+  jest.useFakeTimers({ doNotFake: ["queueMicrotask"] });
+  jest.setSystemTime(new Date("2026-06-11T12:00:00"));
   jest.clearAllMocks();
   mockedUseBudgets.mockReturnValue({ data: [buildBudget()] } as never);
   mockedUseTransactions.mockReturnValue({

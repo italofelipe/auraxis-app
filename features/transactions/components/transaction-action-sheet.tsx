@@ -43,6 +43,21 @@ function ActionSheetHeader({ transaction }: ActionSheetHeaderProps): ReactElemen
           {transaction.description}
         </Paragraph>
       ) : null}
+      {transaction.observation ? (
+        <YStack gap="$1" marginTop="$1">
+          <Paragraph
+            fontFamily="$body"
+            fontSize="$2"
+            fontWeight="$7"
+            color="$muted"
+          >
+            Observações
+          </Paragraph>
+          <Paragraph fontFamily="$body" fontSize="$3" color="$muted">
+            {transaction.observation}
+          </Paragraph>
+        </YStack>
+      ) : null}
       <XStack alignItems="center" gap="$2" marginTop="$1">
         <Paragraph
           fontFamily="$body"

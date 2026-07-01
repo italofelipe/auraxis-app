@@ -38,6 +38,7 @@ export interface TransactionViewModel {
   readonly dueDate: string;
   readonly status: string;
   readonly description: string | null;
+  readonly observation: string | null;
   readonly isRecurring: boolean;
   readonly isInstallment: boolean;
   readonly installmentCount: number | null;
@@ -106,6 +107,7 @@ const toViewModel = (
   dueDate: record.dueDate,
   status: record.status,
   description: record.description,
+  observation: record.observation,
   isRecurring: record.isRecurring,
   isInstallment: record.isInstallment,
   installmentCount: record.installmentCount,
@@ -157,6 +159,7 @@ const buildSubmitPayload = (values: CreateTransactionFormValues) => ({
   type: values.type,
   dueDate: values.dueDate,
   description: values.description,
+  observation: values.observation,
   isRecurring: values.isRecurring ?? false,
   autoSettle: values.autoSettle ?? false,
   creditCardId: values.type === "expense" ? values.creditCardId : null,
@@ -383,6 +386,7 @@ function useTransactionsActions({
         // and so the duplicate doesn't land in the past by surprise.
         dueDate: new Date().toISOString().slice(0, 10),
         description: original.description ?? null,
+        observation: original.observation ?? null,
         isRecurring: original.isRecurring,
         creditCardId: original.type === "expense" ? original.creditCardId : null,
         isInstallment: false,

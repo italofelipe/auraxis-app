@@ -60,6 +60,7 @@ const transactionToFormValues = (
       recurrenceUnit: "month",
       creditCardId: null,
       autoSettle: false,
+      observation: null,
       isInstallment: false,
       installmentCount: null,
     };
@@ -77,6 +78,7 @@ const transactionToFormValues = (
     recurrenceUnit: transaction.recurrenceUnit,
     creditCardId: transaction.creditCardId,
     autoSettle: transaction.autoSettle ?? false,
+    observation: transaction.observation,
     isInstallment: transaction.isInstallment,
     installmentCount: transaction.installmentCount,
   };
@@ -435,7 +437,31 @@ function TransactionFormFields({
           />
         )}
       />
+      <TransactionObservationField control={control} errors={errors} />
     </YStack>
+  );
+}
+
+function TransactionObservationField({
+  control,
+  errors,
+}: TransactionFormFieldsProps): ReactElement {
+  return (
+      <Controller
+        control={control}
+        name="observation"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <AppInputField
+            id="tx-observation"
+            label="Observações (opcional)"
+            placeholder="Notas internas, recibos ou lembretes"
+            value={value ?? ""}
+            onBlur={onBlur}
+            onChangeText={(text) => onChange(text.length > 0 ? text : null)}
+            errorText={errors.observation?.message}
+          />
+        )}
+      />
   );
 }
 

@@ -144,6 +144,8 @@ beforeAll(() => {
 afterAll(() => jest.useRealTimers());
 
 beforeEach(() => {
+  jest.useFakeTimers({ doNotFake: ["queueMicrotask"] });
+  jest.setSystemTime(new Date("2026-06-15T12:00:00"));
   jest.clearAllMocks();
   mockedUseCardsQuery.mockReturnValue({
     data: { creditCards: [buildCard(), buildCard({ id: "card-2", name: "Inter" })] },

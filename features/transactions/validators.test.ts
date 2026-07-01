@@ -19,6 +19,15 @@ describe("createTransactionSchema", () => {
     expect(() => createTransactionSchema.parse(validBase)).not.toThrow();
   });
 
+  it("preserva observacoes opcionais normalizadas", () => {
+    const parsed = createTransactionSchema.parse({
+      ...validBase,
+      observation: "  Confirmar contrato anual  ",
+    });
+
+    expect(parsed.observation).toBe("Confirmar contrato anual");
+  });
+
   it("rejeita amount zero ou negativo", () => {
     expect(() =>
       createTransactionSchema.parse({ ...validBase, amount: "0" }),
@@ -118,6 +127,9 @@ describe("updateTransactionSchema", () => {
   it("aceita patch parcial valido", () => {
     expect(() => updateTransactionSchema.parse({ title: "Novo titulo" })).not.toThrow();
     expect(() => updateTransactionSchema.parse({ status: "paid" })).not.toThrow();
+    expect(() =>
+      updateTransactionSchema.parse({ observation: "Nota atualizada" }),
+    ).not.toThrow();
   });
 
   it("rejeita patch vazio", () => {

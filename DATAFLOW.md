@@ -40,9 +40,19 @@ No network call or database mutation is required until the user explicitly saves
 7. `MoreHubScreen` handles displaced actions: route cards call `router.push(href)`, while `Nova transação` opens the shared expense sheet store directly.
 8. The credit-cards tour quick-transaction step is centered instructional copy, so it does not depend on a removed `fab` anchor.
 
+## Transaction Observation Flow
+
+1. `TransactionForm` collects `description` and `observation` as separate optional inputs.
+2. `createTransactionSchema` and `updateTransactionSchema` trim and validate both strings locally before submit.
+3. `useTransactionsScreenController` builds the existing create/update command and includes `observation` alongside `description`.
+4. `transactions-service` already maps `observation` to the API payload/response, so no backend route, DB migration or contract snapshot change is required.
+5. `toFeedItem` copies `observation` into the feed view-model, and `TxCardBody` renders it under an `Observações` label when present.
+6. `TransactionActionSheet` shows description and observations as separate details before the action buttons.
+
 ## Testing Flow
 
 - Pure calculator behavior is verified before screen tests.
 - Screen tests assert that inputs, results and controller actions are wired.
 - Feature flag tests assert production status for promoted parity features.
 - Login tests assert the premium surface while preserving auth controller actions.
+- Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.

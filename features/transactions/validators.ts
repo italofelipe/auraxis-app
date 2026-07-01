@@ -100,6 +100,12 @@ export const createTransactionFieldsSchema = z.object({
   type: transactionTypeSchema,
   dueDate: isoDate,
   description: z.string().trim().max(500, "Descricao muito longa.").optional().nullable(),
+  observation: z
+    .string()
+    .trim()
+    .max(500, "Observacoes muito longas.")
+    .optional()
+    .nullable(),
   isRecurring: z.boolean().optional(),
   startDate: optionalIsoDate,
   endDate: optionalIsoDate,
@@ -127,6 +133,7 @@ export const updateTransactionSchema = z
     type: transactionTypeSchema.optional(),
     dueDate: isoDate.optional(),
     description: z.string().trim().max(500).optional().nullable(),
+    observation: z.string().trim().max(500).optional().nullable(),
     isRecurring: z.boolean().optional(),
     startDate: optionalIsoDate,
     endDate: optionalIsoDate,

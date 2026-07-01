@@ -14,6 +14,7 @@ const buildTx = (
   dueDate: "2026-06-10",
   status: "pending",
   description: "Vivo Fibra",
+  observation: null,
   isRecurring: false,
   isInstallment: false,
   installmentCount: null,
@@ -69,5 +70,18 @@ describe("TransactionActionSheet", () => {
     fireEvent.press(getByTestId("action-delete"));
 
     expect(onDelete).toHaveBeenCalledWith("tx-1");
+  });
+
+  it("mostra descricao e observacoes como detalhes separados", () => {
+    const { getByText } = renderSheet(
+      buildTx({
+        description: "Vivo Fibra",
+        observation: "Renovar desconto",
+      } as Partial<TransactionViewModel>),
+    );
+
+    expect(getByText("Vivo Fibra")).toBeTruthy();
+    expect(getByText("Observações")).toBeTruthy();
+    expect(getByText("Renovar desconto")).toBeTruthy();
   });
 });

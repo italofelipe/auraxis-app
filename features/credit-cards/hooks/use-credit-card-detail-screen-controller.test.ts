@@ -119,6 +119,8 @@ beforeAll(() => {
 afterAll(() => jest.useRealTimers());
 
 beforeEach(() => {
+  jest.useFakeTimers({ doNotFake: ["queueMicrotask"] });
+  jest.setSystemTime(new Date("2026-06-20T12:00:00"));
   jest.clearAllMocks();
   mockRouteParams = { id: "cc-1" };
   mockedUseCards.mockReturnValue({
