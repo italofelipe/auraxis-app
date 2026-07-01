@@ -29,6 +29,17 @@ No network call or database mutation is required until the user explicitly saves
 5. Successful login still consumes any stored auth redirect and navigates to the intended private route or dashboard.
 6. Session-expired and submit-error states render on the same screen without changing session policy.
 
+## Liquid Tab Navigation Flow
+
+1. `app/(private)/_layout.tsx` builds the logged-in tab navigator from `privateTabDefinitions`.
+2. `privateTabDefinitions` exposes `dashboard`, `transacoes`, `insights`, `cartoes` and `mais`; `planejamento` is registered as a hidden route.
+3. `AppTabBar` measures each rendered tab with `onLayout` and stores `{ x, width }` by route name.
+4. When the active route changes, the Reanimated shared values move the liquid blob to the measured tab center with fixed spring parameters and squish timing.
+5. The active icon is rendered inside the blob while the active tab column reserves icon space and keeps the label visible.
+6. The tab navigator uses `createTabCarouselSceneStyleInterpolator(width)` plus `tabCarouselTransitionSpec` so route content slides horizontally with a fixed 480 ms timing curve.
+7. `MoreHubScreen` handles displaced actions: route cards call `router.push(href)`, while `Nova transação` opens the shared expense sheet store directly.
+8. The credit-cards tour quick-transaction step is centered instructional copy, so it does not depend on a removed `fab` anchor.
+
 ## Testing Flow
 
 - Pure calculator behavior is verified before screen tests.

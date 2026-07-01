@@ -1,11 +1,16 @@
-import type { ReactElement } from "react";
+import { useMemo, type ReactElement } from "react";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Redirect, Tabs } from "expo-router";
+import { useWindowDimensions } from "react-native";
 
 import { AppErrorBoundary } from "@/core/errors/app-error-boundary";
 import { AppTabBar } from "@/core/navigation/app-tab-bar";
 import { privateTabDefinitions } from "@/core/navigation/routes";
+import {
+  createTabCarouselSceneStyleInterpolator,
+  tabCarouselTransitionSpec,
+} from "@/core/navigation/tab-carousel-transition";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { ExpenseSheetHost } from "@/features/credit-cards/components/expense-sheet/expense-sheet-host";
@@ -32,9 +37,8 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
   "carteira-operacoes",
   "tags",
   "contas",
-  "cartoes",
+  "planejamento",
   "orcamentos",
-  "insights",
   "foco",
   "onboarding",
   "simulador-meta",
@@ -47,8 +51,13 @@ const HIDDEN_TAB_NAMES: readonly string[] = [
 function PrivateLayoutContent(): ReactElement | null {
   const { ready, redirectTo } = usePrivateRouteGuard();
   const resolvedTheme = useResolvedTheme();
+  const { width } = useWindowDimensions();
   const tabTheme =
     resolvedTheme === "auraxis_dark" ? darkSemanticColors : lightSemanticColors;
+  const sceneStyleInterpolator = useMemo(
+    () => createTabCarouselSceneStyleInterpolator(width),
+    [width],
+  );
   const weeklyInsightEnabled = isFeatureEnabled(WEEKLY_INSIGHT_FEATURE_FLAG_KEY);
   const weeklyInsight = useWeeklyInsight({
     enabled: weeklyInsightEnabled && ready && !redirectTo,
@@ -66,9 +75,13 @@ function PrivateLayoutContent(): ReactElement | null {
   return (
     <TourAnchorProvider>
       <Tabs
+        detachInactiveScreens={false}
         tabBar={(props) => <AppTabBar {...props} />}
         screenOptions={{
           headerShown: false,
+          lazy: false,
+          transitionSpec: tabCarouselTransitionSpec,
+          sceneStyleInterpolator,
           tabBarActiveTintColor: tabTheme.primary,
           tabBarInactiveTintColor: tabTheme.subduedForeground,
           tabBarStyle: {

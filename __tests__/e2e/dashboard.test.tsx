@@ -55,6 +55,7 @@ jest.mock("@/core/session/session-store", () => ({
 }));
 
 const mockedDashboardService = jest.mocked(dashboardService);
+const waitForQuery = { timeout: 5000 } as const;
 
 // ---------------------------------------------------------------------------
 // Dashboard E2E: loading state, data, error state
@@ -87,7 +88,7 @@ describe("Dashboard E2E flow", () => {
     // After service resolves, data should be available
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
 
     expect(result.current.data?.totals.balance).toBe(
       dashboardOverviewFixture.totals.balance,
@@ -107,13 +108,14 @@ describe("Dashboard E2E flow", () => {
     } = require("@/features/dashboard/hooks/use-dashboard-screen-controller");
 
     const wrapper = createTestHookWrapper({ queryClient });
-    const { result } = renderHook(() => useDashboardScreenController(), {
-      wrapper,
-    });
+    const { result } = renderHook(
+      () => useDashboardScreenController({ weeklyInsightEnabled: false }),
+      { wrapper },
+    );
 
     await waitFor(() => {
       expect(result.current.overviewQuery.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
 
     expect(typeof result.current.currentBalance).toBe("number");
     expect(result.current.currentBalance).toBe(
@@ -141,7 +143,7 @@ describe("Dashboard E2E flow", () => {
       () => {
         expect(result.current.isError).toBe(true);
       },
-      { timeout: 5000 },
+      waitForQuery,
     );
 
     expect(result.current.data).toBeUndefined();
@@ -160,7 +162,7 @@ describe("Dashboard E2E flow", () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
 
     expect(result.current.data?.series).toBeDefined();
     expect(result.current.data?.series.length).toBe(
@@ -175,14 +177,15 @@ describe("Dashboard E2E flow", () => {
     } = require("@/features/dashboard/hooks/use-dashboard-screen-controller");
 
     const wrapper = createTestHookWrapper({ queryClient });
-    const { result } = renderHook(() => useDashboardScreenController(), {
-      wrapper,
-    });
+    const { result } = renderHook(
+      () => useDashboardScreenController({ weeklyInsightEnabled: false }),
+      { wrapper },
+    );
 
     // monthOptions derives from trendsQuery.data — wait for it to load
     await waitFor(() => {
       expect(result.current.trendsQuery.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
 
     expect(result.current.monthOptions.length).toBeGreaterThan(0);
     expect(typeof result.current.selectedMonth).toBe("string");
@@ -203,7 +206,7 @@ describe("Dashboard E2E flow", () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
 
     expect(result.current.data?.topCategories.expense).toHaveLength(
       dashboardOverviewFixture.topCategories.expense.length,

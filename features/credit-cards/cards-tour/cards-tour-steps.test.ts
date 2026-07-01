@@ -11,12 +11,14 @@ describe("cardsTourSteps", () => {
     expect(CARDS_TOUR_TOTAL_STEPS).toBe(8);
   });
 
-  it("marca apenas o primeiro e o último como centralizados (sem âncora)", () => {
+  it("marca passos centralizados sem âncora", () => {
     expect(cardsTourSteps[0].center).toBe(true);
     expect(cardsTourSteps[0].anchorKey).toBeNull();
+    expect(cardsTourSteps[5].center).toBe(true);
+    expect(cardsTourSteps[5].anchorKey).toBeNull();
     expect(cardsTourSteps[7].center).toBe(true);
     expect(cardsTourSteps[7].anchorKey).toBeNull();
-    const middle = cardsTourSteps.slice(1, 7);
+    const middle = cardsTourSteps.slice(1, 7).filter((step) => step.id !== "more");
     for (const step of middle) {
       expect(step.center).toBe(false);
       expect(step.anchorKey).not.toBeNull();
@@ -30,18 +32,18 @@ describe("cardsTourSteps", () => {
       "views",
       "months",
       "fatura",
-      "fab",
+      null,
       "theme",
       null,
     ]);
   });
 
-  it("usa o raio de pílula para FAB e tema, e geral para os demais", () => {
+  it("usa o raio de pílula para tema, e geral para os demais", () => {
     const byId = Object.fromEntries(
       cardsTourSteps.map((step) => [step.id, step]),
     );
-    expect(byId.fab.radius).toBe(coachMarks.radiusPill);
     expect(byId.theme.radius).toBe(coachMarks.radiusPill);
+    expect(byId.more.radius).toBe(coachMarks.radiusGeneral);
     expect(byId.cards.radius).toBe(coachMarks.radiusGeneral);
     expect(byId.views.radius).toBe(coachMarks.radiusGeneral);
     expect(byId.months.radius).toBe(coachMarks.radiusGeneral);
@@ -68,7 +70,7 @@ describe("cardsTourSteps", () => {
       "Dois níveis de detalhe",
       "Navegue no tempo",
       "Do resumo ao extrato",
-      "Lançar despesa leva segundos",
+      "Nova transação mora em Mais",
       "Claro ou escuro, você decide",
       "Você já sabe o essencial",
     ]);
@@ -76,7 +78,7 @@ describe("cardsTourSteps", () => {
 
   it("mantém os marcadores de negrito do corpo (parseáveis e com trechos bold)", () => {
     // Passos com negrito conhecido devem render ao menos um segmento bold.
-    const boldSteps = ["cards", "views", "months", "fatura", "fab", "done"];
+    const boldSteps = ["cards", "views", "months", "fatura", "more", "done"];
     for (const step of cardsTourSteps) {
       const segments = parseBoldSegments(step.body);
       const hasBold = segments.some((segment) => segment.bold);
@@ -96,9 +98,8 @@ describe("cardsTourSteps", () => {
     expect(byId.months.body).toContain("**aberta**");
     expect(byId.months.body).toContain("**fechada**");
     expect(byId.fatura.body).toContain("**extrato completo**");
-    expect(byId.fab.body).toContain("**+**");
-    expect(byId.fab.body).toContain("**opcional**");
-    expect(byId.fab.body).toContain("**entrada**");
+    expect(byId.more.body).toContain("**Mais**");
+    expect(byId.more.body).toContain("**Nova transação**");
     expect(byId.done.body).toContain("**?**");
   });
 
@@ -118,7 +119,7 @@ describe("cardsTourSteps", () => {
     expect(before[3]).toEqual({ setView: "faturas", scroll: "top" });
     // 5 → setView faturas + scrollToFatura
     expect(before[4]).toEqual({ setView: "faturas", scroll: "fatura" });
-    // 6 → FAB sempre visível (sem setup)
+    // 6 → explicação centralizada sobre Mais (sem setup)
     expect(before[5]).toEqual({});
     // 7 → scrollTop
     expect(before[6]).toEqual({ scroll: "top" });
@@ -130,7 +131,7 @@ describe("cardsTourSteps", () => {
     const byId = Object.fromEntries(
       cardsTourSteps.map((step) => [step.id, step]),
     );
-    expect(byId.fab.padding).toBe(6);
+    expect(byId.more.padding).toBe(0);
     expect(byId.theme.padding).toBe(6);
     expect(byId.cards.padding).toBe(8);
     expect(byId.fatura.padding).toBe(8);

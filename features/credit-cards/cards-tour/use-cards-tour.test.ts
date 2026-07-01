@@ -205,7 +205,7 @@ describe("useCardsTour", () => {
     expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it("before() do FAB não altera view nem rola (sempre visível)", async () => {
+  it("before() do passo Mais não altera view nem rola", async () => {
     const handlers = makeHandlers();
     const { ref, scrollTo } = makeScrollRef();
     const { result } = renderHook(() =>
@@ -217,9 +217,9 @@ describe("useCardsTour", () => {
       }),
     );
 
-    const fabStep = result.current.steps.find((step) => step.id === "fab");
+    const moreStep = result.current.steps.find((step) => step.id === "more");
     await act(async () => {
-      await fabStep?.before?.();
+      await moreStep?.before?.();
     });
     expect(handlers.setView).not.toHaveBeenCalled();
     expect(handlers.selectCard).not.toHaveBeenCalled();

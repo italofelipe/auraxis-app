@@ -59,6 +59,7 @@ jest.mock("expo-router", () => ({
 }));
 
 const mockedTransactionsService = jest.mocked(transactionsService);
+const waitForQuery = { timeout: 5000 } as const;
 
 // ---------------------------------------------------------------------------
 // Transactions E2E: list, create, update, delete
@@ -93,7 +94,7 @@ describe("Transactions E2E flow", () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
 
     expect(result.current.data?.transactions).toHaveLength(
       transactionCollectionFixture.transactions.length,
@@ -126,7 +127,7 @@ describe("Transactions E2E flow", () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
     expect(mockedTransactionsService.createTransaction).toHaveBeenCalledWith(
       expect.objectContaining({
         title: "Nova transacao de teste",
@@ -156,7 +157,7 @@ describe("Transactions E2E flow", () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
     expect(mockedTransactionsService.updateTransaction).toHaveBeenCalledWith(
       transactionFixture.id,
       { title: "Salario atualizado" },
@@ -180,7 +181,7 @@ describe("Transactions E2E flow", () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBe(true);
-    });
+    }, waitForQuery);
     expect(mockedTransactionsService.deleteTransaction).toHaveBeenCalledWith(
       transactionFixture.id,
       "occurrence",
@@ -204,7 +205,7 @@ describe("Transactions E2E flow", () => {
       () => {
         expect(result.current.isError).toBe(true);
       },
-      { timeout: 5000 },
+      waitForQuery,
     );
   });
 
@@ -222,7 +223,7 @@ describe("Transactions E2E flow", () => {
 
     await waitFor(() => {
       expect(result.current.transactions.length).toBeGreaterThan(0);
-    });
+    }, waitForQuery);
 
     const firstTx = result.current.transactions[0];
     expect(firstTx).toHaveProperty("id");

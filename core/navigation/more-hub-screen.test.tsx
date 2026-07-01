@@ -2,6 +2,10 @@ import { fireEvent, render } from "@testing-library/react-native";
 
 import { MoreHubScreen } from "@/core/navigation/more-hub-screen";
 import { AppProviders } from "@/core/providers/app-providers";
+import {
+  resetExpenseSheetStore,
+  useExpenseSheetStore,
+} from "@/stores/expense-sheet-store";
 
 const mockPush = jest.fn();
 
@@ -13,6 +17,11 @@ jest.mock("expo-router", () => ({
 describe("MoreHubScreen", () => {
   beforeEach(() => {
     mockPush.mockClear();
+    resetExpenseSheetStore();
+  });
+
+  afterEach(() => {
+    resetExpenseSheetStore();
   });
 
   it("renderiza os destinos que sairam da tab bar", () => {
@@ -27,6 +36,17 @@ describe("MoreHubScreen", () => {
     }
   });
 
+  it("inclui planejamento e nova transacao como destinos deslocados do menu", () => {
+    const { getByTestId } = render(
+      <AppProviders>
+        <MoreHubScreen />
+      </AppProviders>,
+    );
+
+    expect(getByTestId("hub-item-planning")).toBeTruthy();
+    expect(getByTestId("hub-item-quickTransaction")).toBeTruthy();
+  });
+
   it("navega para a rota do item tocado", () => {
     const { getByTestId } = render(
       <AppProviders>
@@ -36,5 +56,18 @@ describe("MoreHubScreen", () => {
 
     fireEvent.press(getByTestId("hub-item-wallet"));
     expect(mockPush).toHaveBeenCalledWith("/carteira");
+  });
+
+  it("abre o sheet rapido ao tocar em nova transacao", () => {
+    const { getByTestId } = render(
+      <AppProviders>
+        <MoreHubScreen />
+      </AppProviders>,
+    );
+
+    expect(useExpenseSheetStore.getState().isOpen).toBe(false);
+    fireEvent.press(getByTestId("hub-item-quickTransaction"));
+    expect(useExpenseSheetStore.getState().isOpen).toBe(true);
+    expect(mockPush).not.toHaveBeenCalled();
   });
 });

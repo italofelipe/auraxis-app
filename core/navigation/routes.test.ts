@@ -3,6 +3,7 @@ import {
   buildCreditCardBillPath,
   buildGoalScenarioPath,
   buildTickerDetailPath,
+  privateTabDefinitions,
 } from "@/core/navigation/routes";
 
 describe("app routes", () => {
@@ -30,5 +31,15 @@ describe("app routes", () => {
   it("keeps static private routes as direct href strings", () => {
     expect(appRoutes.private.dashboard).toBe("/dashboard");
     expect(appRoutes.private.insights).toBe("/insights");
+  });
+
+  it("exposes the mobile handoff tabs in the expected order", () => {
+    expect(privateTabDefinitions.map((tab) => tab.name)).toEqual([
+      "dashboard",
+      "transacoes",
+      "insights",
+      "cartoes",
+      "mais",
+    ]);
   });
 });

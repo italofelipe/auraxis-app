@@ -18,7 +18,6 @@ export type CardsTourAnchorKey =
   | "views"
   | "months"
   | "fatura"
-  | "fab"
   | "theme";
 
 /** Alvos de rolagem que o `before()` pode acionar antes de medir. */
@@ -129,14 +128,14 @@ export const cardsTourSteps: readonly CardsTourStepConfig[] = [
     before: { setView: "faturas", scroll: "fatura" },
   },
   {
-    id: "fab",
+    id: "more",
     eyebrow: "PASSO 6 DE 8",
-    title: "Lançar despesa leva segundos",
-    body: "Toque no **+** a qualquer momento. O cartão é **opcional**: registre agora e defina depois. Comprou parcelado? Informe as parcelas — e, se houver **entrada**, o Auraxis distribui o restante nas próximas faturas, automaticamente.",
-    anchorKey: "fab",
-    center: false,
-    padding: ROUND_PADDING,
-    radius: coachMarks.radiusPill,
+    title: "Nova transação mora em Mais",
+    body: "O botão **+** saiu da barra para deixar a navegação líquida respirar. Quando precisar registrar rápido, abra **Mais** e toque em **Nova transação**.",
+    anchorKey: null,
+    center: true,
+    padding: 0,
+    radius: coachMarks.radiusGeneral,
     before: {},
   },
   {
