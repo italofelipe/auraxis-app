@@ -1,9 +1,10 @@
 import { fireEvent, render } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 
 import { LoginScreen } from "@/features/auth/screens/login-screen";
 import { TestProviders } from "@/shared/testing/test-providers";
 import { useLoginScreenController } from "@/features/auth/hooks/use-login-screen-controller";
-import { initI18n } from "@/shared/i18n";
+import { initI18n, switchLocale } from "@/shared/i18n";
 
 const mockController = {
   form: {
@@ -58,7 +59,8 @@ describe("LoginScreen", () => {
     await initI18n("pt");
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await switchLocale("pt");
     jest.clearAllMocks();
     mockedUseController.mockReturnValue(mockController as never);
   });
@@ -77,6 +79,35 @@ describe("LoginScreen", () => {
     expect(getByText("OU")).toBeTruthy();
     expect(getByText("Termos de Uso")).toBeTruthy();
     expect(getByText("Privacidade")).toBeTruthy();
+  });
+
+  it("renderiza placeholders premium pelo idioma ativo", async () => {
+    await switchLocale("en");
+
+    const { getByPlaceholderText } = renderScreen();
+
+    expect(getByPlaceholderText("you@example.com")).toBeTruthy();
+    expect(getByPlaceholderText("Your password")).toBeTruthy();
+  });
+
+  it("aplica halo premium enquanto o campo esta focado", () => {
+    const { getByPlaceholderText, getByTestId } = renderScreen();
+    const emailInput = getByPlaceholderText("seu@email.com");
+    const emailShell = getByTestId("login-email-shell");
+
+    fireEvent(emailInput, "focus");
+    expect(StyleSheet.flatten(emailShell.props.style)).toEqual(
+      expect.objectContaining({
+        borderColor: "rgba(155,233,255,0.6)",
+      }),
+    );
+
+    fireEvent(emailInput, "blur");
+    expect(StyleSheet.flatten(emailShell.props.style)).toEqual(
+      expect.objectContaining({
+        borderColor: "rgba(255,255,255,0.16)",
+      }),
+    );
   });
 
   it("mantem as acoes do fluxo de auth conectadas ao controller", () => {
