@@ -42,6 +42,7 @@ const buildTx = (
   dueDate: "2026-06-10",
   status: "pending",
   description: null,
+  observation: null,
   isRecurring: false,
   isInstallment: false,
   installmentCount: null,

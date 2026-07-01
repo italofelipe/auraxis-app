@@ -12,6 +12,7 @@ const vm = (overrides: Partial<TransactionViewModel> = {}): TransactionViewModel
   dueDate: "2026-06-29",
   status: "pending",
   description: null,
+  observation: null,
   isRecurring: false,
   isInstallment: false,
   installmentCount: null,

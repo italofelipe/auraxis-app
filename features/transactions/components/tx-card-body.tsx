@@ -166,6 +166,16 @@ export function TxCardBody({ item, analytic }: TxCardBodyProps): ReactElement {
             {item.description}
           </AppText>
         ) : null}
+        {item.observation ? (
+          <YStack gap="$1">
+            <AppText size="caption" tone="muted">
+              Observações
+            </AppText>
+            <AppText size="bodySm" tone="muted" numberOfLines={2}>
+              {item.observation}
+            </AppText>
+          </YStack>
+        ) : null}
         <XStack alignItems="center" gap="$2" flexWrap="wrap">
           <TxStatusChip status={item.status} type={item.type} />
           {item.invoiceBadgeMonth ? (

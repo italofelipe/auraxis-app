@@ -59,6 +59,7 @@ const item: TransactionFeedItem = {
   id: "tx-1",
   title: "Impostos",
   description: "Impostos do salário gringo",
+  observation: null,
   amount: 2000,
   type: "expense",
   status: "pending",
@@ -163,6 +164,27 @@ describe("TxCard", () => {
     expect(getByText("− R$ 2.000,00")).toBeTruthy();
     fireEvent.press(getByTestId("tx-card-tx-1"));
     expect(onPress).toHaveBeenCalledWith("tx-1");
+  });
+
+  it("renderiza observacoes separadas da descricao legada", () => {
+    const observedItem = {
+      ...item,
+      observation: "Separar comprovante para o contador",
+    } as TransactionFeedItem;
+
+    const { getByText } = wrap(
+      <TxCard
+        item={observedItem}
+        analytic={false}
+        onPress={jest.fn()}
+        onMarkPaid={jest.fn()}
+        onDelete={jest.fn()}
+      />,
+    );
+
+    expect(getByText("Impostos do salário gringo")).toBeTruthy();
+    expect(getByText("Observações")).toBeTruthy();
+    expect(getByText("Separar comprovante para o contador")).toBeTruthy();
   });
 
   it("no modo Analítico mostra categoria e % do gasto", () => {

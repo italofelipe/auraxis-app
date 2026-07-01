@@ -59,6 +59,7 @@ export interface TransactionFeedItem {
   readonly id: string;
   readonly title: string;
   readonly description: string | null;
+  readonly observation: string | null;
   /** Valor numérico do lançamento (sempre positivo). */
   readonly amount: number;
   readonly type: TransactionType;
@@ -316,6 +317,7 @@ export const toFeedItem = ({
     id: tx.id,
     title: tx.title,
     description: tx.description,
+    observation: tx.observation,
     amount,
     type: tx.type,
     status: tx.status,

@@ -230,6 +230,7 @@ describe("toFeedItem", () => {
         id: "tx-9",
         title: "Uber",
         description: "corrida",
+        observation: "Reembolsar com recibo",
         amount: "200.00",
         type: "expense",
         tagId: "tag-1",
@@ -243,6 +244,7 @@ describe("toFeedItem", () => {
     expect(item.id).toBe("tx-9");
     expect(item.title).toBe("Uber");
     expect(item.description).toBe("corrida");
+    expect(item.observation).toBe("Reembolsar com recibo");
     expect(item.amount).toBeCloseTo(200);
     expect(item.type).toBe("expense");
     expect(item.status).toBe("pending");

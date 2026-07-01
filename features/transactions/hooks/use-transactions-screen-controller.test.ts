@@ -98,6 +98,8 @@ afterAll(() => {
 });
 
 beforeEach(() => {
+  jest.useFakeTimers({ doNotFake: ["queueMicrotask"] });
+  jest.setSystemTime(new Date("2026-06-11T12:00:00"));
   createStub = buildMutationStub();
   updateStub = buildMutationStub();
   deleteStub = buildMutationStub();
@@ -181,7 +183,7 @@ describe("useTransactionsScreenController data projection", () => {
   });
 });
 
-describe("useTransactionsScreenController mutations", () => {
+describe("useTransactionsScreenController create and edit mutations", () => {
   beforeEach(() => {
     mockedUseQuery.mockReturnValue({
       data: { transactions: [], pagination: { total: 0 } },
@@ -202,6 +204,25 @@ describe("useTransactionsScreenController mutations", () => {
       expect.objectContaining({ title: "Conta", amount: "150.75", type: "expense" }),
     );
     expect(result.current.formMode.kind).toBe("closed");
+  });
+
+  it("create repassa observacoes opcionais no payload", async () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    act(() => {
+      result.current.handleOpenCreate();
+    });
+    await act(async () => {
+      await result.current.handleSubmit({
+        ...formValues({ title: "Internet", amount: "120.00" }),
+        observation: "Renovar desconto no proximo ciclo",
+      } as CreateTransactionFormValues);
+    });
+
+    expect(createStub.mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        observation: "Renovar desconto no proximo ciclo",
+      }),
+    );
   });
 
   it("create preserva dados de cartao e parcelamento no payload", async () => {
@@ -246,6 +267,26 @@ describe("useTransactionsScreenController mutations", () => {
     );
   });
 
+  it("edit repassa observacoes opcionais no payload", async () => {
+    const { result } = renderHook(() => useTransactionsScreenController());
+    act(() => {
+      result.current.handleOpenEdit(buildRecord({ id: "tx-9" }));
+    });
+    await act(async () => {
+      await result.current.handleSubmit({
+        ...formValues({ title: "Updated", amount: "100.00", type: "income" }),
+        observation: "Nota revisada",
+      } as CreateTransactionFormValues);
+    });
+
+    expect(updateStub.mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        transactionId: "tx-9",
+        payload: expect.objectContaining({ observation: "Nota revisada" }),
+      }),
+    );
+  });
+
   it("captura submitError quando create falha e mantem form aberto", async () => {
     createStub.mutateAsync.mockRejectedValueOnce(new Error("boom"));
     const { result } = renderHook(() => useTransactionsScreenController());
@@ -257,6 +298,14 @@ describe("useTransactionsScreenController mutations", () => {
     });
     expect(result.current.submitError).toBeInstanceOf(Error);
     expect(result.current.formMode.kind).toBe("create");
+  });
+});
+
+describe("useTransactionsScreenController transaction actions", () => {
+  beforeEach(() => {
+    mockedUseQuery.mockReturnValue({
+      data: { transactions: [], pagination: { total: 0 } },
+    } as never);
   });
 
   it("delete dispara deleteMutation com escopo occurrence por padrao", async () => {
@@ -302,6 +351,33 @@ describe("useTransactionsScreenController mutations", () => {
     });
     expect(result.current.submitError).toBeInstanceOf(Error);
     expect(result.current.payingTransactionId).toBeNull();
+  });
+
+  it("handleDuplicate preserva observacao da transacao original", async () => {
+    mockedUseQuery.mockReturnValue({
+      data: {
+        transactions: [
+          buildRecord({
+            id: "copy-me",
+            description: "Vivo Fibra",
+            observation: "Renovar desconto",
+          }),
+        ],
+        pagination: { total: 1 },
+      },
+    } as never);
+    const { result } = renderHook(() => useTransactionsScreenController());
+
+    await act(async () => {
+      await result.current.handleDuplicate("copy-me");
+    });
+
+    expect(createStub.mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        description: "Vivo Fibra",
+        observation: "Renovar desconto",
+      }),
+    );
   });
 
   it("dismissSubmitError limpa estado e reseta mutations", async () => {
@@ -437,6 +513,21 @@ describe("useTransactionsScreenController period balance + active filters", () =
 
     expect(result.current.transactions[0]).toEqual(
       expect.objectContaining({ description: "Conta de luz" }),
+    );
+  });
+
+  it("expoe observacoes no view model", () => {
+    mockedUseQuery.mockReturnValue({
+      data: {
+        transactions: [buildRecord({ id: "a", observation: "Renovar desconto" })],
+        pagination: { total: 1 },
+      },
+    } as never);
+
+    const { result } = renderHook(() => useTransactionsScreenController());
+
+    expect(result.current.transactions[0]).toEqual(
+      expect.objectContaining({ observation: "Renovar desconto" }),
     );
   });
 

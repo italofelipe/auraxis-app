@@ -2,6 +2,7 @@ import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import { TransactionForm } from "@/features/transactions/components/transaction-form";
 import { useCreditCardsQuery } from "@/features/credit-cards/hooks/use-credit-cards-query";
+import type { TransactionRecord } from "@/features/transactions/contracts";
 import { isFeatureEnabled } from "@/shared/feature-flags";
 import { AppProviders } from "@/core/providers/app-providers";
 
@@ -16,10 +17,47 @@ jest.mock("@/shared/feature-flags", () => ({
 const mockedUseCreditCardsQuery = jest.mocked(useCreditCardsQuery);
 const mockedIsFeatureEnabled = jest.mocked(isFeatureEnabled);
 
-const renderForm = (onSubmit = jest.fn()) => {
+const buildInitialTransaction = (
+  overrides: Partial<TransactionRecord> = {},
+): TransactionRecord => ({
+  id: "tx-edit",
+  title: "Internet",
+  amount: "120.00",
+  type: "expense",
+  dueDate: "2026-05-10",
+  startDate: null,
+  endDate: null,
+  description: "Vivo Fibra",
+  observation: "Renovar desconto no proximo ciclo",
+  isRecurring: false,
+  isInstallment: false,
+  installmentCount: null,
+  recurrenceInterval: 1,
+  recurrenceUnit: "month",
+  tagId: null,
+  accountId: null,
+  creditCardId: null,
+  status: "pending",
+  currency: "BRL",
+  source: "manual",
+  externalId: null,
+  bankName: null,
+  installmentGroupId: null,
+  autoSettle: false,
+  paidAt: null,
+  createdAt: null,
+  updatedAt: null,
+  ...overrides,
+});
+
+const renderForm = (
+  onSubmit = jest.fn(),
+  initialTransaction: TransactionRecord | null = null,
+) => {
   const rendered = render(
     <AppProviders>
       <TransactionForm
+        initialTransaction={initialTransaction}
         isSubmitting={false}
         submitError={null}
         onSubmit={onSubmit}
@@ -94,6 +132,35 @@ describe("TransactionForm installments", () => {
       );
     });
     expect(getByText("12x de R$ 100,00")).toBeTruthy();
+  });
+
+  it("submete observacoes opcionais sem substituir a descricao", async () => {
+    const { getByText, getByLabelText, onSubmit } = renderForm();
+
+    fireEvent.changeText(getByLabelText("Titulo"), "Internet");
+    fireEvent.changeText(getByLabelText("Valor (R$)"), "12000");
+    fireEvent.changeText(getByLabelText("Data"), "2026-05-10");
+    fireEvent.changeText(getByLabelText("Descricao (opcional)"), "Vivo Fibra");
+    fireEvent.changeText(
+      getByLabelText("Observações (opcional)"),
+      "Renovar desconto no proximo ciclo",
+    );
+    fireEvent.press(getByText("Criar transacao"));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith(
+        expect.objectContaining({
+          description: "Vivo Fibra",
+          observation: "Renovar desconto no proximo ciclo",
+        }),
+      );
+    });
+  });
+
+  it("preenche observacoes existentes ao editar transacao", () => {
+    const { getByDisplayValue } = renderForm(jest.fn(), buildInitialTransaction());
+
+    expect(getByDisplayValue("Renovar desconto no proximo ciclo")).toBeTruthy();
   });
 
   it("revela campos de recorrencia e submete cadencia ao ativar o toggle", async () => {

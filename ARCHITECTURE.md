@@ -17,6 +17,12 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - Its regional seed data is mirrored in `features/tools/data/cost-of-living-by-uf.json` so the app calculator runs locally and does not depend on the Web repo at runtime.
 - The calculator compares monthly expenses against UF averages, computes committed income, savings rate, FIRE target wealth, estimated years to retirement, regional comparison and a sustainability score.
 
+## Transactions Surface
+
+- Mobile transactions keep `description` as the legacy short detail field and now expose `observation` as the dedicated optional notes field already present in the app API contract.
+- `TransactionForm` edits both fields independently; `useTransactionsScreenController` forwards `observation` through create, update and duplicate flows without introducing a new endpoint.
+- The feed view-model and action sheet render observations as a separate detail block so historical descriptions remain visible and untouched.
+
 ## Feature Flags
 
 - `app.transactions.installments` is promoted to `enabled-prod` after app-side parity validation for transaction installments.
@@ -42,5 +48,5 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.
-- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status and login screen.
+- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen and transaction observation form/feed/controller coverage.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.
