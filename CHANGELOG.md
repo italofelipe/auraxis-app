@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.12.0](https://github.com/italofelipe/auraxis-app/compare/v1.11.0...v1.12.0) (2026-07-01)
+
+
+### Features
+
+* **app:** parear app com web parity ([#629](https://github.com/italofelipe/auraxis-app/issues/629)) ([0bd221a](https://github.com/italofelipe/auraxis-app/commit/0bd221a80425914ee74328fddaaf3704e8449c07)), closes [#628](https://github.com/italofelipe/auraxis-app/issues/628)
+* **app:** redesenhar menu inferior liquido ([#635](https://github.com/italofelipe/auraxis-app/issues/635)) ([e587b70](https://github.com/italofelipe/auraxis-app/commit/e587b70ae49b6709032516f3eac84d65f50fcf67)), closes [#634](https://github.com/italofelipe/auraxis-app/issues/634)
+* **credit-cards:** add invoice expense actions ([#619](https://github.com/italofelipe/auraxis-app/issues/619)) ([7db65f0](https://github.com/italofelipe/auraxis-app/commit/7db65f01c65859e52ca23ce48e52149a2267dd08))
+* **payments-assistant:** assistente de pagamentos (deck swipe, Premium) ([#631](https://github.com/italofelipe/auraxis-app/issues/631)) ([2609d28](https://github.com/italofelipe/auraxis-app/commit/2609d28af7f24827f281c4a708b2828b5b9c60db))
+* **transactions:** add mobile observations ([#637](https://github.com/italofelipe/auraxis-app/issues/637)) ([b687364](https://github.com/italofelipe/auraxis-app/commit/b687364fe0e5ca23bd9eeda5bd10df9c720dbc13))
+* **transactions:** toggle auto-settle no form de transação (F4) ([#633](https://github.com/italofelipe/auraxis-app/issues/633)) ([b058fcd](https://github.com/italofelipe/auraxis-app/commit/b058fcd145b183c30af4f8c679367eba8ab84ec3))
+
+
+### Bug Fixes
+
+* **transactions:** avoid android swipeable crash ([#621](https://github.com/italofelipe/auraxis-app/issues/621)) ([0896068](https://github.com/italofelipe/auraxis-app/commit/08960682382c7f04c82ceb5288eb40911c17ee83))
+
 ## [1.11.0](https://github.com/italofelipe/auraxis-app/compare/v1.10.0...v1.11.0) (2026-06-22)
 
 
