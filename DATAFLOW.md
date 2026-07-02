@@ -24,10 +24,11 @@ No network call or database mutation is required until the user explicitly saves
 
 1. `LoginScreen` obtains all auth actions and state from `useLoginScreenController`.
 2. The premium auth shell renders only presentation: brand background, glass inputs, captcha, CTA, session notice and legal links.
-3. Email and password fields still write into the same React Hook Form controller.
-4. Submit calls `controller.handleSubmit`, preserving captcha enforcement and login mutation behavior.
-5. Successful login still consumes any stored auth redirect and navigates to the intended private route or dashboard.
-6. Session-expired and submit-error states render on the same screen without changing session policy.
+3. Premium labels and placeholders come from `shared/i18n/locales/*.json`; focus state only changes the local glass input shell styling.
+4. Email and password fields still write into the same React Hook Form controller.
+5. Submit calls `controller.handleSubmit`, preserving captcha enforcement and login mutation behavior.
+6. Successful login still consumes any stored auth redirect and navigates to the intended private route or dashboard.
+7. Session-expired and submit-error states render on the same screen without changing session policy.
 
 ## Liquid Tab Navigation Flow
 
@@ -54,5 +55,5 @@ No network call or database mutation is required until the user explicitly saves
 - Pure calculator behavior is verified before screen tests.
 - Screen tests assert that inputs, results and controller actions are wired.
 - Feature flag tests assert production status for promoted parity features.
-- Login tests assert the premium surface while preserving auth controller actions.
+- Login tests assert the premium surface, localized placeholders, focus styling and preserved auth controller actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.

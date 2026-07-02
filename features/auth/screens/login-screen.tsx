@@ -69,6 +69,10 @@ export function LoginScreen(): ReactElement {
             email: t("auth.login.emailLabelPremium"),
             password: t("auth.login.passwordLabelPremium"),
           }}
+          placeholders={{
+            email: t("auth.login.emailPlaceholderPremium"),
+            password: t("auth.login.passwordPlaceholderPremium"),
+          }}
         />
 
         <CaptchaBlock controller={controller} />
@@ -290,9 +294,18 @@ interface LoginFieldsProps {
     readonly email: string;
     readonly password: string;
   };
+  readonly placeholders: {
+    readonly email: string;
+    readonly password: string;
+  };
 }
 
-function LoginFields({ control, errors, labels }: LoginFieldsProps): ReactElement {
+function LoginFields({
+  control,
+  errors,
+  labels,
+  placeholders,
+}: LoginFieldsProps): ReactElement {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   return (
@@ -304,7 +317,7 @@ function LoginFields({ control, errors, labels }: LoginFieldsProps): ReactElemen
           <PremiumInputField
             id="login-email"
             label={labels.email}
-            placeholder="seu@email.com"
+            placeholder={placeholders.email}
             autoCapitalize="none"
             autoComplete="email"
             keyboardType="email-address"
@@ -323,7 +336,7 @@ function LoginFields({ control, errors, labels }: LoginFieldsProps): ReactElemen
           <PremiumInputField
             id="login-password"
             label={labels.password}
-            placeholder="Sua senha"
+            placeholder={placeholders.password}
             autoComplete="password"
             textContentType="password"
             secureTextEntry={!passwordVisible}
@@ -365,8 +378,12 @@ function PremiumInputField({
   errorText,
   trailingIcon,
   accessibilityLabel,
+  onBlur,
+  onFocus,
   ...rest
 }: PremiumInputFieldProps): ReactElement {
+  const [focused, setFocused] = useState(false);
+
   return (
     <YStack gap="$2">
       <Label
@@ -380,13 +397,14 @@ function PremiumInputField({
         {label}
       </Label>
       <XStack
+        testID={`${id}-shell`}
         minHeight={54}
         alignItems="center"
         borderRadius={radii.md}
-        borderColor={AUTH_BORDER}
         borderWidth={borderWidths.hairline}
         backgroundColor={AUTH_GLASS}
         paddingHorizontal="$3"
+        style={focused ? styles.inputShellFocused : styles.inputShellResting}
       >
         <Input
           id={id}
@@ -402,6 +420,14 @@ function PremiumInputField({
           placeholderTextColor="$muted"
           paddingHorizontal={0}
           {...rest}
+          onBlur={(event) => {
+            setFocused(false);
+            onBlur?.(event);
+          }}
+          onFocus={(event) => {
+            setFocused(true);
+            onFocus?.(event);
+          }}
         />
         {trailingIcon}
       </XStack>
@@ -634,6 +660,18 @@ const iconButtonStyle: ViewStyle = {
   minWidth: 44,
 };
 
+const inputShellRestingStyle: ViewStyle = {
+  borderColor: AUTH_BORDER,
+};
+
+const inputShellFocusedStyle: ViewStyle = {
+  borderColor: "rgba(155,233,255,0.6)",
+  shadowColor: colorPalette.cyan500,
+  shadowOffset: { width: 0, height: 0 },
+  shadowOpacity: 0.16,
+  shadowRadius: 10,
+};
+
 const logoMarkStyle: ViewStyle = {
   width: 38,
   height: 38,
@@ -666,4 +704,6 @@ const styles = StyleSheet.create({
   primaryButton: primaryButtonStyle,
   ghostButton: ghostButtonStyle,
   iconButton: iconButtonStyle,
+  inputShellResting: inputShellRestingStyle,
+  inputShellFocused: inputShellFocusedStyle,
 } satisfies Record<string, ViewStyle | TextStyle>);

@@ -34,6 +34,7 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - The login route keeps the same `useLoginScreenController` contract for mutation, captcha, error handling, legal links and navigation.
 - The visual layer is now a dedicated premium auth shell using the brand gradient, glass fields, white primary CTA and light status bar requested by the mobile handoff.
 - Login copy is read from `shared/i18n/locales/*.json`; the screen should not introduce new hardcoded product strings.
+- Premium login handoff hardening is tracked in `docs/handoffs/mobile-design-handoff-status-2026-07-01.md`; placeholder copy and glass focus styling must stay covered by login screen tests.
 
 ## Private Navigation
 
@@ -48,5 +49,5 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.
-- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen and transaction observation form/feed/controller coverage.
+- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage and transaction observation form/feed/controller coverage.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.
