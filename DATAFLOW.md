@@ -20,6 +20,14 @@ No network call or database mutation is required until the user explicitly saves
 4. `enabled-prod` means the app fallback treats the feature as enabled in production-ready builds.
 5. Remote provider decisions can still override the local fallback when Unleash mode is configured.
 
+## Production Runtime Config Flow
+
+1. `shared/config/runtime.ts` reads `EXPO_PUBLIC_APP_ENV` from Expo public env and falls back to `expo.extra.appEnv` or `development`.
+2. The same module resolves `apiBaseUrl` from `EXPO_PUBLIC_API_URL`, then `expo.extra.apiUrl`, then the local development fallback `http://localhost:5000`.
+3. `normalizeBaseUrl` removes trailing slashes so downstream clients receive a stable base URL.
+4. If the resolved app environment is `production`, `assertProductionApiBaseUrl` rejects invalid URLs, non-HTTPS URLs and localhost-style hosts before exporting `appRuntimeConfig`.
+5. `core/http/http-client.ts` imports the guarded `appRuntimeConfig.apiBaseUrl`; a production bundle without a safe API URL fails fast instead of dispatching requests to localhost.
+
 ## Premium Login Flow
 
 1. `LoginScreen` obtains all auth actions and state from `useLoginScreenController`.

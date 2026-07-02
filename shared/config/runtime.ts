@@ -6,6 +6,7 @@ import {
 } from "@/shared/config/checkout-provider-channel";
 
 export type ApiMode = "live" | "mock";
+export type AppEnvironment = "development" | "preview" | "production";
 
 export interface AppRuntimeConfig {
   readonly apiBaseUrl: string;
@@ -39,6 +40,7 @@ const DEFAULT_BRAPI_BASE_URL = "https://brapi.dev/api";
 const expoExtra = (Constants.expoConfig?.extra ?? {}) as Record<string, unknown>;
 
 type RuntimeEnvKey =
+  | "EXPO_PUBLIC_APP_ENV"
   | "EXPO_PUBLIC_API_URL"
   | "EXPO_PUBLIC_API_MODE"
   | "EXPO_PUBLIC_API_CONTRACT_VERSION"
@@ -56,6 +58,7 @@ type RuntimeEnvKey =
   | "EXPO_PUBLIC_BRAPI_BASE_URL";
 
 const RUNTIME_ENV_READERS: Readonly<Record<RuntimeEnvKey, () => string | undefined>> = {
+  EXPO_PUBLIC_APP_ENV: () => process.env.EXPO_PUBLIC_APP_ENV,
   EXPO_PUBLIC_API_URL: () => process.env.EXPO_PUBLIC_API_URL,
   EXPO_PUBLIC_API_MODE: () => process.env.EXPO_PUBLIC_API_MODE,
   EXPO_PUBLIC_API_CONTRACT_VERSION: () => process.env.EXPO_PUBLIC_API_CONTRACT_VERSION,
@@ -153,15 +156,70 @@ export const normalizeBaseUrl = (rawUrl: string): string => {
   return rawUrl.slice(0, end);
 };
 
+export const resolveAppEnvironment = (
+  rawValue: string | null | undefined,
+): AppEnvironment => {
+  const normalized = String(rawValue ?? "").trim().toLowerCase();
+
+  if (normalized === "production" || normalized === "preview") {
+    return normalized;
+  }
+
+  return "development";
+};
+
+const PRODUCTION_API_URL_ERROR =
+  "Production app runtime requires EXPO_PUBLIC_API_URL to be an HTTPS URL. Configure EXPO_PUBLIC_API_URL=https://api.auraxis.com.br in the EAS environment before building.";
+
+const isLocalhostHostname = (hostname: string): boolean =>
+  ["localhost", "127.0.0.1", "0.0.0.0", "::1", "[::1]"].includes(hostname);
+
+export const assertProductionApiBaseUrl = ({
+  apiBaseUrl,
+  appEnvironment,
+}: {
+  readonly apiBaseUrl: string;
+  readonly appEnvironment: AppEnvironment;
+}): string => {
+  if (appEnvironment !== "production") {
+    return apiBaseUrl;
+  }
+
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(apiBaseUrl);
+  } catch {
+    throw new Error(PRODUCTION_API_URL_ERROR);
+  }
+
+  if (
+    parsedUrl.protocol !== "https:"
+    || isLocalhostHostname(parsedUrl.hostname)
+  ) {
+    throw new Error(PRODUCTION_API_URL_ERROR);
+  }
+
+  return apiBaseUrl;
+};
+
 const readApiMode = (): ApiMode => {
   const rawValue = readString("EXPO_PUBLIC_API_MODE", "apiMode", "live").toLowerCase();
   return rawValue === "mock" ? "mock" : "live";
 };
 
-export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
+const appEnvironment = resolveAppEnvironment(
+  readString("EXPO_PUBLIC_APP_ENV", "appEnv", "development"),
+);
+
+const resolvedApiBaseUrl = assertProductionApiBaseUrl({
   apiBaseUrl: normalizeBaseUrl(
     readString("EXPO_PUBLIC_API_URL", "apiUrl", DEFAULT_API_BASE_URL),
   ),
+  appEnvironment,
+});
+
+export const appRuntimeConfig: AppRuntimeConfig = Object.freeze({
+  apiBaseUrl: resolvedApiBaseUrl,
   apiMode: readApiMode(),
   apiContractVersion: readString(
     "EXPO_PUBLIC_API_CONTRACT_VERSION",
