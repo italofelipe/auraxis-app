@@ -40,18 +40,24 @@ jest.mock("axios", () => require("axios/dist/node/axios.cjs"));
 /* eslint-disable @typescript-eslint/no-require-imports, @typescript-eslint/no-explicit-any, react/display-name */
 jest.mock("react-native-reanimated", () => {
   const React = require("react");
-  const { View } = require("react-native");
+  const { View, Text } = require("react-native");
   const fadeStub = { duration: () => fadeStub, delay: () => fadeStub };
   const ForwardedView = React.forwardRef(
     ({ children, style, ...rest }: any, ref: any) => {
       return React.createElement(View, { style, ref, ...rest }, children);
     },
   );
+  const ForwardedText = React.forwardRef(
+    ({ children, style, ...rest }: any, ref: any) => {
+      return React.createElement(Text, { style, ref, ...rest }, children);
+    },
+  );
   const createAnimatedComponent = (component: unknown) => component;
   return {
     __esModule: true,
-    default: { View: ForwardedView, createAnimatedComponent },
+    default: { View: ForwardedView, Text: ForwardedText, createAnimatedComponent },
     View: ForwardedView,
+    Text: ForwardedText,
     createAnimatedComponent,
     FadeIn: fadeStub,
     FadeOut: fadeStub,
@@ -64,6 +70,8 @@ jest.mock("react-native-reanimated", () => {
       typeof factory === "function" ? factory() : {},
     withTiming: (value: unknown) => value,
     withSpring: (value: unknown) => value,
+    withRepeat: (value: unknown) => value,
+    withSequence: (...values: unknown[]) => values[values.length - 1],
     withDelay: (_delay: unknown, value: unknown) => value,
     Easing: {
       bezier: () => (t: number) => t,
