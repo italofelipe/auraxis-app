@@ -108,6 +108,28 @@ export class SharedEntriesClassifier {
     });
   }
 
+  incomingPending(
+    records: readonly SharedInvitationRecord[],
+    currentUserId: string | null,
+  ): readonly InvitationView[] {
+    return this.pending(records).filter((invitation) => {
+      return currentUserId ? invitation.fromUserId !== currentUserId : true;
+    });
+  }
+
+  outgoing(
+    records: readonly SharedInvitationRecord[],
+    currentUserId: string | null,
+  ): readonly InvitationView[] {
+    if (!currentUserId) {
+      return [];
+    }
+
+    return this.invitations(records).filter((invitation) => {
+      return invitation.fromUserId === currentUserId;
+    });
+  }
+
   active(records: readonly SharedEntryRecord[]): readonly EntryView[] {
     return this.entries(records).filter((entry) => entry.bucket === "active");
   }

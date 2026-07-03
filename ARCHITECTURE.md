@@ -26,9 +26,10 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 ## Shared Entries Surface
 
 - `/compartilhamentos` mounts `SharedEntriesScreen`, guarded by `PaywallGate` for the `shared_entries` entitlement.
-- `useSharedEntriesScreenController` keeps the Web parity split explicit: invitations, entries shared by the current user (`byMe`) and entries shared with the current user (`withMe`) are queried independently and exposed as separate tabs.
+- `useSharedEntriesScreenController` keeps the Web parity split explicit: incoming invitations, entries shared by the current user (`byMe`), entries shared with the current user (`withMe`) and outgoing invitations are queried/classified independently.
 - The mobile surface renders a summary card with total entries, active entries and pending invitations before the tab selector, then shows per-tab counters so `Compartilhei` and `Recebi` stay visually distinct.
-- Revocation remains restricted to `byMe` cards; `withMe` cards are read-only and keep the explanatory copy that only the creator can revoke.
+- `Compartilhei` includes the outgoing composer, the list of shares created by the user and the sent invitation list. Pending sent invitations can be revoked through the same generated `/shared-entries/invitations/{invitationId}` contract used by incoming rejection.
+- Shared-entry revocation remains restricted to `byMe` cards; `withMe` cards are read-only and keep the explanatory copy that only the creator can revoke.
 
 ## Feature Flags
 
@@ -62,5 +63,5 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.
-- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, shared-entries mobile parity and transaction observation form/feed/controller coverage.
+- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, shared-entries mobile parity including outgoing invitations, and transaction observation form/feed/controller coverage.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.

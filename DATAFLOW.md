@@ -44,9 +44,10 @@ No network call or database mutation is required until the user explicitly saves
 2. `PaywallGate` checks the `shared_entries` entitlement before rendering premium sharing data.
 3. `useSharedEntriesScreenController` starts three independent TanStack queries: `sharedEntries.byMe`, `sharedEntries.withMe` and `sharedEntries.invitations`.
 4. `sharedEntriesService` resolves the generated contract paths for `/shared-entries/by-me`, `/shared-entries/with-me` and `/shared-entries/invitations`, then maps API snake_case payloads into app records.
-5. `sharedEntriesClassifier` derives buckets and labels, while the controller derives tab counts plus the summary totals from the classified lists.
-6. `SharedEntriesScreen` renders the summary card first, then the `Convites`, `Compartilhei` and `Recebi` tabs with counters.
-7. Accept/reject actions apply only to invitation cards. Revoke actions apply only to `byMe` entries; `withMe` entries stay read-only.
+5. `sharedEntriesClassifier` derives buckets, labels and invitation direction. Pending incoming invitations exclude records whose `fromUserId` matches the current session user; outgoing invitations include only records sent by the current user.
+6. The controller derives tab counts plus the summary totals from the classified lists and keeps a local outgoing invitation form with selected shared entry, invitee email, optional split percentage, optional exact amount, optional message and expiry hours.
+7. `SharedEntriesScreen` renders the summary card first, then the `Convites`, `Compartilhei` and `Recebi` tabs with counters.
+8. `Convites` accepts/rejects received invitations. `Compartilhei` creates invitations with `createInvitation`, lists sent invitations and revokes pending sent invitations with `deleteInvitation`. Revoke actions for shared entries still apply only to `byMe` entries; `withMe` entries stay read-only.
 
 ## Liquid Tab Navigation Flow
 
@@ -74,5 +75,5 @@ No network call or database mutation is required until the user explicitly saves
 - Screen tests assert that inputs, results and controller actions are wired.
 - Feature flag tests assert production status for promoted parity features.
 - Login tests assert the premium surface, localized placeholders, focus styling and preserved auth controller actions.
-- Shared-entries tests assert controller counts, summary rendering, tab counters and stable tab actions.
+- Shared-entries tests assert controller counts, summary rendering, tab counters, incoming/outgoing invitation separation, outgoing composer actions and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
