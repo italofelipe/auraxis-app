@@ -112,6 +112,30 @@ describe("SharedEntriesClassifier shortcuts", () => {
     expect(result).toHaveLength(1);
   });
 
+  it("incomingPending() remove convites enviados pelo usuario atual", () => {
+    const result = sharedEntriesClassifier.incomingPending(
+      [
+        buildInvitation({ id: "received", fromUserId: "other-user" }),
+        buildInvitation({ id: "sent", fromUserId: "current-user" }),
+      ],
+      "current-user",
+    );
+
+    expect(result.map((invitation) => invitation.id)).toEqual(["received"]);
+  });
+
+  it("outgoing() lista convites enviados pelo usuario atual", () => {
+    const result = sharedEntriesClassifier.outgoing(
+      [
+        buildInvitation({ id: "sent", fromUserId: "current-user" }),
+        buildInvitation({ id: "received", fromUserId: "other-user" }),
+      ],
+      "current-user",
+    );
+
+    expect(result.map((invitation) => invitation.id)).toEqual(["sent"]);
+  });
+
   it("active() filtra apenas ativos", () => {
     const result = sharedEntriesClassifier.active([
       buildEntry({ status: "active" }),
