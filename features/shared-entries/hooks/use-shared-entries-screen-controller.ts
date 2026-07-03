@@ -18,6 +18,19 @@ import {
 
 export type SharedEntriesTab = "invitations" | "byMe" | "withMe";
 
+export type SharedEntriesTabCounts = Readonly<Record<SharedEntriesTab, number>>;
+
+export interface SharedEntriesSummary {
+  readonly totalEntries: number;
+  readonly activeEntries: number;
+  readonly pendingInvitations: number;
+}
+
+interface SharedEntriesMetrics {
+  readonly tabCounts: SharedEntriesTabCounts;
+  readonly summary: SharedEntriesSummary;
+}
+
 export interface SharedEntriesScreenController {
   readonly invitationsQuery: ReturnType<typeof useSharedInvitationsQuery>;
   readonly byMeQuery: ReturnType<typeof useSharedEntriesByMeQuery>;
@@ -25,6 +38,8 @@ export interface SharedEntriesScreenController {
   readonly pendingInvitations: readonly InvitationView[];
   readonly byMeEntries: readonly EntryView[];
   readonly withMeEntries: readonly EntryView[];
+  readonly tabCounts: SharedEntriesTabCounts;
+  readonly summary: SharedEntriesSummary;
   readonly selectedTab: SharedEntriesTab;
   readonly setSelectedTab: (tab: SharedEntriesTab) => void;
   readonly pendingInvitationIds: ReadonlySet<string>;
@@ -61,6 +76,55 @@ const useTrackedActionIds = () => {
   return { ids, begin, end };
 };
 
+type TrackedActionIds = ReturnType<typeof useTrackedActionIds>;
+
+interface RunTrackedActionParams {
+  readonly id: string;
+  readonly actions: TrackedActionIds;
+  readonly action: () => Promise<unknown>;
+  readonly setLastError: (error: unknown) => void;
+}
+
+const runTrackedAction = async ({
+  id,
+  actions,
+  action,
+  setLastError,
+}: RunTrackedActionParams): Promise<void> => {
+  actions.begin(id);
+  try {
+    await action();
+  } catch (error) {
+    setLastError(error);
+  } finally {
+    actions.end(id);
+  }
+};
+
+const buildSharedEntriesMetrics = ({
+  pendingInvitations,
+  byMeEntries,
+  withMeEntries,
+}: {
+  readonly pendingInvitations: readonly InvitationView[];
+  readonly byMeEntries: readonly EntryView[];
+  readonly withMeEntries: readonly EntryView[];
+}): SharedEntriesMetrics => {
+  const allEntries = [...byMeEntries, ...withMeEntries];
+  return {
+    tabCounts: {
+      invitations: pendingInvitations.length,
+      byMe: byMeEntries.length,
+      withMe: withMeEntries.length,
+    },
+    summary: {
+      totalEntries: allEntries.length,
+      activeEntries: allEntries.filter((entry) => entry.bucket === "active").length,
+      pendingInvitations: pendingInvitations.length,
+    },
+  };
+};
+
 /**
  * Coordinates the shared entries screen: 3 queries (invitations, by me, with
  * me), 3 mutations (accept, reject/delete-invitation, revoke/delete-entry),
@@ -81,7 +145,6 @@ export function useSharedEntriesScreenController(): SharedEntriesScreenControlle
   const [lastError, setLastError] = useState<unknown | null>(null);
   const invitationActions = useTrackedActionIds();
   const entryActions = useTrackedActionIds();
-
   const pendingInvitations = useMemo(
     () => sharedEntriesClassifier.pending(invitationsQuery.data?.invitations ?? []),
     [invitationsQuery.data],
@@ -94,42 +157,41 @@ export function useSharedEntriesScreenController(): SharedEntriesScreenControlle
     () => sharedEntriesClassifier.entries(withMeQuery.data?.sharedEntries ?? []),
     [withMeQuery.data],
   );
+  const metrics = useMemo(
+    () => buildSharedEntriesMetrics({ pendingInvitations, byMeEntries, withMeEntries }),
+    [byMeEntries, pendingInvitations, withMeEntries],
+  );
 
   const handleAccept = async (invitation: InvitationView): Promise<void> => {
-    if (!invitation.token) {
+    const token = invitation.token;
+    if (!token) {
       setLastError(new Error("Convite sem token de aceite."));
       return;
     }
-    invitationActions.begin(invitation.id);
-    try {
-      await acceptMutation.mutateAsync(invitation.token);
-    } catch (error) {
-      setLastError(error);
-    } finally {
-      invitationActions.end(invitation.id);
-    }
+    await runTrackedAction({
+      id: invitation.id,
+      actions: invitationActions,
+      action: () => acceptMutation.mutateAsync(token),
+      setLastError,
+    });
   };
 
   const handleReject = async (invitation: InvitationView): Promise<void> => {
-    invitationActions.begin(invitation.id);
-    try {
-      await deleteInvitationMutation.mutateAsync(invitation.id);
-    } catch (error) {
-      setLastError(error);
-    } finally {
-      invitationActions.end(invitation.id);
-    }
+    await runTrackedAction({
+      id: invitation.id,
+      actions: invitationActions,
+      action: () => deleteInvitationMutation.mutateAsync(invitation.id),
+      setLastError,
+    });
   };
 
   const handleRevoke = async (entry: EntryView): Promise<void> => {
-    entryActions.begin(entry.id);
-    try {
-      await deleteEntryMutation.mutateAsync(entry.id);
-    } catch (error) {
-      setLastError(error);
-    } finally {
-      entryActions.end(entry.id);
-    }
+    await runTrackedAction({
+      id: entry.id,
+      actions: entryActions,
+      action: () => deleteEntryMutation.mutateAsync(entry.id),
+      setLastError,
+    });
   };
 
   return {
@@ -139,6 +201,8 @@ export function useSharedEntriesScreenController(): SharedEntriesScreenControlle
     pendingInvitations,
     byMeEntries,
     withMeEntries,
+    tabCounts: metrics.tabCounts,
+    summary: metrics.summary,
     selectedTab,
     setSelectedTab,
     pendingInvitationIds: invitationActions.ids,

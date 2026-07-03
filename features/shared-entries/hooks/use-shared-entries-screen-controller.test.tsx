@@ -13,6 +13,7 @@ import {
   useSharedEntriesWithMeQuery,
   useSharedInvitationsQuery,
 } from "@/features/shared-entries/hooks/use-shared-entries-query";
+import type { SharedEntryRecord } from "@/features/shared-entries/contracts";
 import type { InvitationView } from "@/features/shared-entries/services/shared-entries-classifier";
 
 jest.mock("@/features/shared-entries/hooks/use-shared-entries-mutations", () => ({
@@ -60,6 +61,23 @@ const buildInvitationView = (
   bucket: "pending",
   isExpired: false,
   shareLabel: "Sua parte: 50%",
+  ...override,
+});
+
+const buildEntryRecord = (
+  override: Partial<SharedEntryRecord> = {},
+): SharedEntryRecord => ({
+  id: "se-1",
+  ownerId: "u-1",
+  transactionId: "tx-1",
+  status: "active",
+  splitType: "equal",
+  transactionTitle: "Aluguel",
+  transactionAmount: 2000,
+  myShare: 1000,
+  otherPartyEmail: "x@y.com",
+  createdAt: "2026-04-01T00:00:00Z",
+  updatedAt: "2026-04-01T00:00:00Z",
   ...override,
 });
 
@@ -151,6 +169,41 @@ describe("useSharedEntriesScreenController", () => {
       result.current.setSelectedTab("byMe");
     });
     expect(result.current.selectedTab).toBe("byMe");
+  });
+
+  it("calcula contadores de tabs e resumo para paridade mobile", () => {
+    mockedInvitations.mockReturnValue({
+      data: { invitations: [buildInvitationView()] },
+      isPending: false,
+    } as never);
+    mockedByMe.mockReturnValue({
+      data: { sharedEntries: [buildEntryRecord({ id: "by-me-1" })] },
+      isPending: false,
+    } as never);
+    mockedWithMe.mockReturnValue({
+      data: {
+        sharedEntries: [
+          buildEntryRecord({ id: "with-me-1", status: "accepted" }),
+          buildEntryRecord({ id: "with-me-2", status: "completed" }),
+        ],
+      },
+      isPending: false,
+    } as never);
+
+    const { result } = renderHook(() => useSharedEntriesScreenController(), {
+      wrapper: wrapper(client),
+    });
+
+    expect(result.current.tabCounts).toEqual({
+      invitations: 1,
+      byMe: 1,
+      withMe: 2,
+    });
+    expect(result.current.summary).toEqual({
+      totalEntries: 3,
+      activeEntries: 2,
+      pendingInvitations: 1,
+    });
   });
 
   it("captura erro quando accept rejeita e mantem outras invitations destrancadas", async () => {

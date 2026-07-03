@@ -35,6 +35,7 @@ export function SharedEntriesScreen(): ReactElement {
   return (
     <PaywallGate featureKey="shared_entries">
       <AppScreen>
+        <SharedEntriesSummaryCard controller={controller} />
         <TabSelector controller={controller} />
         {controller.lastError ? (
           <AppErrorNotice
@@ -66,16 +67,71 @@ interface ControllerProps {
 function TabSelector({ controller }: ControllerProps): ReactElement {
   return (
     <XStack gap="$2" flexWrap="wrap">
-      {TAB_ORDER.map((tab) => (
-        <AppButton
-          key={tab}
-          tone={controller.selectedTab === tab ? "primary" : "secondary"}
-          onPress={() => controller.setSelectedTab(tab)}
-        >
-          {TAB_LABELS[tab]}
-        </AppButton>
-      ))}
+      {TAB_ORDER.map((tab) => {
+        const label = `${TAB_LABELS[tab]} (${controller.tabCounts[tab]})`;
+        return (
+          <AppButton
+            key={tab}
+            tone={controller.selectedTab === tab ? "primary" : "secondary"}
+            onPress={() => controller.setSelectedTab(tab)}
+            testID={`shared-entries-tab-${tab}`}
+            accessibilityLabel={label}
+            accessibilityState={{ selected: controller.selectedTab === tab }}
+          >
+            {label}
+          </AppButton>
+        );
+      })}
     </XStack>
+  );
+}
+
+function SharedEntriesSummaryCard({ controller }: ControllerProps): ReactElement {
+  return (
+    <AppSurfaceCard title="Resumo">
+      <XStack gap="$3" flexWrap="wrap">
+        <SummaryMetric
+          label="Total"
+          value={controller.summary.totalEntries}
+          testID="shared-entries-summary-total"
+        />
+        <SummaryMetric
+          label="Ativos"
+          value={controller.summary.activeEntries}
+          testID="shared-entries-summary-active"
+        />
+        <SummaryMetric
+          label="Convites"
+          value={controller.summary.pendingInvitations}
+          testID="shared-entries-summary-invitations"
+        />
+      </XStack>
+    </AppSurfaceCard>
+  );
+}
+
+interface SummaryMetricProps {
+  readonly label: string;
+  readonly value: number;
+  readonly testID: string;
+}
+
+function SummaryMetric({ label, value, testID }: SummaryMetricProps): ReactElement {
+  return (
+    <YStack flex={1} minWidth={96} gap="$1">
+      <Paragraph color="$muted" fontFamily="$body" fontSize="$2">
+        {label}
+      </Paragraph>
+      <Paragraph
+        color="$color"
+        fontFamily="$body"
+        fontSize="$7"
+        fontWeight="$7"
+        testID={testID}
+      >
+        {value}
+      </Paragraph>
+    </YStack>
   );
 }
 

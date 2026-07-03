@@ -38,6 +38,16 @@ No network call or database mutation is required until the user explicitly saves
 6. Successful login still consumes any stored auth redirect and navigates to the intended private route or dashboard.
 7. Session-expired and submit-error states render on the same screen without changing session policy.
 
+## Shared Entries Flow
+
+1. `app/(private)/compartilhamentos.tsx` mounts `SharedEntriesScreen`.
+2. `PaywallGate` checks the `shared_entries` entitlement before rendering premium sharing data.
+3. `useSharedEntriesScreenController` starts three independent TanStack queries: `sharedEntries.byMe`, `sharedEntries.withMe` and `sharedEntries.invitations`.
+4. `sharedEntriesService` resolves the generated contract paths for `/shared-entries/by-me`, `/shared-entries/with-me` and `/shared-entries/invitations`, then maps API snake_case payloads into app records.
+5. `sharedEntriesClassifier` derives buckets and labels, while the controller derives tab counts plus the summary totals from the classified lists.
+6. `SharedEntriesScreen` renders the summary card first, then the `Convites`, `Compartilhei` and `Recebi` tabs with counters.
+7. Accept/reject actions apply only to invitation cards. Revoke actions apply only to `byMe` entries; `withMe` entries stay read-only.
+
 ## Liquid Tab Navigation Flow
 
 1. `app/(private)/_layout.tsx` builds the logged-in tab navigator from `privateTabDefinitions`.
@@ -64,4 +74,5 @@ No network call or database mutation is required until the user explicitly saves
 - Screen tests assert that inputs, results and controller actions are wired.
 - Feature flag tests assert production status for promoted parity features.
 - Login tests assert the premium surface, localized placeholders, focus styling and preserved auth controller actions.
+- Shared-entries tests assert controller counts, summary rendering, tab counters and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
