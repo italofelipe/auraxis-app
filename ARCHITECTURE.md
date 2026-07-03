@@ -29,6 +29,12 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - `app.credit-cards.expense-actions` is promoted to `enabled-prod` after app-side parity validation for edit, duplicate and delete actions in credit card invoices.
 - Local flag status is tested through `shared/feature-flags/service.test.ts`; runtime providers can still override decisions where configured.
 
+## Runtime Security
+
+- `shared/config/runtime.ts` is the canonical resolver for public Expo runtime configuration used by HTTP, telemetry and product services.
+- Production runtime (`EXPO_PUBLIC_APP_ENV=production`) must resolve `EXPO_PUBLIC_API_URL` to a valid HTTPS URL and must never fall back to localhost. The guard runs while `appRuntimeConfig` is created, before the app can build an HTTP client against an unsafe base URL.
+- Development and preview builds can still use localhost for Expo Go/dev-client workflows.
+
 ## Auth Surface
 
 - The login route keeps the same `useLoginScreenController` contract for mutation, captcha, error handling, legal links and navigation.

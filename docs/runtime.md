@@ -56,6 +56,34 @@ vai injetar o secret no bundle. **Nunca** comitar a DSN em `app.json`,
 `extra.appEnv` → fallback `"development"`. Usar `production` /
 `preview` / `development` conforme o profile EAS.
 
+## API base URL — production guard
+
+`shared/config/runtime.ts` resolve `apiBaseUrl` em build/runtime a partir de
+`EXPO_PUBLIC_API_URL` → `expo.extra.apiUrl` → fallback local
+`http://localhost:5000`.
+
+Esse fallback só é permitido fora de produção. Quando
+`EXPO_PUBLIC_APP_ENV=production`, o runtime falha durante a criação de
+`appRuntimeConfig` se a URL resolvida:
+
+- não for uma URL válida;
+- não usar `https://`;
+- apontar para host local (`localhost`, `127.0.0.1`, `0.0.0.0`, `::1`).
+
+Isso impede que um binário de loja seja publicado silenciosamente apontando
+para a API local de desenvolvimento. Builds `preview` e `development`
+continuam aceitando `localhost` para fluxo local/dev client.
+
+Configuração obrigatória para builds de produção:
+
+```bash
+EXPO_PUBLIC_APP_ENV=production
+EXPO_PUBLIC_API_URL=https://api.auraxis.com.br
+```
+
+Preferir EAS environment/secrets para esses valores. Não gravar URL de produção
+em `.env*` versionado.
+
 ### Sanitização (LGPD)
 
 `sanitizeSentryEvent` em `app/services/sentry.ts` remove `user.email` e
