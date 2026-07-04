@@ -25,8 +25,38 @@ jobs:
           fi
 
       - name: Run Release Please
+        id: release
         uses: googleapis/release-please-action@c3fc4de07084f75a2b61a5b933069bda6edf3d5c # v4
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN }}
           config-file: .release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # Habilita auto-merge no PR "chore(main): release ..." para que ele entre
+      # sozinho assim que os checks obrigatórios ficarem verdes. Sem isso, um fix
+      # P0 pode ficar semanas parado esperando merge manual do PR de release
+      # (aconteceu com o crash de transações). Épico: platform #854 / app #648.
+      # O merge cria a tag `v*`, que dispara o store-release.yml (build + submit
+      # interno draft — promoção interno→prod segue manual, ver #645).
+      - name: Enable auto-merge on the release PR
+        if: ${{ steps.release.outputs.prs_created == 'true' || steps.release.outputs.pr }}
+        env:
+          GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+          RELEASE_PR_JSON: ${{ steps.release.outputs.pr }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Caminho primário: número do PR vem do output `pr` (JSON do release-please).
+          pr_number="$(printf '%s' "${RELEASE_PR_JSON:-}" | jq -r '.number // empty' 2>/dev/null || true)"
+          # Fallback robusto: localiza o PR de release aberto pela label padrão
+          # do release-please, caso o output não traga o número.
+          if [ -z "${pr_number}" ]; then
+            pr_number="$(gh pr list --repo "${REPO}" --state open \
+              --label 'autorelease: pending' --json number --jq '.[0].number // empty' 2>/dev/null || true)"
+          fi
+          if [ -z "${pr_number}" ] || [ "${pr_number}" = "null" ]; then
+            echo "Nenhum PR de release aberto — nada a habilitar."
+            exit 0
+          fi
+          echo "Habilitando auto-merge (squash) no PR de release #${pr_number}"
+          gh pr merge "${pr_number}" --repo "${REPO}" --auto --squash
