@@ -81,7 +81,17 @@ jobs:
         run: |
           set -euo pipefail
           if [ "${{ github.event_name }}" = "push" ]; then
-            # Tag push (v*) -> full production release on both platforms with auto-submit
+            # Tag push (v*) — criada quando o PR do release-please é mergeado
+            # (auto-merge habilitado em release-please.yml). Dispara build nas
+            # duas plataformas com --auto-submit.
+            #
+            # IMPORTANTE — sem auto-promoção para produção (issue #645):
+            #   - Android: eas.json submit.production.android = track:internal +
+            #     releaseStatus:draft → o AAB entra como DRAFT no internal track,
+            #     nunca em produção. Promover interno→produção é MANUAL no Play
+            #     Console (gate one-click, ver docs/release-process.md).
+            #   - iOS: o submit sobe para o TestFlight; publicar na App Store
+            #     (produção) é MANUAL no App Store Connect.
             platform="all"
             profile="production"
             auto_submit="true"

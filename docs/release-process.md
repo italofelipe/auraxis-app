@@ -20,6 +20,44 @@ Gatilhos do `store-release.yml`:
   build `production` nas duas plataformas com `--auto-submit`.
 - **Manual (`workflow_dispatch`)**: escolhe plataforma, profile e auto-submit.
 
+### Cadeia automática de release (issues #648 / #645)
+
+O ciclo é encadeado ponta a ponta, sem passo manual até a promoção:
+
+```
+commits na main ─► release-please abre "chore(main): release X.Y.Z"
+                   │  (auto-merge squash habilitado — release-please.yml)
+                   ▼
+                   PR entra sozinho quando os checks ficam verdes
+                   │
+                   ▼
+                   release-please cria a tag v* + GitHub Release
+                   │
+                   ▼
+                   store-release.yml (push da tag) ─► eas build --auto-submit
+                   ├─ Android → internal track como DRAFT
+                   └─ iOS → TestFlight
+```
+
+> **Sem auto-promoção para produção.** A cadeia para no track interno
+> (Android draft) e no TestFlight (iOS). Promover para produção pública é
+> sempre **manual** — ver o gate abaixo. Motivação: um fix P0 não deve ficar
+> preso esperando merge do release (#648), mas também não deve ir sozinho para
+> produção sem um humano no loop (#645).
+
+### Gate de promoção interno → produção (one-click, manual)
+
+Depois que o build entra no internal/TestFlight, a promoção é um passo humano:
+
+- **Android** — Play Console → Testing → Internal testing → selecionar o build →
+  **Promote release** → Production → revisar rollout % → **Rollout to Production**.
+- **iOS** — App Store Connect → o build do TestFlight → adicionar à versão da
+  App Store → **Submit for Review** → após aprovação, liberar (manual ou
+  phased release).
+
+Nenhum secret ou automação promove para produção; o gate é intencionalmente
+manual.
+
 Gatilho do `ota-update.yml`: somente manual (`workflow_dispatch`), escolhendo
 canal `preview` ou `production` — publica o estado JS do commit checked-out.
 
