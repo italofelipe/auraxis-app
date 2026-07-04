@@ -55,12 +55,32 @@ jobs:
           eas-version: 16.13.0
           token: ${{ secrets.EXPO_TOKEN }}
 
+      - name: Guard — require channel/environment
+        env:
+          CHANNEL: ${{ inputs.channel }}
+        run: |
+          set -euo pipefail
+          # Guard duro: aborta ANTES do `eas update` se o canal (usado tanto em
+          # `--channel` quanto em `--environment`) vier ausente/vazio. Sem
+          # `--environment` o Expo não inlina os `EXPO_PUBLIC_*` no bundle OTA,
+          # deixando `EXPO_PUBLIC_API_URL` undefined (fallback localhost) e
+          # quebrando todas as chamadas de API no device. Ver issues #564/#646.
+          if [ -z "${CHANNEL:-}" ]; then
+            echo "::error::CHANNEL/--environment ausente ou vazio — abortando OTA para não publicar bundle com EXPO_PUBLIC_* undefined." >&2
+            exit 1
+          fi
+          echo "OK — canal/environment resolvido: ${CHANNEL}"
+
       - name: Publish update
         env:
           CHANNEL: ${{ inputs.channel }}
           MESSAGE: ${{ inputs.message }}
         run: |
           set -euo pipefail
+          if [ -z "${CHANNEL:-}" ]; then
+            echo "::error::CHANNEL/--environment vazio no passo de publish — abortando." >&2
+            exit 1
+          fi
           if [ -z "${MESSAGE:-}" ]; then
             MESSAGE="$(git log -1 --pretty=%s)"
           fi
