@@ -110,6 +110,16 @@ describe("LoginScreen", () => {
     );
   });
 
+  it("torna o shell do campo tocavel para focar o input (fix teclado #655)", () => {
+    const { getByTestId } = renderScreen();
+    // O Input aninhado no XStack tinha perdido o tap-to-focus; agora tocar em
+    // qualquer parte do shell foca o input (ref.focus). Exercita o handler.
+    expect(() => fireEvent.press(getByTestId("login-email-shell"))).not.toThrow();
+    expect(() =>
+      fireEvent.press(getByTestId("login-password-shell")),
+    ).not.toThrow();
+  });
+
   it("mantem as acoes do fluxo de auth conectadas ao controller", () => {
     const { getByText } = renderScreen();
 
