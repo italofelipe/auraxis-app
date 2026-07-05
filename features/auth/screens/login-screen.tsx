@@ -1,6 +1,8 @@
 import {
+  useRef,
   useState,
   type ComponentProps,
+  type ComponentRef,
   type ReactElement,
   type ReactNode,
 } from "react";
@@ -383,6 +385,7 @@ function PremiumInputField({
   ...rest
 }: PremiumInputFieldProps): ReactElement {
   const [focused, setFocused] = useState(false);
+  const inputRef = useRef<ComponentRef<typeof Input>>(null);
 
   return (
     <YStack gap="$2">
@@ -393,6 +396,7 @@ function PremiumInputField({
         fontSize="$2"
         fontWeight="$6"
         letterSpacing={1.1}
+        onPress={() => inputRef.current?.focus()}
       >
         {label}
       </Label>
@@ -405,8 +409,10 @@ function PremiumInputField({
         backgroundColor={AUTH_GLASS}
         paddingHorizontal="$3"
         style={focused ? styles.inputShellFocused : styles.inputShellResting}
+        onPress={() => inputRef.current?.focus()}
       >
         <Input
+          ref={inputRef}
           id={id}
           accessibilityLabel={accessibilityLabel ?? label}
           aria-invalid={Boolean(errorText)}
