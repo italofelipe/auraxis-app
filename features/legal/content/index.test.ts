@@ -46,6 +46,32 @@ describe("PRIVACY_POLICY_DOCUMENT", () => {
       expect(section.blocks.length).toBeGreaterThan(0);
     }
   });
+
+  it("lists every active subprocessor in the sharing section (parity with web v2.1.0)", () => {
+    const sharing = PRIVACY_POLICY_DOCUMENT.sections.find((section) =>
+      section.heading.startsWith("5."),
+    );
+    expect(sharing).toBeDefined();
+    const list = sharing!.blocks.find((block) => block.kind === "list");
+    expect(list).toBeDefined();
+    const items =
+      list!.kind === "list"
+        ? list!.items.filter((item): item is string => typeof item === "string").join(" ")
+        : "";
+    for (const vendor of [
+      "AWS",
+      "GitHub",
+      "SonarCloud",
+      "Sentry",
+      "BRAPI",
+      "PostHog",
+      "OpenAI",
+      "Asaas",
+      "Resend",
+    ]) {
+      expect(items).toContain(vendor);
+    }
+  });
 });
 
 describe("TERMS_OF_SERVICE_DOCUMENT", () => {
