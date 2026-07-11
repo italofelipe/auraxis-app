@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.0](https://github.com/italofelipe/auraxis-app/compare/v1.12.0...v1.13.0) (2026-07-11)
+
+
+### Features
+
+* **shell:** splash animada premium no boot ([#642](https://github.com/italofelipe/auraxis-app/issues/642)) ([#643](https://github.com/italofelipe/auraxis-app/issues/643)) ([ba3c578](https://github.com/italofelipe/auraxis-app/commit/ba3c5783b79cde2b90b3a38b70fc1dcc8cd6f9b3))
+
 ## [1.12.0](https://github.com/italofelipe/auraxis-app/compare/v1.11.0...v1.12.0) (2026-07-03)
 
 
