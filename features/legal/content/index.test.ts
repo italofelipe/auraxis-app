@@ -66,7 +66,7 @@ describe("PRIVACY_POLICY_DOCUMENT", () => {
       "BRAPI",
       "PostHog",
       "OpenAI",
-      "Asaas",
+      "AbacatePay",
       "Resend",
     ]) {
       expect(items).toContain(vendor);
