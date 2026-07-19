@@ -5,7 +5,7 @@ const SUPPORT_EMAIL = "suporte@auraxis.com.br";
 export const PRIVACY_POLICY_DOCUMENT: LegalDocument = {
   id: "privacy-policy",
   title: "Política de Privacidade",
-  version: "1.2.0",
+  version: "1.3.0",
   effectiveDate: "11/07/2026",
   contactEmail: SUPPORT_EMAIL,
   siblingId: "terms-of-service",
@@ -95,7 +95,7 @@ export const PRIVACY_POLICY_DOCUMENT: LegalDocument = {
             "Sentry, para observabilidade e monitoramento de erros no frontend;",
             "BRAPI, para consulta de cotações e dados de mercado;",
             "PostHog Cloud, para analytics de produto com eventos minimizados, somente após consentimento;",
-            "Asaas, para processamento de cobrança recorrente do plano Premium (nome, email, CPF/CNPJ, valor e plano);",
+            "AbacatePay (Abacatepay Tecnologia LTDA, CNPJ 58.271.413/0001-90), para processamento de cobrança recorrente do plano Premium (nome, email, CPF/CNPJ, valor e plano);",
             "Resend, para envio de emails transacionais, como verificação de conta, redefinição de senha e avisos de cobrança;",
             "OpenAI, para geração de insights financeiros via IA (apenas quando o recurso for utilizado, com dados minimizados e sem identificadores pessoais).",
           ],
@@ -107,7 +107,7 @@ export const PRIVACY_POLICY_DOCUMENT: LegalDocument = {
         },
         {
           kind: "paragraph",
-          text: "Detalhes específicos do processamento por Asaas, incluindo retenção e bases legais, podem ser consultados na política de privacidade do provedor em https://www.asaas.com/politica-de-privacidade.",
+          text: "O processamento pelo provedor de pagamento, incluindo retenção e bases legais, é regido pela política de privacidade da Abacatepay Tecnologia LTDA (CNPJ 58.271.413/0001-90).",
         },
       ],
     },
