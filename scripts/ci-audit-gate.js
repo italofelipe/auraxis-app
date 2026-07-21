@@ -6,11 +6,22 @@ const os = require("node:os");
 const path = require("node:path");
 const { execSync } = require("node:child_process");
 
+// Allowlisted high/critical advisories. Each entry must be a transitive
+// build/dev-tooling dependency processing trusted input (the project's own
+// config/paths at build time), NOT a runtime path reachable by attacker input.
+// The permanent fix — a coordinated dependency bump validated in a build — is
+// tracked in #691; these entries keep the gate honest for the rest of the tree
+// meanwhile instead of blocking every app PR.
 const allowedIds = new Set([
   "GHSA-3ppc-4f35-3m26",
   "GHSA-7r86-cg39-jmmj",
   "GHSA-23c5-xmqv-rm74",
   "1113371",
+  // Published after 2026-07-19 — all quadratic/exponential-complexity DoS in
+  // parsers pulled in transitively by Metro / RN CLI / expo tooling (#691).
+  "GHSA-3jxr-9vmj-r5cp", // brace-expansion — DoS via exponential {} expansion
+  "GHSA-52cp-r559-cp3m", // js-yaml — quadratic CPU via YAML merge-key chains
+  "GHSA-395f-4hp3-45gv", // shell-quote — quadratic DoS in parse()
 ]);
 
 const runAudit = () => {
