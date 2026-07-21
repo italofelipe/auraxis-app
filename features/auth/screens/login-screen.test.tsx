@@ -90,23 +90,37 @@ describe("LoginScreen", () => {
     expect(getByPlaceholderText("Your password")).toBeTruthy();
   });
 
-  it("aplica halo premium enquanto o campo esta focado", () => {
-    const { getByPlaceholderText, getByTestId } = renderScreen();
+  it("aplica halo premium no proprio input enquanto focado", () => {
+    // #655: the focus halo lives on the Input itself, not on a wrapping shell.
+    // Nesting the Input inside a styled shell swallowed tap-to-focus on device;
+    // asserting the style on the input guards against reintroducing the wrapper.
+    const { getByPlaceholderText } = renderScreen();
     const emailInput = getByPlaceholderText("seu@email.com");
-    const emailShell = getByTestId("login-email-shell");
 
     fireEvent(emailInput, "focus");
-    expect(StyleSheet.flatten(emailShell.props.style)).toEqual(
+    expect(StyleSheet.flatten(emailInput.props.style)).toEqual(
       expect.objectContaining({
         borderColor: "rgba(155,233,255,0.6)",
       }),
     );
 
     fireEvent(emailInput, "blur");
-    expect(StyleSheet.flatten(emailShell.props.style)).toEqual(
+    expect(StyleSheet.flatten(emailInput.props.style)).toEqual(
       expect.objectContaining({
         borderColor: "rgba(255,255,255,0.16)",
       }),
+    );
+  });
+
+  it("estiliza a borda glass no proprio input (regressao #655)", () => {
+    // The glass border/background must live on the Input itself. If a styled
+    // shell wraps a transparent Input again — the layout that swallowed
+    // tap-to-focus — the border would move off the input and this fails.
+    const { getByPlaceholderText } = renderScreen();
+    const emailInput = getByPlaceholderText("seu@email.com");
+
+    expect(StyleSheet.flatten(emailInput.props.style)).toEqual(
+      expect.objectContaining({ borderColor: "rgba(255,255,255,0.16)" }),
     );
   });
 
