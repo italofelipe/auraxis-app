@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.2](https://github.com/italofelipe/auraxis-app/compare/v1.13.1...v1.13.2) (2026-07-21)
+
+
+### Bug Fixes
+
+* **auth:** restaurar tap-to-focus nos inputs de login (teclado não abria) ([7d790bf](https://github.com/italofelipe/auraxis-app/commit/7d790bf86c4ef0bc70abbf53490c16174d19419b))
+* **shell:** reverter splash premium da main (crash nativo de boot) ([8f43567](https://github.com/italofelipe/auraxis-app/commit/8f43567a501e009c734a8c42e889bc7732d0c37b))
+
 ## [1.13.1](https://github.com/italofelipe/auraxis-app/compare/v1.13.0...v1.13.1) (2026-07-21)
 
 
