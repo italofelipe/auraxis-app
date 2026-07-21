@@ -396,29 +396,24 @@ function PremiumInputField({
       >
         {label}
       </Label>
-      <XStack
-        testID={`${id}-shell`}
-        minHeight={54}
-        alignItems="center"
-        borderRadius={radii.md}
-        borderWidth={borderWidths.hairline}
-        backgroundColor={AUTH_GLASS}
-        paddingHorizontal="$3"
-        style={focused ? styles.inputShellFocused : styles.inputShellResting}
-      >
+      <YStack testID={`${id}-shell`} position="relative" justifyContent="center">
         <Input
           id={id}
           accessibilityLabel={accessibilityLabel ?? label}
           aria-invalid={Boolean(errorText)}
-          flex={1}
+          minHeight={54}
           height={54}
-          borderWidth={0}
-          backgroundColor="transparent"
+          borderRadius={radii.md}
+          borderWidth={borderWidths.hairline}
+          backgroundColor={AUTH_GLASS}
           color="#FFFFFF"
           fontFamily="$body"
           fontSize="$4"
           placeholderTextColor="$muted"
-          paddingHorizontal={0}
+          paddingHorizontal="$3"
+          // Reserve room so text never renders under the absolute trailing icon.
+          paddingRight={trailingIcon ? 52 : "$3"}
+          style={focused ? styles.inputShellFocused : styles.inputShellResting}
           {...rest}
           onBlur={(event) => {
             setFocused(false);
@@ -429,8 +424,23 @@ function PremiumInputField({
             onFocus?.(event);
           }}
         />
-        {trailingIcon}
-      </XStack>
+        {trailingIcon ? (
+          // Absolutely positioned over the input's right edge: the icon still
+          // receives its own taps, while the rest of the input stays tappable
+          // for focus. Nesting the Input inside a styled shell (the previous
+          // approach) swallowed tap-to-focus on Android and iOS (#655).
+          <YStack
+            position="absolute"
+            right={6}
+            top={0}
+            bottom={0}
+            alignItems="center"
+            justifyContent="center"
+          >
+            {trailingIcon}
+          </YStack>
+        ) : null}
+      </YStack>
       {errorText ? (
         <Paragraph color={colorPalette.red400} fontFamily="$body" fontSize="$2">
           {errorText}
