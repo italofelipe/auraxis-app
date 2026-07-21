@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.1](https://github.com/italofelipe/auraxis-app/compare/v1.13.0...v1.13.1) (2026-07-21)
+
+
+### Bug Fixes
+
+* **ci:** allowlist tooling-only DoS advisories unblocking every app PR ([6793aca](https://github.com/italofelipe/auraxis-app/commit/6793aca54dec22024aca6e1dc1b5be6438da8e03))
+* **ci:** allowlistar DoS de tooling que travava todo PR do app ([4988c96](https://github.com/italofelipe/auraxis-app/commit/4988c9676318af11a3bcf559dfc3517802bba2c7))
+
 ## [1.13.0](https://github.com/italofelipe/auraxis-app/compare/v1.12.0...v1.13.0) (2026-07-11)
 
 
