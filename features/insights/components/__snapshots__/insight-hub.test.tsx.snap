@@ -207,7 +207,6 @@ exports[`InsightHub agrupa o insight atual por dimensao 1`] = `
                 "borderTopLeftRadius": 999,
                 "borderTopRightRadius": 999,
                 "borderTopWidth": 1,
-                "cursor": "pointer",
                 "flex": 1,
                 "flexDirection": "row",
                 "flexWrap": "nowrap",
