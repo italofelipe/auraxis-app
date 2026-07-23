@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.3](https://github.com/italofelipe/auraxis-app/compare/v1.13.2...v1.13.3) (2026-07-23)
+
+
+### Bug Fixes
+
+* **auth:** avoid eager private route mounts ([#704](https://github.com/italofelipe/auraxis-app/issues/704)) ([#705](https://github.com/italofelipe/auraxis-app/issues/705)) ([73c9a12](https://github.com/italofelipe/auraxis-app/commit/73c9a12928ef05d21ca918e7a15192e32082be06))
+
 ## [1.13.2](https://github.com/italofelipe/auraxis-app/compare/v1.13.1...v1.13.2) (2026-07-21)
 
 
