@@ -75,11 +75,11 @@ function PrivateLayoutContent(): ReactElement | null {
   return (
     <TourAnchorProvider>
       <Tabs
-        detachInactiveScreens={false}
+        detachInactiveScreens
         tabBar={(props) => <AppTabBar {...props} />}
         screenOptions={{
           headerShown: false,
-          lazy: false,
+          lazy: true,
           transitionSpec: tabCarouselTransitionSpec,
           sceneStyleInterpolator,
           tabBarActiveTintColor: tabTheme.primary,

@@ -171,7 +171,7 @@ describe("PrivateLayout", () => {
     expect(hiddenTabs).not.toContain("cartoes");
   });
 
-  it("configura transição horizontal de tabs com timing fixo", () => {
+  it("configura transição horizontal sem montar todas as rotas no login", () => {
     renderPrivateLayout();
 
     expect(mockTabsScreenOptions?.transitionSpec).toMatchObject({
@@ -180,8 +180,8 @@ describe("PrivateLayout", () => {
     });
     expect(mockTabsScreenOptions?.sceneStyleInterpolator).toEqual(expect.any(Function));
     expect(mockTabsScreenOptions).toMatchObject({
-      lazy: false,
+      lazy: true,
     });
-    expect(mockTabsProps).toMatchObject({ detachInactiveScreens: false });
+    expect(mockTabsProps).toMatchObject({ detachInactiveScreens: true });
   });
 });

@@ -49,6 +49,7 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - The visual layer is now a dedicated premium auth shell using the brand gradient, glass fields, white primary CTA and light status bar requested by the mobile handoff.
 - Login copy is read from `shared/i18n/locales/*.json`; the screen should not introduce new hardcoded product strings.
 - Premium login handoff hardening is tracked in `docs/handoffs/mobile-design-handoff-status-2026-07-01.md`; placeholder copy and glass focus styling must stay covered by login screen tests.
+- A successful login persists the canonical session before navigating to the private shell. Mounting that shell must not eagerly initialize every private route; the incident analysis and device smoke checklist live in `docs/wiki/mobile-login-crash-2026-07-23.md`.
 
 ## Private Navigation
 
@@ -56,12 +57,13 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - The bottom navigation follows the mobile liquid menu handoff with five visible tabs: `Início`, `Transações`, `Insights`, `Cartões` and `Mais`.
 - `Planejamento` is no longer a first-level tab; it is exposed through `MoreHubScreen` together with other secondary destinations.
 - The former center `+` action is removed from the tab bar. Quick transaction creation remains available from the `Mais` hub through the shared expense sheet store.
-- Tab content transitions use `core/navigation/tab-carousel-transition.ts`, which provides a fixed 480 ms full-width horizontal scene interpolation while keeping tab screens mounted.
+- Tab content transitions use `core/navigation/tab-carousel-transition.ts`, which provides a fixed 480 ms full-width horizontal scene interpolation.
+- The private navigator must keep `lazy: true` so only the focused route mounts during the post-login handoff. It must also keep `detachInactiveScreens` enabled so previously visited inactive screens leave the native view hierarchy while React Navigation preserves navigation state.
 - The active tab affordance lives in `core/navigation/app-tab-bar.tsx` as a Reanimated liquid blob with fixed spring parameters, a gradient surface and the active icon rendered in white.
 - The credit-cards guided tour no longer targets a `fab` anchor; its quick-transaction step is centered copy that points users to `Mais`.
 
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.
-- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, shared-entries mobile parity including outgoing invitations, and transaction observation form/feed/controller coverage.
+- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, shared-entries mobile parity including outgoing invitations, and transaction observation form/feed/controller coverage.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.

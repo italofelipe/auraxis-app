@@ -35,8 +35,9 @@ No network call or database mutation is required until the user explicitly saves
 3. Premium labels and placeholders come from `shared/i18n/locales/*.json`; focus state only changes the local glass input shell styling.
 4. Email and password fields still write into the same React Hook Form controller.
 5. Submit calls `controller.handleSubmit`, preserving captcha enforcement and login mutation behavior.
-6. Successful login still consumes any stored auth redirect and navigates to the intended private route or dashboard.
-7. Session-expired and submit-error states render on the same screen without changing session policy.
+6. Successful login waits for the canonical session to be persisted, then consumes any stored auth redirect and navigates to the intended private route or dashboard.
+7. The private navigator mounts only the focused route (`lazy: true`) and detaches inactive screens from the native hierarchy, preventing the login handoff from initializing the complete private route tree.
+8. Session-expired and submit-error states render on the same screen without changing session policy.
 
 ## Shared Entries Flow
 
@@ -57,8 +58,9 @@ No network call or database mutation is required until the user explicitly saves
 4. When the active route changes, the Reanimated shared values move the liquid blob to the measured tab center with fixed spring parameters and squish timing.
 5. The active icon is rendered inside the blob while the active tab column reserves icon space and keeps the label visible.
 6. The tab navigator uses `createTabCarouselSceneStyleInterpolator(width)` plus `tabCarouselTransitionSpec` so route content slides horizontally with a fixed 480 ms timing curve.
-7. `MoreHubScreen` handles displaced actions: route cards call `router.push(href)`, while `Nova transação` opens the shared expense sheet store directly.
-8. The credit-cards tour quick-transaction step is centered instructional copy, so it does not depend on a removed `fab` anchor.
+7. `lazy: true` defers each route until its first focus; `detachInactiveScreens` removes inactive native views without changing route definitions or the custom tab transition.
+8. `MoreHubScreen` handles displaced actions: route cards call `router.push(href)`, while `Nova transação` opens the shared expense sheet store directly.
+9. The credit-cards tour quick-transaction step is centered instructional copy, so it does not depend on a removed `fab` anchor.
 
 ## Transaction Observation Flow
 
@@ -74,6 +76,6 @@ No network call or database mutation is required until the user explicitly saves
 - Pure calculator behavior is verified before screen tests.
 - Screen tests assert that inputs, results and controller actions are wired.
 - Feature flag tests assert production status for promoted parity features.
-- Login tests assert the premium surface, localized placeholders, focus styling and preserved auth controller actions.
+- Login tests assert the premium surface, localized placeholders, focus styling, preserved auth controller actions and safe lazy/detached initialization of the private navigator.
 - Shared-entries tests assert controller counts, summary rendering, tab counters, incoming/outgoing invitation separation, outgoing composer actions and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
