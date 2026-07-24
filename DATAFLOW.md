@@ -71,6 +71,21 @@ No network call or database mutation is required until the user explicitly saves
 5. `toFeedItem` copies `observation` into the feed view-model, and `TxCardBody` renders it under an `Observações` label when present.
 6. `TransactionActionSheet` shows description and observations as separate details before the action buttons.
 
+## Subscription Management Flow
+
+1. `SubscriptionScreen` reads `/subscriptions/me` through `useSubscriptionStateQuery`.
+2. `resolveSubscriptionManagementAction` normalizes the returned `provider` and chooses exactly one owner:
+   - `abacatepay`, `asaas`, `stub` or a provider-less active/trial subscription: Auraxis API;
+   - Apple aliases: App Store subscriptions center;
+   - Google aliases: Google Play subscriptions center;
+   - unknown provider: canonical Auraxis Web page `/subscription`.
+3. For an API-managed subscription, tapping `Cancelar assinatura` only opens the confirmation sheet. No request is sent before the explicit confirmation.
+4. Confirmation calls `useCancelSubscriptionMutation`, which sends `POST /subscriptions/cancel` without inventing a second provider contract.
+5. A synchronous in-flight guard rejects duplicate taps while the mutation is active.
+6. Success writes the returned `SubscriptionState` into `queryKeys.subscription.me()`, invalidates `subscription` and `entitlements`, closes the sheet and shows the final access date.
+7. Failure keeps the sheet open, preserves the existing subscription and exposes retry/close actions.
+8. Store-managed subscriptions open the official store surface; an opening failure stays on-screen with retry instead of silently dropping the action.
+
 ## Testing Flow
 
 - Pure calculator behavior is verified before screen tests.
@@ -79,3 +94,4 @@ No network call or database mutation is required until the user explicitly saves
 - Login tests assert the premium surface, localized placeholders, focus styling, preserved auth controller actions and safe lazy/detached initialization of the private navigator.
 - Shared-entries tests assert controller counts, summary rendering, tab counters, incoming/outgoing invitation separation, outgoing composer actions and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
+- Subscription tests cover provider routing, canonical URL fallback, API response mapping, duplicate-request prevention, query/entitlement invalidation, explicit confirmation, retry, loading and post-cancellation states.

@@ -79,14 +79,30 @@ describe("SubscriptionScreen", () => {
       trialOffer: null,
       isStartingCheckout: false,
       isStartingTrial: false,
+      isCancelingSubscription: false,
+      isCancelConfirmationOpen: false,
       checkoutError: null,
       trialError: null,
+      cancelError: null,
+      managementError: null,
       lastCheckoutOutcome: null,
+      lastCanceledSubscription: null,
+      managementAction: {
+        mode: "api",
+        label: "Cancelar assinatura",
+        description:
+          "O cancelamento interrompe a renovacao e preserva o acesso ja contratado.",
+        url: null,
+      },
       handleSubscribe: jest.fn().mockResolvedValue(undefined),
       handleStartTrial: jest.fn().mockResolvedValue(undefined),
       handleManageSubscription: jest.fn().mockResolvedValue(undefined),
+      handleCancelSubscription: jest.fn().mockResolvedValue(undefined),
+      closeCancelConfirmation: jest.fn(),
       dismissCheckoutError: jest.fn(),
       dismissTrialError: jest.fn(),
+      dismissManagementError: jest.fn(),
+      dismissCancellationFeedback: jest.fn(),
     });
 
     const { getByText } = render(
@@ -96,6 +112,6 @@ describe("SubscriptionScreen", () => {
     );
 
     expect(getByText("Sua assinatura")).toBeTruthy();
-    expect(getByText("Gerenciar assinatura")).toBeTruthy();
+    expect(getByText("Cancelar assinatura")).toBeTruthy();
   });
 });

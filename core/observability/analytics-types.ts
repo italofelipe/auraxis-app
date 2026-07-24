@@ -56,6 +56,13 @@ export interface SubscriptionCheckoutAnalyticsProperties
   readonly status?: "opened" | "completed" | "cancelled" | "unknown";
 }
 
+export interface SubscriptionManagementAnalyticsProperties
+  extends AnalyticsProperties {
+  readonly provider?: string;
+  readonly mode?: "api" | "app-store" | "play-store" | "web";
+  readonly status?: "opened" | "completed";
+}
+
 export interface DashboardPeriodChangedAnalyticsProperties
   extends AnalyticsProperties {
   readonly period: string;
@@ -74,6 +81,8 @@ export interface AnalyticsEventPropertiesByName {
   readonly "tool.used": ToolUsedAnalyticsProperties;
   readonly "subscription.checkout.opened": SubscriptionCheckoutAnalyticsProperties;
   readonly "subscription.checkout.completed": SubscriptionCheckoutAnalyticsProperties;
+  readonly "subscription.management.opened": SubscriptionManagementAnalyticsProperties;
+  readonly "subscription.cancel.completed": SubscriptionManagementAnalyticsProperties;
   readonly "dashboard.period.changed": DashboardPeriodChangedAnalyticsProperties;
 }
 
