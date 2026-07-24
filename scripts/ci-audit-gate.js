@@ -17,11 +17,9 @@ const allowedIds = new Set([
   "GHSA-7r86-cg39-jmmj",
   "GHSA-23c5-xmqv-rm74",
   "1113371",
-  // Published after 2026-07-19 — all quadratic/exponential-complexity DoS in
-  // parsers pulled in transitively by Metro / RN CLI / expo tooling (#691).
-  "GHSA-3jxr-9vmj-r5cp", // brace-expansion — DoS via exponential {} expansion
-  "GHSA-52cp-r559-cp3m", // js-yaml — quadratic CPU via YAML merge-key chains
-  "GHSA-395f-4hp3-45gv", // shell-quote — quadratic DoS in parse()
+  // (2026-07-23, #691) brace-expansion/js-yaml/shell-quote saíram do allowlist:
+  // corrigidas de verdade via npm overrides no package.json (fixes dentro de
+  // cada linha de major). Não re-allowlistar — regressão deve quebrar o gate.
 ]);
 
 const runAudit = () => {
