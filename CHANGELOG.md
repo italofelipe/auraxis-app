@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.5](https://github.com/italofelipe/auraxis-app/compare/v1.13.4...v1.13.5) (2026-07-24)
+
+
+### Bug Fixes
+
+* **updates:** adopt fingerprint runtimeVersion policy and align app version ([8409676](https://github.com/italofelipe/auraxis-app/commit/8409676ad293fd573b5b0f80034edb4220013ca8))
+* **updates:** adopt fingerprint runtimeVersion policy and align app version ([0046246](https://github.com/italofelipe/auraxis-app/commit/00462468c472e24ba098f1f85eee74cd321941d8))
+
 ## [1.13.4](https://github.com/italofelipe/auraxis-app/compare/v1.13.3...v1.13.4) (2026-07-24)
 
 
