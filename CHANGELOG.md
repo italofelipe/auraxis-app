@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.8](https://github.com/italofelipe/auraxis-app/compare/v1.13.7...v1.13.8) (2026-07-24)
+
+
+### Bug Fixes
+
+* **auth:** restore native mobile login ([#723](https://github.com/italofelipe/auraxis-app/issues/723)) ([#724](https://github.com/italofelipe/auraxis-app/issues/724)) ([0c6f31d](https://github.com/italofelipe/auraxis-app/commit/0c6f31d6e83fb5041375e150acf2ed906290f991))
+
 ## [1.13.7](https://github.com/italofelipe/auraxis-app/compare/v1.13.6...v1.13.7) (2026-07-24)
 
 
