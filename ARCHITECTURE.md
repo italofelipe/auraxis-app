@@ -23,6 +23,15 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - `TransactionForm` edits both fields independently; `useTransactionsScreenController` forwards `observation` through create, update and duplicate flows without introducing a new endpoint.
 - The feed view-model and action sheet render observations as a separate detail block so historical descriptions remain visible and untouched.
 
+## Subscription Management
+
+- `/assinatura` remains the canonical private mobile route and composes subscription state, plan catalog, checkout, trial and management in `SubscriptionScreen`.
+- `useSubscriptionManagementController` isolates cancellation side effects from the screen/checkout controller. It calls the existing `POST /subscriptions/cancel` mutation, writes the returned subscription into the canonical query cache and invalidates both `subscription` and `entitlements`.
+- `subscription-management.ts` resolves the management owner from the API `provider`: `abacatepay`, `asaas`, `stub` and provider-less trials use the Auraxis API; Apple and Google providers open their official store management centers; unknown providers fall back to the canonical Web route `/subscription`.
+- API-managed cancellation requires an explicit confirmation sheet, blocks concurrent submissions with a synchronous in-flight guard and preserves the confirmed access-end date returned by the backend.
+- Store-managed subscriptions never call the Auraxis cancellation endpoint. The store remains responsible for confirmation, renewal and cancellation.
+- The provider matrix, recovery behavior and iOS/Android smoke procedure are documented in `docs/wiki/subscription-management-and-cancellation-2026-07-23.md`.
+
 ## Shared Entries Surface
 
 - `/compartilhamentos` mounts `SharedEntriesScreen`, guarded by `PaywallGate` for the `shared_entries` entitlement.
@@ -65,5 +74,5 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.
-- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, shared-entries mobile parity including outgoing invitations, and transaction observation form/feed/controller coverage.
+- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, shared-entries mobile parity including outgoing invitations, transaction observation form/feed/controller coverage, and subscription provider resolution/cancellation/controller/screen coverage.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.

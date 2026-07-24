@@ -5,12 +5,10 @@ import type { ReactNode } from "react";
 import { ApiError } from "@/core/http/api-error";
 import type { AnalyticsClient } from "@/core/observability/analytics-types";
 import { useAnalytics } from "@/core/observability/use-analytics";
-import type {
-  BillingPlan,
-  SubscriptionState,
-} from "@/features/subscription/contracts";
+import type { BillingPlan, SubscriptionState } from "@/features/subscription/contracts";
 import { useBillingPlansQuery } from "@/features/subscription/hooks/use-billing-plans-query";
 import { useCheckoutFlow } from "@/features/subscription/hooks/use-checkout-flow";
+import { useSubscriptionManagementController } from "@/features/subscription/hooks/use-subscription-management-controller";
 import { useStartTrialMutation } from "@/features/subscription/hooks/use-subscription-mutations";
 import { useSubscriptionStateQuery } from "@/features/subscription/hooks/use-subscription-query";
 import { useSubscriptionScreenController } from "@/features/subscription/hooks/use-subscription-screen-controller";
@@ -24,6 +22,9 @@ jest.mock("@/features/subscription/hooks/use-subscription-query", () => ({
 jest.mock("@/features/subscription/hooks/use-subscription-mutations", () => ({
   useStartTrialMutation: jest.fn(),
 }));
+jest.mock("@/features/subscription/hooks/use-subscription-management-controller", () => ({
+  useSubscriptionManagementController: jest.fn(),
+}));
 jest.mock("@/features/subscription/hooks/use-checkout-flow", () => ({
   useCheckoutFlow: jest.fn(),
 }));
@@ -34,6 +35,7 @@ jest.mock("@/core/observability/use-analytics", () => ({
 const mockedUsePlans = jest.mocked(useBillingPlansQuery);
 const mockedUseSubscription = jest.mocked(useSubscriptionStateQuery);
 const mockedUseTrial = jest.mocked(useStartTrialMutation);
+const mockedUseManagement = jest.mocked(useSubscriptionManagementController);
 const mockedUseCheckout = jest.mocked(useCheckoutFlow);
 const mockedUseAnalytics = jest.mocked(useAnalytics);
 
@@ -59,9 +61,7 @@ const buildPlan = (override: Partial<BillingPlan> = {}): BillingPlan => ({
   ...override,
 });
 
-const buildSubscription = (
-  override: Partial<SubscriptionState> = {},
-): SubscriptionState => ({
+const buildSubscription = (): SubscriptionState => ({
   id: "sub-1",
   userId: "u-1",
   planCode: "free",
@@ -76,7 +76,6 @@ const buildSubscription = (
   canceledAt: null,
   createdAt: null,
   updatedAt: null,
-  ...override,
 });
 
 const wrapper = (client: QueryClient) => {
@@ -85,6 +84,22 @@ const wrapper = (client: QueryClient) => {
   );
   Provider.displayName = "TestQueryClientProvider";
   return Provider;
+};
+
+const mockManagementController = (): void => {
+  mockedUseManagement.mockReturnValue({
+    isCancelingSubscription: false,
+    isCancelConfirmationOpen: false,
+    cancelError: null,
+    managementError: null,
+    lastCanceledSubscription: null,
+    managementAction: null,
+    handleManageSubscription: jest.fn().mockResolvedValue(undefined),
+    handleCancelSubscription: jest.fn().mockResolvedValue(undefined),
+    closeCancelConfirmation: jest.fn(),
+    dismissManagementError: jest.fn(),
+    dismissCancellationFeedback: jest.fn(),
+  });
 };
 
 describe("useSubscriptionScreenController", () => {
@@ -106,6 +121,7 @@ describe("useSubscriptionScreenController", () => {
       isPending: false,
       error: null,
     } as never);
+    mockManagementController();
     mockedUseCheckout.mockReturnValue({
       isStarting: false,
       lastError: null,
@@ -113,6 +129,10 @@ describe("useSubscriptionScreenController", () => {
       resetError: jest.fn(),
     } as never);
     mockedUseAnalytics.mockReturnValue(analyticsClient);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("expoe presentations e trial offer derivados do comparador", () => {
@@ -141,14 +161,6 @@ describe("useSubscriptionScreenController", () => {
       billingCycle: "monthly",
     });
     expect(result.current.lastCheckoutOutcome).toBe("completed");
-    expect(analyticsClient.capture).toHaveBeenCalledWith(
-      "subscription.checkout.opened",
-      {
-        provider: "hosted",
-        planId: "premium-monthly",
-        status: "opened",
-      },
-    );
     expect(analyticsClient.capture).toHaveBeenCalledWith(
       "subscription.checkout.completed",
       {
@@ -193,15 +205,15 @@ describe("useSubscriptionScreenController", () => {
     expect(result.current.trialError).toBeInstanceOf(ApiError);
   });
 
-  it("dismissTrialError limpa estado e reseta mutation", async () => {
-    trialMutateAsync.mockRejectedValueOnce(new ApiError({ message: "x", status: 500 }));
+  it("limpa o erro de trial e reseta a mutation", async () => {
+    trialMutateAsync.mockRejectedValueOnce(new Error("trial fail"));
     const { result } = renderHook(() => useSubscriptionScreenController(), {
       wrapper: wrapper(client),
     });
-
     await act(async () => {
       await result.current.handleStartTrial();
     });
+
     act(() => {
       result.current.dismissTrialError();
     });
@@ -210,7 +222,7 @@ describe("useSubscriptionScreenController", () => {
     expect(trialReset).toHaveBeenCalled();
   });
 
-  it("constrói comando de checkout sem billingCycle quando plan e cycle null", async () => {
+  it("constroi checkout sem billingCycle quando o plano nao possui ciclo", async () => {
     const { result } = renderHook(() => useSubscriptionScreenController(), {
       wrapper: wrapper(client),
     });

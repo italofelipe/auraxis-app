@@ -8,4 +8,8 @@ const resolveWebBaseUrl = (): string => {
 const WEB_BASE_URL = resolveWebBaseUrl();
 
 export const PLANS_URL = `${WEB_BASE_URL}/plans` as const;
-export const MANAGE_SUBSCRIPTION_URL = `${WEB_BASE_URL}/conta/assinatura` as const;
+export const MANAGE_SUBSCRIPTION_URL = `${WEB_BASE_URL}/subscription` as const;
+export const APPLE_SUBSCRIPTIONS_URL =
+  "https://apps.apple.com/account/subscriptions" as const;
+export const GOOGLE_PLAY_SUBSCRIPTIONS_URL =
+  "https://play.google.com/store/account/subscriptions" as const;

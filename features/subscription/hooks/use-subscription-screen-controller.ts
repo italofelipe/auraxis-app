@@ -1,6 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Linking } from "react-native";
 
 import { useAnalytics } from "@/core/observability/use-analytics";
 import { queryKeys } from "@/core/query/query-keys";
@@ -14,17 +13,19 @@ import {
   useCheckoutFlow,
   type CheckoutOutcome,
 } from "@/features/subscription/hooks/use-checkout-flow";
+import { useStartTrialMutation } from "@/features/subscription/hooks/use-subscription-mutations";
 import {
-  useStartTrialMutation,
-} from "@/features/subscription/hooks/use-subscription-mutations";
+  useSubscriptionManagementController,
+  type SubscriptionManagementController,
+} from "@/features/subscription/hooks/use-subscription-management-controller";
 import { useSubscriptionStateQuery } from "@/features/subscription/hooks/use-subscription-query";
 import {
   subscriptionPlanComparator,
   type PlanPresentation,
 } from "@/features/subscription/services/subscription-plan-comparator";
-import { MANAGE_SUBSCRIPTION_URL } from "@/shared/config/web-urls";
 
-export interface SubscriptionScreenController {
+export interface SubscriptionScreenController
+  extends SubscriptionManagementController {
   readonly subscriptionQuery: ReturnType<typeof useSubscriptionStateQuery>;
   readonly plansQuery: ReturnType<typeof useBillingPlansQuery>;
   readonly subscription: SubscriptionState | null;
@@ -37,7 +38,6 @@ export interface SubscriptionScreenController {
   readonly lastCheckoutOutcome: CheckoutOutcome | null;
   readonly handleSubscribe: (plan: BillingPlan) => Promise<void>;
   readonly handleStartTrial: () => Promise<void>;
-  readonly handleManageSubscription: () => Promise<void>;
   readonly dismissCheckoutError: () => void;
   readonly dismissTrialError: () => void;
 }
@@ -66,6 +66,8 @@ export function useSubscriptionScreenController(): SubscriptionScreenController 
     useState<CheckoutOutcome | null>(null);
 
   const subscription = subscriptionQuery.data ?? null;
+  const managementController =
+    useSubscriptionManagementController(subscription);
   const plansData = plansQuery.data;
   const plans = useMemo(() => plansData ?? [], [plansData]);
 
@@ -112,6 +114,7 @@ export function useSubscriptionScreenController(): SubscriptionScreenController 
   };
 
   return {
+    ...managementController,
     subscriptionQuery,
     plansQuery,
     subscription,
@@ -124,7 +127,6 @@ export function useSubscriptionScreenController(): SubscriptionScreenController 
     lastCheckoutOutcome,
     handleSubscribe,
     handleStartTrial,
-    handleManageSubscription: async () => Linking.openURL(MANAGE_SUBSCRIPTION_URL),
     dismissCheckoutError: () => {
       checkout.resetError();
       setLastCheckoutOutcome(null);

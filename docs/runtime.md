@@ -151,6 +151,7 @@ Eventos instrumentados no app:
 - `goal.created`, `goal.simulated`.
 - `tool.used`.
 - `subscription.checkout.opened`, `subscription.checkout.completed`.
+- `subscription.management.opened`, `subscription.cancel.completed`.
 - `dashboard.period.changed`.
 - screen views via Expo Router (`posthog.screen(pathname, metadata)`).
 
@@ -167,6 +168,12 @@ tela canonica de assinatura:
 Esse valor e publico e nao deve conter segredo. A decisao de entitlement e
 subscription continua no backend; o app apenas escolhe o provider de compra por
 canal e invalida `subscription`/`entitlements` depois do retorno.
+
+Depois da compra, a gestao usa o `provider` retornado por
+`GET /subscriptions/me`, nao `EXPO_PUBLIC_CHECKOUT_PROVIDER`. Assinaturas
+`abacatepay`, `asaas`, `stub` e trials internos cancelam por
+`POST /subscriptions/cancel`; assinaturas Apple/Google abrem a gestao oficial
+da loja; provider desconhecido usa `https://app.auraxis.com.br/subscription`.
 
 ## Push notifications
 

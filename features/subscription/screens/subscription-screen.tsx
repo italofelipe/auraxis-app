@@ -6,11 +6,16 @@ import { Paragraph, YStack } from "tamagui";
 import { appRoutes } from "@/core/navigation/routes";
 import { BillingPlanCard } from "@/features/subscription/components/billing-plan-card";
 import { CheckoutOutcomeCard } from "@/features/subscription/components/checkout-outcome-card";
+import { SubscriptionCancelModal } from "@/features/subscription/components/subscription-cancel-modal";
 import {
   useSubscriptionScreenController,
   type SubscriptionScreenController,
 } from "@/features/subscription/hooks/use-subscription-screen-controller";
-import type { SubscriptionState } from "@/features/subscription/contracts";
+import type {
+  SubscriptionState,
+  SubscriptionStatus,
+} from "@/features/subscription/contracts";
+import type { SubscriptionManagementAction } from "@/features/subscription/services/subscription-management";
 import { AppBadge } from "@/shared/components/app-badge";
 import { AppButton } from "@/shared/components/app-button";
 import { AppErrorNotice } from "@/shared/components/app-error-notice";
@@ -33,6 +38,15 @@ const SUCCESS_NOTICE: Record<string, { title: string; description: string }> = {
   },
 };
 
+const STATUS_LABELS: Record<SubscriptionStatus, string> = {
+  free: "Gratuito",
+  trialing: "Periodo gratuito",
+  active: "Ativa",
+  past_due: "Pagamento pendente",
+  canceled: "Cancelada",
+  expired: "Expirada",
+};
+
 /**
  * Canonical subscription screen composition for the mobile app.
  *
@@ -44,9 +58,20 @@ export function SubscriptionScreen(): ReactElement {
   return (
     <AppScreen>
       <CurrentSubscriptionCard controller={controller} />
+      <CancellationFeedback controller={controller} />
       <TrialCallout controller={controller} />
       <CheckoutFeedback controller={controller} />
       <PlansCard controller={controller} />
+      <SubscriptionCancelModal
+        visible={controller.isCancelConfirmationOpen}
+        currentPeriodEnd={controller.subscription?.currentPeriodEnd ?? null}
+        isSubmitting={controller.isCancelingSubscription}
+        error={controller.cancelError}
+        onConfirm={() => {
+          void controller.handleCancelSubscription();
+        }}
+        onClose={controller.closeCancelConfirmation}
+      />
     </AppScreen>
   );
 }
@@ -81,7 +106,10 @@ function CurrentSubscriptionCard({ controller }: ControllerProps): ReactElement 
         {(subscription) => (
           <SubscriptionDetails
             subscription={subscription}
+            managementAction={controller.managementAction}
+            managementError={controller.managementError}
             onManage={controller.handleManageSubscription}
+            onDismissManagementError={controller.dismissManagementError}
           />
         )}
       </AppQueryState>
@@ -91,13 +119,22 @@ function CurrentSubscriptionCard({ controller }: ControllerProps): ReactElement 
 
 interface SubscriptionDetailsProps {
   readonly subscription: SubscriptionState;
+  readonly managementAction: SubscriptionManagementAction | null;
+  readonly managementError: unknown | null;
   readonly onManage: () => Promise<void>;
+  readonly onDismissManagementError: () => void;
 }
 
 function SubscriptionDetails({
   subscription,
+  managementAction,
+  managementError,
   onManage,
+  onDismissManagementError,
 }: SubscriptionDetailsProps): ReactElement {
+  const periodEndLabel =
+    subscription.status === "canceled" ? "Acesso ate" : "Proxima cobranca";
+
   return (
     <YStack gap="$3">
       <AppKeyValueRow
@@ -108,13 +145,13 @@ function SubscriptionDetails({
         label="Status"
         value={
           <AppBadge tone={subscription.status === "past_due" ? "danger" : "primary"}>
-            {subscription.status}
+            {STATUS_LABELS[subscription.status]}
           </AppBadge>
         }
       />
       {subscription.currentPeriodEnd ? (
         <AppKeyValueRow
-          label="Proxima cobranca"
+          label={periodEndLabel}
           value={new Date(subscription.currentPeriodEnd).toLocaleDateString("pt-BR")}
         />
       ) : null}
@@ -124,16 +161,70 @@ function SubscriptionDetails({
           value={new Date(subscription.trialEndsAt).toLocaleDateString("pt-BR")}
         />
       ) : null}
+      {subscription.canceledAt ? (
+        <AppKeyValueRow
+          label="Cancelada em"
+          value={new Date(subscription.canceledAt).toLocaleDateString("pt-BR")}
+        />
+      ) : null}
+      {managementError ? (
+        <AppErrorNotice
+          error={managementError}
+          fallbackTitle="Nao foi possivel abrir a gestao da assinatura"
+          fallbackDescription="Tente novamente ou use a pagina Web da Auraxis."
+          actionLabel="Tentar novamente"
+          onAction={() => {
+            void onManage();
+          }}
+          secondaryActionLabel="Fechar"
+          onSecondaryAction={onDismissManagementError}
+          testID="subscription-management-error"
+        />
+      ) : null}
+      {managementAction ? (
+        <>
+          <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+            {managementAction.description}
+          </Paragraph>
+          <AppButton
+            tone={managementAction.mode === "api" ? "danger" : "secondary"}
+            onPress={() => {
+              void onManage();
+            }}
+            testID="manage-subscription-button"
+          >
+            {managementAction.label}
+          </AppButton>
+        </>
+      ) : null}
+    </YStack>
+  );
+}
+
+function CancellationFeedback({
+  controller,
+}: ControllerProps): ReactElement | null {
+  const canceledSubscription = controller.lastCanceledSubscription;
+  if (!canceledSubscription) {
+    return null;
+  }
+
+  const description = canceledSubscription.currentPeriodEnd
+    ? `A renovacao foi interrompida. Seu acesso continua ate ${new Date(
+        canceledSubscription.currentPeriodEnd,
+      ).toLocaleDateString("pt-BR")}.`
+    : "A renovacao foi interrompida. O estado atualizado ja foi sincronizado.";
+
+  return (
+    <AppSurfaceCard title="Assinatura cancelada" description={description}>
       <AppButton
         tone="secondary"
-        onPress={() => {
-          void onManage();
-        }}
-        testID="manage-subscription-button"
+        onPress={controller.dismissCancellationFeedback}
+        testID="dismiss-cancellation-feedback"
       >
-        Gerenciar assinatura
+        Entendi
       </AppButton>
-    </YStack>
+    </AppSurfaceCard>
   );
 }
 

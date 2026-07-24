@@ -127,8 +127,9 @@ incident note e confirmar que um dispositivo instalado recebe o rollback.
 - Dashboard carrega contra `api.auraxis.com.br` (nunca localhost — guard #521).
 - Transação: criar/excluir/restaurar; troca de período mensal.
 - Meta: criar e simular.
-- Assinatura abre hosted checkout; store checkout falha com segurança até
-  StoreKit/Play Billing serem configurados.
+- Assinatura abre hosted checkout; provider API exige confirmacao antes de
+  cancelar e atualiza a data final de acesso; providers Apple/Google abrem a
+  gestao oficial da loja.
 - Privacy center: opt-out de analytics interrompe eventos PostHog.
 - Push opt-in trata permissão negada/indisponível.
 - Deep links: link privado roteia após login; link inválido cai no fallback.

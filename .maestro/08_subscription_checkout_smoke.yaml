@@ -5,4 +5,8 @@ appId: com.sensoriumit.auraxis
 - openLink: auraxisapp://assinatura
 - assertVisible: "Sua assinatura"
 - assertVisible: "Planos disponiveis"
-- assertVisible: "Gerenciar assinatura"
+- assertVisible: "Cancelar assinatura"
+- tapOn: "Cancelar assinatura"
+- assertVisible: "Cancelar assinatura?"
+- assertVisible: "Manter assinatura"
+- tapOn: "Manter assinatura"
