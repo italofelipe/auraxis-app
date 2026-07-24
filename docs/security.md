@@ -74,10 +74,22 @@ posture see `auraxis-platform/.context/`.
   `EXPO_PUBLIC_SSL_PINNING_ENABLED` and
   `EXPO_PUBLIC_SSL_PINNING_FINGERPRINTS`.
 - Native pinning is configured for `api.auraxis.com.br` in `app.json`
-  and `assets/network-security-config.xml`.
-- Current production pins:
-  - Leaf `api.auraxis.com.br`: `sha256/6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=`
-  - Backup CA/intermediate `Let's Encrypt E7`: `sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=`
+  and `assets/network-security-config.xml`. The Expo config plugin
+  `plugins/with-android-network-security-config.cjs` copies the XML and
+  references it from the generated Android manifest; an `app.json` property
+  alone is not a supported Expo integration.
+- Current production CA-SPKI pins, verified against the chain served on
+  2026-07-24:
+  - Let's Encrypt `YE2` intermediate:
+    `sha256/s/tdAOmUzd8syaTuqfgGvFcn6DzA5Cmb+Vby1ST+U3Y=`
+  - `ISRG Root YE`:
+    `sha256/sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w=`
+- iOS intentionally configures only `NSPinnedCAIdentities`. Do not add a
+  leaf category next to it: when both leaf and CA categories are present,
+  Apple requires each category to satisfy its pinning policy, making a normal
+  leaf renewal capable of taking the API offline for installed builds.
+- `npm run ssl-pinning:check` validates the iOS/Android parity, Android
+  expiration and the live production chain before a native release.
 - The runtime policy only reports `enabled=true` when the build exposes
   at least two distinct fingerprints.
 - Before promoting beyond internal beta, run the MITM smoke in the SSL

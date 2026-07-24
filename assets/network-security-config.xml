@@ -5,16 +5,17 @@
   Baseline:
   - Cleartext traffic blocked by default. The whole app must speak HTTPS.
   - System trust anchors only. No user-installed CAs honored.
-  - api.auraxis.com.br is pinned with the current leaf SPKI and the
-    Let's Encrypt E7 intermediate SPKI as the operational backup pin.
+  - api.auraxis.com.br is pinned to two CA keys from the production
+    chain (Let's Encrypt YE2 + ISRG Root YE). Avoid leaf pins: the leaf
+    rotates every 90 days and caused the 2026-07-24 login outage.
     See docs/runbooks/ssl-pinning-rotation.md before rotating.
 -->
 <network-security-config>
     <domain-config>
-        <domain>api.auraxis.com.br</domain>
-        <pin-set expiration="2026-08-01">
-            <pin digest="SHA-256">6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=</pin>
-            <pin digest="SHA-256">y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=</pin>
+        <domain includeSubdomains="false">api.auraxis.com.br</domain>
+        <pin-set expiration="2028-08-01">
+            <pin digest="SHA-256">s/tdAOmUzd8syaTuqfgGvFcn6DzA5Cmb+Vby1ST+U3Y=</pin>
+            <pin digest="SHA-256">sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w=</pin>
         </pin-set>
     </domain-config>
     <base-config cleartextTrafficPermitted="false">

@@ -1,11 +1,33 @@
 appId: com.sensoriumit.auraxis
+name: Issue 723 - login nativo com pinning TLS valido
 ---
 - launchApp:
     clearState: true
 - assertVisible: "E-mail"
 - tapOn: "E-mail"
-- inputText: "test@auraxis.com.br"
+- inputText: ${E2E_EMAIL}
 - tapOn: "Senha"
-- inputText: "TestPass123!"
-- tapOn: "Entrar"
-- assertVisible: "Dashboard"
+- inputText: ${E2E_INVALID_PASSWORD}
+- hideKeyboard
+- takeScreenshot:
+    path: 01-login-password-masked
+    label: Senha permanece mascarada antes do envio
+- tapOn: "Entrar na Auraxis"
+- extendedWaitUntil:
+    visible: "E-mail ou senha inválidos."
+    timeout: 15000
+- takeScreenshot:
+    path: 02-invalid-credentials-feedback
+    label: Credenciais inválidas exibem feedback seguro
+- tapOn: "Fechar"
+- tapOn: "Senha"
+- eraseText
+- inputText: ${E2E_PASSWORD}
+- hideKeyboard
+- tapOn: "Entrar na Auraxis"
+- extendedWaitUntil:
+    visible: "Saldo geral"
+    timeout: 20000
+- takeScreenshot:
+    path: 03-dashboard-after-valid-login
+    label: Login válido abre a área privada

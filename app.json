@@ -28,14 +28,12 @@
           "NSPinnedDomains": {
             "api.auraxis.com.br": {
               "NSIncludesSubdomains": false,
-              "NSPinnedLeafIdentities": [
-                {
-                  "SPKI-SHA256-BASE64": "6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI="
-                }
-              ],
               "NSPinnedCAIdentities": [
                 {
-                  "SPKI-SHA256-BASE64": "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU="
+                  "SPKI-SHA256-BASE64": "s/tdAOmUzd8syaTuqfgGvFcn6DzA5Cmb+Vby1ST+U3Y="
+                },
+                {
+                  "SPKI-SHA256-BASE64": "sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w="
                 }
               ]
             }
@@ -134,27 +132,19 @@
         "NSPrivacyAccessedAPITypes": [
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryFileTimestamp",
-            "NSPrivacyAccessedAPITypeReasons": [
-              "C617.1"
-            ]
+            "NSPrivacyAccessedAPITypeReasons": ["C617.1"]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
-            "NSPrivacyAccessedAPITypeReasons": [
-              "CA92.1"
-            ]
+            "NSPrivacyAccessedAPITypeReasons": ["CA92.1"]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategorySystemBootTime",
-            "NSPrivacyAccessedAPITypeReasons": [
-              "35F9.1"
-            ]
+            "NSPrivacyAccessedAPITypeReasons": ["35F9.1"]
           },
           {
             "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryDiskSpace",
-            "NSPrivacyAccessedAPITypeReasons": [
-              "E174.1"
-            ]
+            "NSPrivacyAccessedAPITypeReasons": ["E174.1"]
           }
         ]
       }
@@ -168,8 +158,7 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.sensoriumit.auraxis",
-      "networkSecurityConfig": "./assets/network-security-config.xml"
+      "package": "com.sensoriumit.auraxis"
     },
     "web": {
       "output": "static",
@@ -204,7 +193,8 @@
       "expo-secure-store",
       "expo-sharing",
       "expo-web-browser",
-      "expo-asset"
+      "expo-asset",
+      "./plugins/with-android-network-security-config.cjs"
     ],
     "experiments": {
       "typedRoutes": true,

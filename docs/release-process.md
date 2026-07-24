@@ -77,6 +77,12 @@ fingerprint.
 A comparação é conservadora: ausência de informação produz build, nunca OTA
 potencialmente incompatível.
 
+Antes de qualquer build nativo, execute `npm run ssl-pinning:check`. O gate
+confirma que os pins CA-SPKI de iOS e Android estão alinhados, que a política
+Android não está perto de expirar e que todos os pins correspondem à cadeia TLS
+servida em produção. Mudanças de pinning sempre exigem binário novo; uma OTA não
+altera a política nativa já instalada.
+
 ## Versões e deduplicação
 
 `package.json`, `app.json` (`expo.version`) e
@@ -175,6 +181,9 @@ confirmar em dispositivo real após dois relaunches.
 ## Smoke checklist
 
 - Cadastro, login e logout.
+- `npm run ssl-pinning:check` encontra todos os pins na cadeia TLS ao vivo.
+- Login inválido mostra erro de credenciais; falha de transporte mostra erro de
+  rede; senha permanece mascarada.
 - Dashboard usa `https://api.auraxis.com.br`, nunca localhost.
 - Criar, editar, excluir e restaurar transação.
 - Criar e simular meta.

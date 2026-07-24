@@ -30,14 +30,19 @@ No network call or database mutation is required until the user explicitly saves
 
 ## Premium Login Flow
 
-1. `LoginScreen` obtains all auth actions and state from `useLoginScreenController`.
-2. The premium auth shell renders only presentation: brand background, glass inputs, captcha, CTA, session notice and legal links.
-3. Premium labels and placeholders come from `shared/i18n/locales/*.json`; focus state only changes the local glass input shell styling.
-4. Email and password fields still write into the same React Hook Form controller.
-5. Submit calls `controller.handleSubmit`, preserving captcha enforcement and login mutation behavior.
-6. Successful login waits for the canonical session to be persisted, then consumes any stored auth redirect and navigates to the intended private route or dashboard.
-7. The private navigator mounts only the focused route (`lazy: true`) and detaches inactive screens from the native hierarchy, preventing the login handoff from initializing the complete private route tree.
-8. Session-expired and submit-error states render on the same screen without changing session policy.
+1. Before any HTTP payload is exchanged, the native transport validates the system certificate chain and an allowed CA SPKI for `api.auraxis.com.br`.
+2. iOS consumes the CA pins from `NSPinnedCAIdentities`; the Android Expo config plugin copies the matching XML and references it from the generated application manifest.
+3. `LoginScreen` obtains all auth actions and state from `useLoginScreenController`.
+4. The premium auth shell renders only presentation: brand background, glass inputs, captcha, CTA, session notice and legal links.
+5. Premium labels and placeholders come from `shared/i18n/locales/*.json`; focus state only changes the local glass input shell styling.
+6. Email and password fields still write into the same React Hook Form controller, and the password remains masked unless the user explicitly toggles visibility.
+7. Submit calls `controller.handleSubmit`, preserving captcha enforcement and login mutation behavior.
+8. HTTP 401 is rendered as invalid credentials. DNS, connectivity and TLS failures retain the network-specific error description so the UI does not falsely blame the credentials.
+9. Successful login waits for the canonical session to be persisted, then consumes any stored auth redirect and navigates to the intended private route or dashboard.
+10. Optional private queries may return 403 when the user lacks a product entitlement. The response remains local to that resource and does not clear the valid session.
+11. Only a global 401, token expiry, or an explicit bootstrap/subscription revalidation failure invalidates the session.
+12. The private navigator mounts only the focused route (`lazy: true`) and detaches inactive screens from the native hierarchy, preventing the login handoff from initializing the complete private route tree.
+13. Session-expired and submit-error states render on the same screen without changing session policy.
 
 ## Shared Entries Flow
 
@@ -91,7 +96,8 @@ No network call or database mutation is required until the user explicitly saves
 - Pure calculator behavior is verified before screen tests.
 - Screen tests assert that inputs, results and controller actions are wired.
 - Feature flag tests assert production status for promoted parity features.
-- Login tests assert the premium surface, localized placeholders, focus styling, preserved auth controller actions and safe lazy/detached initialization of the private navigator.
+- Login tests assert the premium surface, localized placeholders, focus styling, password masking, transport-versus-credential error taxonomy, preserved auth controller actions and safe lazy/detached initialization of the private navigator.
+- Native TLS tests assert CA-pin parity across iOS and Android, generated-manifest integration and a live match against the production chain; Maestro captures the invalid and successful login states from a release build.
 - Shared-entries tests assert controller counts, summary rendering, tab counters, incoming/outgoing invitation separation, outgoing composer actions and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
 - Subscription tests cover provider routing, canonical URL fallback, API response mapping, duplicate-request prevention, query/entitlement invalidation, explicit confirmation, retry, loading and post-cancellation states.

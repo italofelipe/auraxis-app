@@ -20,6 +20,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import Svg, { Defs, RadialGradient, Rect, Stop } from "react-native-svg";
 import { Input, Label, Paragraph, ScrollView, XStack, YStack } from "tamagui";
 
+import { toApiError } from "@/core/http/api-error";
 import { TurnstileChallenge } from "@/features/auth/components/turnstile-challenge";
 import {
   useLoginScreenController,
@@ -40,6 +41,13 @@ const AUTH_TEXT = "rgba(232,244,248,0.84)";
 const AUTH_MUTED = "rgba(232,244,248,0.64)";
 const AUTH_BORDER = "rgba(255,255,255,0.16)";
 const AUTH_GLASS = "rgba(255,255,255,0.07)";
+const INVALID_CREDENTIALS_DESCRIPTION = "E-mail ou senha inválidos.";
+
+const resolveLoginErrorDescription = (error: unknown): string | undefined => {
+  return toApiError(error).status === 401
+    ? INVALID_CREDENTIALS_DESCRIPTION
+    : undefined;
+};
 
 export function LoginScreen(): ReactElement {
   const controller = useLoginScreenController();
@@ -100,7 +108,7 @@ export function LoginScreen(): ReactElement {
           <AppErrorNotice
             error={controller.submitError}
             fallbackTitle="Nao foi possivel entrar agora"
-            fallbackDescription="Confira seus dados e tente novamente."
+            fallbackDescription={resolveLoginErrorDescription(controller.submitError)}
             secondaryActionLabel="Fechar"
             onSecondaryAction={controller.dismissSubmitError}
           />
