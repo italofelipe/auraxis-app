@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.6](https://github.com/italofelipe/auraxis-app/compare/v1.13.5...v1.13.6) (2026-07-24)
+
+
+### Bug Fixes
+
+* **subscription:** enable provider-aware management ([#698](https://github.com/italofelipe/auraxis-app/issues/698)) ([#717](https://github.com/italofelipe/auraxis-app/issues/717)) ([afa1c5b](https://github.com/italofelipe/auraxis-app/commit/afa1c5b3ef3341d009b8e0e2e1b2a8905c73d533))
+
 ## [1.13.5](https://github.com/italofelipe/auraxis-app/compare/v1.13.4...v1.13.5) (2026-07-24)
 
 
