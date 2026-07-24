@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.9](https://github.com/italofelipe/auraxis-app/compare/v1.13.8...v1.13.9) (2026-07-24)
+
+
+### Bug Fixes
+
+* **mobile:** align Expo runtime dependencies ([#727](https://github.com/italofelipe/auraxis-app/issues/727)) ([2b3f1a8](https://github.com/italofelipe/auraxis-app/commit/2b3f1a823bb35eb1e6d9761f591692e89f22f8e4))
+
 ## [1.13.8](https://github.com/italofelipe/auraxis-app/compare/v1.13.7...v1.13.8) (2026-07-24)
 
 
