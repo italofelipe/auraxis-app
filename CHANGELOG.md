@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.13.7](https://github.com/italofelipe/auraxis-app/compare/v1.13.6...v1.13.7) (2026-07-24)
+
+
+### Bug Fixes
+
+* **release:** require detailed store changelogs ([#720](https://github.com/italofelipe/auraxis-app/issues/720)) ([2fc1aa1](https://github.com/italofelipe/auraxis-app/commit/2fc1aa18a937baad2764c9755cf674abcd360a37))
+
 ## [1.13.6](https://github.com/italofelipe/auraxis-app/compare/v1.13.5...v1.13.6) (2026-07-24)
 
 
