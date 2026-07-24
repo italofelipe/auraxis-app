@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.13.4](https://github.com/italofelipe/auraxis-app/compare/v1.13.3...v1.13.4) (2026-07-24)
+
+
+### Bug Fixes
+
+* **security:** resolve high npm advisories via capped overrides ([eb87068](https://github.com/italofelipe/auraxis-app/commit/eb87068c9aa4b1ffe7149645d3d6db03d64fc126))
+* **security:** resolve high npm advisories via capped overrides (0 high/critical) ([d0903b3](https://github.com/italofelipe/auraxis-app/commit/d0903b3dc60b4e4ddc5aa9ec22b71c73132770db))
+
 ## [1.13.3](https://github.com/italofelipe/auraxis-app/compare/v1.13.2...v1.13.3) (2026-07-23)
 
 
