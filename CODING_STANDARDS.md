@@ -1225,8 +1225,8 @@ Workflows adicionais:
 | Item | Situação | Quando implementar |
 |:-----|:---------|:-------------------|
 | Detox E2E no CI | Scaffold pronto — requer macOS runner | APP5 / Fase Beta |
-| EAS Build gate | Requer conta EAS | APP5 |
-| EAS Update / OTA | Requer aprovação de release | Pós-MVP |
+| EAS Build por fingerprint | Implementado após CI; changelog obrigatório | #719 |
+| EAS Update / OTA | Implementado após CI para runtime compatível | #719 |
 | Sentry (error tracking) | A integrar | APP3+ |
 | Stryker (mutation testing) | A avaliar | APP5+ |
 

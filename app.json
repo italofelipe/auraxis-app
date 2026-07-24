@@ -2,7 +2,7 @@
   "expo": {
     "name": "auraxis-app",
     "slug": "auraxis-app",
-    "version": "1.13.4",
+    "version": "1.13.6",
     "runtimeVersion": {
       "policy": "fingerprint"
     },

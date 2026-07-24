@@ -1,0 +1,220 @@
+name: Delivery after CI
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+concurrency:
+  group: delivery-${{ github.event.workflow_run.event }}-${{ github.event.workflow_run.head_branch || github.event.workflow_run.head_sha }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  pull-requests: read
+
+jobs:
+  deliver:
+    name: Select OTA or native preview
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      (github.event.workflow_run.event == 'pull_request' ||
+       github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve the reviewed source revision
+        id: context
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const fs = require('fs');
+            const run = context.payload.workflow_run;
+            const associated = await github.rest.repos.listPullRequestsAssociatedWithCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              commit_sha: run.head_sha,
+            });
+            const preferredNumber = run.pull_requests?.[0]?.number;
+            const pullRequest = associated.data.find((item) => item.number === preferredNumber)
+              ?? associated.data.find((item) => item.merged_at)
+              ?? associated.data[0];
+
+            if (!pullRequest) {
+              core.setOutput('enabled', 'false');
+              core.setOutput('reason', 'No pull request is associated with this CI revision.');
+              return;
+            }
+
+            if (pullRequest.head.repo.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              core.setOutput('enabled', 'false');
+              core.setOutput('reason', 'Fork pull requests never receive deployment credentials.');
+              return;
+            }
+
+            const trustedAssociations = new Set(['OWNER', 'MEMBER', 'COLLABORATOR']);
+            if (!trustedAssociations.has(pullRequest.author_association)) {
+              core.setOutput('enabled', 'false');
+              core.setOutput('reason', 'Only trusted repository collaborators can receive deployment credentials.');
+              return;
+            }
+
+            if (/^chore\(main\): release \d+\.\d+\.\d+/.test(pullRequest.title)) {
+              core.setOutput('enabled', 'false');
+              core.setOutput('reason', 'Release Please PRs are delivered once by their v* tag.');
+              return;
+            }
+
+            const eventPath = `${process.env.RUNNER_TEMP}/delivery-pull-request.json`;
+            fs.writeFileSync(eventPath, JSON.stringify({ pull_request: pullRequest }));
+            const isPullRequest = run.event === 'pull_request';
+            core.setOutput('enabled', 'true');
+            core.setOutput('environment', isPullRequest ? 'preview' : 'production');
+            core.setOutput('event_path', eventPath);
+            core.setOutput('pr_number', String(pullRequest.number));
+            core.setOutput('profile', isPullRequest ? 'preview' : 'production');
+            core.setOutput('sha', isPullRequest ? pullRequest.head.sha : run.head_sha);
+            core.setOutput('target', isPullRequest ? 'pull-request' : 'main');
+
+      - name: Explain a safe skip
+        if: steps.context.outputs.enabled != 'true'
+        env:
+          REASON: ${{ steps.context.outputs.reason }}
+        run: |
+          {
+            echo "### Delivery skipped"
+            echo
+            echo "$REASON"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Checkout the exact CI-approved revision
+        if: steps.context.outputs.enabled == 'true'
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ steps.context.outputs.sha }}
+
+      - name: Setup Node.js
+        if: steps.context.outputs.enabled == 'true'
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        if: steps.context.outputs.enabled == 'true'
+        run: npm ci --ignore-scripts
+
+      - name: Validate deployment changelog
+        if: steps.context.outputs.enabled == 'true'
+        env:
+          GITHUB_EVENT_PATH: ${{ steps.context.outputs.event_path }}
+        run: node scripts/store-release-notes.cjs validate-pr > "$RUNNER_TEMP/store-notes.txt"
+
+      - name: Validate EXPO_TOKEN
+        if: steps.context.outputs.enabled == 'true'
+        env:
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+        run: |
+          if [ -z "${EXPO_TOKEN:-}" ]; then
+            echo "::error::Missing required secret: EXPO_TOKEN"
+            exit 1
+          fi
+
+      - name: Setup Expo
+        if: steps.context.outputs.enabled == 'true'
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: 21.2.0
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Compare native runtime fingerprints
+        if: steps.context.outputs.enabled == 'true'
+        id: policy
+        env:
+          PROFILE: ${{ steps.context.outputs.profile }}
+        run: |
+          set -euo pipefail
+          android_fingerprint="$(npx expo-updates fingerprint:generate --platform android | jq -r '.hash')"
+          ios_fingerprint="$(npx expo-updates fingerprint:generate --platform ios | jq -r '.hash')"
+          eas build:list --platform android --profile "$PROFILE" --limit 50 --json --non-interactive \
+            > "$RUNNER_TEMP/android-builds.json"
+          eas build:list --platform ios --profile "$PROFILE" --limit 50 --json --non-interactive \
+            > "$RUNNER_TEMP/ios-builds.json"
+          jq -s 'add' "$RUNNER_TEMP/android-builds.json" "$RUNNER_TEMP/ios-builds.json" \
+            > "$RUNNER_TEMP/eas-builds.json"
+          resolution="$(node scripts/release-delivery-policy.cjs \
+            --builds-file "$RUNNER_TEMP/eas-builds.json" \
+            --android-fingerprint "$android_fingerprint" \
+            --ios-fingerprint "$ios_fingerprint" \
+            --profile "$PROFILE")"
+          {
+            echo "mode=$(jq -r '.mode' <<< "$resolution")"
+            echo "android_state=$(jq -r '.states.android' <<< "$resolution")"
+            echo "ios_state=$(jq -r '.states.ios' <<< "$resolution")"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build a native PR preview
+        if: >-
+          steps.context.outputs.enabled == 'true' &&
+          steps.context.outputs.target == 'pull-request' &&
+          steps.policy.outputs.mode == 'build'
+        env:
+          NOTES_FILE: ${{ runner.temp }}/store-notes.txt
+        run: |
+          eas build \
+            --platform all \
+            --profile preview \
+            --message "$(cat "$NOTES_FILE")" \
+            --non-interactive \
+            --no-wait
+
+      - name: Publish compatible OTA
+        if: >-
+          steps.context.outputs.enabled == 'true' &&
+          steps.policy.outputs.mode == 'ota'
+        env:
+          ENVIRONMENT: ${{ steps.context.outputs.environment }}
+          NOTES_FILE: ${{ runner.temp }}/store-notes.txt
+          PR_NUMBER: ${{ steps.context.outputs.pr_number }}
+          TARGET: ${{ steps.context.outputs.target }}
+        run: |
+          set -euo pipefail
+          if [ "$TARGET" = "pull-request" ]; then
+            destination=(--branch "pr-${PR_NUMBER}")
+          else
+            destination=(--channel production)
+          fi
+          eas update \
+            "${destination[@]}" \
+            --environment "$ENVIRONMENT" \
+            --message "$(cat "$NOTES_FILE")" \
+            --platform all \
+            --non-interactive
+
+      - name: Record delivery decision
+        if: steps.context.outputs.enabled == 'true'
+        env:
+          ANDROID_STATE: ${{ steps.policy.outputs.android_state }}
+          IOS_STATE: ${{ steps.policy.outputs.ios_state }}
+          MODE: ${{ steps.policy.outputs.mode }}
+          NOTES_FILE: ${{ runner.temp }}/store-notes.txt
+          TARGET: ${{ steps.context.outputs.target }}
+        run: |
+          {
+            echo "### Automatic mobile delivery"
+            echo
+            echo "- Target: \`$TARGET\`"
+            echo "- Decision: \`$MODE\`"
+            echo "- Android native runtime: \`$ANDROID_STATE\`"
+            echo "- iOS native runtime: \`$IOS_STATE\`"
+            if [ "$TARGET" = "main" ] && [ "$MODE" = "build" ]; then
+              echo "- Native change: the Release Please tag owns the single store build."
+            fi
+            if [ "$MODE" = "wait" ]; then
+              echo "- A compatible native build is already running; no duplicate was created."
+            fi
+            echo
+            echo "#### Detailed changelog"
+            echo
+            cat "$NOTES_FILE"
+          } >> "$GITHUB_STEP_SUMMARY"

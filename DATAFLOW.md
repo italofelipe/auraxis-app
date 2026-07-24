@@ -95,3 +95,16 @@ No network call or database mutation is required until the user explicitly saves
 - Shared-entries tests assert controller counts, summary rendering, tab counters, incoming/outgoing invitation separation, outgoing composer actions and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
 - Subscription tests cover provider routing, canonical URL fallback, API response mapping, duplicate-request prevention, query/entitlement invalidation, explicit confirmation, retry, loading and post-cancellation states.
+
+## Automatic Mobile Delivery Flow
+
+1. A PR author writes two or more user-facing pt-BR bullets under `## Changelog de loja`.
+2. CI validates the notes, application quality and the exact PR SHA.
+3. A successful CI `workflow_run` resolves the associated same-repository PR and rejects forks or direct unassociated pushes.
+4. Expo generates Android and iOS native fingerprints; the delivery policy compares them with EAS builds from `preview` or `production`.
+5. A compatible runtime publishes EAS Update with the detailed changelog; a missing preview runtime starts one Android+iOS preview build; an active match creates no duplicate.
+6. On main, a native mismatch is handed to the Release Please tag instead of starting a competing build.
+7. The tag workflow validates package/app/manifest versions and aggregates the source PR changelogs into `build/store-release/metadata.json`.
+8. EAS builds/submits once. TestFlight receives What to Test and EAS Metadata writes App Store pt-BR release notes.
+9. Google Play receives the AAB as draft. The publisher script finds the exact versionCode, writes localized notes, changes it to completed and commits the edit.
+10. Human approval is still required to promote internal/TestFlight artifacts to the public stores.

@@ -4,6 +4,17 @@
 
 Closes #<!-- número da issue -->
 
+## Changelog de loja
+
+<!--
+Obrigatório para todos os PRs que podem ser entregues.
+Escreva pelo menos 2 bullets claros, em pt-BR, totalizando 100–500 caracteres.
+Descreva o que mudou e o impacto percebido; não use "N/A", "TODO" ou placeholders.
+-->
+
+- Mudança percebida pelos usuários:
+- Impacto, correção ou melhoria entregue:
+
 ## Tipo de mudança
 
 - [ ] Feature nova

@@ -2,6 +2,7 @@ import {
   validateBundleGovernance,
   validateNodeRuntimeGovernance,
   validateReleaseReadinessGovernance,
+  validateReleaseVersionGovernance,
 } from "./check-runtime-release-governance.cjs";
 
 const createValidRuntimeInputs = () => {
@@ -21,7 +22,8 @@ const createValidRuntimeInputs = () => {
       "NODE_VERSION_FILE=\"$ROOT_DIR/.nvmrc\"",
       "NODE_DOCKER_IMAGE=\"node:${NODE_VERSION}-bookworm\"",
     ].join("\n"),
-    qualityGatesDoc: "nvm use 25\n# Paridade CI local (ambiente dockerizado Node 25, igual ao runner Linux):",
+    qualityGatesDoc:
+      "nvm use 25\n# Paridade CI local (ambiente dockerizado Node 25, igual ao runner Linux):",
     steeringDoc: "| Toolchain | Node.js | 25 LTS |",
   };
 };
@@ -41,10 +43,7 @@ describe("check-runtime-release-governance", () => {
     });
 
     expect(errors).toEqual(
-      expect.arrayContaining([
-        "package.json engines.node must be 25.x",
-        ".nvmrc must pin Node 25",
-      ]),
+      expect.arrayContaining(["package.json engines.node must be 25.x", ".nvmrc must pin Node 25"]),
     );
   });
 
@@ -68,10 +67,7 @@ describe("check-runtime-release-governance", () => {
               projectId: "project-id",
             },
           },
-          plugins: [
-            "expo-router",
-            ["expo-splash-screen", {}],
-          ],
+          plugins: ["expo-router", ["expo-splash-screen", {}]],
         },
       },
       easConfig: {
@@ -152,7 +148,99 @@ describe("check-runtime-release-governance", () => {
 
     expect(errors).toContain("app.json must define expo.ios.bundleIdentifier");
   });
+});
 
+describe("release version governance", () => {
+  test("accepts aligned versions and mandatory store changelog automation", () => {
+    expect(
+      validateReleaseVersionGovernance({
+        appConfig: {
+          expo: {
+            runtimeVersion: { policy: "fingerprint" },
+            version: "1.13.6",
+          },
+        },
+        deliveryWorkflow: "workflow_run:\nrelease-delivery-policy.cjs",
+        easConfig: {
+          cli: { version: ">= 21.2.0" },
+          submit: {
+            production: {
+              android: { releaseStatus: "draft" },
+              ios: { metadataPath: "./store.config.js" },
+            },
+          },
+        },
+        minimumDeployWorkflow: "store-release-notes.cjs from-text",
+        otaWorkflow: "store-release-notes.cjs from-text",
+        packageJson: { version: "1.13.6" },
+        pullRequestTemplate: "## Changelog de loja",
+        releaseManifest: { ".": "1.13.6" },
+        releasePleaseConfig: {
+          packages: {
+            ".": {
+              "extra-files": [
+                {
+                  type: "json",
+                  path: "app.json",
+                  jsonpath: "$.expo.version",
+                },
+              ],
+            },
+          },
+        },
+        storeReleaseWorkflow: ["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "google-play-release.cjs"].join(
+          "\n",
+        ),
+      }),
+    ).toEqual([]);
+  });
+
+  test("rejects version drift before a store build can start", () => {
+    const errors = validateReleaseVersionGovernance({
+      appConfig: {
+        expo: {
+          runtimeVersion: { policy: "fingerprint" },
+          version: "1.13.4",
+        },
+      },
+      deliveryWorkflow: "workflow_run:\nrelease-delivery-policy.cjs",
+      easConfig: {
+        cli: { version: ">= 21.2.0" },
+        submit: {
+          production: {
+            android: { releaseStatus: "draft" },
+            ios: { metadataPath: "./store.config.js" },
+          },
+        },
+      },
+      minimumDeployWorkflow: "store-release-notes.cjs from-text",
+      otaWorkflow: "store-release-notes.cjs from-text",
+      packageJson: { version: "1.13.6" },
+      pullRequestTemplate: "## Changelog de loja",
+      releaseManifest: { ".": "1.13.6" },
+      releasePleaseConfig: {
+        packages: {
+          ".": {
+            "extra-files": [
+              {
+                type: "json",
+                path: "app.json",
+                jsonpath: "$.expo.version",
+              },
+            ],
+          },
+        },
+      },
+      storeReleaseWorkflow: ["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "google-play-release.cjs"].join(
+        "\n",
+      ),
+    });
+
+    expect(errors).toContain("package.json, app.json and release manifest versions must match");
+  });
+});
+
+describe("bundle governance", () => {
   test("accepts the canonical bundle policy baseline", () => {
     expect(
       validateBundleGovernance({
@@ -160,11 +248,11 @@ describe("check-runtime-release-governance", () => {
           "> Thresholds: ≤ 10 MB (aviso) · ≤ 12 MB",
           "const hardLimit = 12 * 1024 * 1024;",
         ].join("\n"),
-        qualityGatesDoc: [
-          "| Android | > 10 MB | > 12 MB |",
-          "| iOS | > 10 MB | > 12 MB |",
-        ].join("\n"),
-        steeringDoc: "bundle Android/iOS ≤ 12 MB (hard limit no CI), com alerta operacional a partir de 10 MB.",
+        qualityGatesDoc: ["| Android | > 10 MB | > 12 MB |", "| iOS | > 10 MB | > 12 MB |"].join(
+          "\n",
+        ),
+        steeringDoc:
+          "bundle Android/iOS ≤ 12 MB (hard limit no CI), com alerta operacional a partir de 10 MB.",
         codingStandardsDoc: "bundle-analysis   (comenta tamanho no PR; hard limit 12 MB)",
       }),
     ).toEqual([]);

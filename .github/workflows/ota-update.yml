@@ -16,10 +16,14 @@ on:
         options:
           - preview
           - production
-      message:
-        description: "Mensagem do update (default: título do último commit)"
-        required: false
+      release_notes:
+        description: "Changelog detalhado pt-BR (2+ bullets, 100–500 caracteres)"
+        required: true
         type: string
+
+concurrency:
+  group: ota-update-${{ inputs.channel }}
+  cancel-in-progress: true
 
 jobs:
   publish-update:
@@ -40,6 +44,14 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
+      - name: Validate detailed OTA changelog
+        env:
+          STORE_RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          node scripts/store-release-notes.cjs from-text \
+            --version "$(jq -r '.version' package.json)" \
+            --output-dir build/store-release
+
       - name: Validate EXPO_TOKEN
         env:
           EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
@@ -52,7 +64,7 @@ jobs:
       - name: Setup Expo
         uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: 16.13.0
+          eas-version: 21.2.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Guard — require channel/environment
@@ -74,15 +86,11 @@ jobs:
       - name: Publish update
         env:
           CHANNEL: ${{ inputs.channel }}
-          MESSAGE: ${{ inputs.message }}
         run: |
           set -euo pipefail
           if [ -z "${CHANNEL:-}" ]; then
             echo "::error::CHANNEL/--environment vazio no passo de publish — abortando." >&2
             exit 1
-          fi
-          if [ -z "${MESSAGE:-}" ]; then
-            MESSAGE="$(git log -1 --pretty=%s)"
           fi
           # `--environment` é OBRIGATÓRIO: o Expo inlina `EXPO_PUBLIC_*` em
           # build-time. Sem ele, o bundle do OTA sai com essas envs `undefined`
@@ -92,5 +100,5 @@ jobs:
           eas update \
             --channel "$CHANNEL" \
             --environment "$CHANNEL" \
-            --message "$MESSAGE" \
+            --message "$(jq -r '.releaseNotes' build/store-release/metadata.json)" \
             --non-interactive

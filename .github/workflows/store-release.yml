@@ -8,39 +8,43 @@ on:
         required: true
         default: all
         type: choice
-        options:
-          - android
-          - ios
-          - all
+        options: [android, ios, all]
       profile:
         description: "Perfil do EAS Build"
         required: true
         default: production
         type: choice
-        options:
-          - preview
-          - production
+        options: [preview, production]
       auto_submit:
-        description: "Submeter automaticamente para store"
-        required: false
+        description: "Submeter automaticamente para a loja"
+        required: true
         default: "false"
         type: choice
-        options:
-          - "false"
-          - "true"
+        options: ["false", "true"]
+      release_notes:
+        description: "Changelog detalhado pt-BR (2+ bullets, 100–500 caracteres)"
+        required: true
+        type: string
   push:
     tags:
       - "v*"
 
+concurrency:
+  group: store-release
+  cancel-in-progress: false
+
 jobs:
   build-and-submit:
-    name: Build/Submit to Stores
+    name: Build, submit and attach store changelog
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      pull-requests: read
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
@@ -51,77 +55,231 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Validate EXPO_TOKEN
+      - name: Resolve release parameters
+        id: params
         env:
-          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          DISPATCH_AUTO_SUBMIT: ${{ inputs.auto_submit }}
+          DISPATCH_PLATFORM: ${{ inputs.platform }}
+          DISPATCH_PROFILE: ${{ inputs.profile }}
         run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "push" ]; then
+            platform="all"
+            profile="production"
+            auto_submit="true"
+            version="${GITHUB_REF_NAME#v}"
+          else
+            platform="${DISPATCH_PLATFORM:-all}"
+            profile="${DISPATCH_PROFILE:-production}"
+            auto_submit="${DISPATCH_AUTO_SUBMIT:-false}"
+            version="$(jq -r '.version' package.json)"
+          fi
+          {
+            echo "platform=$platform"
+            echo "profile=$profile"
+            echo "auto_submit=$auto_submit"
+            echo "version=$version"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Validate version alignment
+        env:
+          EXPECTED_VERSION: ${{ steps.params.outputs.version }}
+        run: |
+          set -euo pipefail
+          package_version="$(jq -r '.version' package.json)"
+          app_version="$(jq -r '.expo.version' app.json)"
+          manifest_version="$(jq -r '.["."]' .release-please-manifest.json)"
+          for actual in "$package_version" "$app_version" "$manifest_version"; do
+            if [ "$actual" != "$EXPECTED_VERSION" ]; then
+              echo "::error::Version drift: expected $EXPECTED_VERSION, found $actual"
+              exit 1
+            fi
+          done
+
+      - name: Generate and validate detailed store changelog
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+          STORE_RELEASE_NOTES: ${{ inputs.release_notes }}
+          VERSION: ${{ steps.params.outputs.version }}
+        run: |
+          set -euo pipefail
+          if [ "${{ github.event_name }}" = "push" ]; then
+            node scripts/store-release-notes.cjs generate-release \
+              --version "$VERSION" \
+              --output-dir build/store-release
+          else
+            node scripts/store-release-notes.cjs from-text \
+              --version "$VERSION" \
+              --output-dir build/store-release
+          fi
+
+      - name: Validate required credentials before building
+        env:
+          AUTO_SUBMIT: ${{ steps.params.outputs.auto_submit }}
+          EXPO_TOKEN: ${{ secrets.EXPO_TOKEN }}
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          PLATFORM: ${{ steps.params.outputs.platform }}
+          PROFILE: ${{ steps.params.outputs.profile }}
+        run: |
+          set -euo pipefail
           if [ -z "${EXPO_TOKEN:-}" ]; then
-            echo "Missing required secret: EXPO_TOKEN" >&2
+            echo "::error::Missing required secret: EXPO_TOKEN"
+            exit 1
+          fi
+          if [ "$AUTO_SUBMIT" = "true" ] && [ "$PROFILE" != "production" ]; then
+            echo "::error::Automatic store submission is only allowed with the production profile."
+            exit 1
+          fi
+          if [ "$AUTO_SUBMIT" = "true" ] &&
+             [ "$PROFILE" = "production" ] &&
+             { [ "$PLATFORM" = "android" ] || [ "$PLATFORM" = "all" ]; } &&
+             [ -z "${GOOGLE_PLAY_SERVICE_ACCOUNT_JSON:-}" ]; then
+            echo "::error::Missing GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; Android cannot be finalized with release notes."
             exit 1
           fi
 
       - name: Setup Expo
         uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: 16.13.0
+          eas-version: 21.2.0
           token: ${{ secrets.EXPO_TOKEN }}
 
-      - name: Verify EAS context
+      - name: Verify EAS context and Apple metadata
+        env:
+          PLATFORM: ${{ steps.params.outputs.platform }}
         run: |
           set -euo pipefail
           eas whoami
           eas project:info
+          if [ "$PLATFORM" = "ios" ] || [ "$PLATFORM" = "all" ]; then
+            eas metadata:lint --profile production
+          fi
 
-      - name: Resolve build parameters
-        id: params
+      - name: Prevent duplicate native builds
+        id: policy
         env:
-          DISPATCH_PLATFORM: ${{ inputs.platform }}
-          DISPATCH_PROFILE: ${{ inputs.profile }}
-          DISPATCH_AUTO_SUBMIT: ${{ inputs.auto_submit }}
+          PROFILE: ${{ steps.params.outputs.profile }}
+          VERSION: ${{ steps.params.outputs.version }}
         run: |
           set -euo pipefail
-          if [ "${{ github.event_name }}" = "push" ]; then
-            # Tag push (v*) — criada quando o PR do release-please é mergeado
-            # (auto-merge habilitado em release-please.yml). Dispara build nas
-            # duas plataformas com --auto-submit.
-            #
-            # IMPORTANTE — sem auto-promoção para produção (issue #645):
-            #   - Android: eas.json submit.production.android = track:internal +
-            #     releaseStatus:draft → o AAB entra como DRAFT no internal track,
-            #     nunca em produção. Promover interno→produção é MANUAL no Play
-            #     Console (gate one-click, ver docs/release-process.md).
-            #   - iOS: o submit sobe para o TestFlight; publicar na App Store
-            #     (produção) é MANUAL no App Store Connect.
-            platform="all"
-            profile="production"
-            auto_submit="true"
-          else
-            platform="${DISPATCH_PLATFORM:-all}"
-            profile="${DISPATCH_PROFILE:-production}"
-            auto_submit="${DISPATCH_AUTO_SUBMIT:-false}"
-          fi
+          android_fingerprint="$(npx expo-updates fingerprint:generate --platform android | jq -r '.hash')"
+          ios_fingerprint="$(npx expo-updates fingerprint:generate --platform ios | jq -r '.hash')"
+          eas build:list --platform android --profile "$PROFILE" --limit 50 --json --non-interactive \
+            > "$RUNNER_TEMP/android-builds.json"
+          eas build:list --platform ios --profile "$PROFILE" --limit 50 --json --non-interactive \
+            > "$RUNNER_TEMP/ios-builds.json"
+          jq -s 'add' "$RUNNER_TEMP/android-builds.json" "$RUNNER_TEMP/ios-builds.json" \
+            > "$RUNNER_TEMP/eas-builds.json"
+          resolution="$(node scripts/release-delivery-policy.cjs \
+            --builds-file "$RUNNER_TEMP/eas-builds.json" \
+            --android-fingerprint "$android_fingerprint" \
+            --ios-fingerprint "$ios_fingerprint" \
+            --app-version "$VERSION" \
+            --platform "${{ steps.params.outputs.platform }}" \
+            --profile "$PROFILE")"
           {
-            echo "platform=$platform"
-            echo "profile=$profile"
-            echo "auto_submit=$auto_submit"
+            echo "mode=$(jq -r '.mode' <<< "$resolution")"
+            echo "states=$(jq -c '.states' <<< "$resolution")"
+            echo "android_build_id=$(jq -r '.buildIds.android // empty' <<< "$resolution")"
+            echo "ios_build_id=$(jq -r '.buildIds.ios // empty' <<< "$resolution")"
           } >> "$GITHUB_OUTPUT"
-          echo "Resolved trigger=${{ github.event_name }} platform=$platform profile=$profile auto_submit=$auto_submit"
 
-      - name: Trigger build/submission
+      - name: Stop while an identical build is already running
+        if: steps.policy.outputs.mode == 'wait'
+        run: |
+          echo "::error::A build for this exact app version and native runtime is already running. Rerun after it completes."
+          exit 1
+
+      - name: Build and submit once
+        if: steps.policy.outputs.mode == 'build'
         env:
+          AUTO_SUBMIT: ${{ steps.params.outputs.auto_submit }}
+          NOTES_FILE: build/store-release/what-to-test-pt-BR.txt
           PLATFORM: ${{ steps.params.outputs.platform }}
           PROFILE: ${{ steps.params.outputs.profile }}
-          AUTO_SUBMIT: ${{ steps.params.outputs.auto_submit }}
         run: |
           set -euo pipefail
-
-          extra_args=""
+          args=(
+            --platform "$PLATFORM"
+            --profile "$PROFILE"
+            --message "$(cat "$NOTES_FILE")"
+            --non-interactive
+          )
           if [ "$AUTO_SUBMIT" = "true" ]; then
-            extra_args="--auto-submit"
+            args+=(--auto-submit)
+            if [ "$PLATFORM" = "ios" ] || [ "$PLATFORM" = "all" ]; then
+              args+=(--what-to-test "$(cat "$NOTES_FILE")")
+            fi
           fi
+          eas build "${args[@]}"
 
-          eas build \
-            --platform "$PLATFORM" \
-            --profile "$PROFILE" \
-            --non-interactive \
-            $extra_args
+      - name: Publish App Store release notes
+        if: >-
+          steps.policy.outputs.mode != 'wait' &&
+          steps.params.outputs.auto_submit == 'true' &&
+          steps.params.outputs.profile == 'production' &&
+          (steps.params.outputs.platform == 'ios' ||
+           steps.params.outputs.platform == 'all')
+        run: eas metadata:push --profile production --non-interactive
+
+      - name: Resolve submitted Android versionCode
+        id: android
+        if: >-
+          steps.policy.outputs.mode != 'wait' &&
+          steps.params.outputs.auto_submit == 'true' &&
+          steps.params.outputs.profile == 'production' &&
+          (steps.params.outputs.platform == 'android' ||
+           steps.params.outputs.platform == 'all')
+        env:
+          ANDROID_BUILD_ID: ${{ steps.policy.outputs.android_build_id }}
+          VERSION: ${{ steps.params.outputs.version }}
+        run: |
+          set -euo pipefail
+          eas build:list --platform android --profile production --status finished \
+            --limit 50 --json --non-interactive > "$RUNNER_TEMP/finished-android-builds.json"
+          version_code="$(jq -r \
+            --arg build_id "$ANDROID_BUILD_ID" \
+            --arg sha "$GITHUB_SHA" \
+            --arg version "$VERSION" \
+            '[.[] | select(
+              (.appVersion == $version) and
+              (($build_id != "" and .id == $build_id) or
+               ($build_id == "" and .gitCommitHash == $sha))
+            )][0].appBuildVersion // empty' \
+            "$RUNNER_TEMP/finished-android-builds.json")"
+          if [ -z "$version_code" ]; then
+            echo "::error::The finished Android build for $GITHUB_SHA / $VERSION was not found."
+            exit 1
+          fi
+          echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
+
+      - name: Attach Google Play notes and complete internal release
+        if: steps.android.outputs.version_code != ''
+        env:
+          GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          node scripts/google-play-release.cjs \
+            --metadata-file build/store-release/metadata.json \
+            --package com.sensoriumit.auraxis \
+            --track internal \
+            --version-code "${{ steps.android.outputs.version_code }}"
+
+      - name: Release summary
+        if: always()
+        env:
+          MODE: ${{ steps.policy.outputs.mode }}
+          STATES: ${{ steps.policy.outputs.states }}
+          VERSION: ${{ steps.params.outputs.version }}
+        run: |
+          {
+            echo "### Store release ${VERSION}"
+            echo
+            echo "- Native decision: \`${MODE:-not-evaluated}\`"
+            echo "- Platform states: \`${STATES:-not-evaluated}\`"
+            if [ -f build/store-release/metadata.json ]; then
+              echo
+              echo "#### Changelog pt-BR"
+              echo
+              jq -r '.releaseNotes' build/store-release/metadata.json
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
