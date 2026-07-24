@@ -15,7 +15,9 @@
 | Statements | ≥ 85% |
 
 Coverage thresholds are enforced in `jest.config.js` → `coverageThreshold`.
-The `quality-check` script fails if any threshold is breached.
+The `quality-check` script fails if any threshold is breached. It also runs
+`npm run expo:check` before policy, contracts and coverage so an Expo SDK
+dependency drift cannot reach a native build while JavaScript tests stay green.
 
 New files added to the codebase **must** be included in `collectCoverageFrom` in
 `jest.config.js`.
@@ -244,7 +246,7 @@ npm run test:coverage
 # Run in watch mode during development
 npm run test:watch
 
-# Run full quality gate (includes tests)
+# Run full quality gate (includes Expo SDK alignment and tests)
 npm run quality-check
 ```
 

@@ -66,6 +66,8 @@ No network call or database mutation is required until the user explicitly saves
 7. `lazy: true` defers each route until its first focus; `detachInactiveScreens` removes inactive native views without changing route definitions or the custom tab transition.
 8. `MoreHubScreen` handles displaced actions: route cards call `router.push(href)`, while `Nova transação` opens the shared expense sheet store directly.
 9. The credit-cards tour quick-transaction step is centered instructional copy, so it does not depend on a removed `fab` anchor.
+10. Before lint, policy and coverage in the full quality gate, `npm run expo:check` compares declared React, React Native, React Navigation and native-module versions with the installed Expo SDK compatibility matrix.
+11. A native dependency drift blocks delivery even when route-level Jest tests pass, because Jest replaces the iOS/Android native implementations with JavaScript mocks.
 
 ## Transaction Observation Flow
 
@@ -97,6 +99,7 @@ No network call or database mutation is required until the user explicitly saves
 - Screen tests assert that inputs, results and controller actions are wired.
 - Feature flag tests assert production status for promoted parity features.
 - Login tests assert the premium surface, localized placeholders, focus styling, password masking, transport-versus-credential error taxonomy, preserved auth controller actions and safe lazy/detached initialization of the private navigator.
+- Critical-tab smoke tests mount the production Insights and Cards route wrappers, while `npm run expo:check` covers the native dependency boundary those tests cannot execute.
 - Native TLS tests assert CA-pin parity across iOS and Android, generated-manifest integration and a live match against the production chain; Maestro captures the invalid and successful login states from a release build.
 - Shared-entries tests assert controller counts, summary rendering, tab counters, incoming/outgoing invitation separation, outgoing composer actions and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
