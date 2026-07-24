@@ -76,11 +76,13 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - The private navigator must keep `lazy: true` so only the focused route mounts during the post-login handoff. It must also keep `detachInactiveScreens` enabled so previously visited inactive screens leave the native view hierarchy while React Navigation preserves navigation state.
 - The active tab affordance lives in `core/navigation/app-tab-bar.tsx` as a Reanimated liquid blob with fixed spring parameters, a gradient surface and the active icon rendered in white.
 - The credit-cards guided tour no longer targets a `fab` anchor; its quick-transaction step is centered copy that points users to `Mais`.
+- Native navigation depends on the package matrix supported by the installed Expo SDK. `npm run expo:check` is part of `quality-check` and must stay green before any build; JavaScript-only route tests cannot detect a React/React Native or native-module version drift.
+- The cross-platform crash that exposed this invariant, including the affected Insights/Cards routes and native rebuild requirement, is documented in `docs/wiki/mobile-insights-cards-navigation-crash-2026-07-24.md`.
 
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.
-- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, shared-entries mobile parity including outgoing invitations, transaction observation form/feed/controller coverage, and subscription provider resolution/cancellation/controller/screen coverage.
+- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, critical Insights/Cards route smoke coverage, Expo SDK package alignment, shared-entries mobile parity including outgoing invitations, transaction observation form/feed/controller coverage, and subscription provider resolution/cancellation/controller/screen coverage.
 - Native-auth changes additionally require the static pinning tests, the live TLS verifier, an Android release prebuild/build, and the Maestro login flow with masked-password, invalid-credential and successful-dashboard screenshots.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.
 
