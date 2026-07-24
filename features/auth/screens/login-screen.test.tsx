@@ -1,6 +1,7 @@
 import { fireEvent, render } from "@testing-library/react-native";
 import { StyleSheet } from "react-native";
 
+import { ApiError } from "@/core/http/api-error";
 import { LoginScreen } from "@/features/auth/screens/login-screen";
 import { TestProviders } from "@/shared/testing/test-providers";
 import { useLoginScreenController } from "@/features/auth/hooks/use-login-screen-controller";
@@ -28,6 +29,10 @@ const mockController = {
 
 jest.mock("@/features/auth/hooks/use-login-screen-controller", () => ({
   useLoginScreenController: jest.fn(),
+}));
+
+jest.mock("@expo/vector-icons", () => ({
+  MaterialCommunityIcons: "MaterialCommunityIcons",
 }));
 
 jest.mock("react-hook-form", () => {
@@ -138,6 +143,50 @@ describe("LoginScreen", () => {
     expect(mockController.handleRegister).toHaveBeenCalledTimes(1);
     expect(mockController.handleOpenTerms).toHaveBeenCalledTimes(1);
     expect(mockController.handleOpenPrivacy).toHaveBeenCalledTimes(1);
+  });
+
+  it("mantem a senha mascarada por padrao e alterna a visibilidade", () => {
+    const { getByLabelText } = renderScreen();
+    const passwordInput = getByLabelText("SENHA");
+
+    expect(passwordInput.props.secureTextEntry).toBe(true);
+
+    fireEvent.press(getByLabelText("Mostrar senha"));
+    expect(getByLabelText("SENHA").props.secureTextEntry).toBe(false);
+
+    fireEvent.press(getByLabelText("Ocultar senha"));
+    expect(getByLabelText("SENHA").props.secureTextEntry).toBe(true);
+  });
+
+  it("diferencia falha de rede de credenciais invalidas", () => {
+    mockedUseController.mockReturnValue({
+      ...mockController,
+      submitError: new ApiError({
+        message: "Network Error",
+        status: 0,
+      }),
+    } as never);
+
+    const { getByText, queryByText } = renderScreen();
+
+    expect(getByText("Verifique sua internet e tente novamente.")).toBeTruthy();
+    expect(queryByText("Confira seus dados e tente novamente.")).toBeNull();
+  });
+
+  it("normaliza a mensagem de credenciais invalidas sem expor a API", () => {
+    mockedUseController.mockReturnValue({
+      ...mockController,
+      submitError: new ApiError({
+        message: "E-mail ou senha invalidos.",
+        status: 401,
+        code: "INVALID_CREDENTIALS",
+      }),
+    } as never);
+
+    const { getByText, queryByText } = renderScreen();
+
+    expect(getByText("E-mail ou senha inválidos.")).toBeTruthy();
+    expect(queryByText("Confira seus dados e tente novamente.")).toBeNull();
   });
 
   it("renderiza sessao expirada em vidro e permite fechar", () => {

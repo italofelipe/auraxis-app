@@ -51,6 +51,9 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - `shared/config/runtime.ts` is the canonical resolver for public Expo runtime configuration used by HTTP, telemetry and product services.
 - Production runtime (`EXPO_PUBLIC_APP_ENV=production`) must resolve `EXPO_PUBLIC_API_URL` to a valid HTTPS URL and must never fall back to localhost. The guard runs while `appRuntimeConfig` is created, before the app can build an HTTP client against an unsafe base URL.
 - Development and preview builds can still use localhost for Expo Go/dev-client workflows.
+- Native TLS trust for `api.auraxis.com.br` is CA-SPKI based on both platforms. iOS reads the CA identities from `app.json`; Android receives the equivalent `network_security_config.xml` through `plugins/with-android-network-security-config.cjs` during Expo prebuild.
+- Leaf and CA identities must not be mixed in the iOS pinned domain. Apple evaluates both configured categories, so a routine leaf-certificate renewal could otherwise block every API request before authentication is reached.
+- `npm run ssl-pinning:check` is the pre-build invariant: it requires at least two aligned iOS/Android CA pins, rejects expired Android policy, and verifies every configured pin against the live production certificate chain.
 
 ## Auth Surface
 
@@ -59,6 +62,9 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - Login copy is read from `shared/i18n/locales/*.json`; the screen should not introduce new hardcoded product strings.
 - Premium login handoff hardening is tracked in `docs/handoffs/mobile-design-handoff-status-2026-07-01.md`; placeholder copy and glass focus styling must stay covered by login screen tests.
 - A successful login persists the canonical session before navigating to the private shell. Mounting that shell must not eagerly initialize every private route; the incident analysis and device smoke checklist live in `docs/wiki/mobile-login-crash-2026-07-23.md`.
+- A login rejection with HTTP 401 is normalized to the safe user-facing message `E-mail ou senha inválidos.`. Transport/TLS failures keep the network-specific taxonomy from `AppErrorNotice`; they must never be presented as bad credentials.
+- A protected resource returning 403 means the authenticated user lacks that resource permission; the global HTTP layer must preserve the session. Only 401 invalidates globally. The explicit bootstrap/subscription revalidation remains allowed to sign out on 401 or 403 because those endpoints validate the account shell itself.
+- The TLS rotation outage and its native E2E evidence are documented in `docs/wiki/mobile-login-tls-pinning-incident-2026-07-24.md`.
 
 ## Private Navigation
 
@@ -75,6 +81,7 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 
 - New or changed behavior must include tests in the same feature area.
 - For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, shared-entries mobile parity including outgoing invitations, transaction observation form/feed/controller coverage, and subscription provider resolution/cancellation/controller/screen coverage.
+- Native-auth changes additionally require the static pinning tests, the live TLS verifier, an Android release prebuild/build, and the Maestro login flow with masked-password, invalid-credential and successful-dashboard screenshots.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.
 
 ## Mobile Delivery Architecture

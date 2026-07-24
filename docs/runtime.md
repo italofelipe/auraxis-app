@@ -258,27 +258,31 @@ Pinning é aplicado em duas camadas:
 ```jsonc
 "NSAppTransportSecurity": {
   "NSAllowsArbitraryLoads": false,
-  "NSPinnedDomains": {
-    "api.auraxis.com.br": {
-      "NSIncludesSubdomains": false,
-      "NSPinnedLeafIdentities": [
-        { "SPKI-SHA256-BASE64": "6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=" }
-      ],
-      "NSPinnedCAIdentities": [
-        { "SPKI-SHA256-BASE64": "y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=" }
-      ]
-    }
-  }
+      "NSPinnedDomains": {
+        "api.auraxis.com.br": {
+          "NSIncludesSubdomains": false,
+          "NSPinnedCAIdentities": [
+            { "SPKI-SHA256-BASE64": "s/tdAOmUzd8syaTuqfgGvFcn6DzA5Cmb+Vby1ST+U3Y=" },
+            { "SPKI-SHA256-BASE64": "sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w=" }
+          ]
+        }
+      }
 }
 ```
 
-**Android** — `app.json` aponta `expo.android.networkSecurityConfig` para
-`assets/network-security-config.xml`. O XML aplica cleartext bloqueado,
-system trust apenas, e `<pin-set>` para `api.auraxis.com.br` com:
+**Android** — `plugins/with-android-network-security-config.cjs` injeta
+`android:networkSecurityConfig="@xml/network_security_config"` no manifest
+gerado e copia `assets/network-security-config.xml` para o resource nativo.
+O XML aplica cleartext bloqueado, system trust apenas e `<pin-set>` para
+`api.auraxis.com.br` com:
 
-- leaf atual: `sha256/6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=`
-- backup CA/intermediário Let's Encrypt E7:
-  `sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=`
+- CA intermediária Let's Encrypt YE2:
+  `sha256/s/tdAOmUzd8syaTuqfgGvFcn6DzA5Cmb+Vby1ST+U3Y=`
+- CA raiz ISRG Root YE:
+  `sha256/sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w=`
+
+O campo `expo.android.networkSecurityConfig` isolado não é interpretado pelo
+prebuild Expo e não deve ser reintroduzido.
 
 ### 2. Defensivo (JS, este módulo)
 
@@ -306,18 +310,23 @@ openssl x509 -in /tmp/api-cert.pem -pubkey -noout \
   | openssl dgst -sha256 -binary \
   | openssl enc -base64
 
-# Saída: hash base64 — usar como pin atual.
-# Repetir com a CA de backup (próxima rotação) para o pin secundário.
+# Saída: hash base64.
+# Para a política atual, repetir para cada CA pinada da cadeia, não para o leaf.
 ```
 
 **Política de pins:**
 
-- Sempre dois pins distintos. A build atual usa leaf
-  `api.auraxis.com.br` + CA/intermediário Let's Encrypt E7 porque ainda
-  não há chave offline de próxima rotação registrada em vault.
+- Sempre dois pins CA-SPKI distintos, alinhados entre iOS e Android.
+- Não misturar `NSPinnedLeafIdentities` e `NSPinnedCAIdentities` no mesmo
+  domínio iOS. A combinação exige correspondência das duas categorias e
+  transforma uma renovação rotineira do leaf em indisponibilidade.
 - Validade dos pins documentada no XML/Info.plist com expiração explícita
   no XML Android (`<pin-set expiration="YYYY-MM-DD">`).
-- Rotação a cada 90 dias (alinhada ao ciclo do provedor TLS).
+- Antes de build nativo, `npm run ssl-pinning:check` exige dois pins, paridade
+  iOS/Android, mais de 30 dias até a expiração e match de todos os pins com a
+  cadeia pública ao vivo.
+- Rotação deve acompanhar alterações da cadeia da CA; o check ao vivo é
+  obrigatório mesmo quando o leaf foi apenas renovado.
 
 ### Smoke tests pós-build (manuais)
 

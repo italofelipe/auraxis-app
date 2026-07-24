@@ -1,179 +1,170 @@
 # SSL pinning rotation runbook
 
-## Quando executar
+## Objetivo
 
-- A cada 90 dias (alinhado ao ciclo de renovação do cert
-  `api.auraxis.com.br`).
-- Imediatamente quando o provedor TLS rotacionar inesperadamente um cert.
-- Antes de qualquer release que altere a infra de TLS (mudança de provider,
-  região, distribuição CDN).
+Manter a API acessível em builds iOS e Android sem reduzir a proteção contra
+interceptação. A política nativa usa dois pins CA-SPKI da cadeia pública de
+`api.auraxis.com.br`, alinhados entre as plataformas.
 
-## Pre-requisitos
+Execute este runbook:
 
-- `openssl` na máquina local (≥1.1.1).
-- Acesso SSH/CLI à máquina que tem o cert atual da API,
-  ou uso direto do endpoint público (handshake remoto).
-- Pins atuais extraídos em 2026-05-19:
-  - Leaf `api.auraxis.com.br`:
-    `sha256/6ZqZa5LRfTimLYEkGrZ9Pja4ku36AtNGVJ9NbD13GgI=`
-  - Backup CA/intermediário `Let's Encrypt E7`:
-    `sha256/y7xVm0TVJNahMr2sZydE2jQH8SquXV9yLF9seROHHHU=`
+- antes de todo build nativo;
+- quando a cadeia TLS, CA, CDN ou provedor mudar;
+- quando `npm run ssl-pinning:check` falhar;
+- imediatamente após um alerta de handshake em produção.
 
-## Passos
+Uma correção de pinning não pode ser entregue por OTA: os pins pertencem ao
+binário nativo.
 
-### 1. Extrair pin atual (cert em produção)
+## Estado de referência em 2026-07-24
+
+| Certificado da cadeia | SPKI SHA-256 |
+|---|---|
+| Let's Encrypt `YE2` intermediário | `sha256/s/tdAOmUzd8syaTuqfgGvFcn6DzA5Cmb+Vby1ST+U3Y=` |
+| `ISRG Root YE` | `sha256/sCkq5UWXjg+7mKu9lMhhYF5bGLsy7VI/UNW3tccdR7w=` |
+
+O leaf observado em produção é
+`sha256/ll8r/Juoowyh1V2qUhOGv79vQkRFWb014Jyh4T3NuQ8=`, mas não faz parte da
+política. Leaf certificates têm ciclo curto e sua rotação não deve inutilizar
+um aplicativo já instalado.
+
+## Invariantes
+
+1. iOS declara somente `NSPinnedCAIdentities`; não combine esta chave com
+   `NSPinnedLeafIdentities` no mesmo domínio.
+2. Android e iOS possuem exatamente o mesmo conjunto de pelo menos dois pins.
+3. Android referencia `@xml/network_security_config` no manifest gerado.
+4. O XML canônico fica em `assets/network-security-config.xml`; o config plugin
+   é responsável por copiá-lo durante o prebuild.
+5. A expiração Android permanece pelo menos 30 dias no futuro.
+6. Cada pin configurado corresponde a um certificado da cadeia pública atual.
+
+## 1. Fazer o diagnóstico automático
+
+```bash
+npm run ssl-pinning:check
+```
+
+O comando falha se os arquivos divergem, se um leaf volta ao iOS, se há menos
+de dois pins, se a expiração está próxima ou se a cadeia ao vivo não contém
+todos os pins configurados.
+
+Falha de rede ao executar o check deve bloquear o release; não trate ausência de
+prova como aprovação.
+
+## 2. Inspecionar a cadeia quando houver rotação
 
 ```bash
 openssl s_client \
   -connect api.auraxis.com.br:443 \
   -servername api.auraxis.com.br \
-  </dev/null 2>/dev/null \
-  | openssl x509 -outform PEM > /tmp/api-cert.pem
+  -showcerts </dev/null
+```
 
-PIN_CURRENT=$(openssl x509 -in /tmp/api-cert.pem -pubkey -noout \
+Para cada certificado CA que será pinado, salve o PEM separadamente e extraia o
+SPKI:
+
+```bash
+openssl x509 -in /tmp/ca.pem -pubkey -noout \
   | openssl pkey -pubin -outform der \
   | openssl dgst -sha256 -binary \
-  | openssl enc -base64)
-
-echo "Pin atual: sha256/${PIN_CURRENT}"
+  | openssl enc -base64
 ```
 
-Repetir para `cdn.auraxis.com.br` e qualquer outro subdomínio somente
-quando ele passar a servir tráfego TLS direto pelo app. Em 2026-05-19,
-`cdn.auraxis.com.br` não respondeu handshake público, então a build
-pina apenas `api.auraxis.com.br`.
+Confirme issuer, subject, validade e cadeia em uma segunda fonte confiável antes
+de alterar o app. Não copie um hash de log, issue ou conversa sem refazer a
+extração.
 
-### 2. Gerar pin backup (próximo cert)
+## 3. Atualizar iOS e Android na mesma mudança
 
-O backup pin deve apontar para a **próxima** chave que a CA vai assinar.
-Duas opções:
-
-**Opção A — Pin do CA intermediário** (atual nesta build; mais
-resiliente, menos seguro):
-
-```bash
-openssl s_client -connect api.auraxis.com.br:443 -showcerts </dev/null 2>/dev/null \
-  | awk '/BEGIN CERT/,/END CERT/' \
-  | csplit -z -s -f /tmp/cert- - '/BEGIN CERT/' '{*}'
-# /tmp/cert-01 é o intermediário; rodar a mesma cadeia openssl pkey | dgst | enc
-```
-
-**Opção B — Pin de uma chave gerada offline** (mais seguro, mais
-operacional):
-
-```bash
-# Gerar chave + CSR offline, guardar a chave em vault, usar SPKI da chave
-# como backup pin. Quando o cert atual vencer, ACM vai assinar essa
-# mesma chave e o backup pin fica ativo automaticamente.
-openssl genrsa -out /tmp/backup-key.pem 4096
-PIN_BACKUP=$(openssl rsa -in /tmp/backup-key.pem -pubout -outform der 2>/dev/null \
-  | openssl dgst -sha256 -binary \
-  | openssl enc -base64)
-
-echo "Pin backup: sha256/${PIN_BACKUP}"
-```
-
-Recomendado para a próxima rotação: migrar para a opção B, com a chave
-guardada em AWS Secrets Manager (`auraxis/ssl-pinning/backup-key`).
-
-### 3. Atualizar `app.json` (iOS)
+Em `app.json`, substitua somente as entradas de `NSPinnedCAIdentities`:
 
 ```jsonc
-"ios": {
-  "infoPlist": {
-    "NSAppTransportSecurity": {
-      "NSAllowsArbitraryLoads": false,
-      "NSPinnedDomains": {
-        "api.auraxis.com.br": {
-          "NSIncludesSubdomains": false,
-          "NSPinnedLeafIdentities": [
-            { "SPKI-SHA256-BASE64": "<PIN_CURRENT>" }
-          ],
-          "NSPinnedCAIdentities": [
-            { "SPKI-SHA256-BASE64": "<PIN_BACKUP>" }
-          ]
-        }
-      }
-    }
+"NSPinnedDomains": {
+  "api.auraxis.com.br": {
+    "NSIncludesSubdomains": false,
+    "NSPinnedCAIdentities": [
+      { "SPKI-SHA256-BASE64": "<CA_PIN_1>" },
+      { "SPKI-SHA256-BASE64": "<CA_PIN_2>" }
+    ]
   }
 }
 ```
 
-### 4. Atualizar `assets/network-security-config.xml` (Android)
+Em `assets/network-security-config.xml`, use os mesmos valores e atualize a
+expiração:
 
 ```xml
-<network-security-config>
-    <domain-config>
-        <domain>api.auraxis.com.br</domain>
-        <pin-set expiration="2026-08-01">
-            <pin digest="SHA-256"><!-- PIN_CURRENT without sha256/ --></pin>
-            <pin digest="SHA-256"><!-- PIN_BACKUP without sha256/ --></pin>
-        </pin-set>
-    </domain-config>
-    <base-config cleartextTrafficPermitted="false">
-        <trust-anchors>
-            <certificates src="system" />
-        </trust-anchors>
-    </base-config>
-</network-security-config>
+<domain-config cleartextTrafficPermitted="false">
+    <domain includeSubdomains="false">api.auraxis.com.br</domain>
+    <pin-set expiration="YYYY-MM-DD">
+        <pin digest="SHA-256"><!-- CA_PIN_1 --></pin>
+        <pin digest="SHA-256"><!-- CA_PIN_2 --></pin>
+    </pin-set>
+</domain-config>
 ```
 
-`expiration` deve ser ≥ 30 dias antes da próxima rotação esperada.
-Quando expira, o pin-set deixa de ser enforced (fail-open) — não
-deixar passar.
+Não adicione `expo.android.networkSecurityConfig` ao `app.json`: essa propriedade
+não conecta o XML ao projeto gerado pelo Expo. O plugin
+`./plugins/with-android-network-security-config.cjs` deve permanecer listado.
 
-### 5. Sinalizar telemetria
+## 4. Validar o projeto nativo gerado
 
 ```bash
-eas secret:create \
-  --scope project \
-  --name EXPO_PUBLIC_SSL_PINNING_ENABLED \
-  --value true \
-  --type string
-
-eas secret:create \
-  --scope project \
-  --name EXPO_PUBLIC_SSL_PINNING_FINGERPRINTS \
-  --value "sha256/${PIN_CURRENT},sha256/${PIN_BACKUP}" \
-  --type string
+npx expo prebuild --platform android --clean --no-install
+npm run ssl-pinning:check
 ```
 
-Esses secrets são read pelo `core/security/ssl-pinning.ts` para
-publicar telemetria; não controlam o pinning nativo (esse é imutável
-no binário).
-
-### 6. Build + smoke
+No resultado gerado, confirme:
 
 ```bash
-eas build --profile preview --platform ios
-eas build --profile preview --platform android
-
-# Em cada device:
-# - Conectar normalmente: app deve funcionar.
-# - Ativar mitmproxy/Charles com cert custom: app deve falhar TLS handshake.
+rg 'networkSecurityConfig|usesCleartextTraffic' \
+  android/app/src/main/AndroidManifest.xml
+rg 'pin-set|SHA-256' \
+  android/app/src/main/res/xml/network_security_config.xml
 ```
 
-### 7. Promote
+O manifest deve referenciar `@xml/network_security_config` e bloquear cleartext.
+O XML gerado deve ser idêntico ao arquivo canônico.
 
-Após smoke verde nos 2 devices, promover para `production` profile.
-PR com diff dos pins documentado.
+## 5. Build e E2E
 
-## Mitigação se um pin errado for shipado para produção
+Crie builds nativos para ambas as plataformas. Em dispositivo real ou emulador,
+execute:
 
-**Sintoma:** app instalado retorna erros de rede em todas as chamadas
-HTTPS canônicas.
+1. abrir o app com estado limpo;
+2. confirmar que a senha continua mascarada;
+3. enviar uma senha inválida e confirmar `E-mail ou senha inválidos.`;
+4. fechar o aviso e entrar com uma conta descartável válida;
+5. confirmar a abertura do Dashboard;
+6. capturar imagens dos três estados;
+7. repetir o smoke com proxy MITM confiado pelo aparelho e confirmar que o
+   handshake é bloqueado.
 
-**Causa-raiz:** pin atual não match com o cert servido. App não pode
-fazer OTA pra corrigir (pinning é nativo, requer redeploy via
-store).
+O fluxo Android automatizado está em `.maestro/01_login.yaml`. Credenciais são
+fornecidas por variáveis `E2E_EMAIL`, `E2E_INVALID_PASSWORD` e `E2E_PASSWORD`;
+nunca grave senhas no repositório ou nas capturas.
 
-**Mitigação:**
+## 6. Entrega
 
-1. Reverter o `app.json` / XML para a versão pre-rotação (rollback do PR).
-2. Build emergencial profile `production`. Submeter para review
-   prioritário (Apple expedited review se necessário).
-3. Comunicar status page para ETA.
+- Anexe ao PR as capturas do E2E e informe plataforma, build e data.
+- Inclua o resultado de `npm run ssl-pinning:check`.
+- Descreva os pins removidos e adicionados sem registrar credenciais.
+- Como há alteração nativa, publique novo build de loja; OTA isolado não corrige
+  aparelhos com a política antiga.
+- Faça smoke no TestFlight e Google Play internal antes da promoção pública.
 
-**Prevenção:** sempre dois pins (atual + backup). Smoke test em preview
-profile antes de promote. Pin backup nunca compartilha de chave com
-o atual.
+## Mitigação de incidente
+
+Sintoma típico: a Web autentica normalmente, mas todas as chamadas do app falham
+antes de alcançar a API. O UI pode mostrar um erro de rede; logs do backend não
+registram `/auth/login`.
+
+1. Compare os pins do binário com a cadeia pública usando o verificador.
+2. Atualize as duas plataformas juntas.
+3. Gere build emergencial `production`; não tente corrigir por OTA.
+4. Solicite revisão acelerada quando aplicável e comunique o impacto.
+5. Preserve uma mensagem de rede distinta de credenciais inválidas.
+
+O incidente que originou este runbook está documentado em
+`docs/wiki/mobile-login-tls-pinning-incident-2026-07-24.md`.

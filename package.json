@@ -27,6 +27,7 @@
     "audit:high": "npm audit --audit-level=high",
     "codegen": "graphql-codegen --config codegen.ts",
     "codegen:check": "graphql-codegen --config codegen.ts && git diff --exit-code shared/types/generated/graphql.ts",
+    "ssl-pinning:check": "node scripts/check-native-ssl-pinning.cjs",
     "quality-check": "npm run lint && npm run typecheck && npm run policy:check && npm run contracts:check && npm run codegen:check && npm run test:coverage",
     "test:e2e": "jest --testPathPattern='__tests__/e2e'",
     "test:watch": "jest --watchAll",

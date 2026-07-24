@@ -473,7 +473,7 @@ describe("httpClient", () => {
     });
   });
 
-  it("derruba a sessao com motivo forbidden quando a API responde 403", async () => {
+  it("preserva a sessao quando um recurso opcional responde 403", async () => {
     useSessionStore.setState(
       makeSessionState({
         accessToken: "token",
@@ -506,7 +506,7 @@ describe("httpClient", () => {
               Authorization: "Bearer token",
             },
             method: "get",
-            url: "/dashboard",
+            url: "/ai/insights/spending-patterns/latest",
           } as InternalAxiosRequestConfig,
           undefined,
           {
@@ -521,7 +521,7 @@ describe("httpClient", () => {
                 Authorization: "Bearer token",
               },
               method: "get",
-              url: "/dashboard",
+              url: "/ai/insights/spending-patterns/latest",
             } as InternalAxiosRequestConfig,
           },
         ),
@@ -531,19 +531,19 @@ describe("httpClient", () => {
     });
 
     expect(useSessionStore.getState()).toMatchObject({
-      isAuthenticated: false,
-      authFailureReason: "forbidden",
+      isAuthenticated: true,
+      authFailureReason: null,
     });
     expect(appLogger.warn).toHaveBeenCalledWith({
       domain: "network",
       event: "network.request_failed",
       context: {
         method: "GET",
-        path: "/dashboard",
+        path: "/ai/insights/spending-patterns/latest",
         status: 403,
         code: "REQUEST_FAILED",
         durationMs: expect.any(Number),
-        invalidationReason: "forbidden",
+        invalidationReason: null,
       },
       error: expect.any(AxiosError),
       captureInSentry: false,

@@ -331,7 +331,9 @@ const buildAxiosFailureContext = (
 const maybeInvalidateSession = async (
   error: AxiosError,
 ): Promise<string | null> => {
-  const reason = resolveSessionInvalidationReason(error.response?.status ?? 0);
+  const status = error.response?.status ?? 0;
+  const reason =
+    status === 401 ? resolveSessionInvalidationReason(status) : null;
   if (!reason) {
     return null;
   }
