@@ -13,6 +13,10 @@ on:
         options:
           - "false"
           - "true"
+      release_notes:
+        description: "Obrigatório se houver build: 2+ bullets pt-BR, 100–500 caracteres"
+        required: false
+        type: string
 
 jobs:
   web-baseline-artifact:
@@ -34,6 +38,14 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
+
+      - name: Validate detailed preview changelog
+        env:
+          STORE_RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          node scripts/store-release-notes.cjs from-text \
+            --version "$(jq -r '.version' package.json)" \
+            --output-dir build/store-release
 
       - name: Export web bundle
         env:
@@ -61,6 +73,9 @@ jobs:
   eas-preview-build:
     name: EAS Preview Build
     runs-on: ubuntu-latest
+    concurrency:
+      group: eas-preview-manual
+      cancel-in-progress: false
     if: github.event_name == 'workflow_dispatch' && inputs.run_eas_build == 'true'
     permissions:
       contents: read
@@ -89,8 +104,14 @@ jobs:
       - name: Setup Expo
         uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
         with:
-          eas-version: 16.13.0
+          eas-version: 21.2.0
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Trigger preview build
-        run: npx eas build --platform all --profile preview --non-interactive --no-wait
+        run: |
+          eas build \
+            --platform all \
+            --profile preview \
+            --message "$(jq -r '.releaseNotes' build/store-release/metadata.json)" \
+            --non-interactive \
+            --no-wait

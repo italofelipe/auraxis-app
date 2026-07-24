@@ -62,9 +62,12 @@ Permite que o pipeline envie AABs ao Play sem você. Só precisa ser feito 1 vez
    - Permissões mínimas: **"Release apps to testing tracks"** + **"View app
      information and download bulk reports"**
    - Send invite
-6. **Me entregar o JSON** (caminho local do arquivo — NÃO commitar, NÃO colar
-   em chat público). Eu gravo como EAS secret file `GOOGLE_SERVICE_ACCOUNT`
-   (já referenciado no `eas.json`) e deleto a cópia local.
+6. **Guardar o JSON fora do Git** e registrar a mesma credencial em dois
+   cofres:
+   - EAS, para o upload do AAB;
+   - GitHub Actions, secret `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`, para anexar
+     release notes e concluir o draft pelo Android Publisher API.
+   Nunca commitar nem colar a chave em chat ou logs.
 
 ## Parte D — Primeiro release no internal testing (~10 min, depois do 1º build)
 
@@ -103,7 +106,8 @@ Rode direto nesta sessão do Claude com o prefixo `!`:
 
 ## Depois disso (volta pro Claude)
 
-- [ ] Gravar `GOOGLE_SERVICE_ACCOUNT` como EAS secret file e validar `eas submit`
+- [ ] Validar a service account no EAS e no secret GitHub
+      `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON`
 - [ ] Criar projeto Sentry + gravar `EXPO_PUBLIC_SENTRY_DSN`/`SENTRY_AUTH_TOKEN`
 - [ ] Disparar o primeiro ciclo completo (store-release dispatch) e o smoke alfa
       (checklist em `docs/release-process.md`)

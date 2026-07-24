@@ -5,7 +5,14 @@
     ".": {
       "package-name": "auraxis-app",
       "changelog-path": "CHANGELOG.md",
-      "include-component-in-tag": false
+      "include-component-in-tag": false,
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "app.json",
+          "jsonpath": "$.expo.version"
+        }
+      ]
     }
   }
 }

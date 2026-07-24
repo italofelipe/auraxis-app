@@ -4,17 +4,17 @@
 
 | Camada | Tecnologia | Versão |
 |:-------|:-----------|:-------|
-| Framework | Expo SDK 54 | 54.x |
-| Toolchain | Node.js | 24 LTS |
-| Runtime | React Native | 0.81.6 |
+| Framework | Expo SDK 55 | 55.x |
+| Toolchain | Node.js | 25 LTS |
+| Runtime | React Native | 0.83.10 |
 | Navegação | Expo Router | v6 (file-based) |
 | Linguagem | TypeScript | strict mode |
 | Lint | ESLint + eslint-config-expo | latest |
 | Testes | Jest + React Native Testing Library | latest |
 | Storage seguro | expo-secure-store | latest |
 | HTTP | Axios + TanStack Query | canônico |
-| Build | EAS Build | baseline configurada via `eas.json` |
-| OTA | EAS Update | backlog posterior ao MVP1 |
+| Build | EAS Build | automático após CI quando muda o fingerprint |
+| OTA | EAS Update | automático após CI para runtime compatível |
 
 ## Estrutura de diretórios
 

@@ -76,3 +76,13 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - New or changed behavior must include tests in the same feature area.
 - For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, shared-entries mobile parity including outgoing invitations, transaction observation form/feed/controller coverage, and subscription provider resolution/cancellation/controller/screen coverage.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.
+
+## Mobile Delivery Architecture
+
+- `CI` is the mandatory trust boundary. `.github/workflows/delivery-after-ci.yml` only handles a trusted collaborator's same-repository PR revision after that exact SHA passes CI; forks and external authors never receive deployment credentials.
+- Every non-generated PR supplies the canonical `## Changelog de loja` source. `scripts/store-release-notes.cjs` validates it and later builds the localized release metadata for Google Play, TestFlight and App Store Connect.
+- `scripts/release-delivery-policy.cjs` compares Android/iOS Expo fingerprints with EAS builds from the target profile. A compatible finished runtime receives OTA, a missing runtime receives a native build, and an active compatible build suppresses duplicates.
+- Release Please owns public version bumps. Its `extra-files` rule keeps `app.json` aligned with `package.json` and `.release-please-manifest.json`; the store workflow rejects any drift.
+- Store builds are serialized globally. Android submission is deliberately draft until `scripts/google-play-release.cjs` attaches pt-BR notes to the exact `versionCode` and commits it as completed on the internal track.
+- `store.config.js` maps the same generated notes to the exact Apple version through EAS Metadata, while `--what-to-test` supplies TestFlight.
+- Internal delivery is automatic. Promotion to Google Play production or App Store production remains a human approval boundary.

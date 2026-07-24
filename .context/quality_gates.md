@@ -1,7 +1,7 @@
 # quality_gates.md — auraxis-app
 
 > Gates de qualidade obrigatórios para o aplicativo mobile do Auraxis.
-> Atualizado: 2026-04-08 — Node LTS unificado + stack completa (jest-expo + Gitleaks + TruffleHog + SonarCloud)
+> Atualizado: 2026-07-24 — Node 25 + changelog obrigatório + entrega automática por fingerprint
 
 ---
 
@@ -77,6 +77,7 @@ node scripts/ci-audit-gate.js
 |:----|:--------------|:----------|:----------------|
 | `lint` | ESLint | 0 erros | ✅ sim |
 | `typecheck` | TypeScript strict | 0 erros | ✅ sim |
+| `store-changelog` | 2+ notas pt-BR detalhadas no PR | 100–500 caracteres, sem placeholder | ✅ sim |
 | `test` | Jest + coverage | ≥ 85% (lines/functions/statements/branches) | ✅ sim |
 | `expo-bundle` | JS bundle compila | sem erros | ✅ sim |
 | `bundle-analysis` | Tamanho do bundle | ≤ 12 MB hard (Android/iOS) | ✅ sim (PR apenas) |
@@ -209,8 +210,8 @@ jest.mock('expo-secure-store', () => ({
 
 | Item | Por quê |
 |:-----|:--------|
-| EAS Build nativo | Executado no CI/EAS após merge |
-| EAS Update / OTA | Executado após aprovação em produção |
+| EAS Build nativo | Executado automaticamente após CI quando o fingerprint não possui build compatível |
+| EAS Update / OTA | Executado automaticamente após CI quando o fingerprint é compatível |
 | Detox E2E | Requer macOS runner — executado separadamente |
 | Teste em dispositivo físico | Responsabilidade do reviewer |
 | Review de acessibilidade manual | Feito no PR review |

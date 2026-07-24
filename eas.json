@@ -1,6 +1,6 @@
 {
   "cli": {
-    "version": ">= 16.13.0",
+    "version": ">= 21.2.0",
     "appVersionSource": "remote"
   },
   "build": {
@@ -46,7 +46,8 @@
       },
       "ios": {
         "ascAppId": "6772551270",
-        "appleTeamId": "725XG6A2A7"
+        "appleTeamId": "725XG6A2A7",
+        "metadataPath": "./store.config.js"
       }
     }
   }

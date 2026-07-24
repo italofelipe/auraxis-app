@@ -69,8 +69,9 @@ const validateNodeRuntimeGovernance = ({
 };
 
 const hasPlugin = (plugins, pluginName) => {
-  return Array.isArray(plugins)
-    && plugins.some((entry) => {
+  return (
+    Array.isArray(plugins) &&
+    plugins.some((entry) => {
       if (typeof entry === "string") {
         return entry === pluginName;
       }
@@ -80,7 +81,8 @@ const hasPlugin = (plugins, pluginName) => {
       }
 
       return false;
-    });
+    })
+  );
 };
 
 const validateReleaseReadinessGovernance = ({ appConfig, easConfig }) => {
@@ -183,6 +185,85 @@ const validateReleaseReadinessGovernance = ({ appConfig, easConfig }) => {
   return errors;
 };
 
+const validateReleaseVersionGovernance = ({
+  appConfig,
+  deliveryWorkflow,
+  easConfig,
+  minimumDeployWorkflow,
+  otaWorkflow,
+  packageJson,
+  pullRequestTemplate,
+  releaseManifest,
+  releasePleaseConfig,
+  storeReleaseWorkflow,
+}) => {
+  const errors = [];
+  const packageVersion = packageJson?.version;
+  const appVersion = appConfig?.expo?.version;
+  const manifestVersion = releaseManifest?.["."];
+
+  if (packageVersion !== appVersion || packageVersion !== manifestVersion) {
+    errors.push("package.json, app.json and release manifest versions must match");
+  }
+
+  if (appConfig?.expo?.runtimeVersion?.policy !== "fingerprint") {
+    errors.push("app.json must use expo.runtimeVersion.policy=fingerprint");
+  }
+
+  const extraFiles = releasePleaseConfig?.packages?.["."]?.["extra-files"] ?? [];
+  const syncsAppVersion = extraFiles.some(
+    (entry) =>
+      entry?.type === "json" && entry?.path === "app.json" && entry?.jsonpath === "$.expo.version",
+  );
+
+  if (!syncsAppVersion) {
+    errors.push("Release Please must synchronize app.json expo.version");
+  }
+
+  if (!String(easConfig?.cli?.version ?? "").includes("21.2.0")) {
+    errors.push("eas.json must require EAS CLI 21.2.0 or newer");
+  }
+
+  if (easConfig?.submit?.production?.android?.releaseStatus !== "draft") {
+    errors.push("Android submit must remain draft until detailed notes are attached");
+  }
+
+  if (easConfig?.submit?.production?.ios?.metadataPath !== "./store.config.js") {
+    errors.push("iOS submit must use the generated EAS Metadata config");
+  }
+
+  if (!/^## Changelog de loja$/mu.test(pullRequestTemplate)) {
+    errors.push("PR template must require a store changelog section");
+  }
+
+  if (
+    !/store-release-notes\.cjs validate-pr/u.test(otaWorkflow) &&
+    !/store-release-notes\.cjs from-text/u.test(otaWorkflow)
+  ) {
+    errors.push("OTA workflow must validate detailed release notes");
+  }
+
+  if (!/store-release-notes\.cjs from-text/u.test(minimumDeployWorkflow)) {
+    errors.push("Manual preview builds must validate detailed release notes");
+  }
+
+  if (
+    !/GOOGLE_PLAY_SERVICE_ACCOUNT_JSON/u.test(storeReleaseWorkflow) ||
+    !/google-play-release\.cjs/u.test(storeReleaseWorkflow)
+  ) {
+    errors.push("Store workflow must attach notes before completing Google Play release");
+  }
+
+  if (
+    !/workflow_run:/u.test(deliveryWorkflow) ||
+    !/release-delivery-policy\.cjs/u.test(deliveryWorkflow)
+  ) {
+    errors.push("Post-CI workflow must classify OTA versus native delivery");
+  }
+
+  return errors;
+};
+
 const validateBundleGovernance = ({
   ciWorkflow,
   qualityGatesDoc,
@@ -194,33 +275,52 @@ const validateBundleGovernance = ({
   const hardLimitPattern = new RegExp(`≤ ${EXPECTED_BUNDLE_HARD_MB} MB`, "u");
 
   if (!warningPattern.test(ciWorkflow) || !hardLimitPattern.test(ciWorkflow)) {
-    errors.push(`.github/workflows/ci.yml must document the ${EXPECTED_BUNDLE_WARNING_MB} MB warning and ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`);
+    errors.push(
+      `.github/workflows/ci.yml must document the ${EXPECTED_BUNDLE_WARNING_MB} MB warning and ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`,
+    );
   }
 
-  const hardLimitConstantPattern = new RegExp(`const hardLimit = ${EXPECTED_BUNDLE_HARD_MB} \\* 1024 \\* 1024;`, "u");
+  const hardLimitConstantPattern = new RegExp(
+    `const hardLimit = ${EXPECTED_BUNDLE_HARD_MB} \\* 1024 \\* 1024;`,
+    "u",
+  );
   if (!hardLimitConstantPattern.test(ciWorkflow)) {
     errors.push(`.github/workflows/ci.yml must enforce a ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`);
   }
 
-  const androidQualityRow = new RegExp(`\\| Android \\| > ${EXPECTED_BUNDLE_WARNING_MB} MB \\| > ${EXPECTED_BUNDLE_HARD_MB} MB \\|`, "u");
+  const androidQualityRow = new RegExp(
+    `\\| Android \\| > ${EXPECTED_BUNDLE_WARNING_MB} MB \\| > ${EXPECTED_BUNDLE_HARD_MB} MB \\|`,
+    "u",
+  );
   if (!androidQualityRow.test(qualityGatesDoc)) {
-    errors.push(`.context/quality_gates.md must document Android bundle thresholds (${EXPECTED_BUNDLE_WARNING_MB} MB / ${EXPECTED_BUNDLE_HARD_MB} MB)`);
+    errors.push(
+      `.context/quality_gates.md must document Android bundle thresholds (${EXPECTED_BUNDLE_WARNING_MB} MB / ${EXPECTED_BUNDLE_HARD_MB} MB)`,
+    );
   }
 
-  const iosQualityRow = new RegExp(`\\| iOS \\| > ${EXPECTED_BUNDLE_WARNING_MB} MB \\| > ${EXPECTED_BUNDLE_HARD_MB} MB \\|`, "u");
+  const iosQualityRow = new RegExp(
+    `\\| iOS \\| > ${EXPECTED_BUNDLE_WARNING_MB} MB \\| > ${EXPECTED_BUNDLE_HARD_MB} MB \\|`,
+    "u",
+  );
   if (!iosQualityRow.test(qualityGatesDoc)) {
-    errors.push(`.context/quality_gates.md must document iOS bundle thresholds (${EXPECTED_BUNDLE_WARNING_MB} MB / ${EXPECTED_BUNDLE_HARD_MB} MB)`);
+    errors.push(
+      `.context/quality_gates.md must document iOS bundle thresholds (${EXPECTED_BUNDLE_WARNING_MB} MB / ${EXPECTED_BUNDLE_HARD_MB} MB)`,
+    );
   }
 
   const steeringHardPattern = new RegExp(`bundle Android/iOS ≤ ${EXPECTED_BUNDLE_HARD_MB} MB`, "u");
   const steeringWarnPattern = new RegExp(`a partir de ${EXPECTED_BUNDLE_WARNING_MB} MB`, "u");
   if (!steeringHardPattern.test(steeringDoc) || !steeringWarnPattern.test(steeringDoc)) {
-    errors.push(`steering.md must document the ${EXPECTED_BUNDLE_WARNING_MB} MB warning and ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`);
+    errors.push(
+      `steering.md must document the ${EXPECTED_BUNDLE_WARNING_MB} MB warning and ${EXPECTED_BUNDLE_HARD_MB} MB hard limit`,
+    );
   }
 
   const codingHardPattern = new RegExp(`hard limit ${EXPECTED_BUNDLE_HARD_MB} MB`, "u");
   if (!codingHardPattern.test(codingStandardsDoc)) {
-    errors.push(`CODING_STANDARDS.md must document the ${EXPECTED_BUNDLE_HARD_MB} MB bundle hard limit`);
+    errors.push(
+      `CODING_STANDARDS.md must document the ${EXPECTED_BUNDLE_HARD_MB} MB bundle hard limit`,
+    );
   }
 
   return errors;
@@ -233,13 +333,23 @@ const loadGovernanceInputs = () => {
     ciWorkflow: readTextFile(".github/workflows/ci.yml"),
     codingStandardsDoc: readTextFile("CODING_STANDARDS.md"),
     easConfig: readJsonFile("eas.json"),
+    deliveryWorkflow: readTextFile(".github/workflows/delivery-after-ci.yml"),
+    minimumDeployWorkflow: readTextFile(".github/workflows/deploy-minimum.yml"),
     nvmrc: readTextFile(".nvmrc"),
     packageJson: readJsonFile("package.json"),
+    pullRequestTemplate: readTextFile(".github/pull_request_template.md"),
     qualityGatesDoc: readTextFile(".context/quality_gates.md"),
+    releaseManifest: readJsonFile(".release-please-manifest.json"),
+    releasePleaseConfig: readJsonFile(".release-please-config.json"),
+    otaWorkflow: readTextFile(".github/workflows/ota-update.yml"),
     steeringDoc: readTextFile("steering.md"),
+    storeReleaseWorkflow: readTextFile(".github/workflows/store-release.yml"),
     workflowFiles: {
       ".github/workflows/ci.yml": readTextFile(".github/workflows/ci.yml"),
       ".github/workflows/deploy-minimum.yml": readTextFile(".github/workflows/deploy-minimum.yml"),
+      ".github/workflows/delivery-after-ci.yml": readTextFile(
+        ".github/workflows/delivery-after-ci.yml",
+      ),
       ".github/workflows/store-release.yml": readTextFile(".github/workflows/store-release.yml"),
     },
   };
@@ -250,6 +360,7 @@ const run = () => {
   const errors = [
     ...validateNodeRuntimeGovernance(inputs),
     ...validateReleaseReadinessGovernance(inputs),
+    ...validateReleaseVersionGovernance(inputs),
     ...validateBundleGovernance(inputs),
   ];
 
@@ -278,4 +389,5 @@ module.exports = {
   validateBundleGovernance,
   validateNodeRuntimeGovernance,
   validateReleaseReadinessGovernance,
+  validateReleaseVersionGovernance,
 };

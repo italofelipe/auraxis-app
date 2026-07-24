@@ -1,162 +1,200 @@
-# Release process — ciclo alfa (Google Play internal + TestFlight)
+# Release process — PR, OTA, Google Play e TestFlight
 
-Runbook canônico do ciclo de publicação do app durante o alfa.
-Épico de referência: [#518](https://github.com/italofelipe/auraxis-app/issues/518).
+Runbook canônico da entrega móvel. A política de changelog desta página é
+obrigatória: nenhum preview, OTA, build ou release de loja pode ser criado sem
+descrever detalhadamente, em pt-BR, o que mudou para os usuários.
 
-## Visão geral do ciclo
+## Fluxo automático
 
-```
-mudança JS-only  ──────────────► OTA via EAS Update (workflow ota-update.yml)
-                                  └─ não gasta build credits, chega em minutos
+```text
+PR aberto/atualizado
+  └─ CI verde
+      └─ delivery-after-ci.yml
+          ├─ runtime nativo compatível → EAS Update no branch pr-<número>
+          └─ runtime nativo diferente → build preview Android + iOS
 
-mudança nativa / bump version ─► build + submit (workflow store-release.yml)
-                                  ├─ Android → Play internal testing (draft)
-                                  └─ iOS → TestFlight
-```
+merge na main
+  └─ CI verde
+      ├─ runtime nativo compatível → OTA no canal production
+      └─ runtime nativo diferente → aguarda a tag do Release Please
 
-Gatilhos do `store-release.yml`:
-
-- **Tag `v*`** (criada pelo release-please ao mergear o PR de release):
-  build `production` nas duas plataformas com `--auto-submit`.
-- **Manual (`workflow_dispatch`)**: escolhe plataforma, profile e auto-submit.
-
-### Cadeia automática de release (issues #648 / #645)
-
-O ciclo é encadeado ponta a ponta, sem passo manual até a promoção:
-
-```
-commits na main ─► release-please abre "chore(main): release X.Y.Z"
-                   │  (auto-merge squash habilitado — release-please.yml)
-                   ▼
-                   PR entra sozinho quando os checks ficam verdes
-                   │
-                   ▼
-                   release-please cria a tag v* + GitHub Release
-                   │
-                   ▼
-                   store-release.yml (push da tag) ─► eas build --auto-submit
-                   ├─ Android → internal track como DRAFT
-                   └─ iOS → TestFlight
+tag vX.Y.Z
+  └─ store-release.yml, uma execução por vez
+      ├─ gera changelog a partir dos PRs da versão
+      ├─ valida versão + credenciais + duplicidade
+      ├─ build e submit Android/iOS
+      ├─ App Store/TestFlight recebe What to Test + release notes
+      └─ Google Play draft recebe release notes e só então vira completed
 ```
 
-> **Sem auto-promoção para produção.** A cadeia para no track interno
-> (Android draft) e no TestFlight (iOS). Promover para produção pública é
-> sempre **manual** — ver o gate abaixo. Motivação: um fix P0 não deve ficar
-> preso esperando merge do release (#648), mas também não deve ir sozinho para
-> produção sem um humano no loop (#645).
+O PR mecânico `chore(main): release X.Y.Z` não cria outro preview ou build. A
+tag gerada pelo Release Please é a proprietária única do build de loja. Essa
+exceção evita os dois builds concorrentes observados em 24/07/2026.
 
-### Gate de promoção interno → produção (one-click, manual)
+## Changelog obrigatório
 
-Depois que o build entra no internal/TestFlight, a promoção é um passo humano:
+Todo PR não gerado pelo Release Please deve conter:
 
-- **Android** — Play Console → Testing → Internal testing → selecionar o build →
-  **Promote release** → Production → revisar rollout % → **Rollout to Production**.
-- **iOS** — App Store Connect → o build do TestFlight → adicionar à versão da
-  App Store → **Submit for Review** → após aprovação, liberar (manual ou
-  phased release).
+```md
+## Changelog de loja
 
-Nenhum secret ou automação promove para produção; o gate é intencionalmente
-manual.
+- Mudança percebida pelos usuários, escrita de forma clara e específica.
+- Impacto, correção ou melhoria entregue para quem usa o aplicativo.
+```
 
-Gatilho do `ota-update.yml`: somente manual (`workflow_dispatch`), escolhendo
-canal `preview` ou `production` — publica o estado JS do commit checked-out.
+Regras verificadas pelo CI:
 
-## OTA vs build novo — regra de decisão
+- idioma `pt-BR`;
+- no mínimo 2 bullets e 100 caracteres;
+- no máximo 500 caracteres, limite adotado para o Google Play;
+- cada bullet deve ter pelo menos 25 caracteres;
+- `N/A`, `TODO`, “não se aplica”, “sem alterações” e placeholders são
+  rejeitados.
 
-Use **OTA** (EAS Update) apenas para mudanças de JavaScript/TypeScript, assets,
-copy, i18n e feature flags.
+O release de tag lê os PRs referenciados na seção atual do `CHANGELOG.md`,
+agrega os textos e falha antes do build caso uma nota esteja ausente ou o total
+ultrapasse o limite. Não existe fallback para título de commit: se não há
+changelog detalhado, não há deploy.
 
-Exige **build nativo novo** qualquer mudança em: dependência com código nativo,
-plugin Expo, permissão, `app.json` (bundle id, plist, manifest, ícones, splash),
-`eas.json`, ou bump de `version`.
+OTAs e releases manuais também exigem o texto completo no formulário do
+workflow. As notas são usadas como mensagem do EAS Update/build e registradas no
+resumo da execução.
 
-> **Atenção — `runtimeVersion.policy: appVersion`**: um OTA publicado só
-> alcança builds instalados com a **mesma `version`** do `app.json`. Depois de
-> um release que bumpou a version, builds antigos não recebem mais OTA — eles
-> precisam atualizar pela loja.
+## Decisão OTA versus build
 
-## Variáveis de ambiente (EAS)
+O `runtimeVersion` usa `policy: fingerprint`. Para Android e iOS, o workflow
+calcula o fingerprint nativo atual e compara com os builds do mesmo perfil:
 
-As envs de runtime ficam no **EAS environment** (`eas env:list --environment
-production|preview`), não em secrets do GitHub. Matriz mínima de produção
-(issue [#522](https://github.com/italofelipe/auraxis-app/issues/522)):
+- ambos possuem build finalizado e compatível: publica OTA;
+- algum fingerprint não possui build: cria build nativo;
+- existe build compatível em andamento: aguarda, sem criar duplicata.
 
-| Var | Valor (produção) |
-|-----|------------------|
-| `EXPO_PUBLIC_API_URL` | `https://api.auraxis.com.br` |
-| `EXPO_PUBLIC_APP_ENV` | `production` |
-| `EXPO_PUBLIC_SENTRY_DSN` | DSN do projeto Sentry `auraxis-app` |
-| `EXPO_PUBLIC_POSTHOG_API_KEY` / `EXPO_PUBLIC_POSTHOG_HOST` | key/host do PostHog |
-| `SENTRY_AUTH_TOKEN` | secret — upload de source maps no build |
-| `APPLE_TEAM_ID`, `ASC_*` (5 vars) | submit iOS (já configuradas) |
-| `GOOGLE_SERVICE_ACCOUNT` | secret file — submit Android (setup no guia do Play) |
+Mudanças apenas em JavaScript, TypeScript, assets, copy, i18n e feature flags
+normalmente conservam o fingerprint. Dependências nativas, plugins Expo,
+permissões, configuração nativa, ícones e splash normalmente alteram o
+fingerprint.
 
-GitHub Actions precisa apenas de `EXPO_TOKEN`.
+A comparação é conservadora: ausência de informação produz build, nunca OTA
+potencialmente incompatível.
 
-## Fluxos
+## Versões e deduplicação
 
-### Release completo (build + lojas)
+`package.json`, `app.json` (`expo.version`) e
+`.release-please-manifest.json` devem ter exatamente a mesma versão. O Release
+Please atualiza os três; o workflow de loja repete a validação antes de consumir
+créditos.
 
-1. Mergear o PR do release-please (cria a tag `v*`) — ou disparar
-   `store-release.yml` manualmente.
-2. Acompanhar o build no [dashboard do EAS](https://expo.dev/accounts/italofelipe/projects/auraxis-app/builds).
-3. Android: o submit entra como **draft** no internal track — promover no Play
-   Console. iOS: o build aparece no TestFlight após o processamento.
+O `versionCode` Android e o `buildNumber` iOS continuam remotos e
+auto-incrementais no EAS. Para deduplicar uma release, o workflow exige ao mesmo
+tempo:
 
-### OTA (JS-only)
+- mesma versão pública;
+- mesmo fingerprint nativo;
+- mesmo perfil e plataforma;
+- build finalizado ou em andamento.
 
-1. Garantir que a mudança está mergeada em `main`.
-2. Actions → "OTA Update (EAS Update)" → Run workflow → canal `production`
-   (ou `preview` para validar antes em build interno).
-3. Verificar com `eas update:list --channel <canal> --limit 3`.
-4. Apps instalados aplicam o update no segundo relaunch.
+Todas as execuções de loja compartilham a mesma fila de concorrência. Um
+dispatch manual e uma tag não podem mais iniciar builds em paralelo.
+
+## Google Play internal
+
+O EAS Submit envia somente o AAB. Ele não administra release notes. Por isso o
+perfil Android permanece com `releaseStatus: draft`, que não serve o APK/AAB
+aos testadores.
+
+Depois que o submit termina:
+
+1. o workflow localiza o build Android pelo `GITHUB_SHA`, versão e
+   `versionCode`;
+2. abre um edit na Google Play Developer API;
+3. localiza exatamente esse `versionCode` no track `internal`;
+4. grava nome da release e `releaseNotes` em `pt-BR`;
+5. muda somente essa release de `draft` para `completed`;
+6. commita o edit.
+
+Qualquer falha mantém o draft não distribuído. A promoção
+`internal → production` continua manual no Play Console.
+
+O segredo GitHub `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` contém a mesma service
+account usada pelo EAS e precisa das permissões “Release apps to testing tracks”
+e “View app information”.
+
+## TestFlight e App Store
+
+O build iOS recebe o mesmo changelog no campo **What to Test** do TestFlight.
+Depois do submit, o EAS Metadata sincroniza `releaseNotes` em `pt-BR` para a
+versão exata da App Store usando `store.config.js`.
+
+O upload para TestFlight não publica o app na App Store. Selecionar o build,
+submeter para App Review e liberar a versão pública continuam sendo gates
+manuais no App Store Connect.
+
+## Promoção pública manual
+
+- Android: Play Console → Testing → Internal testing → release validada →
+  Promote release → Production → revisar rollout → Rollout to Production.
+- iOS: App Store Connect → versão com notas → selecionar build do TestFlight →
+  Submit for Review → liberar manualmente ou em phased release.
+
+Antes da promoção, conferir versão, build number/versionCode, changelog,
+screenshots/listing e smoke checklist.
+
+## Secrets e configuração
+
+GitHub Actions:
+
+| Secret | Uso |
+|---|---|
+| `EXPO_TOKEN` | EAS Build, Submit, Update e Metadata |
+| `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | anexar notas e concluir o track interno |
+| `RELEASE_PLEASE_TOKEN` | criar/mergear release PR e tag |
+
+As variáveis do app ficam nos ambientes EAS `preview` e `production`, incluindo
+`EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_APP_ENV`, Sentry e PostHog. Nunca colocar
+essas variáveis públicas ou credenciais de loja diretamente no YAML.
+
+## Operação manual
+
+### OTA
+
+Actions → `OTA Update (EAS Update)` → escolher canal → informar changelog
+detalhado → executar. O mesmo limite de 100–500 caracteres é aplicado.
+
+### Build de loja
+
+Actions → `Store Release (Manual + Tag)` → escolher plataforma/profile →
+informar changelog detalhado → executar. `auto_submit=true` só é aceito no
+profile `production`.
 
 ### Rollback de OTA
 
-```bash
-eas update:list --channel production --limit 10
-```
+Identificar o update bom em `eas update:list --channel production`, republicar o
+estado anterior ou usar o rollback do dashboard EAS. Registrar o update ID e
+confirmar em dispositivo real após dois relaunches.
 
-Republicar o estado JS anterior (checkout do commit bom + `eas update`) ou usar
-o rollback do dashboard EAS no branch/canal afetado. Registrar o update ID no
-incident note e confirmar que um dispositivo instalado recebe o rollback.
+## Smoke checklist
 
-## Smoke checklist (alfa)
-
-- Cadastro de conta nova + login + logout.
-- Dashboard carrega contra `api.auraxis.com.br` (nunca localhost — guard #521).
-- Transação: criar/excluir/restaurar; troca de período mensal.
-- Meta: criar e simular.
-- Assinatura abre hosted checkout; provider API exige confirmacao antes de
-  cancelar e atualiza a data final de acesso; providers Apple/Google abrem a
-  gestao oficial da loja.
-- Privacy center: opt-out de analytics interrompe eventos PostHog.
-- Push opt-in trata permissão negada/indisponível.
-- Deep links: link privado roteia após login; link inválido cai no fallback.
-- Sentry recebe erro de teste sem PII.
-- PostHog recebe eventos de tela/produto sem email/CPF/token/valores brutos.
-- OTA de teste aplicado em dispositivo com o build instalado.
-
-## Maestro
-
-Smoke local:
-
-```bash
-maestro test .maestro/01_login.yaml
-maestro test .maestro/02_dashboard_overview.yaml
-maestro test .maestro/06_privacy_analytics_opt_out.yaml
-maestro test .maestro/07_tool_usage.yaml
-maestro test .maestro/08_subscription_checkout_smoke.yaml
-maestro test .maestro/09_notification_preferences_smoke.yaml
-maestro test .maestro/05_logout.yaml
-```
+- Cadastro, login e logout.
+- Dashboard usa `https://api.auraxis.com.br`, nunca localhost.
+- Criar, editar, excluir e restaurar transação.
+- Criar e simular meta.
+- Abrir/cancelar assinatura conforme o provedor.
+- Privacy center, push opt-in e deep links.
+- Sentry e PostHog sem PII.
+- Android: tester interno enxerga versão e changelog corretos.
+- iOS: TestFlight mostra What to Test e versão correta.
+- OTA compatível é aplicado no segundo relaunch.
 
 ## Troubleshooting
 
 | Sintoma | Causa provável | Ação |
-|---------|----------------|------|
-| Build iOS falha com "Distribution Certificate is not validated for non-interactive builds" | Cert nunca validado interativamente | Italo roda `npx eas-cli credentials` (iOS) uma vez |
-| Build falha com warning de channel sem expo-updates | Pacote `expo-updates` ausente | Issue #519 |
-| Submit Android falha por credencial | `GOOGLE_SERVICE_ACCOUNT` ausente/sem permissão | Guia `docs/runbooks/googleplay-setup-italo.md` |
-| OTA não chega no dispositivo | `version` do build ≠ version do update (`runtimeVersion: appVersion`) | Publicar build novo pela loja |
-| App de produção aponta para localhost | EAS env `EXPO_PUBLIC_API_URL` ausente | Issue #522 / guard #521 |
+|---|---|---|
+| Play mostra `com.sensoriumit.auraxis (unreviewed)` | listing interno inicial ainda não propagou | aguardar até 48h e completar o store listing; isso é separado do AAB |
+| Release Android continua draft | etapa de notas/API falhou ou secret sem permissão | corrigir a falha e repetir o workflow; não promover manualmente sem notas |
+| Versão do AAB difere da tag | drift entre package/app/manifest | corrigir os três; o preflight deve bloquear |
+| OTA não chega | fingerprint do update não possui build compatível | criar build nativo para esse fingerprint |
+| Segundo build idêntico apareceu | execução anterior ao guard de #719 ou mudança de versão/fingerprint | comparar versão, fingerprint e SHA no EAS |
+| Metadata iOS falha | versão ainda não disponível ou credencial Apple inválida | validar no App Store Connect e repetir; binário não vira produção sozinho |
+
+O diagnóstico do incidente original está em
+`docs/wiki/google-play-empty-release-notes-2026-07-24.md`.
