@@ -12,7 +12,9 @@ tags:
 - inputText: ${E2E_EMAIL}
 - tapOn: "Senha"
 - inputText: ${E2E_PASSWORD}
-- hideKeyboard
+# hideKeyboard é instável no iOS; tocar num texto estático dispensa o teclado
+# (keyboardShouldPersistTaps="handled" na tela de login).
+- tapOn: "ACESSO SEGURO E PROTEGIDO"
 - tapOn: "Entrar na Auraxis"
 - extendedWaitUntil:
     visible: "Saldo geral"
