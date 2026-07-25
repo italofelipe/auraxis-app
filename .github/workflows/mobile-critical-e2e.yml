@@ -93,6 +93,7 @@ jobs:
             mkdir -p "$RUNNER_TEMP/maestro-results"
             adb install -r "$RUNNER_TEMP/auraxis-e2e.apk"
             MAESTRO_TESTS_DIR="$RUNNER_TEMP/maestro-results" maestro test \
+              --debug-output "$RUNNER_TEMP/maestro-results/debug" \
               -e E2E_EMAIL="$E2E_EMAIL" \
               -e E2E_PASSWORD="$E2E_PASSWORD" \
               .maestro/10_mobile_stability_visual.yaml
@@ -174,6 +175,7 @@ jobs:
           xcrun simctl install "$device_id" "$app_path"
           mkdir -p "$RUNNER_TEMP/maestro-results"
           MAESTRO_TESTS_DIR="$RUNNER_TEMP/maestro-results" maestro test \
+            --debug-output "$RUNNER_TEMP/maestro-results/debug" \
             -e E2E_EMAIL="$E2E_EMAIL" \
             -e E2E_PASSWORD="$E2E_PASSWORD" \
             .maestro/10_mobile_stability_visual.yaml
