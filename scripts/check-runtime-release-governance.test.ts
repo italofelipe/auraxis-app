@@ -245,6 +245,12 @@ describe("native E2E governance", () => {
       "EAS_BUILD_PROFILE: e2e-test",
       '--platform android --profile "$EAS_BUILD_PROFILE"',
       '--platform ios --profile "$EAS_BUILD_PROFILE"',
+      "id: validate-e2e-credentials",
+      "id: validate-e2e-credentials",
+      "Missing E2E_EMAIL",
+      "Missing E2E_PASSWORD",
+      "steps.validate-e2e-credentials.outcome == 'success'",
+      "steps.validate-e2e-credentials.outcome == 'success'",
       "maestro test .maestro/10_mobile_stability_visual.yaml",
       "maestro test .maestro/10_mobile_stability_visual.yaml",
     ].join("\n"),
@@ -281,6 +287,22 @@ describe("native E2E governance", () => {
       expect.arrayContaining([
         expect.stringContaining("build Android and iOS"),
         expect.stringContaining("missing screenshots"),
+      ]),
+    );
+  });
+
+  test("rejects artifact uploads that mask missing credential failures", () => {
+    const errors = validateMobileE2EGovernance({
+      ...validE2E,
+      e2eWorkflow: validE2E.e2eWorkflow
+        .replaceAll("id: validate-e2e-credentials", "")
+        .replaceAll("steps.validate-e2e-credentials.outcome == 'success'", "always()"),
+    });
+
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("fail before builds"),
+        expect.stringContaining("uploads must be skipped"),
       ]),
     );
   });

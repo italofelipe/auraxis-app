@@ -36,6 +36,7 @@ jobs:
           java-version: "17"
 
       - name: Validate E2E credentials
+        id: validate-e2e-credentials
         run: |
           set -euo pipefail
           test -n "${E2E_EMAIL:-}" || { echo "::error::Missing E2E_EMAIL"; exit 1; }
@@ -91,7 +92,7 @@ jobs:
               .maestro/10_mobile_stability_visual.yaml
 
       - name: Upload Android screenshots and build identity
-        if: always()
+        if: ${{ always() && steps.validate-e2e-credentials.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: mobile-e2e-android-${{ github.sha }}
@@ -115,6 +116,7 @@ jobs:
           cache: npm
 
       - name: Validate E2E credentials
+        id: validate-e2e-credentials
         run: |
           set -euo pipefail
           test -n "${E2E_EMAIL:-}" || { echo "::error::Missing E2E_EMAIL"; exit 1; }
@@ -167,7 +169,7 @@ jobs:
             .maestro/10_mobile_stability_visual.yaml
 
       - name: Upload iOS screenshots and build identity
-        if: always()
+        if: ${{ always() && steps.validate-e2e-credentials.outcome == 'success' }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: mobile-e2e-ios-${{ github.sha }}

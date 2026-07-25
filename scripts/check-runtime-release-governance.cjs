@@ -252,6 +252,18 @@ const validateMobileE2EGovernance = ({ easConfig, e2eWorkflow, e2eFlow }) => {
   ) {
     errors.push("Native E2E workflow must run the critical Maestro flow on both platforms");
   }
+  if (
+    (workflow.match(/id:\s*validate-e2e-credentials/gu) ?? []).length < 2 ||
+    !/Missing E2E_EMAIL/u.test(workflow) ||
+    !/Missing E2E_PASSWORD/u.test(workflow)
+  ) {
+    errors.push("Native E2E workflow must fail before builds when test credentials are missing");
+  }
+  if (
+    (workflow.match(/steps\.validate-e2e-credentials\.outcome == 'success'/gu) ?? []).length < 2
+  ) {
+    errors.push("Native E2E artifact uploads must be skipped when credential validation fails");
+  }
 
   const flow = String(e2eFlow ?? "");
   const requiredScreenshots = [

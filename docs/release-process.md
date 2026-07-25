@@ -188,6 +188,10 @@ Pré-condições do ambiente EAS `preview`:
 - secret GitHub `EXPO_TOKEN`;
 - conta E2E com ao menos uma pendência financeira e transações no mês atual.
 
+O workflow valida as credenciais antes de solicitar builds ao EAS. Se elas
+estiverem ausentes, o job falha com a credencial exata e não tenta publicar um
+artifact vazio, preservando um diagnóstico único e acionável.
+
 As capturas ficam nos artifacts `mobile-e2e-ios-<sha>` e
 `mobile-e2e-android-<sha>` e, para PRs visuais,
 devem ser copiadas para `docs/wiki/assets/<issue>/` e incorporadas à descrição
