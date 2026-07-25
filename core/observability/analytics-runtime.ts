@@ -23,6 +23,10 @@ export const ANALYTICS_EVENT_NAMES = Object.freeze([
   "subscription.checkout.opened",
   "subscription.checkout.completed",
   "dashboard.period.changed",
+  "ai.chat.opened",
+  "ai.chat.question.sent",
+  "ai.chat.answer.received",
+  "ai.chat.request.failed",
 ] as const satisfies readonly AnalyticsEventName[]);
 
 interface AnalyticsRuntimeState {

@@ -17,6 +17,21 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - Its regional seed data is mirrored in `features/tools/data/cost-of-living-by-uf.json` so the app calculator runs locally and does not depend on the Web repo at runtime.
 - The calculator compares monthly expenses against UF averages, computes committed income, savings rate, FIRE target wealth, estimated years to retirement, regional comparison and a sustainability score.
 
+## AI Financial Chat
+
+- `AiChatHost` is mounted once by `app/(private)/_layout.tsx`. Its floating launcher is therefore available from every authenticated tab without adding a route or mounting the feature before the private route guard succeeds.
+- `app.features.ai-chat` is the app kill switch. The entitlement query is disabled when the flag is off, so disabling the surface also prevents background access checks.
+- The canonical commercial gate is the API entitlement `advanced_simulations`. The app uses it only to avoid a known 403; it never duplicates plan/status rules or the backend daily quota.
+- `features/ai-chat/services/ai-chat-service.ts` owns the typed `POST /ai/chat` adapter, trims and validates the 1–1,000 character question contract, maps the v2 envelope to camelCase and applies a 45-second request timeout suitable for an LLM response.
+- The API remains single-turn and stateless. `useAiChatSession` keeps the transcript in private-layout memory, preserves it when the sheet closes and clears it naturally when logout unmounts the private shell.
+- `useAiInsightConsent` now treats `GET/POST /me/consents` as the consent authority (`kind=ai`, `version=1.0`, `source=app`). SecureStore is only a resilience cache when the remote read is unavailable.
+- Sensitive preview state goes through `core/storage/secure-key-value-storage.ts`: iOS/Android keep Expo SecureStore, while Expo Web uses process-memory storage only and never writes tokens or consent to `localStorage`.
+- A stale local consent cannot silently overwrite an explicit server revocation: a successful remote read wins and clears the local cache when AI consent is absent/revoked.
+- Error taxonomy keeps entitlement, consent, budget, validation, timeout and server failures distinct. Retry is offered only for transient timeout/server failures; renewing a rejected consent automatically retries the pending question without duplicating the user message.
+- Product analytics record only gate state, attempt type, classified error and boolean response metadata. Questions, answers, model, tokens, cost and financial values are never captured.
+- The screen structure, parity decisions, API contract and iOS/Android smoke plan are documented in `docs/wiki/mobile-ai-financial-chat-2026-07-24.md`.
+- Modal content forces the resolved Tamagui theme inside the portal. `AppButton` resolves its semantic colors to concrete values, preserving the same CTA appearance when a portal cannot inherit generated theme variables.
+
 ## Transactions Surface
 
 - Mobile transactions keep `description` as the legacy short detail field and now expose `observation` as the dedicated optional notes field already present in the app API contract.
@@ -44,6 +59,7 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 
 - `app.transactions.installments` is promoted to `enabled-prod` after app-side parity validation for transaction installments.
 - `app.credit-cards.expense-actions` is promoted to `enabled-prod` after app-side parity validation for edit, duplicate and delete actions in credit card invoices.
+- `app.features.ai-chat` controls the global Premium financial assistant and is independently overridable for an immediate OTA kill switch.
 - Local flag status is tested through `shared/feature-flags/service.test.ts`; runtime providers can still override decisions where configured.
 
 ## Runtime Security
@@ -51,6 +67,7 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 - `shared/config/runtime.ts` is the canonical resolver for public Expo runtime configuration used by HTTP, telemetry and product services.
 - Production runtime (`EXPO_PUBLIC_APP_ENV=production`) must resolve `EXPO_PUBLIC_API_URL` to a valid HTTPS URL and must never fall back to localhost. The guard runs while `appRuntimeConfig` is created, before the app can build an HTTP client against an unsafe base URL.
 - Development and preview builds can still use localhost for Expo Go/dev-client workflows.
+- Tamagui `size` and `space` tokens expose a `true` alias matching the default `40`/`semanticSpacing.md` values required by the current runtime.
 - Native TLS trust for `api.auraxis.com.br` is CA-SPKI based on both platforms. iOS reads the CA identities from `app.json`; Android receives the equivalent `network_security_config.xml` through `plugins/with-android-network-security-config.cjs` during Expo prebuild.
 - Leaf and CA identities must not be mixed in the iOS pinned domain. Apple evaluates both configured categories, so a routine leaf-certificate renewal could otherwise block every API request before authentication is reached.
 - `npm run ssl-pinning:check` is the pre-build invariant: it requires at least two aligned iOS/Android CA pins, rejects expired Android policy, and verifies every configured pin against the live production certificate chain.
@@ -82,7 +99,7 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 ## Validation
 
 - New or changed behavior must include tests in the same feature area.
-- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, critical Insights/Cards route smoke coverage, Expo SDK package alignment, shared-entries mobile parity including outgoing invitations, transaction observation form/feed/controller coverage, and subscription provider resolution/cancellation/controller/screen coverage.
+- For this parity slice, the critical tests are the regional calculator model, regional screen, tools catalog, feature flag status, login screen handoff coverage, private navigator lazy/detach guarantees, critical Insights/Cards route smoke coverage, Expo SDK package alignment, shared-entries mobile parity including outgoing invitations, transaction observation form/feed/controller coverage, subscription provider resolution/cancellation/controller/screen coverage, and AI chat service/session/consent/gate/screen coverage.
 - Native-auth changes additionally require the static pinning tests, the live TLS verifier, an Android release prebuild/build, and the Maestro login flow with masked-password, invalid-credential and successful-dashboard screenshots.
 - No backend or database interface was added by this slice. If a future calculator starts consuming an API, run contracts checks and live database validation as required by `AGENTS.md`.
 

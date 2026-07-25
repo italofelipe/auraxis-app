@@ -259,6 +259,53 @@
       }
     }
   },
+  "aiChat": {
+    "launcher": "Pergunte à IA",
+    "title": "Assistente financeiro",
+    "subtitle": "Respostas baseadas apenas nos seus dados.",
+    "close": "Fechar assistente",
+    "disclaimer": "A IA responde somente com base nas suas finanças cadastradas no Auraxis.",
+    "transparency": "Seus dados financeiros não são usados para treinar modelos. A IA usa apenas os registros do Auraxis para responder.",
+    "limits": "Conteúdo informativo; não substitui aconselhamento financeiro individualizado.",
+    "consentTitle": "Permita o uso de IA",
+    "consentBody": "Antes da primeira pergunta, confirme que o Auraxis pode usar seus dados financeiros cadastrados para gerar respostas personalizadas.",
+    "consentAction": "Permitir assistente de IA",
+    "consentLoading": "Conferindo sua preferência de IA",
+    "consentGranting": "Registrando consentimento...",
+    "premiumTitle": "Assistente disponível no Premium",
+    "premiumBody": "Faça upgrade para conversar com a IA sobre suas próprias finanças.",
+    "premiumCta": "Conhecer o Premium",
+    "emptyTitle": "O que você quer entender?",
+    "emptyBody": "Escolha uma sugestão ou escreva uma pergunta sobre suas finanças.",
+    "examples": {
+      "food": "Quanto gastei com alimentação este mês?",
+      "largest": "Qual foi meu maior gasto recente?",
+      "goal": "Estou perto de bater alguma meta?"
+    },
+    "messageLabels": {
+      "user": "Você",
+      "assistant": "Auraxis IA"
+    },
+    "composer": {
+      "placeholder": "Pergunte sobre suas finanças...",
+      "send": "Enviar pergunta",
+      "sending": "Analisando seus dados...",
+      "counter": "{{current}} de {{maximum}} caracteres"
+    },
+    "actions": {
+      "retry": "Tentar novamente",
+      "dismiss": "Fechar aviso",
+      "grantAgain": "Atualizar consentimento"
+    },
+    "errors": {
+      "entitlement": "Este recurso exige uma assinatura Premium ativa.",
+      "consent": "A API precisa de um consentimento de IA válido antes de responder.",
+      "budget": "Seu limite de IA foi atingido. Tente novamente quando a API liberar novas consultas.",
+      "validation": "Escreva uma pergunta válida com até 1.000 caracteres.",
+      "timeout": "A resposta demorou mais que o esperado. Você pode tentar novamente.",
+      "server": "Não foi possível obter a resposta agora. Tente novamente em instantes."
+    }
+  },
   "paymentsAssistant": {
     "title": "Pendências em aberto",
     "progress": "{{current}} de {{total}}",

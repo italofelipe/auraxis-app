@@ -210,6 +210,7 @@ exports[`InsightHub agrupa o insight atual por dimensao 1`] = `
                 "flex": 1,
                 "flexDirection": "row",
                 "flexWrap": "nowrap",
+                "gap": 16,
                 "height": 48,
                 "justifyContent": "center",
                 "paddingLeft": 24,
@@ -239,8 +240,6 @@ exports[`InsightHub agrupa o insight atual por dimensao 1`] = `
                   {
                     "color": "#ffffff",
                     "fontFamily": "Inter_600SemiBold",
-                    "fontSize": 15,
-                    "lineHeight": 22,
                   }
                 }
                 suppressHighlighting={true}

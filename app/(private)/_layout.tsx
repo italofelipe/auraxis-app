@@ -13,6 +13,7 @@ import {
 } from "@/core/navigation/tab-carousel-transition";
 import { usePrivateRouteGuard } from "@/core/navigation/use-route-guards";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
+import { AiChatHost } from "@/features/ai-chat/screens/ai-chat-host";
 import { ExpenseSheetHost } from "@/features/credit-cards/components/expense-sheet/expense-sheet-host";
 import { useEntitlementsForegroundRefresh } from "@/features/entitlements/hooks/use-entitlements-foreground-refresh";
 import { PaymentAssistantHost } from "@/features/payments-assistant/screens/payment-assistant-host";
@@ -121,6 +122,7 @@ function PrivateLayoutContent(): ReactElement | null {
       </Tabs>
       <ExpenseSheetHost />
       <PaymentAssistantHost />
+      <AiChatHost />
     </TourAnchorProvider>
   );
 }

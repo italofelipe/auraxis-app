@@ -1,7 +1,7 @@
 {
   "name": "auraxis-app",
   "main": "expo-router/entry",
-  "version": "1.13.9",
+  "version": "1.14.0",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
@@ -135,7 +135,7 @@
     "shell-quote": "^1.9.0",
     "brace-expansion@1": "~1.1.16",
     "brace-expansion@2": "~2.1.2",
-    "brace-expansion@5": "^5.0.7",
+    "brace-expansion@5": "^5.0.8",
     "js-yaml@3": "^3.15.0",
     "js-yaml@4": "^4.3.0",
     "immutable": "^5.1.8",

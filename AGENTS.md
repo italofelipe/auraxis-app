@@ -92,6 +92,14 @@ npm run contracts:check
 # Se falhar: npm run contracts:sync para atualizar snapshot
 ```
 
+## IA financeira — invariantes
+
+- `POST /ai/chat` e exclusivo do entitlement `advanced_simulations`; nao replique regras de plano ou quota no app.
+- Consentimento de IA e autoritativo em `GET/POST /me/consents`. SecureStore e apenas cache de resiliencia.
+- Nunca envie pergunta, resposta, valores financeiros, modelo, tokens ou custo para analytics/logs.
+- O transcript do chat deve permanecer apenas em memoria e ser descartado ao desmontar a area privada.
+- Preview Expo Web nunca persiste token ou consentimento sensivel em `localStorage`; use o adaptador volatil de `core/storage`.
+
 ## PR rules
 
 - Body deve conter `Closes #<número>`

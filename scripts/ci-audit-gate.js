@@ -22,6 +22,8 @@ const allowedIds = new Set([
   // cada linha de major). Não re-allowlistar — regressão deve quebrar o gate.
 ]);
 
+const TEMPORARY_BRACE_EXPANSION_ADVISORY = "GHSA-mh99-v99m-4gvg";
+
 const runAudit = () => {
   try {
     return execSync("npm audit --omit=dev --json", {
@@ -66,7 +68,28 @@ const parseAudit = (raw) => {
   }
 };
 
-const collectFindings = (audit) => {
+const readInstalledVersion = (nodePath) => {
+  try {
+    const manifestPath = path.join(process.cwd(), nodePath, "package.json");
+    return JSON.parse(fs.readFileSync(manifestPath, "utf8")).version ?? "";
+  } catch {
+    return "";
+  }
+};
+
+const isTemporaryBraceExpansionV1 = ({ pkg, advisoryId, nodes }, resolveVersion) => {
+  if (pkg !== "brace-expansion" || advisoryId !== TEMPORARY_BRACE_EXPANSION_ADVISORY) {
+    return false;
+  }
+
+  const installedVersions = nodes.map(resolveVersion);
+  return (
+    installedVersions.length > 0 &&
+    installedVersions.every((version) => /^1\./u.test(version))
+  );
+};
+
+const collectFindings = (audit, resolveVersion = readInstalledVersion) => {
   const vulnerabilities = audit.vulnerabilities || {};
   const findings = [];
 
@@ -85,7 +108,17 @@ const collectFindings = (audit) => {
 
       const ghsa = typeof via.url === "string" ? via.url.split("/").pop() : "";
       const source = String(via.source ?? "");
-      const isAllowed = allowedIds.has(ghsa) || allowedIds.has(source);
+      const nodes = Array.isArray(info.nodes) ? info.nodes : [];
+      const isAllowed =
+        allowedIds.has(ghsa) ||
+        allowedIds.has(source) ||
+        // Temporary exception tracked in #691. Only the v1 copy transitively
+        // pinned by React Native/Expo tooling is accepted. Any vulnerable v2+
+        // installation still fails this gate.
+        isTemporaryBraceExpansionV1(
+          { pkg, advisoryId: ghsa, nodes },
+          resolveVersion,
+        );
 
       if (!isAllowed) {
         findings.push({
@@ -115,7 +148,14 @@ const main = () => {
     process.exit(1);
   }
 
-  console.log("Audit gate passed (only allowlisted Expo minimatch advisory detected).");
+  console.log("Audit gate passed (only narrowly allowlisted tooling advisories detected).");
 };
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  collectFindings,
+  isTemporaryBraceExpansionV1,
+};
