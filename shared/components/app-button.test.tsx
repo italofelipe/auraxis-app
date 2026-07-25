@@ -39,13 +39,32 @@ describe("AppButton", () => {
   });
 
   it("renderiza o tone secundário", () => {
-    const { getByText } = render(
+    const { getByRole, getByText } = render(
       <AppProviders>
         <AppButton tone="secondary">Cancelar</AppButton>
       </AppProviders>,
     );
 
     expect(getByText("Cancelar")).toBeTruthy();
+    const style = flattenStyle(getByRole("button").props.style);
+    expect(style.borderColor ?? style.borderTopColor).toBe(
+      lightSemanticColors.border,
+    );
+  });
+
+  it("resolve cores concretas sem depender de variáveis do portal", () => {
+    const { getByRole, getByText } = render(
+      <AppProviders>
+        <AppButton>Confirmar</AppButton>
+      </AppProviders>,
+    );
+
+    expect(flattenStyle(getByRole("button").props.style).backgroundColor).toBe(
+      lightSemanticColors.primary,
+    );
+    expect(flattenStyle(getByText("Confirmar").props.style).color).toBe(
+      lightSemanticColors.primaryForeground,
+    );
   });
 
   it("dispara haptic light por default no tone primário em pressIn", () => {

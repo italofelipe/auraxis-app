@@ -259,6 +259,53 @@
       }
     }
   },
+  "aiChat": {
+    "launcher": "Ask AI",
+    "title": "Financial assistant",
+    "subtitle": "Answers based only on your data.",
+    "close": "Close assistant",
+    "disclaimer": "AI answers only from the financial data saved in Auraxis.",
+    "transparency": "Your financial data is not used to train models. AI uses only your Auraxis records to answer.",
+    "limits": "Informational content; it does not replace individual financial advice.",
+    "consentTitle": "Allow AI use",
+    "consentBody": "Before your first question, confirm that Auraxis may use your saved financial data to generate personalized answers.",
+    "consentAction": "Allow AI assistant",
+    "consentLoading": "Checking your AI preference",
+    "consentGranting": "Recording consent...",
+    "premiumTitle": "Assistant available on Premium",
+    "premiumBody": "Upgrade to chat with AI about your own finances.",
+    "premiumCta": "Explore Premium",
+    "emptyTitle": "What would you like to understand?",
+    "emptyBody": "Pick a suggestion or write a question about your finances.",
+    "examples": {
+      "food": "How much did I spend on food this month?",
+      "largest": "What was my largest recent expense?",
+      "goal": "Am I close to reaching any goal?"
+    },
+    "messageLabels": {
+      "user": "You",
+      "assistant": "Auraxis AI"
+    },
+    "composer": {
+      "placeholder": "Ask about your finances...",
+      "send": "Send question",
+      "sending": "Analyzing your data...",
+      "counter": "{{current}} of {{maximum}} characters"
+    },
+    "actions": {
+      "retry": "Try again",
+      "dismiss": "Dismiss notice",
+      "grantAgain": "Refresh consent"
+    },
+    "errors": {
+      "entitlement": "This feature requires an active Premium subscription.",
+      "consent": "The API needs valid AI consent before it can answer.",
+      "budget": "Your AI limit has been reached. Try again when the API makes more requests available.",
+      "validation": "Write a valid question with up to 1,000 characters.",
+      "timeout": "The answer took longer than expected. You can try again.",
+      "server": "We couldn't get an answer right now. Try again shortly."
+    }
+  },
   "paymentsAssistant": {
     "title": "Open items",
     "progress": "{{current}} of {{total}}",

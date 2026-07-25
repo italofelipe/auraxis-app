@@ -68,6 +68,24 @@ export interface DashboardPeriodChangedAnalyticsProperties
   readonly period: string;
 }
 
+export interface AiChatOpenedAnalyticsProperties extends AnalyticsProperties {
+  readonly hasPremiumAccess: boolean;
+}
+
+export interface AiChatQuestionSentAnalyticsProperties extends AnalyticsProperties {
+  readonly attempt: "initial" | "retry";
+}
+
+export interface AiChatAnswerReceivedAnalyticsProperties extends AnalyticsProperties {
+  readonly periodAnchored: boolean;
+  readonly usedTools: boolean;
+}
+
+export interface AiChatRequestFailedAnalyticsProperties extends AnalyticsProperties {
+  readonly errorKind: string;
+  readonly retryable: boolean;
+}
+
 export interface AnalyticsEventPropertiesByName {
   readonly "auth.login.success": AuthLoginSuccessAnalyticsProperties;
   readonly "auth.register.completed": AuthRegisterCompletedAnalyticsProperties;
@@ -84,6 +102,10 @@ export interface AnalyticsEventPropertiesByName {
   readonly "subscription.management.opened": SubscriptionManagementAnalyticsProperties;
   readonly "subscription.cancel.completed": SubscriptionManagementAnalyticsProperties;
   readonly "dashboard.period.changed": DashboardPeriodChangedAnalyticsProperties;
+  readonly "ai.chat.opened": AiChatOpenedAnalyticsProperties;
+  readonly "ai.chat.question.sent": AiChatQuestionSentAnalyticsProperties;
+  readonly "ai.chat.answer.received": AiChatAnswerReceivedAnalyticsProperties;
+  readonly "ai.chat.request.failed": AiChatRequestFailedAnalyticsProperties;
 }
 
 export type AnalyticsEventName = keyof AnalyticsEventPropertiesByName;

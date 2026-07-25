@@ -92,6 +92,12 @@ import type {
   LatestInsightResponse,
 } from "@/features/insights/contracts";
 import type {
+  AiConsentListResponse,
+  AiConsentRecord,
+  GrantAiConsentCommand,
+} from "@/features/insights/ai-consent-contracts";
+import type { AiChatAnswer, AskFinancialQuestionCommand } from "@/features/ai-chat/contracts";
+import type {
   SpendingPatternsDetectCommand,
   SpendingPatternsDetectResponse,
   SpendingPatternsLatestResponse,
@@ -458,6 +464,23 @@ export const apiContractMap = {
     path: "/ai/insights/history",
     authRequired: true,
   }),
+  aiChatAsk: defineApiContract<"POST", "/ai/chat", AskFinancialQuestionCommand, AiChatAnswer>({
+    method: "POST",
+    path: "/ai/chat",
+    authRequired: true,
+  }),
+  aiConsentList: defineApiContract<"GET", "/me/consents", never, AiConsentListResponse>({
+    method: "GET",
+    path: "/me/consents",
+    authRequired: true,
+  }),
+  aiConsentGrant: defineApiContract<"POST", "/me/consents", GrantAiConsentCommand, AiConsentRecord>(
+    {
+      method: "POST",
+      path: "/me/consents",
+      authRequired: true,
+    },
+  ),
   importDetect: defineApiContract<
     "POST",
     "/v2/import/detect",

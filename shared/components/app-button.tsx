@@ -18,7 +18,12 @@ import {
   type HapticImpactTone,
   triggerHapticImpact,
 } from "@/shared/feedback/haptics";
-import { darkSemanticGlows, lightSemanticGlows } from "@/shared/theme";
+import {
+  darkSemanticColors,
+  darkSemanticGlows,
+  lightSemanticColors,
+  lightSemanticGlows,
+} from "@/shared/theme";
 
 // Botões pill (raio total) — paridade com os CTAs do web ("Entrar na
 // Auraxis", chips de período do dashboard). Altura e padding vêm de
@@ -66,6 +71,24 @@ type FrameProps = ComponentProps<typeof PrimaryButtonFrame>;
 type ButtonGlow = (typeof lightSemanticGlows)[keyof typeof lightSemanticGlows];
 
 export type AppButtonTone = "primary" | "secondary" | "danger";
+
+interface ButtonPalette {
+  readonly foreground: string;
+  readonly primary: string;
+  readonly primaryPressed: string;
+  readonly primaryForeground: string;
+  readonly surfaceRaised: string;
+  readonly border: string;
+  readonly borderStrong: string;
+  readonly danger: string;
+  readonly dangerStrong: string;
+}
+
+interface ButtonContentOptions {
+  readonly tone: AppButtonTone;
+  readonly fontToken: string;
+  readonly palette: ButtonPalette;
+}
 
 export interface AppButtonProps extends Omit<FrameProps, "children"> {
   readonly children: ReactNode;
@@ -128,15 +151,55 @@ const resolveButtonGlow = (
   return glows[tone === "danger" ? "danger" : "brand"];
 };
 
+const resolveButtonFrameColors = (
+  tone: AppButtonTone,
+  palette: ButtonPalette,
+): Partial<FrameProps> => {
+  if (tone === "secondary") {
+    return {
+      backgroundColor: "transparent",
+      borderColor: palette.border,
+      pressStyle: {
+        backgroundColor: palette.surfaceRaised,
+        borderColor: palette.borderStrong,
+        scale: 0.97,
+      },
+    };
+  }
+
+  if (tone === "danger") {
+    return {
+      backgroundColor: palette.danger,
+      borderColor: "transparent",
+      pressStyle: {
+        backgroundColor: palette.dangerStrong,
+        scale: 0.97,
+      },
+    };
+  }
+
+  return {
+    backgroundColor: palette.primary,
+    borderColor: "transparent",
+    pressStyle: {
+      backgroundColor: palette.primaryPressed,
+      scale: 0.97,
+    },
+  };
+};
+
 const renderButtonContent = (
   children: ReactNode,
-  tone: AppButtonTone,
-  fontToken: string,
+  options: ButtonContentOptions,
 ): ReactNode => {
   if (typeof children !== "string" && typeof children !== "number") {
     return children;
   }
-  const color = tone === "primary" ? "$actionPrimaryForeground" : "$color";
+  const { tone, fontToken, palette } = options;
+  const color =
+    tone === "primary" || tone === "danger"
+      ? palette.primaryForeground
+      : palette.foreground;
   return (
     <ButtonLabel color={color} fontSize={fontToken}>
       {children}
@@ -190,6 +253,10 @@ export function AppButton({
   const resolvedTheme = useResolvedTheme();
   const glows =
     resolvedTheme === "auraxis_dark" ? darkSemanticGlows : lightSemanticGlows;
+  const palette =
+    resolvedTheme === "auraxis_dark"
+      ? darkSemanticColors
+      : lightSemanticColors;
 
   const handlePressIn = useCallback(
     (event: GestureResponderEvent): void => {
@@ -201,6 +268,7 @@ export function AppButton({
 
   const sizing = buttonSizing[size];
   const sharedProps: FrameProps = {
+    ...resolveButtonFrameColors(tone, palette),
     ...rest,
     ...resolveButtonGlow(glow, tone, glows),
     height: sizing.minHeight,
@@ -217,6 +285,10 @@ export function AppButton({
   return renderButtonFrame(
     tone,
     sharedProps,
-    renderButtonContent(children, tone, sizing.fontToken),
+    renderButtonContent(children, {
+      tone,
+      fontToken: sizing.fontToken,
+      palette,
+    }),
   );
 }

@@ -119,6 +119,16 @@
       "status": "enabled-prod",
       "description": "Controla a nova leitura editorial Fluida dos insights de IA no app (ativada em producao).",
       "repositories": ["auraxis-app", "auraxis-api"]
+    },
+    {
+      "key": "app.features.ai-chat",
+      "owner": "platform",
+      "createdAt": "2026-07-24",
+      "removeBy": "2026-12-31",
+      "type": "release",
+      "status": "enabled-prod",
+      "description": "Controla o assistente financeiro conversacional nas telas privadas do app.",
+      "repositories": ["auraxis-app", "auraxis-api", "auraxis-web"]
     }
   ]
 }

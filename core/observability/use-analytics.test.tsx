@@ -51,6 +51,10 @@ describe("useAnalytics", () => {
       "subscription.checkout.opened",
       "subscription.checkout.completed",
       "dashboard.period.changed",
+      "ai.chat.opened",
+      "ai.chat.question.sent",
+      "ai.chat.answer.received",
+      "ai.chat.request.failed",
     ]);
   });
 
