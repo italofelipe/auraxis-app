@@ -25,7 +25,11 @@ import {
 } from "@/features/ai-chat/hooks/use-ai-chat-controller";
 import { AppButton } from "@/shared/components/app-button";
 import { useT } from "@/shared/i18n";
-import { darkSemanticColors, lightSemanticColors } from "@/shared/theme";
+import {
+  darkSemanticColors,
+  lightSemanticColors,
+  semanticShadows,
+} from "@/shared/theme";
 
 const SHEET_RADIUS = 28;
 const LAUNCHER_SIZE = 58;
@@ -399,10 +403,6 @@ const styles = StyleSheet.create({
     borderRadius: LAUNCHER_SIZE / 2,
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.28,
-    shadowRadius: 12,
-    elevation: 9,
+    ...semanticShadows.lg,
   },
 });
