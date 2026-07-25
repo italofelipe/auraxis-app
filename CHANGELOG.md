@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.0](https://github.com/italofelipe/auraxis-app/compare/v1.13.9...v1.14.0) (2026-07-25)
+
+
+### Features
+
+* **ai-chat:** add mobile financial assistant ([#729](https://github.com/italofelipe/auraxis-app/issues/729)) ([12d2679](https://github.com/italofelipe/auraxis-app/commit/12d26796f0cd707a458fc972b6742d4fec2f3a5f))
+
 ## [1.13.9](https://github.com/italofelipe/auraxis-app/compare/v1.13.8...v1.13.9) (2026-07-24)
 
 
