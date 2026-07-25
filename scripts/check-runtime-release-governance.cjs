@@ -238,13 +238,22 @@ const validateMobileE2EGovernance = ({ easConfig, e2eWorkflow, e2eFlow }) => {
   }
 
   const workflow = String(e2eWorkflow ?? "");
+  // Híbrido (#734): E2E builda no runner; a cota EAS fica reservada para loja.
   if (
-    !/--platform android/u.test(workflow) ||
-    !/--platform ios/u.test(workflow) ||
-    (workflow.match(/--profile "\$EAS_BUILD_PROFILE"/gu) ?? []).length < 2 ||
-    !/EAS_BUILD_PROFILE:\s*e2e-test/u.test(workflow)
+    !/expo prebuild --platform android --no-install/u.test(workflow) ||
+    !/expo prebuild --platform ios --no-install/u.test(workflow) ||
+    !/gradlew assembleRelease/u.test(workflow) ||
+    !/-sdk iphonesimulator/u.test(workflow) ||
+    !/CODE_SIGNING_ALLOWED=NO/u.test(workflow)
   ) {
-    errors.push("EAS E2E workflow must build Android and iOS from the e2e-test profile");
+    errors.push(
+      "Native E2E workflow must build Android and iOS on the runner (prebuild + assembleRelease + xcodebuild simulator)",
+    );
+  }
+  if (/eas build/u.test(workflow)) {
+    errors.push(
+      "Native E2E workflow must not consume EAS build quota (hybrid: EAS is reserved for store builds)",
+    );
   }
   if (
     (workflow.match(/maestro test/gu) ?? []).length < 2 ||

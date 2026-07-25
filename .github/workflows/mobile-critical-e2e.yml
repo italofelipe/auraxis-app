@@ -1,5 +1,10 @@
 name: Mobile Critical E2E
 
+# Híbrido de builds (#734): o E2E compila SEMPRE no runner do GitHub
+# (prebuild + Gradle/xcodebuild, sem assinatura). A cota de builds do EAS fica
+# reservada para releases de loja. A governança
+# (check-runtime-release-governance) bloqueia builds via EAS neste workflow.
+
 on:
   pull_request:
     branches: [main]
@@ -13,13 +18,18 @@ permissions:
   contents: read
 
 env:
-  EAS_BUILD_PROFILE: e2e-test
+  # Espelho do ambiente EAS `preview` para o bundle JS. Os valores vivem em
+  # GitHub variables — nunca hardcoded no YAML (docs/release-process.md).
+  EXPO_PUBLIC_API_URL: ${{ vars.EXPO_PUBLIC_API_URL }}
+  EXPO_PUBLIC_APP_ENV: ${{ vars.EXPO_PUBLIC_APP_ENV }}
+  EXPO_PUBLIC_POSTHOG_API_KEY: ${{ vars.EXPO_PUBLIC_POSTHOG_API_KEY }}
+  EXPO_PUBLIC_POSTHOG_HOST: ${{ vars.EXPO_PUBLIC_POSTHOG_HOST }}
   E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
   E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
 
 jobs:
   android:
-    name: Android EAS build + Maestro
+    name: Android build + Maestro
     runs-on: ubuntu-latest
     timeout-minutes: 90
     steps:
@@ -34,6 +44,7 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+          cache: gradle
 
       - name: Validate E2E credentials
         id: validate-e2e-credentials
@@ -48,24 +59,15 @@ jobs:
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
-      - uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
-        with:
-          eas-version: 21.2.0
-          token: ${{ secrets.EXPO_TOKEN }}
+      - name: Prebuild Android project
+        run: npx expo prebuild --platform android --no-install
 
-      - name: Build Android APK on EAS
+      - name: Build Android APK on the runner
         run: |
           set -euo pipefail
-          eas build \
-            --platform android \
-            --profile "$EAS_BUILD_PROFILE" \
-            --message "E2E ${GITHUB_SHA}" \
-            --wait \
-            --json \
-            --non-interactive > "$RUNNER_TEMP/android-build.json"
-          build_url="$(jq -r 'if type == "array" then .[0].artifacts.buildUrl else .artifacts.buildUrl end' "$RUNNER_TEMP/android-build.json")"
-          test -n "$build_url" && test "$build_url" != "null"
-          curl --fail --location "$build_url" --output "$RUNNER_TEMP/auraxis-e2e.apk"
+          cd android
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/auraxis-e2e.apk"
           printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/e2e-sha.txt"
 
       - name: Enable KVM
@@ -98,13 +100,12 @@ jobs:
           name: mobile-e2e-android-${{ github.sha }}
           path: |
             ${{ runner.temp }}/maestro-results/
-            ${{ runner.temp }}/android-build.json
             ${{ runner.temp }}/e2e-sha.txt
           if-no-files-found: error
           retention-days: 30
 
   ios:
-    name: iOS EAS build + Maestro
+    name: iOS Simulator build + Maestro
     runs-on: macos-latest
     timeout-minutes: 90
     steps:
@@ -128,26 +129,31 @@ jobs:
           curl -fsSL "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
-      - uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
-        with:
-          eas-version: 21.2.0
-          token: ${{ secrets.EXPO_TOKEN }}
-
-      - name: Build iOS Simulator app on EAS
+      - name: Prebuild iOS project
         run: |
           set -euo pipefail
-          eas build \
-            --platform ios \
-            --profile "$EAS_BUILD_PROFILE" \
-            --message "E2E ${GITHUB_SHA}" \
-            --wait \
-            --json \
-            --non-interactive > "$RUNNER_TEMP/ios-build.json"
-          build_url="$(jq -r 'if type == "array" then .[0].artifacts.buildUrl else .artifacts.buildUrl end' "$RUNNER_TEMP/ios-build.json")"
-          test -n "$build_url" && test "$build_url" != "null"
-          curl --fail --location "$build_url" --output "$RUNNER_TEMP/auraxis-e2e.tar.gz"
+          npx expo prebuild --platform ios --no-install
+          npx pod-install ios
+
+      - name: Build iOS Simulator app on the runner
+        run: |
+          set -euo pipefail
+          workspace="$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)"
+          test -n "$workspace"
+          scheme="$(basename "$workspace" .xcworkspace)"
+          xcodebuild \
+            -workspace "$workspace" \
+            -scheme "$scheme" \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -derivedDataPath "$RUNNER_TEMP/derived" \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+          app_path="$(find "$RUNNER_TEMP/derived/Build/Products/Release-iphonesimulator" \
+            -maxdepth 1 -type d -name '*.app' -print -quit)"
+          test -n "$app_path"
           mkdir -p "$RUNNER_TEMP/ios-app"
-          tar -xzf "$RUNNER_TEMP/auraxis-e2e.tar.gz" -C "$RUNNER_TEMP/ios-app"
+          cp -R "$app_path" "$RUNNER_TEMP/ios-app/"
           printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/e2e-sha.txt"
 
       - name: Boot simulator and run iOS critical flow
@@ -175,7 +181,6 @@ jobs:
           name: mobile-e2e-ios-${{ github.sha }}
           path: |
             ${{ runner.temp }}/maestro-results/
-            ${{ runner.temp }}/ios-build.json
             ${{ runner.temp }}/e2e-sha.txt
           if-no-files-found: error
           retention-days: 30

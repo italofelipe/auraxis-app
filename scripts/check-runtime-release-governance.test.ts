@@ -242,9 +242,11 @@ describe("native E2E governance", () => {
       },
     },
     e2eWorkflow: [
-      "EAS_BUILD_PROFILE: e2e-test",
-      '--platform android --profile "$EAS_BUILD_PROFILE"',
-      '--platform ios --profile "$EAS_BUILD_PROFILE"',
+      "expo prebuild --platform android --no-install",
+      "./gradlew assembleRelease",
+      "expo prebuild --platform ios --no-install",
+      "-sdk iphonesimulator",
+      "CODE_SIGNING_ALLOWED=NO",
       "id: validate-e2e-credentials",
       "id: validate-e2e-credentials",
       "Missing E2E_EMAIL",
@@ -280,7 +282,7 @@ describe("native E2E governance", () => {
     const errors = validateMobileE2EGovernance({
       ...validE2E,
       e2eWorkflow:
-        'EAS_BUILD_PROFILE: e2e-test\n--platform android --profile "$EAS_BUILD_PROFILE"\nmaestro test',
+        "expo prebuild --platform android --no-install\n./gradlew assembleRelease\nmaestro test",
       e2eFlow: "tab-insights\ntab-cartoes",
     });
     expect(errors).toEqual(
@@ -288,6 +290,16 @@ describe("native E2E governance", () => {
         expect.stringContaining("build Android and iOS"),
         expect.stringContaining("missing screenshots"),
       ]),
+    );
+  });
+
+  test("rejects E2E workflows that consume EAS build quota", () => {
+    const errors = validateMobileE2EGovernance({
+      ...validE2E,
+      e2eWorkflow: `${validE2E.e2eWorkflow}\neas build --platform android`,
+    });
+    expect(errors).toEqual(
+      expect.arrayContaining([expect.stringContaining("EAS build quota")]),
     );
   });
 
