@@ -20,13 +20,17 @@ tags:
     visible: "Saldo geral"
     timeout: 20000
 
-# A conta E2E precisa manter ao menos uma pendência aberta.
-- extendedWaitUntil:
-    visible: "Pendências em aberto"
-    timeout: 15000
-- takeScreenshot: ${MAESTRO_TESTS_DIR}/01-pendencias
-- tapOn:
-    id: payment-assistant-close
+# O assistente de pendências ("Pendências em aberto") só auto-abre para
+# contas com entitlement Premium (advanced_simulations). A conta E2E atual
+# não tem Premium — o bloco é condicional (best-effort) até a conta técnica
+# ser provisionada como Premium; aí a captura volta a ser obrigatória.
+- runFlow:
+    when:
+      visible: "Pendências em aberto"
+    commands:
+      - takeScreenshot: ${MAESTRO_TESTS_DIR}/01-pendencias
+      - tapOn:
+          id: payment-assistant-close
 
 - tapOn:
     id: tab-transacoes
