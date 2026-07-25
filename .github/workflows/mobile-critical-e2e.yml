@@ -40,11 +40,12 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      # Sem `cache: gradle`: os arquivos Gradle só existem após o prebuild
+      # (projeto CNG), e o setup-java falha ao hashear um checkout sem eles.
       - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
         with:
           distribution: temurin
           java-version: "17"
-          cache: gradle
 
       - name: Validate E2E credentials
         id: validate-e2e-credentials
