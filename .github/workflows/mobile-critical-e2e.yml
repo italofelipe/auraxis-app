@@ -66,11 +66,23 @@ jobs:
       - name: Prebuild Android project
         run: npx expo prebuild --platform android --no-install
 
+      - name: Cache Gradle
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: gradle-e2e-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            gradle-e2e-${{ runner.os }}-
+
+      # Só x86_64: o emulador não precisa das ABIs ARM e compilar as 4
+      # arquiteturas estourava o timeout de 90 min no runner de 4 cores.
       - name: Build Android APK on the runner
         run: |
           set -euo pipefail
           cd android
-          ./gradlew assembleRelease --no-daemon
+          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=x86_64
           cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/auraxis-e2e.apk"
           printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/e2e-sha.txt"
 
