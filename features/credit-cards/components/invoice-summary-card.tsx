@@ -65,7 +65,6 @@ export function InvoiceSummaryCard({
 
   return (
     <AppSurfaceCard
-      variant="interactive"
       onPress={onOpenInvoice}
       testID={testID ?? "invoice-summary-card"}
     >

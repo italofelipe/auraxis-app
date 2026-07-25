@@ -1,24 +1,16 @@
 import { act, renderHook } from "@testing-library/react-native";
 
-import { useAppShellStore } from "@/core/shell/app-shell-store";
-import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import type { UserInsight } from "@/features/insights/contracts";
 import { insightToFluidaVM } from "@/features/insights/fluida/insight-to-fluida-vm";
 import { selectFluidaVM } from "@/features/insights/mocks/fluida-vm";
 import { useWeeklyInsight } from "@/features/insights/hooks/use-weekly-insight-query";
 import { useInsightsFluidaScreenController } from "@/features/insights/hooks/use-insights-fluida-screen-controller";
 
-jest.mock("@/core/shell/use-resolved-theme", () => ({
-  useResolvedTheme: jest.fn(),
-}));
-
 jest.mock("@/features/insights/hooks/use-weekly-insight-query", () => ({
   useWeeklyInsight: jest.fn(),
 }));
 
-const mockedUseResolvedTheme = jest.mocked(useResolvedTheme);
 const mockedUseWeeklyInsight = jest.mocked(useWeeklyInsight);
-const setThemePreference = jest.fn();
 
 const setLatestInsight = (insight: UserInsight | null): void => {
   mockedUseWeeklyInsight.mockReturnValue({
@@ -68,11 +60,7 @@ const realInsight: UserInsight = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  mockedUseResolvedTheme.mockReturnValue("auraxis_light");
   setLatestInsight(null);
-  jest
-    .spyOn(useAppShellStore, "getState")
-    .mockReturnValue({ setThemePreference } as never);
 });
 
 describe("useInsightsFluidaScreenController", () => {
@@ -276,34 +264,10 @@ describe("useInsightsFluidaScreenController - interacoes", () => {
     );
   });
 
-  it("exposes the resolved colour scheme as a boolean isDark flag", () => {
-    mockedUseResolvedTheme.mockReturnValue("auraxis_dark");
-
+  it("does not expose a theme shortcut outside Settings", () => {
     const { result } = renderHook(() => useInsightsFluidaScreenController());
-
-    expect(result.current.isDark).toBe(true);
-  });
-
-  it("pins the opposite preference when the theme is toggled (light → dark)", () => {
-    mockedUseResolvedTheme.mockReturnValue("auraxis_light");
-    const { result } = renderHook(() => useInsightsFluidaScreenController());
-
-    act(() => {
-      result.current.toggleTheme();
-    });
-
-    expect(setThemePreference).toHaveBeenCalledWith("dark");
-  });
-
-  it("pins light when toggled away from a dark scheme (dark → light)", () => {
-    mockedUseResolvedTheme.mockReturnValue("auraxis_dark");
-    const { result } = renderHook(() => useInsightsFluidaScreenController());
-
-    act(() => {
-      result.current.toggleTheme();
-    });
-
-    expect(setThemePreference).toHaveBeenCalledWith("light");
+    expect(result.current).not.toHaveProperty("toggleTheme");
+    expect(result.current).not.toHaveProperty("isDark");
   });
 
   it("lists the five theme tabs in the canonical order with labels", () => {

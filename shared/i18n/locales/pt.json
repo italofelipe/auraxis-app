@@ -117,8 +117,8 @@
       "calendar": "Calendario"
     },
     "calendar": {
-      "dayTitle": "Movimentacoes do dia",
-      "empty": "Nenhuma movimentacao neste dia.",
+      "dayTitle": "Movimentações do dia",
+      "empty": "Nenhuma movimentação neste dia.",
       "close": "Fechar"
     },
     "actions": {
@@ -130,7 +130,7 @@
       "invoiceBadge": "fatura {{month}}"
     },
     "export": {
-      "title": "Exportar transacoes",
+      "title": "Exportar transações",
       "description": "Escolha o formato; geramos o arquivo e abrimos o compartilhamento.",
       "csv": "CSV",
       "pdf": "PDF",
@@ -265,6 +265,8 @@
     "statusHint": "Marcar aqui só atualiza o status no Auraxis — não move dinheiro de verdade.",
     "emptyTitle": "Tudo em dia",
     "emptyBody": "Você não tem contas em aberto vencidas há mais de um mês.",
+    "actionErrorTitle": "Não foi possível atualizar a pendência",
+    "actionErrorBody": "Sua alteração não foi aplicada. Verifique a conexão e tente novamente.",
     "type": {
       "income": "Receita",
       "expense": "Despesa"
@@ -281,10 +283,13 @@
       "payIncome": "Marcar como recebido",
       "delete": "Excluir",
       "skip": "Pular",
-      "markAllPaid": "Marcar todas como pagas",
+      "markAllPaid": "Processar todas",
       "undo": "Desfazer",
       "close": "Fechar",
-      "cancel": "Cancelar"
+      "cancel": "Cancelar",
+      "processing": "Atualizando...",
+      "retry": "Tentar novamente",
+      "dismiss": "Agora não"
     }
   }
 }

@@ -59,8 +59,8 @@ describe("weeklySnapshotService.getWeeklySnapshot", () => {
       currentExpense: 1800,
       currentBalance: 3200,
       transactionCount: 23,
-      expenseDeltaPercent: -14.3,
-      balanceDeltaPercent: 10.3,
+      expenseDelta: -300,
+      balanceDelta: 300,
     });
   });
 
@@ -84,8 +84,8 @@ describe("weekly snapshot change detection", () => {
     currentExpense: 1800,
     currentBalance: 3200,
     transactionCount: 23,
-    expenseDeltaPercent: -14.3,
-    balanceDeltaPercent: 10.3,
+    expenseDelta: -300,
+    balanceDelta: 300,
   };
 
   it("buildSnapshotSignature combina semana + despesa atual", () => {

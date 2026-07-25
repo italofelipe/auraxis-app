@@ -42,10 +42,10 @@ describe("TransactionFilters", () => {
 
     expect(getByText("Junho de 2026")).toBeTruthy();
 
-    fireEvent.press(getByLabelText("Mes anterior"));
+    fireEvent.press(getByLabelText("Mês anterior"));
     expect(props.onPreviousMonth).toHaveBeenCalled();
 
-    fireEvent.press(getByLabelText("Proximo mes"));
+    fireEvent.press(getByLabelText("Próximo mês"));
     expect(props.onNextMonth).toHaveBeenCalled();
   });
 

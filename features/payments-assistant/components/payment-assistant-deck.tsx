@@ -28,6 +28,7 @@ export interface PaymentAssistantDeckProps {
   readonly onPay: () => void;
   /** Swiped left past the threshold (delete — caller confirms). */
   readonly onDelete: () => void;
+  readonly disabled?: boolean;
 }
 
 /**
@@ -42,6 +43,7 @@ export function PaymentAssistantDeck({
   card,
   onPay,
   onDelete,
+  disabled = false,
 }: PaymentAssistantDeckProps): ReactElement | null {
   const translateX = useSharedValue(0);
 
@@ -51,6 +53,7 @@ export function PaymentAssistantDeck({
   }, [card?.id, translateX]);
 
   const pan = Gesture.Pan()
+    .enabled(!disabled)
     .activeOffsetX([-12, 12])
     .onUpdate((event) => {
       translateX.value = event.translationX;

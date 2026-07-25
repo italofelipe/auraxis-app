@@ -226,11 +226,11 @@ describe("CreditCardsScreen", () => {
   });
 
   it("expõe âncoras de onboarding (testIDs do tour)", () => {
-    const { getByTestId } = renderScreen();
+    const { getByTestId, queryByTestId } = renderScreen();
     expect(getByTestId("tour-cards")).toBeTruthy();
     expect(getByTestId("tour-views")).toBeTruthy();
     expect(getByTestId("tour-months")).toBeTruthy();
     expect(getByTestId("tour-fatura")).toBeTruthy();
-    expect(getByTestId("tour-theme")).toBeTruthy();
+    expect(queryByTestId("tour-theme")).toBeNull();
   });
 });

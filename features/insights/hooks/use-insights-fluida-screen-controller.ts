@@ -1,7 +1,5 @@
-import { useCallback, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
-import { useAppShellStore } from "@/core/shell/app-shell-store";
-import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import type { InsightDimension } from "@/features/insights/contracts";
 import type {
   InsightCadence,
@@ -42,12 +40,10 @@ export interface InsightsFluidaScreenController {
   readonly vm: InsightFluidaVM;
   /** Whether the "Como se compara" beat renders (general dimension only). */
   readonly showCompare: boolean;
-  readonly isDark: boolean;
   readonly cadenceOptions: readonly InsightCadenceOption[];
   readonly dimensionTabs: readonly InsightDimensionTab[];
   readonly selectCadence: (cadence: InsightCadence) => void;
   readonly selectDimension: (dimension: InsightDimension) => void;
-  readonly toggleTheme: () => void;
 }
 
 /**
@@ -72,9 +68,8 @@ const CADENCE_OPTIONS: readonly InsightCadenceOption[] = [
  * Screen controller for the "Fluida" insights screen (etapa 1 + 2). Owns the
  * selected cadence and dimension, derives the full reading VM from the **real**
  * insight (the latest AI insight loaded via {@link useWeeklyInsight}), flags
- * whether the comparative beat applies (general only), and bridges the
- * light/dark toggle to the app shell theme preference. View-only components
- * consume this; no business logic lives in the screen itself.
+ * whether the comparative beat applies (general only). Theme preference is
+ * deliberately managed only by Configurações.
  *
  * The VM is derived by {@link insightToFluidaVM}, which falls back to the mock
  * fixture when the insight is absent (404 / not yet loaded) or lacks the
@@ -91,9 +86,6 @@ export const useInsightsFluidaScreenController = (
     const [dimension, setDimension] = useState<InsightDimension>(
       options.initialDimension ?? "general",
     );
-    const resolvedTheme = useResolvedTheme();
-    const isDark = resolvedTheme === "auraxis_dark";
-
     const { insight } = useWeeklyInsight();
 
     const vm = useMemo(
@@ -111,20 +103,14 @@ export const useInsightsFluidaScreenController = (
       [],
     );
 
-    const toggleTheme = useCallback((): void => {
-      useAppShellStore.getState().setThemePreference(isDark ? "light" : "dark");
-    }, [isDark]);
-
     return {
       cadence,
       dimension,
       vm,
       showCompare,
-      isDark,
       cadenceOptions: CADENCE_OPTIONS,
       dimensionTabs,
       selectCadence: setCadence,
       selectDimension: setDimension,
-      toggleTheme,
     };
   };

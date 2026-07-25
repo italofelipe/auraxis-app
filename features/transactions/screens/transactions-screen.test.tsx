@@ -183,13 +183,17 @@ describe("TransactionsScreen", () => {
 
   it("renderiza o calendário quando a visão de calendário está ativa", () => {
     mockOverrides = { calendarActive: true };
-    const { queryByTestId } = renderScreen();
+    const { getAllByText, queryByTestId } = renderScreen();
     // O feed não é renderizado na visão de calendário.
     expect(queryByTestId("transactions-flashlist")).toBeNull();
+    expect(getAllByText("Junho de 2026")).toHaveLength(1);
+    expect(queryByTestId("tx-hero-theme-toggle")).toBeNull();
   });
 
-  it("navega para a lixeira pelo botão de ações", () => {
+  it("mantém a lixeira dentro do menu de opções", () => {
     const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("transactions-options-button"));
+    expect(getByTestId("transactions-options-sheet")).toBeTruthy();
     fireEvent.press(getByTestId("transactions-trash-button"));
     expect(mockPush).toHaveBeenCalledWith("/lixeira-transacoes");
   });

@@ -265,6 +265,8 @@
     "statusHint": "Marking here only updates the status in Auraxis — no real money moves.",
     "emptyTitle": "All caught up",
     "emptyBody": "You have no open bills overdue by more than a month.",
+    "actionErrorTitle": "We couldn't update this item",
+    "actionErrorBody": "Your change was not applied. Check your connection and try again.",
     "type": {
       "income": "Income",
       "expense": "Expense"
@@ -281,10 +283,13 @@
       "payIncome": "Mark as received",
       "delete": "Delete",
       "skip": "Skip",
-      "markAllPaid": "Mark all as paid",
+      "markAllPaid": "Process all",
       "undo": "Undo",
       "close": "Close",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "processing": "Updating...",
+      "retry": "Try again",
+      "dismiss": "Not now"
     }
   }
 }

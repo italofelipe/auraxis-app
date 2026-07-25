@@ -19,11 +19,11 @@ export interface WeeklyPeriodTotalsPayload {
 
 export interface WeeklyComparisonPayload {
   readonly income_delta: number;
-  readonly income_delta_percent: number;
+  readonly income_delta_percent: number | null;
   readonly expense_delta: number;
-  readonly expense_delta_percent: number;
+  readonly expense_delta_percent: number | null;
   readonly balance_delta: number;
-  readonly balance_delta_percent: number;
+  readonly balance_delta_percent: number | null;
 }
 
 export interface WeeklySummaryPayload {
@@ -49,6 +49,7 @@ export interface WeeklySnapshot {
   readonly currentExpense: number;
   readonly currentBalance: number;
   readonly transactionCount: number;
-  readonly expenseDeltaPercent: number;
-  readonly balanceDeltaPercent: number;
+  /** Variações absolutas preservadas para evitar percentuais sem base. */
+  readonly expenseDelta: number;
+  readonly balanceDelta: number;
 }

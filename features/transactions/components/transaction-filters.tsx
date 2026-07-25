@@ -1,6 +1,7 @@
 import { type ReactElement } from "react";
 
-import { Paragraph, XStack, YStack } from "tamagui";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Paragraph, XStack, YStack, useTheme } from "tamagui";
 
 import { useTagsQuery } from "@/features/tags/hooks/use-tags-query";
 import type {
@@ -9,6 +10,7 @@ import type {
   TransactionsTypeFilter,
 } from "@/features/transactions/hooks/use-transactions-screen-controller";
 import { AppButton } from "@/shared/components/app-button";
+import { iconSizes } from "@/shared/theme";
 
 const TYPE_LABELS: Record<TransactionsTypeFilter, string> = {
   all: "Todas",
@@ -78,14 +80,24 @@ export function PeriodNavigator({
   onPreviousMonth,
   onNextMonth,
 }: PeriodNavigatorProps): ReactElement {
+  const theme = useTheme();
+  const iconColor = theme.color?.val ?? "#000000";
+
   return (
     <XStack alignItems="center" gap="$2">
       <AppButton
         tone="secondary"
+        width={44}
+        paddingHorizontal={0}
         onPress={onPreviousMonth}
-        accessibilityLabel="Mes anterior"
+        accessibilityLabel="Mês anterior"
+        testID="period-previous-month"
       >
-        {"<"}
+        <MaterialCommunityIcons
+          name="chevron-left"
+          size={iconSizes.lg}
+          color={iconColor}
+        />
       </AppButton>
       <Paragraph
         flex={1}
@@ -99,10 +111,17 @@ export function PeriodNavigator({
       </Paragraph>
       <AppButton
         tone="secondary"
+        width={44}
+        paddingHorizontal={0}
         onPress={onNextMonth}
-        accessibilityLabel="Proximo mes"
+        accessibilityLabel="Próximo mês"
+        testID="period-next-month"
       >
-        {">"}
+        <MaterialCommunityIcons
+          name="chevron-right"
+          size={iconSizes.lg}
+          color={iconColor}
+        />
       </AppButton>
     </XStack>
   );

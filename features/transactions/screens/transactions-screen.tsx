@@ -1,7 +1,5 @@
 import type { ReactElement } from "react";
 
-import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
-import { useAppShellStore } from "@/core/shell/app-shell-store";
 import { FinancialCalendar } from "@/features/transactions/components/financial-calendar";
 import { PeriodNavigator } from "@/features/transactions/components/transaction-filters";
 import { TransactionFeed } from "@/features/transactions/components/transaction-feed-list";
@@ -22,10 +20,6 @@ import { AppScreen } from "@/shared/components/app-screen";
  */
 export function TransactionsScreen(): ReactElement {
   const controller = useTransactionsFeedController();
-  const isDark = useResolvedTheme() === "auraxis_dark";
-  const setThemePreference = useAppShellStore(
-    (state) => state.setThemePreference,
-  );
 
   if (controller.formMode.kind !== "closed") {
     return (
@@ -51,8 +45,6 @@ export function TransactionsScreen(): ReactElement {
       <TxHero
         periodLabel={controller.periodLabel}
         kpis={controller.heroKpis}
-        isDark={isDark}
-        onToggleTheme={() => setThemePreference(isDark ? "light" : "dark")}
         onToggleCalendar={controller.toggleCalendar}
         calendarActive={controller.calendarActive}
       />
@@ -68,7 +60,11 @@ export function TransactionsScreen(): ReactElement {
           onPreviousMonth={controller.goToPreviousMonth}
           onNextMonth={controller.goToNextMonth}
         />
-        <FinancialCalendar transactions={controller.transactions} />
+        <FinancialCalendar
+          transactions={controller.transactions}
+          year={controller.selectedMonth.year}
+          month={controller.selectedMonth.month}
+        />
       </AppScreen>
     );
   }

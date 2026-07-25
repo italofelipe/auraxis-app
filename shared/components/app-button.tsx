@@ -136,7 +136,10 @@ const renderButtonContent = (
   if (typeof children !== "string" && typeof children !== "number") {
     return children;
   }
-  const color = tone === "primary" ? "$actionPrimaryForeground" : "$color";
+  const color =
+    tone === "primary" || tone === "danger"
+      ? "$actionPrimaryForeground"
+      : "$color";
   return (
     <ButtonLabel color={color} fontSize={fontToken}>
       {children}

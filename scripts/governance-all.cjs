@@ -12,6 +12,11 @@ const GOVERNANCE_CHECKS = [
     script: "scripts/check-frontend-governance.cjs",
   },
   {
+    id: "visual-surfaces",
+    label: "Visual surface depth",
+    script: "scripts/check-visual-surface-governance.cjs",
+  },
+  {
     id: "api-contract",
     label: "API contract boundaries",
     script: "scripts/check-api-contract-governance.cjs",

@@ -10,6 +10,28 @@
 
 **Área:** navegação privada e dependências nativas
 
+## Reabertura em 25/07/2026
+
+O issue #726 foi reaberto porque o build iOS 1.13.9 falhou antes de chegar ao
+TestFlight. Portanto, o 1.13.8 instalado não podia validar nem invalidar o
+hotfix. O mesmo princípio vale para Android: teste de Jest ou bundle exportado
+não prova estabilidade do processo nativo.
+
+O diagnóstico foi ajustado para não atribuir o crash a SVG, Reanimated ou outra
+biblioteca sem stack trace. A entrega #730:
+
+- corrige o arquivo enviado ao EAS com `.easignore` determinístico;
+- monta as árvores reais de Insights e Cartões nos testes de composição, sem
+  mock integral das telas;
+- adiciona boundary por aba e breadcrumbs de montagem/desmontagem;
+- cria builds E2E iOS Simulator e Android APK no mesmo SHA;
+- torna obrigatório o Maestro Dashboard → Insights → Cartões em ambos;
+- registra versão, build, runtime/update ID e commit em Configurações.
+
+Somente os artifacts nativos desse workflow são evidência de aceite. Se houver
+novo encerramento, o vídeo/log do job ou o stack trace do aparelho deve orientar
+a correção mínima no mesmo PR.
+
 ## Sintoma
 
 O login concluía e o Dashboard permanecia funcional, mas tocar nas abas
@@ -53,7 +75,7 @@ para o Expo SDK 55:
 O renderer de testes também permanecia em 19.2.7 e se tornou incompatível
 quando React foi realinhado para 19.2.0.
 
-## Causa raiz
+## Hipótese técnica original
 
 Atualizações automáticas alteraram versões coordenadas pelo Expo sem um gate de
 compatibilidade no `quality-check`. O repositório continuava passando lint,
@@ -145,15 +167,14 @@ novo e impedir que o bundle seja entregue a um binário incompatível.
 
 ## Risco residual
 
-- Esta máquina não possui `simctl` nem `adb`; o smoke em device precisa ocorrer
-  no build distribuído.
-- O `expo-doctor` ainda aponta propriedades antigas no schema de `app.json`.
-  Elas não foram alteradas nesta issue porque `app.json` exige aprovação humana
-  explícita e o erro é independente do drift de dependências.
+- Esta máquina não possui `simctl` nem `adb`; o aceite foi movido para EAS
+  Build + emuladores iOS/Android do GitHub Actions.
+- O Expo Doctor volta a passar 19/19 após remover chaves obsoletas do SDK 55;
+  Nova Arquitetura, Hermes e edge-to-edge permanecem ativos por padrão.
 - Se o crash persistir após o build alinhado, anexar à issue #726 o stack trace
-  nativo/Sentry, versão do SO, modelo do aparelho e aba anterior. O próximo
-  isolamento deve desabilitar temporariamente a transição customizada e os
-  componentes SVG/Reanimated separadamente.
+  nativo/Sentry, versão do SO, modelo do aparelho e aba anterior. A próxima
+  correção deve ser a alteração mínima indicada por esse stack trace; módulos
+  nativos não serão removidos por tentativa e erro.
 
 ## Referências
 

@@ -21,8 +21,8 @@ const mapWeeklySnapshot = (
     currentExpense: current.expense,
     currentBalance: current.balance,
     transactionCount: current.transaction_count,
-    expenseDeltaPercent: comparison.expense_delta_percent,
-    balanceDeltaPercent: comparison.balance_delta_percent,
+    expenseDelta: comparison.expense_delta,
+    balanceDelta: comparison.balance_delta,
   };
 };
 

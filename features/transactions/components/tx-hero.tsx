@@ -24,10 +24,6 @@ export interface TxHeroProps {
   readonly periodLabel: string;
   /** KPIs agregados do período (receitas, despesas, resultado, contagem). */
   readonly kpis: FeedKpis;
-  /** True quando o tema resolvido é escuro (controla o ícone do botão). */
-  readonly isDark: boolean;
-  /** Alterna o tema claro/escuro. */
-  readonly onToggleTheme: () => void;
   /** Alterna entre lista e calendário. */
   readonly onToggleCalendar: () => void;
   /** True quando a visão de calendário está ativa (controla ícone/label). */
@@ -135,7 +131,8 @@ function HeroResultRow({ kpis }: { readonly kpis: FeedKpis }): ReactElement {
 /**
  * Herói teal da tela de Transações: título, período + nº de lançamentos,
  * RESULTADO (mono assinado, verde/vermelho) e, à direita, os fluxos curtos
- * (↑ receitas / ↓ despesas). Inclui os botões de alternar tema e calendário.
+ * (↑ receitas / ↓ despesas). O único controle auxiliar alterna o calendário;
+ * a preferência de tema fica exclusivamente em Configurações.
  * O gradiente segue o tema resolvido (mesmo padrão dos Cartões).
  *
  * @param props Período, KPIs, estado de tema/calendário e handlers.
@@ -144,8 +141,6 @@ function HeroResultRow({ kpis }: { readonly kpis: FeedKpis }): ReactElement {
 export function TxHero({
   periodLabel,
   kpis,
-  isDark,
-  onToggleTheme,
   onToggleCalendar,
   calendarActive,
 }: TxHeroProps): ReactElement {
@@ -183,12 +178,6 @@ export function TxHero({
               accessibilityLabel={calendarActive ? "Ver lista" : "Ver calendário"}
               testID="tx-hero-calendar-toggle"
               onPress={onToggleCalendar}
-            />
-            <HeroRoundButton
-              icon={isDark ? "white-balance-sunny" : "weather-night"}
-              accessibilityLabel="Alternar tema"
-              testID="tx-hero-theme-toggle"
-              onPress={onToggleTheme}
             />
           </XStack>
         </XStack>

@@ -29,7 +29,7 @@ jest.mock("@/features/transactions/hooks/use-transaction-mutations", () => ({
   useRestoreTransactionMutation: () => ({ mutateAsync: mockRestore }),
 }));
 
-const NOW = (): Date => new Date(2026, 5, 29);
+const NOW = (): Date => new Date("2026-06-29T12:00:00.000Z");
 
 const tx = (overrides: Partial<TransactionRecord> = {}): TransactionRecord =>
   ({
@@ -90,7 +90,63 @@ describe("usePaymentAssistantController", () => {
     await act(async () => {
       await result.current.pay();
     });
-    expect(mockMarkPaid).toHaveBeenCalledWith({ transactionId: "a", paidAt: "2026-06-29" });
+    expect(mockMarkPaid).toHaveBeenCalledWith({
+      transactionId: "a",
+      paidAt: "2026-06-29T12:00:00.000Z",
+    });
+    expect(result.current.current?.id).toBe("b");
+  });
+
+  it("keeps the current item visible and exposes retry when payment fails", async () => {
+    mockMarkPaid.mockRejectedValueOnce(new Error("offline"));
+    const { result } = renderController();
+
+    await act(async () => {
+      await result.current.pay();
+    });
+
+    expect(result.current.current?.id).toBe("a");
+    expect(result.current.actionError).toEqual(new Error("offline"));
+    expect(result.current.failedAction).toBe("pay");
+    expect(result.current.isActing).toBe(false);
+  });
+
+  it("retries the failed action and advances only after confirmed success", async () => {
+    mockMarkPaid
+      .mockRejectedValueOnce(new Error("offline"))
+      .mockResolvedValueOnce(undefined);
+    const { result } = renderController();
+
+    await act(async () => {
+      await result.current.pay();
+    });
+    await act(async () => {
+      await result.current.retryLastAction();
+    });
+
+    expect(mockMarkPaid).toHaveBeenCalledTimes(2);
+    expect(result.current.current?.id).toBe("b");
+    expect(result.current.actionError).toBeNull();
+  });
+
+  it("ignores a second pay tap while the first request is in flight", async () => {
+    let resolvePayment: (() => void) | undefined;
+    mockMarkPaid.mockImplementationOnce(
+      () =>
+        new Promise<void>((resolve) => {
+          resolvePayment = resolve;
+        }),
+    );
+    const { result } = renderController();
+
+    await act(async () => {
+      const first = result.current.pay();
+      const second = result.current.pay();
+      expect(mockMarkPaid).toHaveBeenCalledTimes(1);
+      resolvePayment?.();
+      await Promise.all([first, second]);
+    });
+
     expect(result.current.current?.id).toBe("b");
   });
 
@@ -110,6 +166,21 @@ describe("usePaymentAssistantController", () => {
     });
     expect(mockMarkPaid).toHaveBeenCalledTimes(2);
     expect(result.current.isDone).toBe(true);
+  });
+
+  it("preserves successful progress when mark-all stops on a later failure", async () => {
+    mockMarkPaid
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValueOnce(new Error("second item failed"));
+    const { result } = renderController();
+
+    await act(async () => {
+      await result.current.markAllPaid();
+    });
+
+    expect(result.current.current?.id).toBe("b");
+    expect(result.current.progress).toEqual({ current: 2, total: 2 });
+    expect(result.current.failedAction).toBe("mark-all");
   });
 
   it("undoes a payment by reverting to pending", async () => {

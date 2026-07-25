@@ -1,0 +1,74 @@
+appId: com.sensoriumit.auraxis
+name: Issue 730 - estabilidade e evidência visual crítica
+tags:
+  - critical
+  - visual
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "E-mail"
+- tapOn: "E-mail"
+- inputText: ${E2E_EMAIL}
+- tapOn: "Senha"
+- inputText: ${E2E_PASSWORD}
+- hideKeyboard
+- tapOn: "Entrar na Auraxis"
+- extendedWaitUntil:
+    visible: "Saldo geral"
+    timeout: 20000
+
+# A conta E2E precisa manter ao menos uma pendência aberta.
+- extendedWaitUntil:
+    visible: "Pendências em aberto"
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/01-pendencias
+- tapOn:
+    id: payment-assistant-close
+
+- tapOn:
+    id: tab-transacoes
+- extendedWaitUntil:
+    visible:
+      id: tx-hero
+    timeout: 15000
+- tapOn: "Analítico"
+- assertVisible: "Gastos por categoria"
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/02-transacoes-analitica
+
+- tapOn:
+    id: tx-hero-calendar-toggle
+- assertVisible:
+    id: financial-calendar
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/03-calendario
+- tapOn:
+    id: "calendar-day-with-transactions-.*"
+- assertVisible: "Movimentações do dia"
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/04-movimentacoes-do-dia
+- tapOn:
+    id: calendar-day-sheet-close
+
+- tapOn:
+    id: tab-insights
+- extendedWaitUntil:
+    visible:
+      id: insights-chart-beat
+    timeout: 15000
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/05-insights
+
+- tapOn:
+    id: tab-cartoes
+- extendedWaitUntil:
+    visible:
+      id: credit-cards-screen
+    timeout: 15000
+- runFlow:
+    when:
+      visible:
+        id: coach-tooltip-skip
+    commands:
+      - tapOn:
+          id: coach-tooltip-skip
+- assertVisible:
+    id: credit-cards-screen
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/06-cartoes

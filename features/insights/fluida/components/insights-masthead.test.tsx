@@ -23,7 +23,6 @@ const renderMasthead = (
 ) => {
   const onSelectCadence = jest.fn();
   const onSelectDimension = jest.fn();
-  const onToggleTheme = jest.fn();
   const utils = render(
     <TestProviders>
       <InsightsMasthead
@@ -31,15 +30,13 @@ const renderMasthead = (
         dimension="general"
         cadenceOptions={cadenceOptions}
         dimensionTabs={dimensionTabs}
-        isDark={false}
         onSelectCadence={onSelectCadence}
         onSelectDimension={onSelectDimension}
-        onToggleTheme={onToggleTheme}
         {...overrides}
       />
     </TestProviders>,
   );
-  return { ...utils, onSelectCadence, onSelectDimension, onToggleTheme };
+  return { ...utils, onSelectCadence, onSelectDimension };
 };
 
 describe("InsightsMasthead", () => {
@@ -65,9 +62,8 @@ describe("InsightsMasthead", () => {
     expect(onSelectDimension).toHaveBeenCalledWith("transactions");
   });
 
-  it("forwards theme-mode taps to the toggle handler", () => {
-    const { getByTestId, onToggleTheme } = renderMasthead();
-    fireEvent.press(getByTestId("insights-theme-mode-toggle"));
-    expect(onToggleTheme).toHaveBeenCalledTimes(1);
+  it("keeps theme controls exclusively in Settings", () => {
+    const { queryByTestId } = renderMasthead();
+    expect(queryByTestId("insights-theme-mode-toggle")).toBeNull();
   });
 });

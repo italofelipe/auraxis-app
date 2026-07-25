@@ -125,7 +125,7 @@ export const useDeleteTransactionMutation = () => {
 
 export interface MarkTransactionPaidVariables {
   readonly transactionId: string;
-  /** Effective payment date in YYYY-MM-DD format. */
+  /** Effective payment timestamp in ISO 8601 format. */
   readonly paidAt: string;
 }
 

@@ -1,5 +1,7 @@
 import {
   validateBundleGovernance,
+  validateEasArchiveGovernance,
+  validateMobileE2EGovernance,
   validateNodeRuntimeGovernance,
   validateReleaseReadinessGovernance,
   validateReleaseVersionGovernance,
@@ -16,6 +18,7 @@ const createValidRuntimeInputs = () => {
     workflowFiles: {
       ".github/workflows/ci.yml": "with:\n  node-version-file: .nvmrc\n",
       ".github/workflows/deploy-minimum.yml": "with:\n  node-version-file: .nvmrc\n",
+      ".github/workflows/mobile-critical-e2e.yml": "with:\n  node-version-file: .nvmrc\n",
       ".github/workflows/store-release.yml": "with:\n  node-version-file: .nvmrc\n",
     },
     ciLocalScript: [
@@ -52,7 +55,6 @@ describe("check-runtime-release-governance", () => {
       appConfig: {
         expo: {
           scheme: "auraxisapp",
-          newArchEnabled: true,
           experiments: { typedRoutes: true },
           ios: {
             bundleIdentifier: "com.sensoriumit.auraxis",
@@ -110,7 +112,6 @@ describe("check-runtime-release-governance", () => {
       appConfig: {
         expo: {
           scheme: "auraxisapp",
-          newArchEnabled: true,
           experiments: { typedRoutes: true },
           ios: {
             buildNumber: "1",
@@ -147,6 +148,141 @@ describe("check-runtime-release-governance", () => {
     });
 
     expect(errors).toContain("app.json must define expo.ios.bundleIdentifier");
+  });
+
+  test("rejects native switches removed by Expo SDK 55", () => {
+    const errors = validateReleaseReadinessGovernance({
+      appConfig: {
+        expo: {
+          newArchEnabled: true,
+          jsEngine: "hermes",
+          scheme: "auraxisapp",
+          experiments: { typedRoutes: true },
+          ios: {
+            bundleIdentifier: "com.sensoriumit.auraxis",
+            buildNumber: "1",
+          },
+          android: {
+            edgeToEdgeEnabled: true,
+            package: "com.sensoriumit.auraxis",
+            versionCode: 1,
+          },
+          extra: {
+            eas: {
+              projectId: "project-id",
+            },
+          },
+          plugins: ["expo-router", ["expo-splash-screen", {}]],
+        },
+      },
+      easConfig: {
+        cli: { version: ">= 16.13.0" },
+        build: {
+          development: { developmentClient: true },
+          preview: { distribution: "internal", android: { buildType: "apk" } },
+          production: {
+            distribution: "store",
+            android: { buildType: "app-bundle" },
+          },
+        },
+        submit: {
+          production: {
+            android: { track: "internal" },
+            ios: { ascAppId: "${ASC_APP_ID}" },
+          },
+        },
+      },
+    });
+
+    expect(errors).toContain(
+      "Expo SDK 55 config must omit obsolete newArchEnabled, jsEngine and edgeToEdgeEnabled fields",
+    );
+  });
+});
+
+describe("EAS source archive governance", () => {
+  test("requires .easignore to contain every .gitignore rule and native build exclusions", () => {
+    const gitIgnore = ["node_modules/", "android/", "ios/", ".env", "*.p8", "*.keystore"].join(
+      "\n",
+    );
+
+    expect(
+      validateEasArchiveGovernance({
+        easIgnore: `${gitIgnore}\n__tests__/\n`,
+        gitIgnore,
+      }),
+    ).toEqual([]);
+  });
+
+  test("rejects archives that can upload local dependencies or native directories", () => {
+    const errors = validateEasArchiveGovernance({
+      easIgnore: ".env\n*.p8\n*.keystore\n",
+      gitIgnore: "node_modules/\nandroid/\nios/\n.env\n*.p8\n*.keystore\n",
+    });
+
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("node_modules/"),
+        expect.stringContaining("build-safety exclusions"),
+      ]),
+    );
+  });
+});
+
+describe("native E2E governance", () => {
+  const validE2E = {
+    easConfig: {
+      build: {
+        "e2e-test": {
+          distribution: "internal",
+          withoutCredentials: true,
+          android: { buildType: "apk" },
+          ios: { simulator: true },
+        },
+      },
+    },
+    e2eWorkflow: [
+      "EAS_BUILD_PROFILE: e2e-test",
+      '--platform android --profile "$EAS_BUILD_PROFILE"',
+      '--platform ios --profile "$EAS_BUILD_PROFILE"',
+      "maestro test .maestro/10_mobile_stability_visual.yaml",
+      "maestro test .maestro/10_mobile_stability_visual.yaml",
+    ].join("\n"),
+    e2eFlow: [
+      "tab-insights",
+      "tab-cartoes",
+      "01-pendencias",
+      "02-transacoes-analitica",
+      "03-calendario",
+      "04-movimentacoes-do-dia",
+      "05-insights",
+      "06-cartoes",
+    ]
+      .map((value) =>
+        value.startsWith("tab-")
+          ? value
+          : `takeScreenshot: \${MAESTRO_TESTS_DIR}/${value}`,
+      )
+      .join("\n"),
+  };
+
+  test("accepts same-workflow native builds and all required screenshots", () => {
+    expect(validateMobileE2EGovernance(validE2E)).toEqual([]);
+  });
+
+  test("rejects a missing platform and incomplete visual evidence", () => {
+    const errors = validateMobileE2EGovernance({
+      ...validE2E,
+      e2eWorkflow:
+        'EAS_BUILD_PROFILE: e2e-test\n--platform android --profile "$EAS_BUILD_PROFILE"\nmaestro test',
+      e2eFlow: "tab-insights\ntab-cartoes",
+    });
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("build Android and iOS"),
+        expect.stringContaining("missing screenshots"),
+      ]),
+    );
   });
 });
 
@@ -188,9 +324,12 @@ describe("release version governance", () => {
             },
           },
         },
-        storeReleaseWorkflow: ["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "google-play-release.cjs"].join(
-          "\n",
-        ),
+        storeReleaseWorkflow: [
+          "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",
+          "google-play-release.cjs",
+          "APP_STORE_CONNECT_PRIVATE_KEY_BASE64",
+          "app-store-connect-release-notes.cjs",
+        ].join("\n"),
       }),
     ).toEqual([]);
   });
@@ -231,9 +370,12 @@ describe("release version governance", () => {
           },
         },
       },
-      storeReleaseWorkflow: ["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "google-play-release.cjs"].join(
-        "\n",
-      ),
+      storeReleaseWorkflow: [
+        "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",
+        "google-play-release.cjs",
+        "APP_STORE_CONNECT_PRIVATE_KEY_BASE64",
+        "app-store-connect-release-notes.cjs",
+      ].join("\n"),
     });
 
     expect(errors).toContain("package.json, app.json and release manifest versions must match");

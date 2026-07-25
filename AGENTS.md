@@ -67,6 +67,23 @@ npm run quality-check
 Toda feature nova deve ter entrada em `config/feature-flags.json`.
 Verificar com: `node scripts/check-new-feature-flag-governance.cjs`
 
+## Linguagem visual — regra permanente
+
+- Cards de conteúdo usam `AppSurfaceCard` com variante `flat` por padrão:
+  raio de 14 px, borda hairline semântica e nenhuma sombra/elevation.
+- `raised` é reservado a hierarquia real e limita a profundidade a
+  `y=1`, opacidade `0,08`, blur `4`, elevation `1`.
+- Sheets/overlays usam `overlay`, com raio superior de 24 px e elevação curta.
+- Pills/chips podem continuar totalmente arredondados porque são controles,
+  não containers.
+- Nunca adicionar `shadow*` ou `elevation` diretamente em cards. Use
+  `AppSurfaceCard`/`semanticShadows`; exceções estruturais ficam na allowlist de
+  `scripts/check-visual-surface-governance.cjs`.
+- A troca de tema existe somente em Configurações → Aparência. Telas de
+  produto não devem expor atalhos de tema.
+
+Validar com: `npm run governance:all`.
+
 ## Contratos de API
 
 Antes de consumir endpoint novo:

@@ -6,6 +6,7 @@ import { Paragraph, YStack } from "tamagui";
 import { appRoutes } from "@/core/navigation/routes";
 import { PRIVACY_CENTER_FEATURE_FLAG_KEY } from "@/features/legal/privacy-center-config";
 import { AppearanceSection } from "@/features/user-profile/components/appearance-section";
+import { BuildInformationSection } from "@/features/user-profile/components/build-information-section";
 import { LanguageSection } from "@/features/user-profile/components/language-section";
 import { SecuritySection } from "@/features/user-profile/components/security-section";
 import { UserProfileForm } from "@/features/user-profile/components/user-profile-form";
@@ -61,6 +62,7 @@ export function UserProfileScreen(): ReactElement {
       <SecuritySection />
       <LogoutCard controller={controller} />
       <LegalSection />
+      <BuildInformationSection />
       <DangerZoneCta />
     </AppScreen>
   );
