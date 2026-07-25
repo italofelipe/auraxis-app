@@ -119,6 +119,7 @@ jobs:
             ${{ runner.temp }}/maestro-results/
             ${{ runner.temp }}/e2e-sha.txt
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
 
   ios:
@@ -201,4 +202,5 @@ jobs:
             ${{ runner.temp }}/maestro-results/
             ${{ runner.temp }}/e2e-sha.txt
           if-no-files-found: error
+          include-hidden-files: true
           retention-days: 30
