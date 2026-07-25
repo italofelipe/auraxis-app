@@ -24,6 +24,9 @@ env:
   EXPO_PUBLIC_APP_ENV: ${{ vars.EXPO_PUBLIC_APP_ENV }}
   EXPO_PUBLIC_POSTHOG_API_KEY: ${{ vars.EXPO_PUBLIC_POSTHOG_API_KEY }}
   EXPO_PUBLIC_POSTHOG_HOST: ${{ vars.EXPO_PUBLIC_POSTHOG_HOST }}
+  # Paridade com o profile e2e-test do eas.json: build de teste não sobe
+  # source maps para o Sentry (sem credenciais no runner).
+  SENTRY_DISABLE_AUTO_UPLOAD: "true"
   E2E_EMAIL: ${{ secrets.E2E_EMAIL }}
   E2E_PASSWORD: ${{ secrets.E2E_PASSWORD }}
 
