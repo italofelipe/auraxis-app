@@ -46,6 +46,17 @@ type MockRouteHandler = (
   context: MockRouteContext,
 ) => MockApiResponsePayload | null;
 
+let aiConsentGranted = false;
+
+const mockAiConsentRecord = {
+  id: "00000000-0000-4000-8000-000000000712",
+  kind: "ai",
+  version: "1.0",
+  action: "granted",
+  source: "app",
+  created_at: "2026-07-24T20:00:00Z",
+} as const;
+
 interface SerializedSubscriptionEnvelope {
   readonly subscription: {
     readonly id: string;
@@ -135,7 +146,27 @@ const getPathname = (config: InternalAxiosRequestConfig): string => {
 const getQueryParams = (config: InternalAxiosRequestConfig): URLSearchParams => {
   const rawUrl = config.url ?? "";
   const search = rawUrl.includes("?") ? rawUrl.slice(rawUrl.indexOf("?")) : "";
-  return new URLSearchParams(search);
+  const query = new URLSearchParams(search);
+  const params = config.params as
+    | URLSearchParams
+    | Record<string, unknown>
+    | undefined;
+
+  if (params instanceof URLSearchParams) {
+    params.forEach((value, key) => {
+      query.set(key, value);
+    });
+    return query;
+  }
+
+  Object.entries(params ?? {}).forEach(([key, value]) => {
+    if (value === null || typeof value === "undefined") {
+      return;
+    }
+    query.set(key, String(value));
+  });
+
+  return query;
 };
 
 const readJsonBody = (config: InternalAxiosRequestConfig): Record<string, unknown> => {
@@ -589,6 +620,31 @@ const handleInsightRoutes: MockRouteHandler = (context) => {
   return null;
 };
 
+const handleAiAssistantRoutes: MockRouteHandler = (context) => {
+  if (context.method === "GET" && context.pathname === "/me/consents") {
+    const items = aiConsentGranted ? [mockAiConsentRecord] : [];
+    return ok({ items, total: items.length });
+  }
+
+  if (context.method === "POST" && context.pathname === "/me/consents") {
+    aiConsentGranted = true;
+    return created(mockAiConsentRecord);
+  }
+
+  if (context.method === "POST" && context.pathname === "/ai/chat") {
+    return ok({
+      answer: "No ambiente de demonstração, seus gastos com alimentação estão dentro do planejado.",
+      model: "auraxis-mock",
+      tokens_used: 0,
+      cost_usd: 0,
+      period_label: "julho/2026",
+      tool_rounds: 1,
+    });
+  }
+
+  return null;
+};
+
 const handleImportRoutes: MockRouteHandler = (context) => {
   if (context.method === "POST" && context.pathname === "/v2/import/detect") {
     return ok(serializeImportDetect());
@@ -696,6 +752,7 @@ const routeHandlers: MockRouteHandler[] = [
   handleSubscriptionRoutes,
   handleDashboardRoutes,
   handleInsightRoutes,
+  handleAiAssistantRoutes,
   handleImportRoutes,
   handleWalletRoute,
   handleGoalRoute,

@@ -31,6 +31,8 @@ export const apiEndpointCatalog = {
     "POST /ai/insights/generate",
     "GET /ai/insights/history",
   ],
+  aiChat: ["POST /ai/chat"],
+  consents: ["GET /me/consents", "POST /me/consents"],
   spendingPatterns: [
     "POST /ai/insights/spending-patterns",
     "GET /ai/insights/spending-patterns/latest",

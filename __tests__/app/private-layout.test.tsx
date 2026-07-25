@@ -66,6 +66,10 @@ jest.mock("@/features/insights/hooks/use-weekly-insight-query", () => ({
   useWeeklyInsight: jest.fn(),
 }));
 
+jest.mock("@/features/ai-chat/screens/ai-chat-host", () => ({
+  AiChatHost: () => null,
+}));
+
 jest.mock("@/shared/feature-flags", () => ({
   isFeatureEnabled: jest.fn(),
 }));

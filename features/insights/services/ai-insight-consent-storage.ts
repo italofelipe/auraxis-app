@@ -1,4 +1,8 @@
-import * as SecureStore from "expo-secure-store";
+import {
+  deleteSecureValue,
+  getSecureValue,
+  setSecureValue,
+} from "@/core/storage/secure-key-value-storage";
 
 export const AI_INSIGHT_CONSENT_STORAGE_KEY = "auraxis.ai-insight-consent.v1";
 export const AI_INSIGHT_CONSENT_COPY_VERSION = "ai-insights-transparency-v1";
@@ -44,7 +48,7 @@ const hydrateConsent = (payload: unknown): AiInsightConsentSnapshot => {
 
 export const loadAiInsightConsent = async (): Promise<AiInsightConsentSnapshot> => {
   try {
-    const payload = await SecureStore.getItemAsync(AI_INSIGHT_CONSENT_STORAGE_KEY);
+    const payload = await getSecureValue(AI_INSIGHT_CONSENT_STORAGE_KEY);
     if (!payload) {
       return EMPTY_CONSENT;
     }
@@ -69,11 +73,14 @@ export const persistAiInsightConsent = async (
     grantedAt,
   };
 
-  await SecureStore.setItemAsync(AI_INSIGHT_CONSENT_STORAGE_KEY, JSON.stringify(payload));
+  await setSecureValue(
+    AI_INSIGHT_CONSENT_STORAGE_KEY,
+    JSON.stringify(payload),
+  );
 
   return snapshot;
 };
 
 export const clearAiInsightConsent = async (): Promise<void> => {
-  await SecureStore.deleteItemAsync(AI_INSIGHT_CONSENT_STORAGE_KEY);
+  await deleteSecureValue(AI_INSIGHT_CONSENT_STORAGE_KEY);
 };

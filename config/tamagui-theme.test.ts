@@ -1,6 +1,7 @@
 import {
   auraxisDefaultTheme,
   auraxisThemes,
+  tamaguiConfig,
 } from "@/config/tamagui-theme";
 
 describe("tamagui theme config", () => {
@@ -19,5 +20,19 @@ describe("tamagui theme config", () => {
       ...Object.values(auraxisThemes.auraxis_dark),
     ];
     expect(allValues.some((value) => String(value).startsWith("$"))).toBe(false);
+  });
+
+  it("defines default size and spacing aliases required by Tamagui", () => {
+    const defaultSize =
+      tamaguiConfig.tokensParsed.size[
+        "$true" as keyof typeof tamaguiConfig.tokensParsed.size
+      ];
+    const defaultSpace =
+      tamaguiConfig.tokensParsed.space[
+        "$true" as keyof typeof tamaguiConfig.tokensParsed.space
+      ];
+
+    expect(defaultSize.val).toBe(40);
+    expect(defaultSpace.val).toBe(16);
   });
 });

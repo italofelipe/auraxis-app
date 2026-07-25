@@ -153,6 +153,7 @@ const tokens = createTokens({
     6: semanticSpacing.xl,
     7: semanticSpacing["2xl"],
     8: semanticSpacing["3xl"],
+    true: semanticSpacing.md,
   },
   size: {
     0: 0,
@@ -164,6 +165,7 @@ const tokens = createTokens({
     6: 52,
     7: 60,
     8: 72,
+    true: 40,
   },
   radius: {
     0: 0,

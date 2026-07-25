@@ -1,7 +1,10 @@
-import * as SecureStore from "expo-secure-store";
-
 import { withSessionMetadata } from "@/core/session/session-policy";
 import type { StoredSession } from "@/core/session/types";
+import {
+  deleteSecureValue,
+  getSecureValue,
+  setSecureValue,
+} from "@/core/storage/secure-key-value-storage";
 
 const SESSION_KEY = "auraxis.session";
 const LEGACY_ACCESS_TOKEN_KEY = "auraxis.access-token";
@@ -53,8 +56,8 @@ const parseStoredSession = (payload: string | null): StoredSession | null => {
 
 const loadLegacySession = async (): Promise<StoredSession | null> => {
   const [accessToken, userEmail] = await Promise.all([
-    SecureStore.getItemAsync(LEGACY_ACCESS_TOKEN_KEY),
-    SecureStore.getItemAsync(LEGACY_USER_EMAIL_KEY),
+    getSecureValue(LEGACY_ACCESS_TOKEN_KEY),
+    getSecureValue(LEGACY_USER_EMAIL_KEY),
   ]);
 
   if (!accessToken || !userEmail) {
@@ -76,7 +79,7 @@ const loadLegacySession = async (): Promise<StoredSession | null> => {
 };
 
 export const loadStoredSession = async (): Promise<LoadedStoredSession> => {
-  const payload = await SecureStore.getItemAsync(SESSION_KEY);
+  const payload = await getSecureValue(SESSION_KEY);
   const hasCanonicalPayload = typeof payload === "string" && payload.length > 0;
   const canonicalSession = parseStoredSession(payload);
 
@@ -108,19 +111,19 @@ export const persistStoredSession = async (
   session: StoredSession,
 ): Promise<void> => {
   const nextSession = withSessionMetadata(session);
-  await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(nextSession));
+  await setSecureValue(SESSION_KEY, JSON.stringify(nextSession));
 };
 
 export const clearLegacyStoredSession = async (): Promise<void> => {
   await Promise.all([
-    SecureStore.deleteItemAsync(LEGACY_ACCESS_TOKEN_KEY),
-    SecureStore.deleteItemAsync(LEGACY_USER_EMAIL_KEY),
+    deleteSecureValue(LEGACY_ACCESS_TOKEN_KEY),
+    deleteSecureValue(LEGACY_USER_EMAIL_KEY),
   ]);
 };
 
 export const clearStoredSession = async (): Promise<void> => {
   await Promise.all([
-    SecureStore.deleteItemAsync(SESSION_KEY),
+    deleteSecureValue(SESSION_KEY),
     clearLegacyStoredSession(),
   ]);
 };

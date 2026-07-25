@@ -20,6 +20,21 @@ No network call or database mutation is required until the user explicitly saves
 4. `enabled-prod` means the app fallback treats the feature as enabled in production-ready builds.
 5. Remote provider decisions can still override the local fallback when Unleash mode is configured.
 
+## AI Financial Chat Flow
+
+1. `app/(private)/_layout.tsx` mounts `AiChatHost` after the authenticated tab navigator. The launcher remains available across private screens while the session exists.
+2. `useAiChatController` resolves `app.features.ai-chat`. When disabled, the host returns `null` and the entitlement/consent hooks are disabled.
+3. Opening the sheet checks the canonical `advanced_simulations` entitlement. A user without access sees the Premium route CTA and no chat request is made.
+4. For an entitled user, `useAiInsightConsent` reads `GET /me/consents`. A current `ai/granted` event unlocks the assistant; absence or revocation shows the transparency gate.
+5. Granting calls `POST /me/consents` with `{ kind: "ai", version: "1.0", action: "granted", source: "app" }`. Only the successful server response updates the in-memory state; iOS/Android SecureStore then receives a best-effort cache copy. Expo Web previews use volatile memory and never persist this sensitive state to `localStorage`.
+6. The composer trims the question, enforces the API maximum of 1,000 characters and calls `POST /ai/chat` through `aiChatService`.
+7. The service applies a 45-second timeout and maps `answer`, `model`, `tokens_used`, `cost_usd`, `period_label` and `tool_rounds` into the mobile domain result.
+8. `useAiChatSession` appends the user message once and then the assistant answer. Closing/reopening the modal preserves the in-memory transcript; logout clears it by unmounting the private layout.
+9. `ENTITLEMENT_REQUIRED`, `AI_CONSENT_REQUIRED`, `AI_INSIGHT_BUDGET_EXCEEDED`, validation, timeout and provider/server failures map to separate UI copy.
+10. Timeout/server failures retain the pending question for explicit retry without adding a second user bubble. A consent rejection offers a new server grant and automatically retries that same pending question.
+11. The backend owns daily quota and cost policy. The app does not hard-code remaining calls and does not automatically retry budget, validation or entitlement failures.
+12. Analytics receives only `ai.chat.opened`, `ai.chat.question.sent`, `ai.chat.answer.received` and `ai.chat.request.failed` with non-sensitive booleans/classifications. The question and answer never leave the request/transcript path.
+
 ## Production Runtime Config Flow
 
 1. `shared/config/runtime.ts` reads `EXPO_PUBLIC_APP_ENV` from Expo public env and falls back to `expo.extra.appEnv` or `development`.
@@ -104,6 +119,8 @@ No network call or database mutation is required until the user explicitly saves
 - Shared-entries tests assert controller counts, summary rendering, tab counters, incoming/outgoing invitation separation, outgoing composer actions and stable tab actions.
 - Transaction observation tests cover schema validation, form submission/edit prefill, controller payloads, duplicate behavior, feed mapping, card rendering and action sheet details.
 - Subscription tests cover provider routing, canonical URL fallback, API response mapping, duplicate-request prevention, query/entitlement invalidation, explicit confirmation, retry, loading and post-cancellation states.
+- AI chat tests cover request/envelope mapping, 1–1,000 character validation, timeout/error taxonomy, consent authority/cache fallback, entitlement/feature gates, session transcript, sanitized analytics, retry without duplication and the rendered Premium/consent/chat states.
+- The visual E2E runs the versioned mock adapter in a `390x844` Expo Web viewport. The mock router test protects Axios `config.params`, while storage/theme tests protect the Web preview without weakening native SecureStore behavior.
 
 ## Automatic Mobile Delivery Flow
 
