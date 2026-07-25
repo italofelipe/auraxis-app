@@ -76,13 +76,19 @@ jobs:
           restore-keys: |
             gradle-e2e-${{ runner.os }}-
 
-      # Só x86_64: o emulador não precisa das ABIs ARM e compilar as 4
-      # arquiteturas estourava o timeout de 90 min no runner de 4 cores.
+      # Só x86_64 (o emulador não usa ABIs ARM); lintVital fica de fora — o CI
+      # já tem job de Lint e as JVMs extras causavam OOM no runner de 4 cores
+      # (workers mortos pelo kernel deixavam o Gradle pendurado até o timeout).
+      # O `timeout` garante falha rápida com log em vez de 90 min cancelados.
       - name: Build Android APK on the runner
         run: |
           set -euo pipefail
+          df -h / | tail -1
           cd android
-          ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=x86_64
+          timeout -k 30 3300 ./gradlew assembleRelease --no-daemon --console=plain \
+            -PreactNativeArchitectures=x86_64 \
+            -x lintVitalRelease -x lintVitalAnalyzeRelease -x lintVitalReportRelease
+          df -h / | tail -1
           cp app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/auraxis-e2e.apk"
           printf '%s\n' "$GITHUB_SHA" > "$RUNNER_TEMP/e2e-sha.txt"
 
