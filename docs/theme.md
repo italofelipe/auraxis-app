@@ -18,6 +18,27 @@ The deprecated orange/brown palette must not be used for new UI work.
 - `auraxis_dark` preserves the DS v3 dark Market Pulse palette.
 - `auraxis_light` keeps the DS v3 cyan/violet/lime/red accents and uses native high-contrast light surfaces.
 - The profile Appearance section persists `system`, `light`, and `dark` in `AppShellStore`.
+- Appearance in Settings/Profile is the only place allowed to change theme.
+  Product screens, heroes and tours must not expose local theme shortcuts.
+
+## Surface language
+
+`AppSurfaceCard` is the single semantic content surface:
+
+| Variant | Radius | Border | Depth | Use |
+|---|---:|---|---|---|
+| `flat` (default) | 14 px | hairline semantic | none | content cards and grouped information |
+| `raised` | 14 px | hairline semantic | y 1, opacity 0.08, blur 4, elevation 1 | deliberately emphasized content |
+| `overlay` | top 24 px | hairline semantic | short overlay token | sheets and transient overlays |
+
+Pills and chips keep a fully rounded shape because they are controls, not
+containers. Custom white/light content boxes must be migrated to semantic
+surface tokens; direct `shadow*`/`elevation` declarations are forbidden outside
+the structural allowlist.
+
+`npm run governance:all` runs
+`scripts/check-visual-surface-governance.cjs` and rejects new direct depth in
+feature/content components.
 
 ## Native differences
 
@@ -48,3 +69,5 @@ For each screen, verify both `auraxis_light` and `auraxis_dark` for:
 - input background, border, placeholder, and error colors;
 - tab and icon active/inactive states;
 - no overlapped text on small screens.
+- content cards remain visually flat and do not accumulate nested shadows;
+- danger badges/buttons use a high-contrast semantic foreground.

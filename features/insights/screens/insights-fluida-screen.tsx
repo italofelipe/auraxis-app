@@ -53,10 +53,8 @@ export function InsightsFluidaScreen({
           dimension={controller.dimension}
           cadenceOptions={controller.cadenceOptions}
           dimensionTabs={controller.dimensionTabs}
-          isDark={controller.isDark}
           onSelectCadence={controller.selectCadence}
           onSelectDimension={controller.selectDimension}
-          onToggleTheme={controller.toggleTheme}
         />
 
         <InsightLead lead={vm} />

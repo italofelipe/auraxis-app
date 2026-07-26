@@ -98,8 +98,14 @@ const validateReleaseReadinessGovernance = ({ appConfig, easConfig }) => {
     errors.push("app.json must define expo.scheme");
   }
 
-  if (expo.newArchEnabled !== true) {
-    errors.push("app.json must keep expo.newArchEnabled=true");
+  if (
+    Object.hasOwn(expo, "newArchEnabled") ||
+    Object.hasOwn(expo, "jsEngine") ||
+    Object.hasOwn(expo.android ?? {}, "edgeToEdgeEnabled")
+  ) {
+    errors.push(
+      "Expo SDK 55 config must omit obsolete newArchEnabled, jsEngine and edgeToEdgeEnabled fields",
+    );
   }
 
   if (experiments.typedRoutes !== true) {
@@ -185,6 +191,114 @@ const validateReleaseReadinessGovernance = ({ appConfig, easConfig }) => {
   return errors;
 };
 
+const ignoreRules = (contents) => {
+  return String(contents ?? "")
+    .split(/\r?\n/u)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0 && !line.startsWith("#"));
+};
+
+const validateEasArchiveGovernance = ({ easIgnore, gitIgnore }) => {
+  const errors = [];
+  const easRules = new Set(ignoreRules(easIgnore));
+  const missingGitRules = ignoreRules(gitIgnore).filter((rule) => !easRules.has(rule));
+  const mandatoryRules = ["node_modules/", "android/", "ios/", ".env", "*.p8", "*.keystore"];
+  const missingMandatoryRules = mandatoryRules.filter((rule) => !easRules.has(rule));
+
+  if (missingGitRules.length > 0) {
+    errors.push(
+      `.easignore must be a strict superset of .gitignore; missing: ${missingGitRules.join(", ")}`,
+    );
+  }
+
+  if (missingMandatoryRules.length > 0) {
+    errors.push(
+      `.easignore is missing build-safety exclusions: ${missingMandatoryRules.join(", ")}`,
+    );
+  }
+
+  return errors;
+};
+
+const validateMobileE2EGovernance = ({ easConfig, e2eWorkflow, e2eFlow }) => {
+  const errors = [];
+  const profile = easConfig?.build?.["e2e-test"];
+
+  if (profile?.withoutCredentials !== true) {
+    errors.push("eas.json build.e2e-test must use withoutCredentials=true");
+  }
+  if (profile?.distribution !== "internal") {
+    errors.push("eas.json build.e2e-test must use internal distribution");
+  }
+  if (profile?.android?.buildType !== "apk") {
+    errors.push("eas.json build.e2e-test must produce an Android APK");
+  }
+  if (profile?.ios?.simulator !== true) {
+    errors.push("eas.json build.e2e-test must produce an iOS simulator build");
+  }
+
+  const workflow = String(e2eWorkflow ?? "");
+  // Híbrido (#734): E2E builda no runner; a cota EAS fica reservada para loja.
+  // Nota: o build do simulador usa a assinatura ad-hoc padrão do Xcode —
+  // desligar code signing quebra Keychain/SecureStore e trava o startup.
+  if (
+    !/expo prebuild --platform android --no-install/u.test(workflow) ||
+    !/expo prebuild --platform ios --no-install/u.test(workflow) ||
+    !/gradlew assembleRelease/u.test(workflow) ||
+    !/-sdk iphonesimulator/u.test(workflow)
+  ) {
+    errors.push(
+      "Native E2E workflow must build Android and iOS on the runner (prebuild + assembleRelease + xcodebuild simulator)",
+    );
+  }
+  if (/eas build/u.test(workflow)) {
+    errors.push(
+      "Native E2E workflow must not consume EAS build quota (hybrid: EAS is reserved for store builds)",
+    );
+  }
+  if (
+    (workflow.match(/maestro test/gu) ?? []).length < 2 ||
+    !/10_mobile_stability_visual\.yaml/u.test(workflow)
+  ) {
+    errors.push("Native E2E workflow must run the critical Maestro flow on both platforms");
+  }
+  if (
+    (workflow.match(/id:\s*validate-e2e-credentials/gu) ?? []).length < 2 ||
+    !/Missing E2E_EMAIL/u.test(workflow) ||
+    !/Missing E2E_PASSWORD/u.test(workflow)
+  ) {
+    errors.push("Native E2E workflow must fail before builds when test credentials are missing");
+  }
+  if (
+    (workflow.match(/steps\.validate-e2e-credentials\.outcome == 'success'/gu) ?? []).length < 2
+  ) {
+    errors.push("Native E2E artifact uploads must be skipped when credential validation fails");
+  }
+
+  const flow = String(e2eFlow ?? "");
+  const requiredScreenshots = [
+    "01-pendencias",
+    "02-transacoes-analitica",
+    "03-calendario",
+    "04-movimentacoes-do-dia",
+    "05-insights",
+    "06-cartoes",
+  ];
+  const missingScreenshots = requiredScreenshots.filter(
+    (screenshot) => !flow.includes(`MAESTRO_TESTS_DIR}/${screenshot}`),
+  );
+  if (missingScreenshots.length > 0) {
+    errors.push(
+      `Critical Maestro flow is missing screenshots: ${missingScreenshots.join(", ")}`,
+    );
+  }
+  if (!/tab-insights/u.test(flow) || !/tab-cartoes/u.test(flow)) {
+    errors.push("Critical Maestro flow must navigate through Insights and Cartões");
+  }
+
+  return errors;
+};
+
 const validateReleaseVersionGovernance = ({
   appConfig,
   deliveryWorkflow,
@@ -252,6 +366,17 @@ const validateReleaseVersionGovernance = ({
     !/google-play-release\.cjs/u.test(storeReleaseWorkflow)
   ) {
     errors.push("Store workflow must attach notes before completing Google Play release");
+  }
+
+  if (
+    !/APP_STORE_CONNECT_PRIVATE_KEY_BASE64/u.test(storeReleaseWorkflow) ||
+    !/app-store-connect-release-notes\.cjs/u.test(storeReleaseWorkflow)
+  ) {
+    errors.push("Store workflow must attach detailed What to Test notes to TestFlight");
+  }
+
+  if (/--what-to-test/u.test(storeReleaseWorkflow)) {
+    errors.push("Store workflow must not use the Enterprise-only EAS --what-to-test flag");
   }
 
   if (
@@ -332,10 +457,14 @@ const loadGovernanceInputs = () => {
     ciLocalScript: readTextFile("scripts/run_ci_like_actions_local.sh"),
     ciWorkflow: readTextFile(".github/workflows/ci.yml"),
     codingStandardsDoc: readTextFile("CODING_STANDARDS.md"),
+    easIgnore: readTextFile(".easignore"),
     easConfig: readJsonFile("eas.json"),
+    e2eFlow: readTextFile(".maestro/10_mobile_stability_visual.yaml"),
+    e2eWorkflow: readTextFile(".github/workflows/mobile-critical-e2e.yml"),
     deliveryWorkflow: readTextFile(".github/workflows/delivery-after-ci.yml"),
     minimumDeployWorkflow: readTextFile(".github/workflows/deploy-minimum.yml"),
     nvmrc: readTextFile(".nvmrc"),
+    gitIgnore: readTextFile(".gitignore"),
     packageJson: readJsonFile("package.json"),
     pullRequestTemplate: readTextFile(".github/pull_request_template.md"),
     qualityGatesDoc: readTextFile(".context/quality_gates.md"),
@@ -350,6 +479,9 @@ const loadGovernanceInputs = () => {
       ".github/workflows/delivery-after-ci.yml": readTextFile(
         ".github/workflows/delivery-after-ci.yml",
       ),
+      ".github/workflows/mobile-critical-e2e.yml": readTextFile(
+        ".github/workflows/mobile-critical-e2e.yml",
+      ),
       ".github/workflows/store-release.yml": readTextFile(".github/workflows/store-release.yml"),
     },
   };
@@ -360,6 +492,8 @@ const run = () => {
   const errors = [
     ...validateNodeRuntimeGovernance(inputs),
     ...validateReleaseReadinessGovernance(inputs),
+    ...validateEasArchiveGovernance(inputs),
+    ...validateMobileE2EGovernance(inputs),
     ...validateReleaseVersionGovernance(inputs),
     ...validateBundleGovernance(inputs),
   ];
@@ -387,6 +521,8 @@ module.exports = {
   loadGovernanceInputs,
   run,
   validateBundleGovernance,
+  validateEasArchiveGovernance,
+  validateMobileE2EGovernance,
   validateNodeRuntimeGovernance,
   validateReleaseReadinessGovernance,
   validateReleaseVersionGovernance,

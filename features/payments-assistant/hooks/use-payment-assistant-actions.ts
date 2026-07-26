@@ -6,7 +6,13 @@
  * drives navigation.
  */
 
-import { type Dispatch, type SetStateAction, useCallback } from "react";
+import {
+  type Dispatch,
+  type SetStateAction,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 
 import type { UpdateTransactionCommand } from "@/features/transactions/contracts";
 import {
@@ -46,15 +52,14 @@ export interface AssistantActions {
   readonly skipCard: () => void;
   readonly markAllPaid: () => Promise<void>;
   readonly undo: () => Promise<DeckAction | null>;
+  readonly isActing: boolean;
+  readonly actionError: unknown | null;
+  readonly failedAction: AssistantActionKind | null;
+  readonly dismissActionError: () => void;
+  readonly retryLastAction: () => Promise<void>;
 }
 
-/** Formats a Date as a local `YYYY-MM-DD` calendar date. */
-const toIsoDate = (date: Date): string => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const day = String(date.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-};
+export type AssistantActionKind = "pay" | "discard" | "mark-all" | "undo";
 
 /**
  * Builds the deck action handlers over the given dependencies.
@@ -64,65 +69,157 @@ const toIsoDate = (date: Date): string => {
  */
 export const useAssistantActions = (deps: AssistantActionsDeps): AssistantActions => {
   const { deck, setDeck, setLastAction, mutations, now } = deps;
+  const actionInFlightRef = useRef(false);
+  const [isActing, setIsActing] = useState(false);
+  const [actionError, setActionError] = useState<unknown | null>(null);
+  const [failedAction, setFailedAction] = useState<AssistantActionKind | null>(null);
+
+  const executeAction = useCallback(
+    async (
+      kind: AssistantActionKind,
+      operation: () => Promise<void>,
+    ): Promise<boolean> => {
+      if (actionInFlightRef.current) {
+        return false;
+      }
+
+      actionInFlightRef.current = true;
+      setIsActing(true);
+      setActionError(null);
+
+      try {
+        await operation();
+        setFailedAction(null);
+        return true;
+      } catch (error) {
+        setActionError(error);
+        setFailedAction(kind);
+        return false;
+      } finally {
+        actionInFlightRef.current = false;
+        setIsActing(false);
+      }
+    },
+    [],
+  );
 
   const pay = useCallback(async (): Promise<void> => {
     const card = currentCard(deck);
     if (!card) {
       return;
     }
-    await mutations.markPaid.mutateAsync({ transactionId: card.id, paidAt: toIsoDate(now()) });
-    setDeck((state) => advanceDeck(state, "paid"));
-    setLastAction({ kind: "paid", card });
-  }, [deck, mutations, now, setDeck, setLastAction]);
+    await executeAction("pay", async () => {
+      await mutations.markPaid.mutateAsync({
+        transactionId: card.id,
+        paidAt: now().toISOString(),
+      });
+      setDeck((state) => advanceDeck(state, "paid"));
+      setLastAction({ kind: "paid", card });
+    });
+  }, [deck, executeAction, mutations.markPaid, now, setDeck, setLastAction]);
 
   const discard = useCallback(async (): Promise<void> => {
     const card = currentCard(deck);
     if (!card) {
       return;
     }
-    await mutations.remove.mutateAsync({ transactionId: card.id, scope: "occurrence" });
-    setDeck((state) => advanceDeck(state, "deleted"));
-    setLastAction({ kind: "deleted", card });
-  }, [deck, mutations, setDeck, setLastAction]);
+    await executeAction("discard", async () => {
+      await mutations.remove.mutateAsync({
+        transactionId: card.id,
+        scope: "occurrence",
+      });
+      setDeck((state) => advanceDeck(state, "deleted"));
+      setLastAction({ kind: "deleted", card });
+    });
+  }, [deck, executeAction, mutations.remove, setDeck, setLastAction]);
 
   const skipCard = useCallback((): void => {
+    if (actionInFlightRef.current) {
+      return;
+    }
     const card = currentCard(deck);
     if (!card) {
       return;
     }
+    setActionError(null);
+    setFailedAction(null);
     setDeck((state) => advanceDeck(state, "skipped"));
     setLastAction({ kind: "skipped", card });
   }, [deck, setDeck, setLastAction]);
 
   const markAllPaid = useCallback(async (): Promise<void> => {
-    let working = deck;
-    let card = currentCard(working);
-    while (card) {
-      await mutations.markPaid.mutateAsync({ transactionId: card.id, paidAt: toIsoDate(now()) });
-      working = advanceDeck(working, "paid");
-      setLastAction({ kind: "paid", card });
-      card = currentCard(working);
-    }
-    setDeck(working);
-  }, [deck, mutations, now, setDeck, setLastAction]);
+    await executeAction("mark-all", async () => {
+      let working = deck;
+      let card = currentCard(working);
+      while (card) {
+        await mutations.markPaid.mutateAsync({
+          transactionId: card.id,
+          paidAt: now().toISOString(),
+        });
+        working = advanceDeck(working, "paid");
+        setDeck(working);
+        setLastAction({ kind: "paid", card });
+        card = currentCard(working);
+      }
+    });
+  }, [deck, executeAction, mutations.markPaid, now, setDeck, setLastAction]);
 
   const undo = useCallback(async (): Promise<DeckAction | null> => {
     const { deck: previous, undone } = undoDeck(deck);
     if (!undone) {
       return null;
     }
-    setDeck(previous);
-    setLastAction(null);
-    if (undone.kind === "paid") {
-      await mutations.update.mutateAsync({
-        transactionId: undone.card.id,
-        payload: { status: "pending", paidAt: null },
-      });
-    } else if (undone.kind === "deleted") {
-      await mutations.restore.mutateAsync(undone.card.id);
-    }
-    return undone;
-  }, [deck, mutations, setDeck, setLastAction]);
+    let succeeded = false;
+    await executeAction("undo", async () => {
+      if (undone.kind === "paid") {
+        await mutations.update.mutateAsync({
+          transactionId: undone.card.id,
+          payload: { status: "pending", paidAt: null },
+        });
+      } else if (undone.kind === "deleted") {
+        await mutations.restore.mutateAsync(undone.card.id);
+      }
+      setDeck(previous);
+      setLastAction(null);
+      succeeded = true;
+    });
+    return succeeded ? undone : null;
+  }, [
+    deck,
+    executeAction,
+    mutations.restore,
+    mutations.update,
+    setDeck,
+    setLastAction,
+  ]);
 
-  return { pay, discard, skipCard, markAllPaid, undo };
+  const dismissActionError = useCallback((): void => {
+    setActionError(null);
+    setFailedAction(null);
+  }, []);
+
+  const retryLastAction = useCallback(async (): Promise<void> => {
+    if (failedAction === "pay") {
+      await pay();
+    } else if (failedAction === "discard") {
+      await discard();
+    } else if (failedAction === "mark-all") {
+      await markAllPaid();
+    } else if (failedAction === "undo") {
+      await undo();
+    }
+  }, [discard, failedAction, markAllPaid, pay, undo]);
+
+  return {
+    pay,
+    discard,
+    skipCard,
+    markAllPaid,
+    undo,
+    isActing,
+    actionError,
+    failedAction,
+    dismissActionError,
+    retryLastAction,
+  };
 };

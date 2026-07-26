@@ -6,9 +6,9 @@ import { parseBoldSegments } from "@/shared/coach-marks/coach-marks-text";
 import { coachMarks } from "@/shared/theme/coach-marks-tokens";
 
 describe("cardsTourSteps", () => {
-  it("tem exatamente 8 passos", () => {
+  it("tem exatamente 7 passos", () => {
     expect(cardsTourSteps).toHaveLength(CARDS_TOUR_TOTAL_STEPS);
-    expect(CARDS_TOUR_TOTAL_STEPS).toBe(8);
+    expect(CARDS_TOUR_TOTAL_STEPS).toBe(7);
   });
 
   it("marca passos centralizados sem âncora", () => {
@@ -16,9 +16,9 @@ describe("cardsTourSteps", () => {
     expect(cardsTourSteps[0].anchorKey).toBeNull();
     expect(cardsTourSteps[5].center).toBe(true);
     expect(cardsTourSteps[5].anchorKey).toBeNull();
-    expect(cardsTourSteps[7].center).toBe(true);
-    expect(cardsTourSteps[7].anchorKey).toBeNull();
-    const middle = cardsTourSteps.slice(1, 7).filter((step) => step.id !== "more");
+    expect(cardsTourSteps[6].center).toBe(true);
+    expect(cardsTourSteps[6].anchorKey).toBeNull();
+    const middle = cardsTourSteps.slice(1, 6).filter((step) => step.id !== "more");
     for (const step of middle) {
       expect(step.center).toBe(false);
       expect(step.anchorKey).not.toBeNull();
@@ -33,16 +33,14 @@ describe("cardsTourSteps", () => {
       "months",
       "fatura",
       null,
-      "theme",
       null,
     ]);
   });
 
-  it("usa o raio de pílula para tema, e geral para os demais", () => {
+  it("usa o raio geral para os alvos restantes", () => {
     const byId = Object.fromEntries(
       cardsTourSteps.map((step) => [step.id, step]),
     );
-    expect(byId.theme.radius).toBe(coachMarks.radiusPill);
     expect(byId.more.radius).toBe(coachMarks.radiusGeneral);
     expect(byId.cards.radius).toBe(coachMarks.radiusGeneral);
     expect(byId.views.radius).toBe(coachMarks.radiusGeneral);
@@ -53,12 +51,11 @@ describe("cardsTourSteps", () => {
   it("usa eyebrows literais corretos", () => {
     expect(cardsTourSteps.map((step) => step.eyebrow)).toEqual([
       "BEM-VINDO AO AURAXIS",
-      "PASSO 2 DE 8",
-      "PASSO 3 DE 8",
-      "PASSO 4 DE 8",
-      "PASSO 5 DE 8",
-      "PASSO 6 DE 8",
-      "PASSO 7 DE 8",
+      "PASSO 2 DE 7",
+      "PASSO 3 DE 7",
+      "PASSO 4 DE 7",
+      "PASSO 5 DE 7",
+      "PASSO 6 DE 7",
       "TUDO PRONTO",
     ]);
   });
@@ -71,7 +68,6 @@ describe("cardsTourSteps", () => {
       "Navegue no tempo",
       "Do resumo ao extrato",
       "Nova transação mora em Mais",
-      "Claro ou escuro, você decide",
       "Você já sabe o essencial",
     ]);
   });
@@ -123,16 +119,13 @@ describe("cardsTourSteps", () => {
     expect(before[5]).toEqual({});
     // 7 → scrollTop
     expect(before[6]).toEqual({ scroll: "top" });
-    // 8 → scrollTop
-    expect(before[7]).toEqual({ scroll: "top" });
   });
 
-  it("usa padding 6 para alvos redondos e 8 para retangulares", () => {
+  it("usa padding 8 para alvos retangulares e zero no passo central", () => {
     const byId = Object.fromEntries(
       cardsTourSteps.map((step) => [step.id, step]),
     );
     expect(byId.more.padding).toBe(0);
-    expect(byId.theme.padding).toBe(6);
     expect(byId.cards.padding).toBe(8);
     expect(byId.fatura.padding).toBe(8);
   });

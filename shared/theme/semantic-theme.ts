@@ -94,6 +94,7 @@ export const semanticRadii = {
   sm: radii.sm,
   md: radii.md,
   lg: radii.lg,
+  sheet: radii.sheet,
   xl: radii.xl,
   pill: 999,
 } as const;
@@ -146,30 +147,29 @@ export const semanticShadows = {
     shadowRadius: 16,
     elevation: 12,
   },
-  // Sombra de superfície dos cards — paridade com o web
-  // (`0 10px 24px rgba(0,0,0,0.15)`); mais larga e suave que `md`.
+  // Cards de conteúdo são planos: profundidade vem da borda hairline.
   card: {
-    shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.12,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowColor: "transparent",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0,
+    shadowRadius: 0,
+    elevation: 0,
   },
-  // Card destacado / interativo em hover-press.
+  // Superfície elevada, deliberadamente sutil (Apple-like).
   raised: {
     shadowColor: "#000000",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.16,
-    shadowRadius: 24,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.08,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  // Sheets e overlays que sobem de baixo (sombra para cima).
+  // Sheets e overlays mantêm elevação curta, sem “flutuar” sobre a tela.
   overlay: {
     shadowColor: "#000000",
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 24,
-    elevation: 16,
+    shadowOffset: { width: 0, height: -1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3,
   },
 } as const;
 

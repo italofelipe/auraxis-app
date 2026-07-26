@@ -8,6 +8,7 @@ describe("governance-all", () => {
   test("keeps the canonical governance check list in one place", () => {
     expect(GOVERNANCE_CHECKS.map((check) => check.id)).toEqual([
       "frontend",
+      "visual-surfaces",
       "api-contract",
       "app-routes",
       "openapi-secret-hygiene",

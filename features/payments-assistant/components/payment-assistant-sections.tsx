@@ -6,6 +6,7 @@ import type { PaymentAssistantController } from "@/features/payments-assistant/h
 import { PaymentAssistantActionsBar } from "@/features/payments-assistant/components/payment-assistant-actions-bar";
 import { PaymentAssistantDeck } from "@/features/payments-assistant/components/payment-assistant-deck";
 import { AppText } from "@/shared/components/app-text";
+import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { useT } from "@/shared/i18n";
 
 /** Props for the active (reviewing) section. */
@@ -38,6 +39,7 @@ export function PaymentAssistantActiveSection({
       </AppText>
       <PaymentAssistantDeck
         card={controller.current}
+        disabled={controller.isActing}
         onPay={(): void => {
           void controller.pay();
         }}
@@ -46,6 +48,20 @@ export function PaymentAssistantActiveSection({
       <AppText size="caption" tone="muted">
         {t("paymentsAssistant.statusHint")}
       </AppText>
+      {controller.actionError ? (
+        <AppErrorNotice
+          error={controller.actionError}
+          fallbackTitle={t("paymentsAssistant.actionErrorTitle")}
+          fallbackDescription={t("paymentsAssistant.actionErrorBody")}
+          actionLabel={t("paymentsAssistant.actions.retry")}
+          onAction={(): void => {
+            void controller.retryLastAction();
+          }}
+          secondaryActionLabel={t("paymentsAssistant.actions.dismiss")}
+          onSecondaryAction={controller.dismissActionError}
+          testID="payment-assistant-action-error"
+        />
+      ) : null}
       <PaymentAssistantActionsBar
         payLabel={payLabel}
         onPay={(): void => {
@@ -53,6 +69,7 @@ export function PaymentAssistantActiveSection({
         }}
         onDelete={onDelete}
         onSkip={controller.skipCard}
+        isActing={controller.isActing}
       />
     </YStack>
   );

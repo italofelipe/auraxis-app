@@ -42,7 +42,7 @@ describe("useCardsTour", () => {
     mockLoadSeen.mockResolvedValue(true);
   });
 
-  it("expõe os 8 passos visuais com a copy", () => {
+  it("expõe os 7 passos visuais com a copy", () => {
     const { ref } = makeScrollRef();
     const { result } = renderHook(() =>
       useCardsTour({
@@ -52,7 +52,7 @@ describe("useCardsTour", () => {
         autoOpenEnabled: false,
       }),
     );
-    expect(result.current.steps).toHaveLength(8);
+    expect(result.current.steps).toHaveLength(7);
     expect(result.current.steps[0].title).toBe("Seus cartões em um só lugar");
     expect(result.current.steps[0].center).toBe(true);
   });

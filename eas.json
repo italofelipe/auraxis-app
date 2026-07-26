@@ -29,6 +29,23 @@
         "simulator": false
       }
     },
+    "e2e-test": {
+      "distribution": "internal",
+      "environment": "preview",
+      "channel": "preview",
+      "withoutCredentials": true,
+      "env": {
+        "SENTRY_DISABLE_AUTO_UPLOAD": "true"
+      },
+      "android": {
+        "buildType": "apk",
+        "image": "latest"
+      },
+      "ios": {
+        "simulator": true,
+        "image": "latest"
+      }
+    },
     "production": {
       "distribution": "store",
       "channel": "production",

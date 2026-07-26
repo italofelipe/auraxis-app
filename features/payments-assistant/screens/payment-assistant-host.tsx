@@ -1,7 +1,8 @@
 import { type ReactElement, useCallback } from "react";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Alert, Modal, Pressable } from "react-native";
-import { YStack } from "tamagui";
+import { XStack, YStack, useTheme } from "tamagui";
 
 import { usePaymentAssistantController } from "@/features/payments-assistant/hooks/use-payment-assistant-controller";
 import { PaymentAssistantFooter } from "@/features/payments-assistant/components/payment-assistant-footer";
@@ -29,6 +30,8 @@ const SHEET_RADIUS = 24;
 export function PaymentAssistantHost(): ReactElement | null {
   const { t } = useT();
   const controller = usePaymentAssistantController();
+  const theme = useTheme();
+  const closeIconColor = theme.color?.val ?? "#111111";
 
   const canUndo =
     controller.lastAction?.kind === "paid" || controller.lastAction?.kind === "deleted";
@@ -77,9 +80,30 @@ export function PaymentAssistantHost(): ReactElement | null {
               borderTopLeftRadius={SHEET_RADIUS}
               borderTopRightRadius={SHEET_RADIUS}
             >
-              <AppText size="bodyLg" tone="default">
-                {t("paymentsAssistant.title")}
-              </AppText>
+              <XStack alignItems="center" justifyContent="space-between" gap="$3">
+                <AppText size="bodyLg" tone="default">
+                  {t("paymentsAssistant.title")}
+                </AppText>
+                <YStack
+                  width={44}
+                  height={44}
+                  borderRadius="$5"
+                  alignItems="center"
+                  justifyContent="center"
+                  backgroundColor="$surfaceRaised"
+                  pressStyle={{ backgroundColor: "$backgroundPress" }}
+                  accessibilityRole="button"
+                  accessibilityLabel={t("paymentsAssistant.actions.close")}
+                  testID="payment-assistant-close"
+                  onPress={controller.close}
+                >
+                  <MaterialCommunityIcons
+                    name="close"
+                    size={24}
+                    color={closeIconColor}
+                  />
+                </YStack>
+              </XStack>
 
               {!controller.isDone && controller.current ? (
                 <PaymentAssistantActiveSection
@@ -100,7 +124,7 @@ export function PaymentAssistantHost(): ReactElement | null {
                 onMarkAll={(): void => {
                   void controller.markAllPaid();
                 }}
-                onClose={controller.close}
+                isActing={controller.isActing}
               />
             </YStack>
           </Pressable>

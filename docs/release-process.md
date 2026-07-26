@@ -127,9 +127,13 @@ e “View app information”.
 
 ## TestFlight e App Store
 
-O build iOS recebe o mesmo changelog no campo **What to Test** do TestFlight.
-Depois do submit, o EAS Metadata sincroniza `releaseNotes` em `pt-BR` para a
-versão exata da App Store usando `store.config.js`.
+O EAS Metadata sincroniza as notas públicas `releaseNotes` em `pt-BR` para a
+versão exata da App Store usando `store.config.js`, antes do build.
+
+Depois do submit, `scripts/app-store-connect-release-notes.cjs` aguarda o build
+aparecer no App Store Connect e grava o mesmo changelog em **What to Test** pela
+API oficial. O workflow não usa `eas --what-to-test`, indisponível no plano
+atual. Ausência de credencial Apple bloqueia o build antes do upload.
 
 O upload para TestFlight não publica o app na App Store. Selecionar o build,
 submeter para App Review e liberar a versão pública continuam sendo gates
@@ -153,11 +157,51 @@ GitHub Actions:
 |---|---|
 | `EXPO_TOKEN` | EAS Build, Submit, Update e Metadata |
 | `GOOGLE_PLAY_SERVICE_ACCOUNT_JSON` | anexar notas e concluir o track interno |
+| `APP_STORE_CONNECT_ISSUER_ID` | emitir JWT para localizar o build submetido |
+| `APP_STORE_CONNECT_KEY_ID` | identificar a chave da API App Store Connect |
+| `APP_STORE_CONNECT_PRIVATE_KEY_BASE64` | assinar o JWT e publicar What to Test |
 | `RELEASE_PLEASE_TOKEN` | criar/mergear release PR e tag |
 
 As variáveis do app ficam nos ambientes EAS `preview` e `production`, incluindo
 `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_APP_ENV`, Sentry e PostHog. Nunca colocar
 essas variáveis públicas ou credenciais de loja diretamente no YAML.
+
+## Arquivo enviado ao EAS
+
+`.easignore` deve permanecer um superset estrito de `.gitignore` e excluir
+`node_modules/`, `android/`, `ios/`, segredos e artefatos locais. O gate
+`check-runtime-release-governance` bloqueia regressões. Essa regra evita que
+conteúdo local altere o fingerprint ou interrompa um build que não reproduz o
+checkout do GitHub.
+
+## E2E nativo e evidência visual
+
+Todo PR executa `.github/workflows/mobile-critical-e2e.yml`. Android e iOS são
+construídos **no próprio runner do GitHub** (estratégia híbrida, issue #734):
+`expo prebuild` + Gradle `assembleRelease` no Ubuntu e `expo prebuild` +
+`xcodebuild -sdk iphonesimulator` (sem assinatura) no macOS. O Maestro roda nos
+emuladores nativos do GitHub e salva seis capturas em `MAESTRO_TESTS_DIR`.
+Builds E2E não consomem a cota EAS — ela fica reservada para releases de loja
+— e a governança (`check-runtime-release-governance`) bloqueia a reintrodução
+de `eas build` nesse workflow. O perfil `e2e-test` permanece em `eas.json`
+como rota de escape para builds manuais via EAS.
+
+Pré-condições:
+
+- secrets GitHub `E2E_EMAIL` e `E2E_PASSWORD`;
+- GitHub variables `EXPO_PUBLIC_API_URL`, `EXPO_PUBLIC_APP_ENV`,
+  `EXPO_PUBLIC_POSTHOG_API_KEY` e `EXPO_PUBLIC_POSTHOG_HOST` (espelho do
+  ambiente EAS `preview` para o bundle JS — nunca hardcoded no YAML);
+- conta E2E com ao menos uma pendência financeira e transações no mês atual.
+
+O workflow valida as credenciais antes de compilar. Se elas estiverem
+ausentes, o job falha com a credencial exata e não tenta publicar um artifact
+vazio, preservando um diagnóstico único e acionável.
+
+As capturas ficam nos artifacts `mobile-e2e-ios-<sha>` e
+`mobile-e2e-android-<sha>` e, para PRs visuais,
+devem ser copiadas para `docs/wiki/assets/<issue>/` e incorporadas à descrição
+do PR com plataforma, versão, build e SHA.
 
 ## Operação manual
 
@@ -192,6 +236,7 @@ confirmar em dispositivo real após dois relaunches.
 - Sentry e PostHog sem PII.
 - Android: tester interno enxerga versão e changelog corretos.
 - iOS: TestFlight mostra What to Test e versão correta.
+- E2E: Insights e Cartões abrem em ambos os binários sem encerramento.
 - OTA compatível é aplicado no segundo relaunch.
 
 ## Troubleshooting

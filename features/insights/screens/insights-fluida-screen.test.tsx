@@ -1,28 +1,18 @@
 import { fireEvent, render } from "@testing-library/react-native";
 
-import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
 import { InsightsFluidaScreen } from "@/features/insights/screens/insights-fluida-screen";
 import { TestProviders } from "@/shared/testing/test-providers";
 
-jest.mock("@/core/shell/use-resolved-theme", () => ({
-  useResolvedTheme: jest.fn(),
-}));
-
-const mockedUseResolvedTheme = jest.mocked(useResolvedTheme);
-
-beforeEach(() => {
-  mockedUseResolvedTheme.mockReturnValue("auraxis_light");
-});
-
 describe("InsightsFluidaScreen", () => {
   it("renders the masthead and the general · daily lead by default", () => {
-    const { getByTestId, getByText } = render(
+    const { getByTestId, getByText, queryByTestId } = render(
       <TestProviders>
         <InsightsFluidaScreen />
       </TestProviders>,
     );
 
     expect(getByTestId("insights-masthead")).toBeTruthy();
+    expect(queryByTestId("insights-theme-mode-toggle")).toBeNull();
     expect(getByTestId("insight-lead")).toBeTruthy();
     expect(getByText("Ontem em foco: muita saída, nenhuma entrada")).toBeTruthy();
   });

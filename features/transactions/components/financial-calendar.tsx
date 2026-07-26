@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState, type ReactElement } from "react";
 
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Modal, Pressable } from "react-native";
 import { Paragraph, XStack, YStack, useTheme } from "tamagui";
 
@@ -11,15 +12,13 @@ import {
 } from "@/features/transactions/services/calendar-markers";
 import {
   buildCalendarMonth,
-  stepMonth,
   type CalendarCell,
 } from "@/features/transactions/services/calendar-grid";
 import type { TransactionViewModel } from "@/features/transactions/hooks/use-transactions-screen-controller";
+import { formatStatusLabelForType } from "@/features/transactions/utils/transaction-presentation";
 import { AppBadge } from "@/shared/components/app-badge";
-import { AppButton } from "@/shared/components/app-button";
-import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
-import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { useT } from "@/shared/i18n";
+import { iconSizes } from "@/shared/theme";
 import { formatShortDate } from "@/shared/utils/formatters";
 
 const STATUS_TONE: Record<string, "default" | "primary" | "danger"> = {
@@ -41,11 +40,6 @@ const WEEKDAY_LABELS_PT: Record<(typeof WEEKDAY_KEYS_PT)[number], string> = {
   sab: "Sáb",
 };
 
-const MONTH_LABELS_PT = [
-  "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-  "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
-];
-
 const today = (): { readonly year: number; readonly month: number; readonly iso: string } => {
   const d = new Date();
   return {
@@ -57,6 +51,10 @@ const today = (): { readonly year: number; readonly month: number; readonly iso:
 
 export interface FinancialCalendarProps {
   readonly transactions: readonly TransactionViewModel[];
+  /** Ano controlado pelo controller da tela. */
+  readonly year: number;
+  /** Mês controlado pelo controller da tela, no formato 0–11. */
+  readonly month: number;
 }
 
 /**
@@ -70,10 +68,11 @@ export interface FinancialCalendarProps {
  
 export function FinancialCalendar({
   transactions,
+  year,
+  month: controlledMonth,
 }: FinancialCalendarProps): ReactElement {
   const tamagui = useTheme();
   const start = useMemo(() => today(), []);
-  const [page, setPage] = useState({ year: start.year, month: start.month });
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
 
   const markerTheme = useMemo<CalendarTheme>(() => {
@@ -88,18 +87,14 @@ export function FinancialCalendar({
     return buildCalendarMarkers(transactions, markerTheme);
   }, [markerTheme, transactions]);
 
-  const month = useMemo(() => buildCalendarMonth(page.year, page.month), [page]);
+  const month = useMemo(
+    () => buildCalendarMonth(year, controlledMonth + 1),
+    [controlledMonth, year],
+  );
 
   const dayTransactions = useMemo(() => {
     return selectedDay ? transactionsForDay(transactions, selectedDay) : [];
   }, [selectedDay, transactions]);
-
-  const handlePrev = useCallback(() => {
-    setPage((current) => stepMonth(current.year, current.month, -1));
-  }, []);
-  const handleNext = useCallback(() => {
-    setPage((current) => stepMonth(current.year, current.month, +1));
-  }, []);
 
   const handleSelect = useCallback((day: string): void => {
     setSelectedDay(day);
@@ -110,11 +105,6 @@ export function FinancialCalendar({
 
   return (
     <YStack gap="$3" testID="financial-calendar">
-      <CalendarHeader
-        title={`${MONTH_LABELS_PT[page.month - 1]} ${page.year}`}
-        onPrev={handlePrev}
-        onNext={handleNext}
-      />
       <WeekdayHeader />
       <YStack gap="$1">
         {month.weeks.map((week, rowIndex) => (
@@ -146,28 +136,6 @@ export function FinancialCalendar({
         />
       </Modal>
     </YStack>
-  );
-}
-
-interface CalendarHeaderProps {
-  readonly title: string;
-  readonly onPrev: () => void;
-  readonly onNext: () => void;
-}
-
-function CalendarHeader({ title, onPrev, onNext }: CalendarHeaderProps): ReactElement {
-  return (
-    <XStack alignItems="center" justifyContent="space-between" gap="$2">
-      <AppButton tone="secondary" onPress={onPrev} accessibilityLabel="Mês anterior">
-        ←
-      </AppButton>
-      <Paragraph color="$color" fontFamily="$heading" fontSize="$5">
-        {title}
-      </Paragraph>
-      <AppButton tone="secondary" onPress={onNext} accessibilityLabel="Próximo mês">
-        →
-      </AppButton>
-    </XStack>
   );
 }
 
@@ -215,6 +183,7 @@ function DayCell({
       accessibilityRole="button"
       accessibilityLabel={cell.day}
       accessibilityState={{ selected: isSelected }}
+      testID={`calendar-day-${marker ? "with-transactions-" : ""}${cell.day}`}
       style={{ flex: 1 }}
     >
       <YStack
@@ -268,6 +237,8 @@ function DayDetailSheet({
   onClose,
 }: DayDetailSheetProps): ReactElement | null {
   const { t } = useT();
+  const theme = useTheme();
+  const iconColor = theme.color?.val ?? "#000000";
   if (!day) {
     return null;
   }
@@ -275,31 +246,56 @@ function DayDetailSheet({
     <YStack flex={1} backgroundColor="rgba(0,0,0,0.45)" justifyContent="flex-end">
       <YStack
         backgroundColor="$background"
-        padding="$4"
-        gap="$3"
-        borderTopLeftRadius="$3"
-        borderTopRightRadius="$3"
+        padding="$5"
+        gap="$4"
+        borderTopLeftRadius={24}
+        borderTopRightRadius={24}
         maxHeight="70%"
+        testID="calendar-day-sheet"
       >
-        <AppSurfaceCard
-          title={t("transactions.calendar.dayTitle")}
-          description={formatShortDate(day)}
-        >
-          {transactions.length === 0 ? (
-            <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
-              {t("transactions.calendar.empty")}
+        <XStack alignItems="flex-start" justifyContent="space-between" gap="$3">
+          <YStack flex={1} gap="$1">
+            <Paragraph color="$color" fontFamily="$heading" fontSize="$6" fontWeight="$7">
+              {t("transactions.calendar.dayTitle")}
             </Paragraph>
-          ) : (
-            <YStack gap="$3">
-              {transactions.map((tx) => (
-                <DayRow key={tx.id} tx={tx} />
-              ))}
-            </YStack>
-          )}
-          <AppButton tone="secondary" onPress={onClose} marginTop="$3">
-            {t("transactions.calendar.close")}
-          </AppButton>
-        </AppSurfaceCard>
+            <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+              {formatShortDate(day)}
+            </Paragraph>
+          </YStack>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t("transactions.calendar.close")}
+            onPress={onClose}
+            testID="calendar-day-sheet-close"
+            style={{
+              width: 44,
+              height: 44,
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <MaterialCommunityIcons
+              name="close"
+              size={iconSizes.lg}
+              color={iconColor}
+            />
+          </Pressable>
+        </XStack>
+        {transactions.length === 0 ? (
+          <Paragraph color="$muted" fontFamily="$body" fontSize="$3">
+            {t("transactions.calendar.empty")}
+          </Paragraph>
+        ) : (
+          <YStack>
+            {transactions.map((tx, index) => (
+              <DayRow
+                key={tx.id}
+                tx={tx}
+                showDivider={index < transactions.length - 1}
+              />
+            ))}
+          </YStack>
+        )}
       </YStack>
     </YStack>
   );
@@ -307,27 +303,33 @@ function DayDetailSheet({
 
 interface DayRowProps {
   readonly tx: TransactionViewModel;
+  readonly showDivider: boolean;
 }
 
-function DayRow({ tx }: DayRowProps): ReactElement {
+function DayRow({ tx, showDivider }: DayRowProps): ReactElement {
   return (
-    <AppKeyValueRow
-      label={tx.title}
-      value={
-        <XStack alignItems="center" gap="$2">
-          <YStack alignItems="flex-end" gap="$1">
-            <Paragraph
-              color={tx.type === "income" ? "$success" : "$danger"}
-              fontFamily="$body"
-              fontSize="$4"
-            >
-              {tx.type === "income" ? "+" : "-"}
-              {tx.amount}
-            </Paragraph>
-          </YStack>
-          <AppBadge tone={STATUS_TONE[tx.status] ?? "default"}>{tx.status}</AppBadge>
-        </XStack>
-      }
-    />
+    <XStack
+      alignItems="center"
+      justifyContent="space-between"
+      gap="$3"
+      paddingVertical="$3"
+      borderBottomWidth={showDivider ? 1 : 0}
+      borderBottomColor="$borderColor"
+    >
+      <Paragraph flex={1} color="$color" fontFamily="$body" fontSize="$3">
+        {tx.title}
+      </Paragraph>
+      <Paragraph
+        color={tx.type === "income" ? "$success" : "$danger"}
+        fontFamily="$body"
+        fontSize="$4"
+      >
+        {tx.type === "income" ? "+" : "-"}
+        {tx.amount}
+      </Paragraph>
+      <AppBadge tone={STATUS_TONE[tx.status] ?? "default"}>
+        {formatStatusLabelForType(tx.status, tx.type)}
+      </AppBadge>
+    </XStack>
   );
 }

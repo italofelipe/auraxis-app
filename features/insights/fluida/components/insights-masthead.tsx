@@ -5,7 +5,6 @@ import { Paragraph, XStack, YStack } from "tamagui";
 import type { InsightDimension } from "@/features/insights/contracts";
 import type { InsightCadence } from "@/features/insights/fluida/contracts";
 import { CadenceToggle } from "@/features/insights/fluida/components/cadence-toggle";
-import { ThemeModeToggle } from "@/features/insights/fluida/components/theme-mode-toggle";
 import { ThemeTabs } from "@/features/insights/fluida/components/theme-tabs";
 import type {
   InsightCadenceOption,
@@ -17,16 +16,14 @@ export interface InsightsMastheadProps {
   readonly dimension: InsightDimension;
   readonly cadenceOptions: readonly InsightCadenceOption[];
   readonly dimensionTabs: readonly InsightDimensionTab[];
-  readonly isDark: boolean;
   readonly onSelectCadence: (cadence: InsightCadence) => void;
   readonly onSelectDimension: (dimension: InsightDimension) => void;
-  readonly onToggleTheme: () => void;
 }
 
 /**
  * Top masthead of the "Fluida" insights screen: the section title, the
- * cadence segmented control and theme-mode toggle on one row, and the
- * scrollable theme tabs below. Fully presentational — every piece of state
+ * cadence segmented control and the scrollable theme tabs below. Theme
+ * preference intentionally lives only in Configurações. Every piece of state
  * and every handler comes from the screen controller via props.
  *
  * @param props Masthead state and handlers from the controller.
@@ -37,14 +34,12 @@ export function InsightsMasthead({
   dimension,
   cadenceOptions,
   dimensionTabs,
-  isDark,
   onSelectCadence,
   onSelectDimension,
-  onToggleTheme,
 }: InsightsMastheadProps): ReactElement {
   return (
     <YStack gap="$3" testID="insights-masthead">
-      <XStack alignItems="center" justifyContent="space-between" gap="$3">
+      <XStack alignItems="center" gap="$3">
         <YStack flex={1} gap="$1">
           <Paragraph color="$primary" fontFamily="$heading" fontSize="$6" fontWeight="$7">
             Insights de IA
@@ -53,7 +48,6 @@ export function InsightsMasthead({
             {cadence === "weekly" ? "Leitura semanal" : "Leitura diária"}
           </Paragraph>
         </YStack>
-        <ThemeModeToggle isDark={isDark} onToggle={onToggleTheme} />
       </XStack>
 
       <CadenceToggle

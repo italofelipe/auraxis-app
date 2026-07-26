@@ -77,10 +77,12 @@ export const fontSizes = {
 } as const;
 
 export const radii = {
+  none: 0,
   xs: 6,
   sm: 10,
   md: 14,
   lg: 20,
+  sheet: 24,
   xl: 28,
 } as const;
 

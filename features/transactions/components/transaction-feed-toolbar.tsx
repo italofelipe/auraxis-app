@@ -1,9 +1,9 @@
-import { useCallback, type ReactElement } from "react";
+import { useCallback, useState, type ReactElement } from "react";
 
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Modal, Pressable } from "react-native";
-import { YStack, useTheme } from "tamagui";
+import { Paragraph, XStack, YStack, useTheme } from "tamagui";
 
 import { appRoutes } from "@/core/navigation/routes";
 import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
@@ -29,45 +29,64 @@ import {
 } from "@/shared/insights";
 import { iconSizes } from "@/shared/theme";
 
-interface ToolbarButtonProps {
+interface ToolbarActionProps {
   readonly icon: keyof typeof MaterialCommunityIcons.glyphMap;
-  readonly accessibilityLabel: string;
+  readonly label: string;
   readonly color: string;
   readonly onPress: () => void;
+  readonly tone?: "primary" | "secondary";
   readonly badgeColor?: string;
   readonly testID?: string;
+  readonly compact?: boolean;
 }
 
-/** Botão só-ícone (44×44) da barra de ferramentas, com dot opcional. */
-function ToolbarButton({
+/** Ação legível da barra, com ícone e rótulo (ou overflow compacto). */
+function ToolbarAction({
   icon,
-  accessibilityLabel,
+  label,
   color,
   onPress,
+  tone = "secondary",
   badgeColor,
   testID,
-}: ToolbarButtonProps): ReactElement {
+  compact = false,
+}: ToolbarActionProps): ReactElement {
   return (
-    <Pressable
-      accessibilityRole="button"
-      accessibilityLabel={accessibilityLabel}
+    <AppButton
+      tone={tone}
+      size="sm"
+      flex={compact ? undefined : 1}
+      width={compact ? 44 : undefined}
+      paddingHorizontal={compact ? 0 : "$2"}
+      accessibilityLabel={label}
       onPress={onPress}
       testID={testID}
-      style={{ width: 44, height: 44, alignItems: "center", justifyContent: "center" }}
     >
-      <MaterialCommunityIcons name={icon} size={iconSizes.lg} color={color} />
-      {badgeColor ? (
-        <YStack
-          position="absolute"
-          top={9}
-          right={9}
-          width={9}
-          height={9}
-          borderRadius="$5"
-          backgroundColor={badgeColor}
-        />
-      ) : null}
-    </Pressable>
+      <XStack alignItems="center" justifyContent="center" gap="$1">
+        <MaterialCommunityIcons name={icon} size={iconSizes.sm} color={color} />
+        {compact ? null : (
+          <Paragraph
+            color={tone === "primary" ? "$actionPrimaryForeground" : "$color"}
+            fontFamily="$body"
+            fontSize="$2"
+            fontWeight="$6"
+          >
+            {label}
+          </Paragraph>
+        )}
+        {badgeColor ? (
+          <YStack
+            position="absolute"
+            top={-3}
+            right={compact ? -5 : -1}
+            width={8}
+            height={8}
+            borderRadius="$5"
+            backgroundColor={badgeColor}
+          />
+        ) : null}
+      </XStack>
+    </AppButton>
   );
 }
 
@@ -92,8 +111,11 @@ function FeedToolbar({
   const theme = useTheme();
   const importEnabled = isFeatureEnabled(IMPORT_FEATURE_FLAG_KEY);
   const insightSection = useInsightSection("transactions");
+  const [optionsOpen, setOptionsOpen] = useState(false);
   const iconColor = theme.muted?.val ?? theme.color?.val ?? "#000000";
   const badgeColor = theme.primary?.val ?? iconColor;
+  const primaryIconColor =
+    theme.actionPrimaryForeground?.val ?? theme.background?.val ?? "#ffffff";
 
   return (
     <YStack gap="$4" paddingBottom="$2">
@@ -103,41 +125,41 @@ function FeedToolbar({
         onNextMonth={controller.goToNextMonth}
       />
       <TxModeToggle value={controller.viewMode} onChange={controller.setViewMode} />
-      <YStack alignItems="flex-end">
-        <YStack flexDirection="row">
-          <ToolbarButton
-            icon="filter-variant"
-            accessibilityLabel="Filtros"
-            color={iconColor}
-            badgeColor={controller.hasActiveFilters ? badgeColor : undefined}
-            testID="transactions-filter-button"
-            onPress={onOpenFilters}
+      <XStack gap="$2" alignItems="center" testID="transactions-action-bar">
+        {importEnabled ? (
+          <ToolbarAction
+            icon="file-import-outline"
+            label="Importar"
+            color={primaryIconColor}
+            tone="primary"
+            testID="transactions-import-button"
+            onPress={() => router.push(appRoutes.private.importTransactions)}
           />
-          <ToolbarButton
-            icon="tray-arrow-up"
-            accessibilityLabel="Exportar"
-            color={iconColor}
-            testID="transactions-export-button"
-            onPress={onOpenExport}
-          />
-          <ToolbarButton
-            icon="trash-can-outline"
-            accessibilityLabel="Lixeira de transações"
-            color={iconColor}
-            testID="transactions-trash-button"
-            onPress={() => router.push(appRoutes.private.transactionsTrash)}
-          />
-        </YStack>
-      </YStack>
-      {importEnabled ? (
-        <AppButton
-          tone="secondary"
-          size="sm"
-          onPress={() => router.push(appRoutes.private.importTransactions)}
-        >
-          Importar planilha
-        </AppButton>
-      ) : null}
+        ) : null}
+        <ToolbarAction
+          icon="filter-variant"
+          label="Filtrar"
+          color={iconColor}
+          badgeColor={controller.hasActiveFilters ? badgeColor : undefined}
+          testID="transactions-filter-button"
+          onPress={onOpenFilters}
+        />
+        <ToolbarAction
+          icon="tray-arrow-up"
+          label="Exportar"
+          color={iconColor}
+          testID="transactions-export-button"
+          onPress={onOpenExport}
+        />
+        <ToolbarAction
+          icon="dots-horizontal"
+          label="Mais opções"
+          color={iconColor}
+          compact
+          testID="transactions-options-button"
+          onPress={() => setOptionsOpen(true)}
+        />
+      </XStack>
       <InstallmentGroupFilterNotice controller={controller} />
       {controller.viewMode === "analitico" ? (
         <RevealInView index={1}>
@@ -149,6 +171,66 @@ function FeedToolbar({
         onReadFull={() => router.push(buildInsightFluidaParams("transactions"))}
       />
       <AiInsightSurface dimension="transactions" />
+      <Modal
+        visible={optionsOpen}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setOptionsOpen(false)}
+      >
+        <YStack
+          flex={1}
+          backgroundColor="rgba(0,0,0,0.35)"
+          justifyContent="flex-end"
+        >
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Fechar opções"
+            onPress={() => setOptionsOpen(false)}
+            style={{ flex: 1 }}
+          />
+          <YStack
+            backgroundColor="$background"
+            borderTopLeftRadius={24}
+            borderTopRightRadius={24}
+            padding="$5"
+            gap="$4"
+            testID="transactions-options-sheet"
+          >
+            <XStack alignItems="center" justifyContent="space-between">
+              <Paragraph fontFamily="$heading" fontSize="$5" fontWeight="$7">
+                Opções de transações
+              </Paragraph>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Fechar opções"
+                onPress={() => setOptionsOpen(false)}
+                style={{
+                  width: 44,
+                  height: 44,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <MaterialCommunityIcons
+                  name="close"
+                  size={iconSizes.lg}
+                  color={iconColor}
+                />
+              </Pressable>
+            </XStack>
+            <AppButton
+              tone="danger"
+              testID="transactions-trash-button"
+              onPress={() => {
+                setOptionsOpen(false);
+                router.push(appRoutes.private.transactionsTrash);
+              }}
+            >
+              Abrir lixeira
+            </AppButton>
+          </YStack>
+        </YStack>
+      </Modal>
     </YStack>
   );
 }

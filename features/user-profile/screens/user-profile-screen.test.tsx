@@ -27,6 +27,10 @@ jest.mock("@/features/user-profile/components/appearance-section", () => ({
   AppearanceSection: () => null,
 }));
 
+jest.mock("@/features/user-profile/components/build-information-section", () => ({
+  BuildInformationSection: () => null,
+}));
+
 jest.mock("@/features/user-profile/components/language-section", () => ({
   LanguageSection: () => null,
 }));

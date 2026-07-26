@@ -5,7 +5,10 @@ secrets de produção). Atualizar quando alguma decisão estrutural mudar.
 
 ## JS engine: Hermes (canônico)
 
-`app.json` declara `expo.jsEngine = "hermes"` em todas as plataformas.
+No Expo SDK 55, Hermes, Nova Arquitetura e edge-to-edge já são os padrões
+obrigatórios. `app.json` não deve reintroduzir `jsEngine`, `newArchEnabled` nem
+`android.edgeToEdgeEnabled`: o Expo Doctor e a governança rejeitam essas chaves
+obsoletas.
 Hermes é a engine oficial do app — JSC não é suportado.
 
 Por que Hermes:

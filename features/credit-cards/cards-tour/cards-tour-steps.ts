@@ -1,9 +1,9 @@
 /**
- * Configuração dos 8 passos do tour guiado da HOME de Cartões.
+ * Configuração dos 7 passos do tour guiado da HOME de Cartões.
  *
  * Cada passo carrega a copy FINAL em pt-BR (com marcadores `**negrito**`
  * preservados — paridade exata com o handoff), a chave da âncora a destacar, a
- * flag `center` (passos 1 e 8), o raio do recorte e um DESCRITOR de `before`
+ * flag `center` (passos 1 e 7), o raio do recorte e um DESCRITOR de `before`
  * (qual ação do controller rodar + se deve rolar até um alvo). O hook
  * (`use-cards-tour`) traduz o descritor em ações concretas antes de medir.
  *
@@ -17,8 +17,7 @@ export type CardsTourAnchorKey =
   | "cards"
   | "views"
   | "months"
-  | "fatura"
-  | "theme";
+  | "fatura";
 
 /** Alvos de rolagem que o `before()` pode acionar antes de medir. */
 export type CardsTourScrollTarget = "top" | "fatura";
@@ -61,14 +60,11 @@ export interface CardsTourStepConfig {
 /** Padding do recorte para alvos retangulares (px). */
 const RECT_PADDING = 8;
 
-/** Padding do recorte para alvos redondos (px), conforme handoff. */
-const ROUND_PADDING = 6;
-
 /** Total de passos do tour. */
-export const CARDS_TOUR_TOTAL_STEPS = 8;
+export const CARDS_TOUR_TOTAL_STEPS = 7;
 
 /**
- * Os 8 passos do tour, em ordem. A copy é final — não alterar sem revisão de
+ * Os 7 passos do tour, em ordem. A copy é final — não alterar sem revisão de
  * UX writing.
  */
 export const cardsTourSteps: readonly CardsTourStepConfig[] = [
@@ -85,7 +81,7 @@ export const cardsTourSteps: readonly CardsTourStepConfig[] = [
   },
   {
     id: "cards",
-    eyebrow: "PASSO 2 DE 8",
+    eyebrow: "PASSO 2 DE 7",
     title: "Reunimos todos os seus cartões",
     body: "Deslize para navegar. O cartão escuro **Todos os cartões** soma as faturas de todos; toque em um cartão para focar só nele — e tudo abaixo se ajusta à sua escolha.",
     anchorKey: "cards",
@@ -96,7 +92,7 @@ export const cardsTourSteps: readonly CardsTourStepConfig[] = [
   },
   {
     id: "views",
-    eyebrow: "PASSO 3 DE 8",
+    eyebrow: "PASSO 3 DE 7",
     title: "Dois níveis de detalhe",
     body: "**Faturas** traz o resumo do mês, direto ao ponto. **Analítico** abre os números — evolução, categorias e comparação entre cartões. Alterne quando precisar.",
     anchorKey: "views",
@@ -107,7 +103,7 @@ export const cardsTourSteps: readonly CardsTourStepConfig[] = [
   },
   {
     id: "months",
-    eyebrow: "PASSO 4 DE 8",
+    eyebrow: "PASSO 4 DE 7",
     title: "Navegue no tempo",
     body: "Começamos no mês atual. Uma fatura **aberta** ainda recebe lançamentos; uma **fechada** já foi consolidada. Volte meses para revisar ou avance para planejar.",
     anchorKey: "months",
@@ -118,7 +114,7 @@ export const cardsTourSteps: readonly CardsTourStepConfig[] = [
   },
   {
     id: "fatura",
-    eyebrow: "PASSO 5 DE 8",
+    eyebrow: "PASSO 5 DE 7",
     title: "Do resumo ao extrato",
     body: "Aqui está o total do mês, com vencimento e número de lançamentos. Toque para abrir o **extrato completo**, com os gastos agrupados por categoria.",
     anchorKey: "fatura",
@@ -129,7 +125,7 @@ export const cardsTourSteps: readonly CardsTourStepConfig[] = [
   },
   {
     id: "more",
-    eyebrow: "PASSO 6 DE 8",
+    eyebrow: "PASSO 6 DE 7",
     title: "Nova transação mora em Mais",
     body: "O botão **+** saiu da barra para deixar a navegação líquida respirar. Quando precisar registrar rápido, abra **Mais** e toque em **Nova transação**.",
     anchorKey: null,
@@ -137,17 +133,6 @@ export const cardsTourSteps: readonly CardsTourStepConfig[] = [
     padding: 0,
     radius: coachMarks.radiusGeneral,
     before: {},
-  },
-  {
-    id: "theme",
-    eyebrow: "PASSO 7 DE 8",
-    title: "Claro ou escuro, você decide",
-    body: "Toque para alternar o tema. Os valores continuam nítidos e com bom contraste em qualquer ambiente — de dia ou de madrugada.",
-    anchorKey: "theme",
-    center: false,
-    padding: ROUND_PADDING,
-    radius: coachMarks.radiusPill,
-    before: { scroll: "top" },
   },
   {
     id: "done",

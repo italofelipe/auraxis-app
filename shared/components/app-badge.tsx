@@ -30,7 +30,7 @@ export function AppBadge({
     tone === "primary"
       ? { backgroundColor: "$primary", color: "$actionPrimaryForeground" }
       : tone === "danger"
-        ? { backgroundColor: "$danger", color: "$color" }
+        ? { backgroundColor: "$danger", color: "$actionPrimaryForeground" }
         : undefined;
 
   return <BadgeFrame {...toneProps}>{children}</BadgeFrame>;

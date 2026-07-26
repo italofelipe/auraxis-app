@@ -47,8 +47,10 @@ eram falhas independentes e reais do pipeline.
 - Store release é serializado e deduplicado por versão/fingerprint.
 - Google continua recebendo um draft; a Developer API anexa notas em pt-BR e
   muda exatamente o `versionCode` enviado para `completed`.
-- TestFlight recebe What to Test; EAS Metadata sincroniza release notes da App
-  Store.
+- EAS Metadata sincroniza as notas públicas da App Store; depois do submit, a
+  API do App Store Connect grava o mesmo texto em What to Test do TestFlight.
+- O pipeline não depende do parâmetro EAS `--what-to-test`, indisponível no
+  plano atual.
 - Releases públicas continuam com aprovação humana.
 
 ## Política permanente

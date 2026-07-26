@@ -98,7 +98,9 @@ export class AppErrorBoundary extends Component<
 
     if (this.props.presentation === "screen") {
       return (
-        <AppScreen scrollable={false} testID={this.props.testID}>
+        <AppScreen
+          scrollable={false}
+          testID={this.props.testID ? `${this.props.testID}-screen` : undefined}>
           {notice}
         </AppScreen>
       );

@@ -10,7 +10,6 @@ import {
   buildCreditCardDetailPath,
 } from "@/core/navigation/routes";
 import { useResolvedTheme } from "@/core/shell/use-resolved-theme";
-import { useAppShellStore } from "@/core/shell/app-shell-store";
 import {
   CardsTour,
   type CardsTourHandle,
@@ -172,16 +171,10 @@ interface HeroProps {
 
 function CardsHero({ cards, onAddCard, onReplayTour }: HeroProps): ReactElement {
   const resolvedTheme = useResolvedTheme();
-  const setThemePreference = useAppShellStore(
-    (state) => state.setThemePreference,
-  );
-  const themeAnchor = useTourAnchor("theme");
   const heroGradient =
     resolvedTheme === "auraxis_dark"
       ? darkSemanticGradients.hero
       : lightSemanticGradients.hero;
-  const isDark = resolvedTheme === "auraxis_dark";
-
   const limitTotal = cards.reduce(
     (sum, card) => sum + (card.limitAmount ?? 0),
     0,
@@ -214,16 +207,6 @@ function CardsHero({ cards, onAddCard, onReplayTour }: HeroProps): ReactElement 
           </Paragraph>
         </YStack>
         <XStack gap="$2">
-          <HeroRoundButton
-            icon={isDark ? "white-balance-sunny" : "weather-night"}
-            accessibilityLabel="Alternar tema"
-            testID="tour-theme"
-            anchorRef={themeAnchor.ref}
-            anchorOnLayout={themeAnchor.onLayout}
-            onPress={() =>
-              setThemePreference(isDark ? "light" : "dark")
-            }
-          />
           <HeroRoundButton
             icon="help-circle-outline"
             accessibilityLabel="Rever o guia de Cartões"

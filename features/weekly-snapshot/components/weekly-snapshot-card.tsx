@@ -9,18 +9,29 @@ import { AppQueryState } from "@/shared/components/app-query-state";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
 import { formatCurrency } from "@/shared/utils/formatters";
 
-const formatDelta = (percent: number): string => {
-  const rounded = Math.round(percent * 10) / 10;
-  const sign = rounded > 0 ? "+" : "";
-  return `${sign}${rounded}%`;
-};
-
-const deltaTone = (percent: number, lowerIsBetter: boolean): "default" | "primary" | "danger" => {
-  if (percent === 0) {
+const deltaTone = (
+  delta: number,
+  lowerIsBetter: boolean,
+): "default" | "primary" | "danger" => {
+  if (delta === 0) {
     return "default";
   }
-  const isGood = lowerIsBetter ? percent < 0 : percent > 0;
+  const isGood = lowerIsBetter ? delta < 0 : delta > 0;
   return isGood ? "primary" : "danger";
+};
+
+const expenseDeltaLabel = (delta: number): string => {
+  if (delta === 0) {
+    return "Despesas sem mudança";
+  }
+  return `Despesas ${formatCurrency(Math.abs(delta))} ${delta > 0 ? "a mais" : "a menos"}`;
+};
+
+const balanceDeltaLabel = (delta: number): string => {
+  if (delta === 0) {
+    return "Saldo sem mudança";
+  }
+  return `Saldo ${formatCurrency(Math.abs(delta))} ${delta > 0 ? "acima" : "abaixo"}`;
 };
 
 /**
@@ -87,23 +98,33 @@ function WeeklySnapshotContent({
             <AppBadge tone="primary">NOVO</AppBadge>
           </XStack>
         ) : null}
-        <Paragraph color="$color" fontFamily="$body" fontSize="$4">
-          {snapshot.narrative}
-        </Paragraph>
-        <XStack gap="$3" flexWrap="wrap">
-          <Metric label="Receitas" value={formatCurrency(snapshot.currentIncome)} />
-          <Metric label="Despesas" value={formatCurrency(snapshot.currentExpense)} />
-          <Metric label="Saldo" value={formatCurrency(snapshot.currentBalance)} />
-        </XStack>
-        <XStack gap="$2" flexWrap="wrap">
-          <AppBadge tone={deltaTone(snapshot.expenseDeltaPercent, true)}>
-            {`Despesas ${formatDelta(snapshot.expenseDeltaPercent)}`}
-          </AppBadge>
-          <AppBadge tone={deltaTone(snapshot.balanceDeltaPercent, false)}>
-            {`Saldo ${formatDelta(snapshot.balanceDeltaPercent)}`}
-          </AppBadge>
-          <AppBadge tone="default">{`${snapshot.transactionCount} transacoes`}</AppBadge>
-        </XStack>
+        {snapshot.transactionCount === 0 ? (
+          <Paragraph color="$muted" fontFamily="$body" fontSize="$4">
+            Sem movimentações nesta semana
+          </Paragraph>
+        ) : (
+          <>
+            <Paragraph color="$color" fontFamily="$body" fontSize="$4">
+              {snapshot.narrative}
+            </Paragraph>
+            <XStack gap="$3" flexWrap="wrap">
+              <Metric label="Receitas" value={formatCurrency(snapshot.currentIncome)} />
+              <Metric label="Despesas" value={formatCurrency(snapshot.currentExpense)} />
+              <Metric label="Saldo" value={formatCurrency(snapshot.currentBalance)} />
+            </XStack>
+            <XStack gap="$2" flexWrap="wrap">
+              <AppBadge tone={deltaTone(snapshot.expenseDelta, true)}>
+                {expenseDeltaLabel(snapshot.expenseDelta)}
+              </AppBadge>
+              <AppBadge tone={deltaTone(snapshot.balanceDelta, false)}>
+                {balanceDeltaLabel(snapshot.balanceDelta)}
+              </AppBadge>
+              <AppBadge tone="default">
+                {`${snapshot.transactionCount} transações`}
+              </AppBadge>
+            </XStack>
+          </>
+        )}
       </YStack>
     </AppSurfaceCard>
   );

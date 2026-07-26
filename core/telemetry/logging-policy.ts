@@ -131,6 +131,14 @@ export const APP_EVENT_LOGGING_POLICY = Object.freeze({
     "Mudança efetiva de rota no app.",
     ["route", "routeKey", "access"],
   ),
+  "navigation.critical_tab_mounted": devOnlyInfoPolicy(
+    "Montagem de uma aba crítica com dependências nativas.",
+    ["route"],
+  ),
+  "navigation.critical_tab_unmounted": devOnlyInfoPolicy(
+    "Desmontagem de uma aba crítica com dependências nativas.",
+    ["route"],
+  ),
   "navigation.deep_link_deduplicated": devOnlyDebugPolicy(
     "Deep link repetido e ignorado pelo runtime.",
     ["url"],

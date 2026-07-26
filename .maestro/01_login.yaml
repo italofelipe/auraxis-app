@@ -8,7 +8,9 @@ name: Issue 723 - login nativo com pinning TLS valido
 - inputText: ${E2E_EMAIL}
 - tapOn: "Senha"
 - inputText: ${E2E_INVALID_PASSWORD}
-- hideKeyboard
+# hideKeyboard é instável no iOS; tocar num texto estático dispensa o teclado
+# (keyboardShouldPersistTaps="handled" na tela de login).
+- tapOn: "ACESSO SEGURO E PROTEGIDO"
 - takeScreenshot:
     path: 01-login-password-masked
     label: Senha permanece mascarada antes do envio
@@ -23,7 +25,7 @@ name: Issue 723 - login nativo com pinning TLS valido
 - tapOn: "Senha"
 - eraseText
 - inputText: ${E2E_PASSWORD}
-- hideKeyboard
+- tapOn: "ACESSO SEGURO E PROTEGIDO"
 - tapOn: "Entrar na Auraxis"
 - extendedWaitUntil:
     visible: "Saldo geral"

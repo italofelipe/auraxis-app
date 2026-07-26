@@ -21,6 +21,8 @@ export type AppTelemetryEvent =
   | "runtime.revalidation_failed"
   | "runtime.error_boundary_captured"
   | "navigation.route_changed"
+  | "navigation.critical_tab_mounted"
+  | "navigation.critical_tab_unmounted"
   | "navigation.deep_link_deduplicated"
   | "navigation.deep_link_ignored"
   | "navigation.deep_link_handled"

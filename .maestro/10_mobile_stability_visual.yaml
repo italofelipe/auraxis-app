@@ -1,0 +1,145 @@
+appId: com.sensoriumit.auraxis
+name: Issue 730 - estabilidade e evidência visual crítica
+tags:
+  - critical
+  - visual
+---
+- launchApp:
+    clearState: true
+
+- assertVisible: "E-mail"
+- tapOn: "E-mail"
+- inputText: ${E2E_EMAIL}
+- tapOn: "Senha"
+- inputText: ${E2E_PASSWORD}
+# hideKeyboard é instável no iOS; tocar num texto estático dispensa o teclado
+# (keyboardShouldPersistTaps="handled" na tela de login).
+- tapOn: "ACESSO SEGURO E PROTEGIDO"
+
+# Os campos revalidam a cada tecla e o re-render derruba caracteres no
+# simulador (run 30182464702 digitou "rl.com" no lugar do e-mail). A própria
+# validação do app sinaliza o truncamento: quando acusa, preenche de novo.
+- runFlow:
+    when:
+      visible: "Informe um e-mail valido."
+    commands:
+      - tapOn: "E-mail"
+      - eraseText
+      - inputText: ${E2E_EMAIL}
+      - tapOn: "Senha"
+      - eraseText
+      - inputText: ${E2E_PASSWORD}
+      - tapOn: "ACESSO SEGURO E PROTEGIDO"
+
+- tapOn: "Entrar na Auraxis"
+
+# Credenciais recusadas indicam a senha truncada pelo mesmo motivo: fecha o
+# aviso, repreenche e reenvia uma vez.
+- runFlow:
+    when:
+      visible: "E-mail ou senha inválidos."
+    commands:
+      - tapOn: "Fechar"
+      - tapOn: "E-mail"
+      - eraseText
+      - inputText: ${E2E_EMAIL}
+      - tapOn: "Senha"
+      - eraseText
+      - inputText: ${E2E_PASSWORD}
+      - tapOn: "ACESSO SEGURO E PROTEGIDO"
+      - tapOn: "Entrar na Auraxis"
+# Prompts nativos de salvar senha (iOS Keychain / Google Password Manager)
+# sobem junto com o dashboard e são modais: enquanto estiverem na tela o
+# Maestro não enxerga o conteúdo por trás. Dispensa antes de asserir e de
+# novo depois, porque o timing varia entre plataformas.
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- runFlow:
+    when:
+      visible: "Agora não"
+    commands:
+      - tapOn: "Agora não"
+
+- extendedWaitUntil:
+    visible: "Saldo geral"
+    timeout: 20000
+
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- runFlow:
+    when:
+      visible: "Agora não"
+    commands:
+      - tapOn: "Agora não"
+
+# O assistente de pendências ("Pendências em aberto") só auto-abre para
+# contas com entitlement Premium (advanced_simulations). A conta E2E atual
+# não tem Premium — o bloco é condicional (best-effort) até a conta técnica
+# ser provisionada como Premium; aí a captura volta a ser obrigatória.
+- runFlow:
+    when:
+      visible: "Pendências em aberto"
+    commands:
+      - takeScreenshot: ${MAESTRO_TESTS_DIR}/01-pendencias
+      - tapOn:
+          id: payment-assistant-close
+
+- tapOn:
+    id: tab-transacoes
+- extendedWaitUntil:
+    visible:
+      id: tx-hero
+    timeout: 15000
+- tapOn: "Analítico"
+- assertVisible: "Gastos por categoria"
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/02-transacoes-analitica
+
+- tapOn:
+    id: tx-hero-calendar-toggle
+- assertVisible:
+    id: financial-calendar
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/03-calendario
+- tapOn:
+    id: "calendar-day-with-transactions-.*"
+- assertVisible: "Movimentações do dia"
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/04-movimentacoes-do-dia
+- tapOn:
+    id: calendar-day-sheet-close
+
+- tapOn:
+    id: tab-insights
+- extendedWaitUntil:
+    visible:
+      id: insights-fluida-screen
+    timeout: 15000
+# O ChartBeat fica abaixo da dobra — e é justamente o componente cujo worklet
+# derrubava a aba inteira. A evidência precisa alcançá-lo de fato.
+- scrollUntilVisible:
+    element:
+      id: insights-chart-beat
+    direction: DOWN
+    timeout: 20000
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/05-insights
+
+- tapOn:
+    id: tab-cartoes
+- extendedWaitUntil:
+    visible:
+      id: credit-cards-screen
+    timeout: 15000
+- runFlow:
+    when:
+      visible:
+        id: coach-tooltip-skip
+    commands:
+      - tapOn:
+          id: coach-tooltip-skip
+- assertVisible:
+    id: credit-cards-screen
+- takeScreenshot: ${MAESTRO_TESTS_DIR}/06-cartoes

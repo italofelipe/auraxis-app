@@ -106,8 +106,6 @@ describe("TxHero", () => {
       <TxHero
         periodLabel="Junho de 2026"
         kpis={kpis}
-        isDark={false}
-        onToggleTheme={jest.fn()}
         onToggleCalendar={jest.fn()}
         calendarActive={false}
       />,
@@ -117,22 +115,18 @@ describe("TxHero", () => {
     expect(getByTestId("tx-hero-result")).toBeTruthy();
   });
 
-  it("dispara os toggles de tema e calendário", () => {
-    const onToggleTheme = jest.fn();
+  it("mantém o tema em Configurações e alterna apenas o calendário", () => {
     const onToggleCalendar = jest.fn();
-    const { getByTestId } = wrap(
+    const { getByTestId, queryByTestId } = wrap(
       <TxHero
         periodLabel="Junho de 2026"
         kpis={kpis}
-        isDark={false}
-        onToggleTheme={onToggleTheme}
         onToggleCalendar={onToggleCalendar}
         calendarActive={false}
       />,
     );
-    fireEvent.press(getByTestId("tx-hero-theme-toggle"));
+    expect(queryByTestId("tx-hero-theme-toggle")).toBeNull();
     fireEvent.press(getByTestId("tx-hero-calendar-toggle"));
-    expect(onToggleTheme).toHaveBeenCalled();
     expect(onToggleCalendar).toHaveBeenCalled();
   });
 });

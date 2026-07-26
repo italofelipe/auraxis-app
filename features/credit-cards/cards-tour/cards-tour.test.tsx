@@ -49,7 +49,7 @@ describe("CardsTour", () => {
       </TestProviders>,
     );
     await waitFor(() => expect(getByTestId("coach-tooltip")).toBeTruthy());
-    expect(getByTestId("coach-tooltip-dots").children).toHaveLength(8);
+    expect(getByTestId("coach-tooltip-dots").children).toHaveLength(7);
   });
 
   it("reabre via a ref imperativa (replay do botão ?)", async () => {
