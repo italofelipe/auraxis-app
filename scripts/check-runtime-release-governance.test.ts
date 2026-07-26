@@ -246,7 +246,6 @@ describe("native E2E governance", () => {
       "./gradlew assembleRelease",
       "expo prebuild --platform ios --no-install",
       "-sdk iphonesimulator",
-      "CODE_SIGNING_ALLOWED=NO",
       "id: validate-e2e-credentials",
       "id: validate-e2e-credentials",
       "Missing E2E_EMAIL",

@@ -239,12 +239,13 @@ const validateMobileE2EGovernance = ({ easConfig, e2eWorkflow, e2eFlow }) => {
 
   const workflow = String(e2eWorkflow ?? "");
   // Híbrido (#734): E2E builda no runner; a cota EAS fica reservada para loja.
+  // Nota: o build do simulador usa a assinatura ad-hoc padrão do Xcode —
+  // desligar code signing quebra Keychain/SecureStore e trava o startup.
   if (
     !/expo prebuild --platform android --no-install/u.test(workflow) ||
     !/expo prebuild --platform ios --no-install/u.test(workflow) ||
     !/gradlew assembleRelease/u.test(workflow) ||
-    !/-sdk iphonesimulator/u.test(workflow) ||
-    !/CODE_SIGNING_ALLOWED=NO/u.test(workflow)
+    !/-sdk iphonesimulator/u.test(workflow)
   ) {
     errors.push(
       "Native E2E workflow must build Android and iOS on the runner (prebuild + assembleRelease + xcodebuild simulator)",

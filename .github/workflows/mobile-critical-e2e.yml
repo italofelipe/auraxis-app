@@ -106,8 +106,10 @@ jobs:
           arch: x86_64
           profile: pixel_7_pro
           target: google_apis
+          # O emulator-runner executa este script com sh (dash), que não
+          # suporta `set -o pipefail`.
           script: |
-            set -euo pipefail
+            set -eu
             mkdir -p "$RUNNER_TEMP/maestro-results"
             adb install -r "$RUNNER_TEMP/auraxis-e2e.apk"
             MAESTRO_TESTS_DIR="$RUNNER_TEMP/maestro-results" maestro test \
@@ -165,13 +167,15 @@ jobs:
           workspace="$(find ios -maxdepth 1 -name '*.xcworkspace' -print -quit)"
           test -n "$workspace"
           scheme="$(basename "$workspace" .xcworkspace)"
+          # Assinatura ad-hoc padrão do simulador (sem certificado): desligar
+          # o code signing quebra Keychain/SecureStore e o app trava no splash
+          # (sessão nunca hidrata — visto no run 30180247974).
           xcodebuild \
             -workspace "$workspace" \
             -scheme "$scheme" \
             -configuration Release \
             -sdk iphonesimulator \
             -derivedDataPath "$RUNNER_TEMP/derived" \
-            CODE_SIGNING_ALLOWED=NO \
             build
           app_path="$(find "$RUNNER_TEMP/derived/Build/Products/Release-iphonesimulator" \
             -maxdepth 1 -type d -name '*.app' -print -quit)"
