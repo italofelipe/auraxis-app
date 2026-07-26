@@ -20,6 +20,19 @@ tags:
     visible: "Saldo geral"
     timeout: 20000
 
+# Prompts nativos de salvar senha (iOS Keychain / Google Password Manager)
+# aparecem após o login e cobrem a tab bar. Dispensa quando surgirem.
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- runFlow:
+    when:
+      visible: "Agora não"
+    commands:
+      - tapOn: "Agora não"
+
 # O assistente de pendências ("Pendências em aberto") só auto-abre para
 # contas com entitlement Premium (advanced_simulations). A conta E2E atual
 # não tem Premium — o bloco é condicional (best-effort) até a conta técnica
