@@ -60,6 +60,11 @@ export const barGrowGeometry = ({
   readonly height: number;
   readonly chartHeight: number;
 }): BarGeometry => {
+  // Roda dentro do worklet de `useAnimatedProps` (UI thread). Sem a diretiva,
+  // o Reanimated não a compila para a UI thread e a chamada estoura
+  // "Object is not a function", derrubando o ReactHost e deixando Insights em
+  // branco — só em release, porque no JS thread a função resolve normalmente.
+  "worklet";
   const drawn = height * progress;
   return {
     height: drawn,

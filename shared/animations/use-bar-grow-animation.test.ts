@@ -41,6 +41,18 @@ describe("barGrowGeometry", () => {
   });
 });
 
+describe("barGrowGeometry worklet compilation", () => {
+  it("compiles to a worklet so the UI thread can call it", () => {
+    // `useAnimatedProps` chama esta função na UI thread. Sem a diretiva
+    // "worklet" o Reanimated não a compila e a chamada estoura "Object is not
+    // a function" em release, derrubando o ReactHost e deixando Insights em
+    // branco (visto no E2E nativo Android do run 30183361965). Só o binário
+    // release expõe a falha; este teste tranca a compilação.
+    const compiled = barGrowGeometry as unknown as Record<string, unknown>;
+    expect(compiled.__workletHash).toBeDefined();
+  });
+});
+
 describe("useBarGrowAnimation", () => {
   beforeEach(() => {
     resetAppShellStore();
