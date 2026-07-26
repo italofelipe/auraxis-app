@@ -103,8 +103,15 @@ tags:
     id: tab-insights
 - extendedWaitUntil:
     visible:
-      id: insights-chart-beat
+      id: insights-fluida-screen
     timeout: 15000
+# O ChartBeat fica abaixo da dobra — e é justamente o componente cujo worklet
+# derrubava a aba inteira. A evidência precisa alcançá-lo de fato.
+- scrollUntilVisible:
+    element:
+      id: insights-chart-beat
+    direction: DOWN
+    timeout: 20000
 - takeScreenshot: ${MAESTRO_TESTS_DIR}/05-insights
 
 - tapOn:
