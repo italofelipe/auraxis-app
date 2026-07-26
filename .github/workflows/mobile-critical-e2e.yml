@@ -191,10 +191,11 @@ jobs:
           xcrun simctl boot "$device_id" 2>/dev/null || true
           open -a Simulator
           xcrun simctl bootstatus "$device_id" -b
-          # O prompt nativo "Save Password?" do iOS cobria a tab bar depois do
-          # login e derrubava o fluxo (run 30181242444).
+          # Tenta desligar o AutoFill; o simulador ignora a chave em algumas
+          # versões (o prompt reapareceu no run 30184958537), então o fluxo
+          # Maestro também dispensa o diálogo quando ele aparece.
           xcrun simctl spawn "$device_id" defaults write \
-            com.apple.Preferences AutoFillPasswords -bool false
+            com.apple.Preferences AutoFillPasswords -bool false || true
           app_path="$(find "$RUNNER_TEMP/ios-app" -type d -name '*.app' -print -quit)"
           test -n "$app_path"
           xcrun simctl install "$device_id" "$app_path"

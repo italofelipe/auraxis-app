@@ -48,12 +48,25 @@ tags:
       - inputText: ${E2E_PASSWORD}
       - tapOn: "ACESSO SEGURO E PROTEGIDO"
       - tapOn: "Entrar na Auraxis"
+# Prompts nativos de salvar senha (iOS Keychain / Google Password Manager)
+# sobem junto com o dashboard e são modais: enquanto estiverem na tela o
+# Maestro não enxerga o conteúdo por trás. Dispensa antes de asserir e de
+# novo depois, porque o timing varia entre plataformas.
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- runFlow:
+    when:
+      visible: "Agora não"
+    commands:
+      - tapOn: "Agora não"
+
 - extendedWaitUntil:
     visible: "Saldo geral"
     timeout: 20000
 
-# Prompts nativos de salvar senha (iOS Keychain / Google Password Manager)
-# aparecem após o login e cobrem a tab bar. Dispensa quando surgirem.
 - runFlow:
     when:
       visible: "Not Now"
