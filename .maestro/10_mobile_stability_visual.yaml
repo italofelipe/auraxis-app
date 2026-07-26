@@ -15,7 +15,39 @@ tags:
 # hideKeyboard é instável no iOS; tocar num texto estático dispensa o teclado
 # (keyboardShouldPersistTaps="handled" na tela de login).
 - tapOn: "ACESSO SEGURO E PROTEGIDO"
+
+# Os campos revalidam a cada tecla e o re-render derruba caracteres no
+# simulador (run 30182464702 digitou "rl.com" no lugar do e-mail). A própria
+# validação do app sinaliza o truncamento: quando acusa, preenche de novo.
+- runFlow:
+    when:
+      visible: "Informe um e-mail valido."
+    commands:
+      - tapOn: "E-mail"
+      - eraseText
+      - inputText: ${E2E_EMAIL}
+      - tapOn: "Senha"
+      - eraseText
+      - inputText: ${E2E_PASSWORD}
+      - tapOn: "ACESSO SEGURO E PROTEGIDO"
+
 - tapOn: "Entrar na Auraxis"
+
+# Credenciais recusadas indicam a senha truncada pelo mesmo motivo: fecha o
+# aviso, repreenche e reenvia uma vez.
+- runFlow:
+    when:
+      visible: "E-mail ou senha inválidos."
+    commands:
+      - tapOn: "Fechar"
+      - tapOn: "E-mail"
+      - eraseText
+      - inputText: ${E2E_EMAIL}
+      - tapOn: "Senha"
+      - eraseText
+      - inputText: ${E2E_PASSWORD}
+      - tapOn: "ACESSO SEGURO E PROTEGIDO"
+      - tapOn: "Entrar na Auraxis"
 - extendedWaitUntil:
     visible: "Saldo geral"
     timeout: 20000

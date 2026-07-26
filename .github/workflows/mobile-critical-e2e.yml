@@ -106,22 +106,15 @@ jobs:
           arch: x86_64
           profile: pixel_7_pro
           target: google_apis
-          # O emulator-runner executa este script com sh (dash), que não
-          # suporta `set -o pipefail`.
+          # O emulator-runner roda cada LINHA em seu próprio `sh -c` (dash):
+          # nada de `set -o pipefail` nem continuação com `\` — uma linha por
+          # comando, senão a barra vira argumento literal.
           script: |
-            set -eu
             mkdir -p "$RUNNER_TEMP/maestro-results"
-            # boot_completed não garante ADB pronto: o install pegava o device
-            # ainda "offline". Espera o transporte e tenta de novo.
             adb wait-for-device
             until adb shell true 2>/dev/null; do sleep 2; done
-            adb install -r "$RUNNER_TEMP/auraxis-e2e.apk" \
-              || { sleep 10; adb install -r "$RUNNER_TEMP/auraxis-e2e.apk"; }
-            MAESTRO_TESTS_DIR="$RUNNER_TEMP/maestro-results" maestro test \
-              --debug-output "$RUNNER_TEMP/maestro-results/debug" \
-              -e E2E_EMAIL="$E2E_EMAIL" \
-              -e E2E_PASSWORD="$E2E_PASSWORD" \
-              .maestro/10_mobile_stability_visual.yaml
+            adb install -r "$RUNNER_TEMP/auraxis-e2e.apk" || { sleep 15; adb install -r "$RUNNER_TEMP/auraxis-e2e.apk"; }
+            MAESTRO_TESTS_DIR="$RUNNER_TEMP/maestro-results" maestro test --debug-output "$RUNNER_TEMP/maestro-results/debug" -e E2E_EMAIL="$E2E_EMAIL" -e E2E_PASSWORD="$E2E_PASSWORD" .maestro/10_mobile_stability_visual.yaml
 
       - name: Upload Android screenshots and build identity
         if: ${{ always() && steps.validate-e2e-credentials.outcome == 'success' }}
