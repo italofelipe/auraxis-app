@@ -1,21 +1,7 @@
 {
   "common": {
     "actions": {
-      "save": "Salvar",
-      "cancel": "Cancelar",
-      "confirm": "Confirmar",
-      "delete": "Excluir",
-      "edit": "Editar",
-      "close": "Fechar",
-      "back": "Voltar",
-      "tryAgain": "Tentar novamente",
-      "create": "Criar",
-      "loading": "Carregando..."
-    },
-    "errors": {
-      "unknown": "Algo deu errado. Tente novamente em instantes.",
-      "network": "Sem conexao para carregar agora",
-      "validation": "Verifique os campos destacados"
+      "save": "Salvar"
     },
     "appearance": {
       "title": "Aparencia",
@@ -42,50 +28,27 @@
   },
   "auth": {
     "captcha": {
-      "label": "Verificacao de seguranca",
       "testKeyHint": "Modo de desenvolvimento — chave de teste Turnstile.",
       "error": "Nao foi possivel verificar. Tente novamente em instantes.",
       "missing": "Complete a verificacao de seguranca antes de continuar."
     },
     "login": {
-      "title": "Entrar",
       "overline": "ACESSO SEGURO E PROTEGIDO",
       "headlinePrefix": "Organize suas finanças com",
       "headlineAccent": "clareza.",
       "subtitle": "Acesse sua área privada e continue sua rotina financeira com tranquilidade.",
-      "emailLabel": "Email",
       "emailLabelPremium": "E-MAIL",
       "emailPlaceholderPremium": "seu@email.com",
-      "passwordLabel": "Senha",
       "passwordLabelPremium": "SENHA",
       "passwordPlaceholderPremium": "Sua senha",
-      "submit": "Entrar",
       "submitPremium": "Entrar na Auraxis",
       "submitting": "Entrando...",
-      "forgotPassword": "Esqueci minha senha",
       "forgotPasswordPremium": "Esqueceu sua senha?",
       "divider": "OU",
-      "noAccount": "Ainda nao tem conta?",
       "noAccountPremium": "Não tem conta?",
-      "createAccount": "Criar conta",
       "createAccountPremium": "Criar conta gratuita",
       "terms": "Termos de Uso",
       "privacy": "Privacidade"
-    },
-    "register": {
-      "title": "Criar conta",
-      "submit": "Criar conta",
-      "submitting": "Criando..."
-    },
-    "forgotPassword": {
-      "title": "Recuperar senha",
-      "submit": "Enviar instrucoes",
-      "submitting": "Enviando..."
-    },
-    "resetPassword": {
-      "title": "Definir nova senha",
-      "submit": "Salvar nova senha",
-      "submitting": "Salvando..."
     },
     "resendConfirmation": {
       "title": "Reenviar e-mail de confirmacao",
@@ -112,19 +75,10 @@
     }
   },
   "transactions": {
-    "view": {
-      "list": "Lista",
-      "calendar": "Calendario"
-    },
     "calendar": {
       "dayTitle": "Movimentações do dia",
       "empty": "Nenhuma movimentação neste dia.",
       "close": "Fechar"
-    },
-    "actions": {
-      "duplicate": "Duplicar",
-      "duplicateDescription": "Cria uma copia com a data de hoje.",
-      "title": "Acoes"
     },
     "feed": {
       "invoiceBadge": "fatura {{month}}"
@@ -134,9 +88,7 @@
       "description": "Escolha o formato; geramos o arquivo e abrimos o compartilhamento.",
       "csv": "CSV",
       "pdf": "PDF",
-      "submit": "Exportar agora",
       "submitting": "Gerando arquivo...",
-      "success": "Pronto! Use o compartilhamento para enviar ou salvar.",
       "errorTitle": "Nao foi possivel exportar",
       "errorDescription": "Tente novamente em instantes."
     }
@@ -210,13 +162,6 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard",
-    "greeting": "Ola, {{name}}",
-    "balanceLabel": "Saldo geral",
-    "monthSummary": {
-      "title": "Resumo por mes",
-      "description": "Receitas, despesas e saldo do periodo selecionado."
-    },
     "quickAdd": {
       "fabLabel": "Nova transacao rapida",
       "title": "Lancamento rapido",
@@ -242,9 +187,7 @@
     "upcomingDue": {
       "title": "Proximos vencimentos",
       "description": "Transacoes pendentes nos proximos 7 dias.",
-      "empty": "Nenhum vencimento na semana.",
-      "markPaid": "Marcar como pago",
-      "marking": "Marcando..."
+      "empty": "Nenhum vencimento na semana."
     },
     "embeddedSummaries": {
       "goals": {

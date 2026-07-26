@@ -1,21 +1,7 @@
 {
   "common": {
     "actions": {
-      "save": "Save",
-      "cancel": "Cancel",
-      "confirm": "Confirm",
-      "delete": "Delete",
-      "edit": "Edit",
-      "close": "Close",
-      "back": "Back",
-      "tryAgain": "Try again",
-      "create": "Create",
-      "loading": "Loading..."
-    },
-    "errors": {
-      "unknown": "Something went wrong. Please try again shortly.",
-      "network": "No connection right now",
-      "validation": "Check the highlighted fields"
+      "save": "Save"
     },
     "appearance": {
       "title": "Appearance",
@@ -42,50 +28,27 @@
   },
   "auth": {
     "captcha": {
-      "label": "Security check",
       "testKeyHint": "Development mode — Turnstile test key.",
       "error": "Could not verify. Please try again shortly.",
       "missing": "Complete the security check before continuing."
     },
     "login": {
-      "title": "Sign in",
       "overline": "SECURE AND PROTECTED ACCESS",
       "headlinePrefix": "Organize your money with",
       "headlineAccent": "clarity.",
       "subtitle": "Access your private area and continue your financial routine with confidence.",
-      "emailLabel": "Email",
       "emailLabelPremium": "EMAIL",
       "emailPlaceholderPremium": "you@example.com",
-      "passwordLabel": "Password",
       "passwordLabelPremium": "PASSWORD",
       "passwordPlaceholderPremium": "Your password",
-      "submit": "Sign in",
       "submitPremium": "Sign in to Auraxis",
       "submitting": "Signing in...",
-      "forgotPassword": "I forgot my password",
       "forgotPasswordPremium": "Forgot your password?",
       "divider": "OR",
-      "noAccount": "Don't have an account yet?",
       "noAccountPremium": "Don't have an account?",
-      "createAccount": "Create account",
       "createAccountPremium": "Create a free account",
       "terms": "Terms of Use",
       "privacy": "Privacy"
-    },
-    "register": {
-      "title": "Create account",
-      "submit": "Create account",
-      "submitting": "Creating..."
-    },
-    "forgotPassword": {
-      "title": "Recover password",
-      "submit": "Send instructions",
-      "submitting": "Sending..."
-    },
-    "resetPassword": {
-      "title": "Set new password",
-      "submit": "Save new password",
-      "submitting": "Saving..."
     },
     "resendConfirmation": {
       "title": "Resend confirmation email",
@@ -112,19 +75,10 @@
     }
   },
   "transactions": {
-    "view": {
-      "list": "List",
-      "calendar": "Calendar"
-    },
     "calendar": {
       "dayTitle": "Transactions for the day",
       "empty": "Nothing on this day.",
       "close": "Close"
-    },
-    "actions": {
-      "duplicate": "Duplicate",
-      "duplicateDescription": "Creates a copy dated today.",
-      "title": "Actions"
     },
     "feed": {
       "invoiceBadge": "invoice {{month}}"
@@ -134,9 +88,7 @@
       "description": "Pick a format; we generate the file and open share.",
       "csv": "CSV",
       "pdf": "PDF",
-      "submit": "Export now",
       "submitting": "Generating file...",
-      "success": "Ready! Use share to send or save.",
       "errorTitle": "Could not export",
       "errorDescription": "Please try again shortly."
     }
@@ -210,13 +162,6 @@
     }
   },
   "dashboard": {
-    "title": "Dashboard",
-    "greeting": "Hello, {{name}}",
-    "balanceLabel": "Total balance",
-    "monthSummary": {
-      "title": "Monthly summary",
-      "description": "Income, expenses and balance for the selected period."
-    },
     "quickAdd": {
       "fabLabel": "Quick transaction",
       "title": "Quick entry",
@@ -242,9 +187,7 @@
     "upcomingDue": {
       "title": "Upcoming due",
       "description": "Pending transactions in the next 7 days.",
-      "empty": "No upcoming dues this week.",
-      "markPaid": "Mark as paid",
-      "marking": "Marking..."
+      "empty": "No upcoming dues this week."
     },
     "embeddedSummaries": {
       "goals": {
