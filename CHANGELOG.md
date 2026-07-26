@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.14.1](https://github.com/italofelipe/auraxis-app/compare/v1.14.0...v1.14.1) (2026-07-26)
+
+
+### Bug Fixes
+
+* **mobile:** estabilizar abas críticas e renovar a experiência ([#731](https://github.com/italofelipe/auraxis-app/issues/731)) ([7e297aa](https://github.com/italofelipe/auraxis-app/commit/7e297aaa3b3dcb6eecb2934d405603be2fdbbef8))
+
 ## [1.14.0](https://github.com/italofelipe/auraxis-app/compare/v1.13.9...v1.14.0) (2026-07-25)
 
 
