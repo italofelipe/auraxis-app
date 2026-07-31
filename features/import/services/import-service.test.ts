@@ -143,6 +143,7 @@ describe("createImportService.previewFile", () => {
         category: "transporte",
         confidence: 0.92,
         isDuplicate: false,
+        missingFields: [],
       },
       {
         id: "draft-2",
@@ -153,6 +154,7 @@ describe("createImportService.previewFile", () => {
         category: "receita",
         confidence: null,
         isDuplicate: true,
+        missingFields: [],
       },
     ]);
     expect(result.previewToken).toBe("preview-1");
@@ -180,7 +182,9 @@ describe("createImportService.confirmImport", () => {
     expect(client.post).toHaveBeenCalledWith("/v2/import/confirm", {
       preview_token: "preview-1",
       exclude_ids: ["draft-2"],
+      completions: {},
+      use_generic_placeholders: false,
     });
-    expect(result).toEqual({ importedCount: 1, skippedCount: 1 });
+    expect(result).toEqual({ importedCount: 1, skippedCount: 1, errors: [] });
   });
 });

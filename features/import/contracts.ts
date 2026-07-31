@@ -38,6 +38,12 @@ export interface ImportPreviewCommand {
   readonly mapping: ImportColumnMapping;
 }
 
+/**
+ * Campo que o arquivo não trouxe e que precisa da resposta do usuário antes de
+ * concluir a importação. Espelha `missing_fields` do api-v2 (#110).
+ */
+export type ImportMissingField = "description" | "amount";
+
 export interface ImportTransactionDraft {
   readonly id: string;
   readonly date: string;
@@ -47,6 +53,13 @@ export interface ImportTransactionDraft {
   readonly category: string | null;
   readonly confidence: number | null;
   readonly isDuplicate: boolean;
+  readonly missingFields: readonly ImportMissingField[];
+}
+
+/** Linha que existia no arquivo e o parser não conseguiu ler. */
+export interface ImportRejectedRow {
+  readonly lineNumber: number;
+  readonly reason: string;
 }
 
 export interface ImportPreview {
@@ -55,17 +68,34 @@ export interface ImportPreview {
   readonly fileType: ImportFileType;
   readonly totalCount: number;
   readonly duplicatesCount: number;
+  readonly incompleteCount: number;
   readonly transactions: readonly ImportTransactionDraft[];
+  readonly rejectedRows: readonly ImportRejectedRow[];
 }
+
+/** O que o usuário respondeu na conferência: `{ draftId: { campo: valor } }`. */
+export type ImportCompletions = Readonly<
+  Record<string, Readonly<Partial<Record<ImportMissingField, string>>>>
+>;
 
 export interface ConfirmImportCommand {
   readonly previewToken: string;
   readonly excludeIds: readonly string[];
+  readonly completions?: ImportCompletions;
+  /** "Terminar depois": grava títulos genéricos numerados e R$ 1,00. */
+  readonly useGenericPlaceholders?: boolean;
+}
+
+/** Linha que o v1 recusou; volta para o cliente poder tentar de novo. */
+export interface ImportRowError {
+  readonly draftId: string;
+  readonly reason: string;
 }
 
 export interface ConfirmImportResult {
   readonly importedCount: number;
   readonly skippedCount: number;
+  readonly errors: readonly ImportRowError[];
 }
 
 export type ImportMappingFieldKey =

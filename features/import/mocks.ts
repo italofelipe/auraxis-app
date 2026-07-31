@@ -35,6 +35,8 @@ export const importPreviewFixture: ImportPreview = {
   fileType: "csv",
   totalCount: 3,
   duplicatesCount: 1,
+  incompleteCount: 0,
+  rejectedRows: [],
   transactions: [
     {
       id: "draft-1",
@@ -45,6 +47,7 @@ export const importPreviewFixture: ImportPreview = {
       category: "transporte",
       confidence: 0.92,
       isDuplicate: false,
+      missingFields: [],
     },
     {
       id: "draft-2",
@@ -55,6 +58,7 @@ export const importPreviewFixture: ImportPreview = {
       category: "receita",
       confidence: 0.88,
       isDuplicate: true,
+      missingFields: [],
     },
     {
       id: "draft-3",
@@ -65,6 +69,7 @@ export const importPreviewFixture: ImportPreview = {
       category: "alimentacao",
       confidence: 0.78,
       isDuplicate: false,
+      missingFields: [],
     },
   ],
 };
@@ -72,4 +77,25 @@ export const importPreviewFixture: ImportPreview = {
 export const confirmImportFixture: ConfirmImportResult = {
   importedCount: 2,
   skippedCount: 1,
+  errors: [],
+};
+
+/** Preview com uma linha sem título e outra sem valor, para a conferência. */
+export const importPreviewWithIncompleteFixture: ImportPreview = {
+  ...importPreviewFixture,
+  incompleteCount: 2,
+  transactions: [
+    { ...importPreviewFixture.transactions[0], missingFields: ["description"] },
+    importPreviewFixture.transactions[1],
+    { ...importPreviewFixture.transactions[2], missingFields: ["amount"] },
+  ],
+};
+
+/** Preview em que o parser perdeu duas linhas do arquivo. */
+export const importPreviewWithRejectedRowsFixture: ImportPreview = {
+  ...importPreviewFixture,
+  rejectedRows: [
+    { lineNumber: 7, reason: "Data inválida: 31/02/2026" },
+    { lineNumber: 12, reason: "Linha truncada: faltam colunas" },
+  ],
 };

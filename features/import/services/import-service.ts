@@ -10,8 +10,10 @@ import type {
   ImportDetectResult,
   ImportFileAsset,
   ImportFileType,
+  ImportMissingField,
   ImportPreview,
   ImportPreviewCommand,
+  ImportRejectedRow,
   ImportTransactionDraft,
   ImportTransactionType,
 } from "@/features/import/contracts";
@@ -44,6 +46,7 @@ interface ImportPreviewPayload {
   readonly file_type: ImportFileType;
   readonly total_count: number;
   readonly duplicates_count: number;
+  readonly incomplete_count?: number | null;
   readonly transactions: readonly {
     readonly id: string;
     readonly date: string;
@@ -53,12 +56,19 @@ interface ImportPreviewPayload {
     readonly category: string | null;
     readonly confidence: number | null;
     readonly is_duplicate: boolean;
+    readonly missing_fields?: readonly string[] | null;
   }[];
+  readonly rejected_rows?:
+    | readonly { readonly line_number: number; readonly reason: string }[]
+    | null;
 }
 
 interface ConfirmImportPayload {
   readonly imported_count: number;
   readonly skipped_count?: number | null;
+  readonly errors?:
+    | readonly { readonly draft_id: string; readonly reason: string }[]
+    | null;
 }
 
 type AppendableFormData = FormData & {
@@ -117,6 +127,25 @@ const mapDetect = (payload: ImportDetectPayload): ImportDetectResult => ({
   confidence: toConfidence(payload),
 });
 
+const KNOWN_MISSING_FIELDS: readonly ImportMissingField[] = [
+  "description",
+  "amount",
+];
+
+/**
+ * Mantém só os campos que o app sabe perguntar. Um campo novo no backend não
+ * pode virar um card de conferência sem formulário — seria uma pendência que o
+ * usuário não teria como resolver.
+ */
+const toMissingFields = (
+  raw: readonly string[] | null | undefined,
+): readonly ImportMissingField[] => {
+  if (!raw) {
+    return [];
+  }
+  return KNOWN_MISSING_FIELDS.filter((field) => raw.includes(field));
+};
+
 const mapTransaction = (
   payload: ImportPreviewPayload["transactions"][number],
 ): ImportTransactionDraft => ({
@@ -128,16 +157,34 @@ const mapTransaction = (
   category: payload.category,
   confidence: payload.confidence,
   isDuplicate: payload.is_duplicate,
+  missingFields: toMissingFields(payload.missing_fields),
 });
 
-const mapPreview = (payload: ImportPreviewPayload): ImportPreview => ({
-  previewToken: payload.preview_token,
-  expiresAt: payload.expires_at,
-  fileType: payload.file_type,
-  totalCount: payload.total_count,
-  duplicatesCount: payload.duplicates_count,
-  transactions: payload.transactions.map(mapTransaction),
+const mapRejectedRow = (payload: {
+  readonly line_number: number;
+  readonly reason: string;
+}): ImportRejectedRow => ({
+  lineNumber: payload.line_number,
+  reason: payload.reason,
 });
+
+const mapPreview = (payload: ImportPreviewPayload): ImportPreview => {
+  const transactions = payload.transactions.map(mapTransaction);
+  return {
+    previewToken: payload.preview_token,
+    expiresAt: payload.expires_at,
+    fileType: payload.file_type,
+    totalCount: payload.total_count,
+    duplicatesCount: payload.duplicates_count,
+    // O backend manda `incomplete_count`, mas derivar dos drafts mantém a
+    // contagem coerente com o que a tela consegue de fato perguntar.
+    incompleteCount:
+      payload.incomplete_count ??
+      transactions.filter((tx) => tx.missingFields.length > 0).length,
+    transactions,
+    rejectedRows: (payload.rejected_rows ?? []).map(mapRejectedRow),
+  };
+};
 
 export const createImportService = (client: AxiosInstance) => {
   return {
@@ -173,11 +220,17 @@ export const createImportService = (client: AxiosInstance) => {
       const response = await client.post(apiContractMap.importConfirm.path, {
         preview_token: command.previewToken,
         exclude_ids: command.excludeIds,
+        completions: command.completions ?? {},
+        use_generic_placeholders: command.useGenericPlaceholders ?? false,
       });
       const payload = unwrapEnvelopeData<ConfirmImportPayload>(response.data);
       return {
         importedCount: payload.imported_count,
         skippedCount: payload.skipped_count ?? command.excludeIds.length,
+        errors: (payload.errors ?? []).map((error) => ({
+          draftId: error.draft_id,
+          reason: error.reason,
+        })),
       };
     },
   };

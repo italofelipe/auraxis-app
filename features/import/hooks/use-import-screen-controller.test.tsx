@@ -56,6 +56,8 @@ const preview: ImportPreview = {
   fileType: "csv",
   totalCount: 2,
   duplicatesCount: 1,
+  incompleteCount: 0,
+  rejectedRows: [],
   transactions: [
     {
       id: "draft-1",
@@ -66,6 +68,7 @@ const preview: ImportPreview = {
       category: "transporte",
       confidence: 0.92,
       isDuplicate: false,
+      missingFields: [],
     },
     {
       id: "draft-2",
@@ -76,6 +79,7 @@ const preview: ImportPreview = {
       category: "receita",
       confidence: null,
       isDuplicate: true,
+      missingFields: [],
     },
   ],
 };

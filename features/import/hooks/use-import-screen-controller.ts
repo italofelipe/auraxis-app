@@ -4,11 +4,14 @@ import * as DocumentPicker from "expo-document-picker";
 import type {
   ConfirmImportResult,
   ImportColumnMapping,
+  ImportCompletions,
   ImportDetectResult,
   ImportFileAsset,
   ImportMappingFieldKey,
   ImportMappingFieldViewModel,
   ImportPreview,
+  ImportRejectedRow,
+  ImportTransactionDraft,
 } from "@/features/import/contracts";
 import {
   IMPORT_CONFIDENCE_THRESHOLD,
@@ -19,8 +22,17 @@ import {
   useDetectImportMutation,
   usePreviewImportMutation,
 } from "@/features/import/hooks/use-import-mutations";
+import {
+  useImportReview,
+  type ImportReviewState,
+} from "@/features/import/hooks/use-import-review";
 
-export type ImportScreenPhase = "select" | "mapping" | "preview" | "success";
+export type ImportScreenPhase =
+  | "select"
+  | "mapping"
+  | "preview"
+  | "review"
+  | "success";
 
 export interface ImportScreenController {
   readonly phase: ImportScreenPhase;
@@ -33,9 +45,14 @@ export interface ImportScreenController {
   readonly selectedImportCount: number;
   readonly totalPreviewCount: number;
   readonly duplicateCount: number;
+  readonly rejectedRows: readonly ImportRejectedRow[];
   readonly confirmationResult: ConfirmImportResult | null;
   readonly error: unknown | null;
   readonly isBusy: boolean;
+  /** Conferência das linhas incompletas selecionadas (#760). */
+  readonly review: ImportReviewState;
+  /** Segundo modal do "terminar depois" está aberto. */
+  readonly isFinishLaterOpen: boolean;
   readonly handlePickFile: () => Promise<void>;
   readonly handleCancelMapping: () => void;
   readonly handlePreviousMappingField: () => void;
@@ -44,6 +61,11 @@ export interface ImportScreenController {
   readonly handleConfirmMapping: () => Promise<void>;
   readonly handleToggleTransaction: (transactionId: string) => void;
   readonly handleConfirmImport: () => Promise<void>;
+  readonly handleCancelReview: () => void;
+  readonly handleSubmitReview: () => Promise<void>;
+  readonly handleOpenFinishLater: () => void;
+  readonly handleDismissFinishLater: () => void;
+  readonly handleConfirmWithPlaceholders: () => Promise<void>;
   readonly handleReset: () => void;
   readonly dismissError: () => void;
   readonly isTransactionSelected: (transactionId: string) => boolean;
@@ -153,6 +175,7 @@ export function useImportScreenController(): ImportScreenController {
   const [confirmationResult, setConfirmationResult] =
     useState<ConfirmImportResult | null>(null);
   const [error, setError] = useState<unknown | null>(null);
+  const [isFinishLaterOpen, setIsFinishLaterOpen] = useState<boolean>(false);
 
   const mappingFields = useMemo(
     () => buildMappingFields(detectResult, mapping),
@@ -161,6 +184,18 @@ export function useImportScreenController(): ImportScreenController {
   const currentMappingField = mappingFields[currentMappingIndex] ?? null;
   const totalPreviewCount = preview?.transactions.length ?? 0;
   const duplicateCount = preview?.duplicatesCount ?? 0;
+
+  // Só o que o usuário mantém selecionado precisa de conferência: desmarcar a
+  // linha é uma resposta válida para "não quero essa transação".
+  const incompleteDrafts = useMemo(
+    (): readonly ImportTransactionDraft[] =>
+      (preview?.transactions ?? []).filter(
+        (transaction) =>
+          selectedIds.has(transaction.id) && transaction.missingFields.length > 0,
+      ),
+    [preview, selectedIds],
+  );
+  const review = useImportReview(incompleteDrafts);
 
   const handlePickFile = async (): Promise<void> => {
     setError(null);
@@ -222,7 +257,10 @@ export function useImportScreenController(): ImportScreenController {
     await generatePreview(file, mapping);
   };
 
-  const handleConfirmImport = async (): Promise<void> => {
+  const submitConfirm = async (options: {
+    readonly completions?: ImportCompletions;
+    readonly useGenericPlaceholders?: boolean;
+  }): Promise<void> => {
     if (!preview) {
       return;
     }
@@ -234,12 +272,44 @@ export function useImportScreenController(): ImportScreenController {
       const result = await confirmMutation.mutateAsync({
         previewToken: preview.previewToken,
         excludeIds,
+        completions: options.completions,
+        useGenericPlaceholders: options.useGenericPlaceholders,
       });
       setConfirmationResult(result);
+      setIsFinishLaterOpen(false);
       setPhase("success");
     } catch (caughtError) {
       setError(caughtError);
     }
+  };
+
+  const handleConfirmImport = async (): Promise<void> => {
+    if (!preview) {
+      return;
+    }
+    // Nada entra pela metade sem o usuário saber: havendo linha incompleta
+    // selecionada, a conferência vem antes do confirm (#760).
+    if (incompleteDrafts.length > 0) {
+      setError(null);
+      setPhase("review");
+      return;
+    }
+    await submitConfirm({});
+  };
+
+  const handleSubmitReview = async (): Promise<void> => {
+    if (!review.isComplete) {
+      return;
+    }
+    await submitConfirm({ completions: review.completions });
+  };
+
+  const handleConfirmWithPlaceholders = async (): Promise<void> => {
+    // O que já foi respondido continua valendo; o placeholder cobre o resto.
+    await submitConfirm({
+      completions: review.completions,
+      useGenericPlaceholders: true,
+    });
   };
 
   return {
@@ -253,10 +323,13 @@ export function useImportScreenController(): ImportScreenController {
     selectedImportCount: selectedIds.size,
     totalPreviewCount,
     duplicateCount,
+    rejectedRows: preview?.rejectedRows ?? [],
     confirmationResult,
     error,
     isBusy:
       detectMutation.isPending || previewMutation.isPending || confirmMutation.isPending,
+    review,
+    isFinishLaterOpen,
     handlePickFile,
     handleCancelMapping: () => setPhase("select"),
     handlePreviousMappingField: () => {
@@ -283,6 +356,14 @@ export function useImportScreenController(): ImportScreenController {
       });
     },
     handleConfirmImport,
+    handleCancelReview: () => {
+      setIsFinishLaterOpen(false);
+      setPhase("preview");
+    },
+    handleSubmitReview,
+    handleOpenFinishLater: () => setIsFinishLaterOpen(true),
+    handleDismissFinishLater: () => setIsFinishLaterOpen(false),
+    handleConfirmWithPlaceholders,
     handleReset: () => {
       setPhase("select");
       setFile(null);
@@ -293,6 +374,8 @@ export function useImportScreenController(): ImportScreenController {
       setCurrentMappingIndex(0);
       setConfirmationResult(null);
       setError(null);
+      setIsFinishLaterOpen(false);
+      review.reset();
       detectMutation.reset();
       previewMutation.reset();
       confirmMutation.reset();
