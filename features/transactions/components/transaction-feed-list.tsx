@@ -1,10 +1,13 @@
 import { useCallback, useMemo, useState, type ReactElement } from "react";
 
 import { FlashList } from "@shopify/flash-list";
+import { useRouter } from "expo-router";
 import { RefreshControl } from "react-native";
 import { YStack } from "tamagui";
 
+import { appRoutes } from "@/core/navigation/routes";
 import { queryKeys } from "@/core/query/query-keys";
+import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
 import {
   DeleteConfirmModal,
   MarkPaidConfirmModal,
@@ -21,7 +24,9 @@ import type { TransactionFeedItem } from "@/features/transactions/model/transact
 import { RevealInView } from "@/shared/animations/reveal-in-view";
 import { AppEmptyState } from "@/shared/components/app-empty-state";
 import { AppQueryState } from "@/shared/components/app-query-state";
+import { isFeatureEnabled } from "@/shared/feature-flags";
 import { useListRefresh } from "@/shared/hooks/use-list-refresh";
+import { useT } from "@/shared/i18n";
 import { TransactionListSkeleton } from "@/shared/skeletons";
 
 const TRANSACTIONS_REFRESH_KEYS = [
@@ -48,6 +53,9 @@ function FeedList({
   readonly handlers: FeedItemActionHandlers;
 }): ReactElement {
   const { refreshing, onRefresh } = useListRefresh(TRANSACTIONS_REFRESH_KEYS);
+  const { t } = useT();
+  const router = useRouter();
+  const importEnabled = isFeatureEnabled(IMPORT_FEATURE_FLAG_KEY);
 
   const renderItem = useCallback(
     ({
@@ -76,9 +84,20 @@ function FeedList({
         illustration="transactions"
         title="Nenhuma transação no filtro atual"
         description="Crie uma nova transação no botão central ou troque o filtro para visualizar movimentos."
+        // Feed vazio é o melhor momento para oferecer o import: quem chega aqui
+        // ou não lançou nada ainda, ou tem o histórico só na planilha (#749).
+        cta={
+          importEnabled
+            ? {
+                label: t("import.entry.emptyCta"),
+                onPress: () => router.push(appRoutes.private.importTransactions),
+              }
+            : undefined
+        }
+        testID="transactions-empty-state"
       />
     ),
-    [],
+    [importEnabled, router, t],
   );
 
   return (
