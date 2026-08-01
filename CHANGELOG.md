@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.0](https://github.com/italofelipe/auraxis-app/compare/v1.15.0...v1.16.0) (2026-08-01)
+
+
+### Features
+
+* **ota:** publicar update sem passar por serviço da Expo ([#765](https://github.com/italofelipe/auraxis-app/issues/765)) ([5824fb8](https://github.com/italofelipe/auraxis-app/commit/5824fb84379352e127a664cd30ead44b2e12399b))
+
 ## [1.15.0](https://github.com/italofelipe/auraxis-app/compare/v1.14.1...v1.15.0) (2026-08-01)
 
 
