@@ -6,6 +6,9 @@ import { Paragraph, XStack, YStack } from "tamagui";
 
 import { createAppErrorState } from "@/core/errors/app-error";
 import { appRoutes } from "@/core/navigation/routes";
+import { ImportFinishLaterModal } from "@/features/import/components/import-finish-later-modal";
+import { ImportRejectedRowsNotice } from "@/features/import/components/import-rejected-rows-notice";
+import { ImportReviewSheet } from "@/features/import/components/import-review-sheet";
 import type {
   ImportMappingFieldKey,
   ImportMappingFieldViewModel,
@@ -21,6 +24,7 @@ import { AppErrorNotice } from "@/shared/components/app-error-notice";
 import { AppKeyValueRow } from "@/shared/components/app-key-value-row";
 import { AppScreen } from "@/shared/components/app-screen";
 import { AppSurfaceCard } from "@/shared/components/app-surface-card";
+import { useT } from "@/shared/i18n";
 import { formatShortDate } from "@/shared/utils/formatters";
 
 const listContainerStyle = { paddingBottom: 96 } as const;
@@ -40,7 +44,9 @@ export function ImportScreen(): ReactElement {
   const controller = useImportScreenController();
 
   return (
-    <AppScreen scrollable={controller.phase !== "preview"}>
+    <AppScreen
+      scrollable={controller.phase !== "preview" && controller.phase !== "review"}
+    >
       <YStack gap="$3" flex={1}>
         <HeaderCard controller={controller} />
         <ImportErrorFeedback controller={controller} />
@@ -51,11 +57,35 @@ export function ImportScreen(): ReactElement {
         {controller.phase === "preview" ? (
           <PreviewStep controller={controller} />
         ) : null}
+        {controller.phase === "review" ? (
+          <ReviewStep controller={controller} />
+        ) : null}
         {controller.phase === "success" ? (
           <SuccessStep controller={controller} />
         ) : null}
       </YStack>
     </AppScreen>
+  );
+}
+
+/**
+ * Fase de conferência: mantém o preview no fundo e sobrepõe o sheet de
+ * preenchimento, com o segundo modal do "terminar depois" por cima dele.
+ */
+function ReviewStep({ controller }: ControllerProps): ReactElement {
+  return (
+    <>
+      <PreviewStep controller={controller} />
+      <ImportReviewSheet controller={controller} />
+      <ImportFinishLaterModal
+        visible={controller.isFinishLaterOpen}
+        isBusy={controller.isBusy}
+        onConfirm={() => {
+          void controller.handleConfirmWithPlaceholders();
+        }}
+        onCancel={controller.handleDismissFinishLater}
+      />
+    </>
   );
 }
 
@@ -325,11 +355,18 @@ function PreviewStep({ controller }: ControllerProps): ReactElement | null {
         description={`Importar ${controller.selectedImportCount} de ${controller.totalPreviewCount} transacoes`}
       >
         <YStack gap="$3">
-          {controller.duplicateCount > 0 ? (
-            <AppBadge tone="danger">
-              {controller.duplicateCount} possivel duplicata
-            </AppBadge>
-          ) : null}
+          <XStack gap="$2" flexWrap="wrap">
+            {controller.duplicateCount > 0 ? (
+              <AppBadge tone="danger">
+                {controller.duplicateCount} possivel duplicata
+              </AppBadge>
+            ) : null}
+            {controller.review.totalCount > 0 ? (
+              <AppBadge tone="danger">
+                {controller.review.pendingCount} a conferir
+              </AppBadge>
+            ) : null}
+          </XStack>
           <Paragraph>
             Importar {controller.selectedImportCount} de{" "}
             {controller.totalPreviewCount} transacoes
@@ -350,6 +387,7 @@ function PreviewStep({ controller }: ControllerProps): ReactElement | null {
           </XStack>
         </YStack>
       </AppSurfaceCard>
+      <ImportRejectedRowsNotice rows={controller.rejectedRows} />
       <YStack flex={1} minHeight={320}>
         <FlatList
           data={preview.transactions}
@@ -404,6 +442,9 @@ function TransactionPreviewRow({
             {transaction.isDuplicate ? (
               <AppBadge tone="danger">Possivel duplicata</AppBadge>
             ) : null}
+            {transaction.missingFields.length > 0 ? (
+              <AppBadge tone="danger">Falta preencher</AppBadge>
+            ) : null}
             <AppBadge>{selected ? "Selecionada" : "Ignorada"}</AppBadge>
           </XStack>
         </YStack>
@@ -413,38 +454,55 @@ function TransactionPreviewRow({
 }
 
 function SuccessStep({ controller }: ControllerProps): ReactElement {
+  const { t } = useT();
   const router = useRouter();
-  const handleOpenDashboard = useCallback(() => {
-    router.push(appRoutes.private.dashboard);
+  const handleOpenTransactions = useCallback(() => {
+    router.push(appRoutes.private.transactions);
   }, [router]);
+  const result = controller.confirmationResult;
+  const failedCount = result?.errors.length ?? 0;
 
   return (
-    <AppSurfaceCard
-      title="Importacao concluida"
-      description="As transacoes selecionadas foram enviadas para sua lista."
-    >
-      <YStack gap="$3">
-        {controller.confirmationResult ? (
-          <>
-            <AppKeyValueRow
-              label="Importadas"
-              value={String(controller.confirmationResult.importedCount)}
-            />
-            <AppKeyValueRow
-              label="Ignoradas"
-              value={String(controller.confirmationResult.skippedCount)}
-            />
-          </>
-        ) : null}
-        <XStack gap="$2">
-          <AppButton flex={1} onPress={handleOpenDashboard}>
-            Ver no dashboard
+    <YStack gap="$3">
+      <AppSurfaceCard
+        title={t("import.success.title")}
+        description={t("import.success.description")}
+      >
+        <YStack gap="$3">
+          {result ? (
+            <>
+              <AppKeyValueRow
+                label="Importadas"
+                value={String(result.importedCount)}
+              />
+              <AppKeyValueRow
+                label="Ignoradas"
+                value={String(result.skippedCount)}
+              />
+            </>
+          ) : null}
+          <AppButton onPress={handleOpenTransactions} testID="import-success-cta">
+            {t("import.success.goToTransactions")}
           </AppButton>
-          <AppButton flex={1} tone="secondary" onPress={controller.handleReset}>
-            Importar outra
+          <AppButton tone="secondary" onPress={controller.handleReset}>
+            {t("import.success.importAnother")}
           </AppButton>
-        </XStack>
-      </YStack>
-    </AppSurfaceCard>
+        </YStack>
+      </AppSurfaceCard>
+      {failedCount > 0 ? (
+        <AppSurfaceCard
+          title={t("import.success.errorsTitle", { count: failedCount })}
+          description={t("import.success.errorsDescription")}
+        >
+          <YStack gap="$2" testID="import-success-errors">
+            {result?.errors.map((rowError) => (
+              <Paragraph key={rowError.draftId} color="$mutedColor">
+                {rowError.reason}
+              </Paragraph>
+            ))}
+          </YStack>
+        </AppSurfaceCard>
+      ) : null}
+    </YStack>
   );
 }

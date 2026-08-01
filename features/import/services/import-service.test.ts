@@ -143,6 +143,7 @@ describe("createImportService.previewFile", () => {
         category: "transporte",
         confidence: 0.92,
         isDuplicate: false,
+        missingFields: [],
       },
       {
         id: "draft-2",
@@ -153,6 +154,7 @@ describe("createImportService.previewFile", () => {
         category: "receita",
         confidence: null,
         isDuplicate: true,
+        missingFields: [],
       },
     ]);
     expect(result.previewToken).toBe("preview-1");
@@ -180,7 +182,154 @@ describe("createImportService.confirmImport", () => {
     expect(client.post).toHaveBeenCalledWith("/v2/import/confirm", {
       preview_token: "preview-1",
       exclude_ids: ["draft-2"],
+      completions: {},
+      use_generic_placeholders: false,
     });
-    expect(result).toEqual({ importedCount: 1, skippedCount: 1 });
+    expect(result).toEqual({ importedCount: 1, skippedCount: 1, errors: [] });
+  });
+});
+
+describe("createImportService — campos do fluxo de conferência", () => {
+  it("mapeia missing_fields, rejected_rows e incomplete_count do preview", async () => {
+    const client = buildClient();
+    client.post.mockResolvedValueOnce({
+      data: {
+        data: {
+          preview_token: "preview-1",
+          expires_at: "2026-05-17T14:00:00Z",
+          file_type: "csv",
+          total_count: 2,
+          duplicates_count: 0,
+          incomplete_count: 1,
+          transactions: [
+            {
+              id: "draft-1",
+              date: "2026-05-01",
+              description: "",
+              amount: "25.50",
+              transaction_type: "expense",
+              category: null,
+              confidence: null,
+              is_duplicate: false,
+              missing_fields: ["description"],
+            },
+          ],
+          rejected_rows: [{ line_number: 9, reason: "Data invalida" }],
+        },
+      },
+    });
+
+    const result = await createImportService(client).previewFile({ file, mapping });
+
+    expect(result.transactions[0]?.missingFields).toEqual(["description"]);
+    expect(result.incompleteCount).toBe(1);
+    expect(result.rejectedRows).toEqual([{ lineNumber: 9, reason: "Data invalida" }]);
+  });
+
+  it("descarta campo faltante que a tela nao sabe perguntar", async () => {
+    const client = buildClient();
+    client.post.mockResolvedValueOnce({
+      data: {
+        data: {
+          preview_token: "preview-1",
+          expires_at: "2026-05-17T14:00:00Z",
+          file_type: "csv",
+          total_count: 1,
+          duplicates_count: 0,
+          transactions: [
+            {
+              id: "draft-1",
+              date: "2026-05-01",
+              description: "Uber",
+              amount: "25.50",
+              transaction_type: "expense",
+              category: null,
+              confidence: null,
+              is_duplicate: false,
+              // Campo novo no backend: viraria pendencia sem formulario.
+              missing_fields: ["description", "installments"],
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await createImportService(client).previewFile({ file, mapping });
+
+    expect(result.transactions[0]?.missingFields).toEqual(["description"]);
+  });
+
+  it("deriva incomplete_count dos drafts quando o backend omite o campo", async () => {
+    const client = buildClient();
+    client.post.mockResolvedValueOnce({
+      data: {
+        data: {
+          preview_token: "preview-1",
+          expires_at: "2026-05-17T14:00:00Z",
+          file_type: "csv",
+          total_count: 2,
+          duplicates_count: 0,
+          transactions: [
+            {
+              id: "draft-1", date: "2026-05-01", description: "", amount: "25.50",
+              transaction_type: "expense", category: null, confidence: null,
+              is_duplicate: false, missing_fields: ["description"],
+            },
+            {
+              id: "draft-2", date: "2026-05-02", description: "Uber", amount: "10.00",
+              transaction_type: "expense", category: null, confidence: null,
+              is_duplicate: false,
+            },
+          ],
+        },
+      },
+    });
+
+    const result = await createImportService(client).previewFile({ file, mapping });
+
+    expect(result.incompleteCount).toBe(1);
+    expect(result.rejectedRows).toEqual([]);
+    expect(result.transactions[1]?.missingFields).toEqual([]);
+  });
+
+  it("envia completions e use_generic_placeholders no confirm", async () => {
+    const client = buildClient();
+    client.post.mockResolvedValueOnce({
+      data: { data: { imported_count: 2, skipped_count: 0 } },
+    });
+
+    await createImportService(client).confirmImport({
+      previewToken: "preview-1",
+      excludeIds: [],
+      completions: { "draft-1": { description: "Mercado" } },
+      useGenericPlaceholders: true,
+    });
+
+    expect(client.post).toHaveBeenCalledWith("/v2/import/confirm", {
+      preview_token: "preview-1",
+      exclude_ids: [],
+      completions: { "draft-1": { description: "Mercado" } },
+      use_generic_placeholders: true,
+    });
+  });
+
+  it("mapeia os erros por linha devolvidos pelo confirm", async () => {
+    const client = buildClient();
+    client.post.mockResolvedValueOnce({
+      data: {
+        data: {
+          imported_count: 1,
+          skipped_count: 0,
+          errors: [{ draft_id: "draft-9", reason: "valor invalido" }],
+        },
+      },
+    });
+
+    const result = await createImportService(client).confirmImport({
+      previewToken: "preview-1",
+      excludeIds: [],
+    });
+
+    expect(result.errors).toEqual([{ draftId: "draft-9", reason: "valor invalido" }]);
   });
 });

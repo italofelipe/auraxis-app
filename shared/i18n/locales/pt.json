@@ -281,5 +281,55 @@
       "retry": "Tentar novamente",
       "dismiss": "Agora não"
     }
+  },
+  "import": {
+    "review": {
+      "modalTitle": "Antes de prosseguir, precisamos conferir se as informações estão corretas",
+      "modalDescription": "Encontramos lançamentos com dados faltando no arquivo. Confira cada um para concluir a importação.",
+      "progress": "{{resolved}} de {{total}} conferidos",
+      "pending": "{{count}} pendente",
+      "pending_plural": "{{count}} pendentes",
+      "cardCounter": "Transação {{current}} de {{total}}",
+      "income": "Receita",
+      "expense": "Despesa",
+      "askDescription": "Qual o título desta transação?",
+      "askAmount": "Qual o valor desta transação?",
+      "descriptionPlaceholder": "Ex.: Mercado do bairro",
+      "amountPlaceholder": "Ex.: 149,90",
+      "blockedHint": "Conclua o preenchimento das transações pendentes para liberar a conclusão.",
+      "finishNow": "Concluir importação",
+      "finishLater": "Terminar depois",
+      "backToPreview": "Voltar para a revisão",
+      "next": "Próxima",
+      "previous": "Anterior",
+      "resolved": "Preenchida",
+      "missing": "Falta preencher"
+    },
+    "finishLater": {
+      "title": "Caso queira terminar de cadastrar suas transações posteriormente nós vamos cadastrar os dados com informações genéricas que podem ser alteradas por você posteriormente",
+      "confirm": "Prosseguir",
+      "cancel": "Não, quero terminar de preencher meus dados"
+    },
+    "rejectedRows": {
+      "title": "{{count}} linha não foi importada",
+      "title_plural": "{{count}} linhas não foram importadas",
+      "description": "O arquivo tinha linhas que não conseguimos ler. Corrija o arquivo e importe de novo — elas não ficam marcadas como duplicadas.",
+      "lineLabel": "Linha {{line}}",
+      "expand": "Ver detalhes",
+      "collapse": "Ocultar detalhes"
+    },
+    "success": {
+      "title": "Importação concluída",
+      "description": "Suas transações já estão na lista.",
+      "goToTransactions": "Ver minhas transações",
+      "importAnother": "Importar outra planilha",
+      "errorsTitle": "{{count}} lançamento não pôde ser criado",
+      "errorsTitle_plural": "{{count}} lançamentos não puderam ser criados",
+      "errorsDescription": "Essas linhas não gravaram e podem ser importadas de novo."
+    },
+    "entry": {
+      "feedAction": "Importar planilha",
+      "emptyCta": "Importar de uma planilha"
+    }
   }
 }

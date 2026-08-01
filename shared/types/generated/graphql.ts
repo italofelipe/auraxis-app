@@ -341,6 +341,13 @@ export type CancelSubscriptionMutation = {
   subscription: SubscriptionType;
 };
 
+/** Swap plan without double-charging (#1597); mirrors REST /change-plan. */
+export type ChangeSubscriptionPlanMutation = {
+  __typename?: 'ChangeSubscriptionPlanMutation';
+  checkout: CheckoutSessionType;
+  message: Scalars['String']['output'];
+};
+
 export type CheckoutSessionType = {
   __typename?: 'CheckoutSessionType';
   checkoutUrl: Scalars['String']['output'];
@@ -864,6 +871,11 @@ export type Mutation = {
   /** @deprecated ADR-0004: use POST /subscription/cancel */
   cancelSubscription?: Maybe<CancelSubscriptionMutation>;
   /**
+   * Swap plan without double-charging (#1597); mirrors REST /change-plan.
+   * @deprecated ADR-0004: use POST /subscription/change-plan
+   */
+  changeSubscriptionPlan?: Maybe<ChangeSubscriptionPlanMutation>;
+  /**
    * Mark the authenticated user's onboarding as completed (idempotent).
    *
    * REST parity: ``POST /user/onboarding/complete``.
@@ -1013,6 +1025,12 @@ export type MutationCancelReceivableArgs = {
 };
 
 
+export type MutationChangeSubscriptionPlanArgs = {
+  billingCycle?: InputMaybe<BillingCycle>;
+  planSlug: Scalars['String']['input'];
+};
+
+
 export type MutationConfirmBankImportArgs = {
   bankName: Scalars['String']['input'];
   mode: Scalars['String']['input'];
@@ -1048,6 +1066,7 @@ export type MutationCreateBudgetArgs = {
 export type MutationCreateCheckoutSessionArgs = {
   billingCycle?: InputMaybe<BillingCycle>;
   planSlug: Scalars['String']['input'];
+  returnSurface?: InputMaybe<Scalars['String']['input']>;
 };
 
 

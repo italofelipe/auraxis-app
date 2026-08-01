@@ -25,9 +25,30 @@ const buildController = (
     selectedImportCount: 0,
     totalPreviewCount: 0,
     duplicateCount: 0,
+    rejectedRows: [],
     confirmationResult: null,
     error: null,
     isBusy: false,
+    review: {
+      cards: [],
+      currentIndex: 0,
+      currentCard: null,
+      totalCount: 0,
+      resolvedCount: 0,
+      pendingCount: 0,
+      isComplete: false,
+      completions: {},
+      answer: jest.fn(),
+      goToNext: jest.fn(),
+      goToPrevious: jest.fn(),
+      reset: jest.fn(),
+    },
+    isFinishLaterOpen: false,
+    handleCancelReview: jest.fn(),
+    handleSubmitReview: jest.fn(),
+    handleOpenFinishLater: jest.fn(),
+    handleDismissFinishLater: jest.fn(),
+    handleConfirmWithPlaceholders: jest.fn(),
     handlePickFile: jest.fn(),
     handleCancelMapping: jest.fn(),
     handlePreviousMappingField: jest.fn(),
@@ -133,6 +154,8 @@ describe("ImportScreen", () => {
         fileType: "csv",
         totalCount: 2,
         duplicatesCount: 1,
+        incompleteCount: 0,
+        rejectedRows: [],
         transactions: [
           {
             id: "draft-1",
@@ -143,6 +166,7 @@ describe("ImportScreen", () => {
             category: "transporte",
             confidence: 0.92,
             isDuplicate: false,
+            missingFields: [],
           },
           {
             id: "draft-2",
@@ -153,6 +177,7 @@ describe("ImportScreen", () => {
             category: "receita",
             confidence: null,
             isDuplicate: true,
+            missingFields: [],
           },
         ],
       },
@@ -199,5 +224,102 @@ describe("ImportScreen", () => {
 
     fireEvent.press(getByText("Fechar"));
     expect(controller.dismissError).toHaveBeenCalled();
+  });
+});
+
+describe("ImportScreen — conferência, linhas perdidas e sucesso", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("na fase de conferencia mostra o sheet por cima da prancheta de preview", () => {
+    const reviewCard = {
+      draft: {
+        id: "draft-9",
+        date: "2026-05-05",
+        description: "",
+        amount: "89.90",
+        type: "expense" as const,
+        category: "outros",
+        confidence: 0.4,
+        isDuplicate: false,
+        missingFields: ["description" as const],
+      },
+      answers: {},
+      isResolved: false,
+    };
+    const controller = buildController({
+      phase: "review",
+      preview: {
+        previewToken: "preview-1",
+        expiresAt: "2026-05-17T14:00:00Z",
+        fileType: "csv",
+        totalCount: 1,
+        duplicatesCount: 0,
+        incompleteCount: 1,
+        rejectedRows: [],
+        transactions: [reviewCard.draft],
+      },
+      totalPreviewCount: 1,
+      selectedImportCount: 1,
+      review: {
+        cards: [reviewCard],
+        currentIndex: 0,
+        currentCard: reviewCard,
+        totalCount: 1,
+        resolvedCount: 0,
+        pendingCount: 1,
+        isComplete: false,
+        completions: {},
+        answer: jest.fn(),
+        goToNext: jest.fn(),
+        goToPrevious: jest.fn(),
+        reset: jest.fn(),
+      },
+    });
+
+    const { getByTestId } = renderScreen(controller);
+
+    expect(getByTestId("import-review-sheet")).toBeTruthy();
+    expect(getByTestId("import-preview-list")).toBeTruthy();
+  });
+
+  it("mostra o aviso das linhas que o arquivo perdeu", () => {
+    const controller = buildController({
+      phase: "preview",
+      totalPreviewCount: 1,
+      selectedImportCount: 1,
+      rejectedRows: [{ lineNumber: 7, reason: "Data invalida" }],
+      preview: {
+        previewToken: "preview-1",
+        expiresAt: "2026-05-17T14:00:00Z",
+        fileType: "csv",
+        totalCount: 1,
+        duplicatesCount: 0,
+        incompleteCount: 0,
+        rejectedRows: [{ lineNumber: 7, reason: "Data invalida" }],
+        transactions: [],
+      },
+    });
+
+    const { getByTestId } = renderScreen(controller);
+
+    expect(getByTestId("import-rejected-rows")).toBeTruthy();
+  });
+
+  it("na tela de sucesso leva para as transacoes e lista os erros por linha", () => {
+    const controller = buildController({
+      phase: "success",
+      confirmationResult: {
+        importedCount: 4,
+        skippedCount: 1,
+        errors: [{ draftId: "draft-9", reason: "valor invalido" }],
+      },
+    });
+
+    const { getByTestId } = renderScreen(controller);
+
+    expect(getByTestId("import-success-cta")).toBeTruthy();
+    expect(getByTestId("import-success-errors")).toBeTruthy();
   });
 });

@@ -281,5 +281,55 @@
       "retry": "Try again",
       "dismiss": "Not now"
     }
+  },
+  "import": {
+    "review": {
+      "modalTitle": "Before moving on, we need to check whether the information is correct",
+      "modalDescription": "Some rows in your file are missing data. Review each one to finish the import.",
+      "progress": "{{resolved}} of {{total}} reviewed",
+      "pending": "{{count}} pending",
+      "pending_plural": "{{count}} pending",
+      "cardCounter": "Transaction {{current}} of {{total}}",
+      "income": "Income",
+      "expense": "Expense",
+      "askDescription": "What is the title of this transaction?",
+      "askAmount": "What is the amount of this transaction?",
+      "descriptionPlaceholder": "e.g. Corner grocery",
+      "amountPlaceholder": "e.g. 149.90",
+      "blockedHint": "Fill in the pending transactions to unlock the import.",
+      "finishNow": "Finish import",
+      "finishLater": "Finish later",
+      "backToPreview": "Back to review",
+      "next": "Next",
+      "previous": "Previous",
+      "resolved": "Filled in",
+      "missing": "Missing"
+    },
+    "finishLater": {
+      "title": "If you would rather finish registering your transactions later, we will save them with generic information that you can change afterwards",
+      "confirm": "Continue",
+      "cancel": "No, I want to finish filling in my data"
+    },
+    "rejectedRows": {
+      "title": "{{count}} row was not imported",
+      "title_plural": "{{count}} rows were not imported",
+      "description": "Your file had rows we could not read. Fix the file and import again — they are not flagged as duplicates.",
+      "lineLabel": "Line {{line}}",
+      "expand": "See details",
+      "collapse": "Hide details"
+    },
+    "success": {
+      "title": "Import complete",
+      "description": "Your transactions are already in the list.",
+      "goToTransactions": "See my transactions",
+      "importAnother": "Import another file",
+      "errorsTitle": "{{count}} entry could not be created",
+      "errorsTitle_plural": "{{count}} entries could not be created",
+      "errorsDescription": "These rows were not saved and can be imported again."
+    },
+    "entry": {
+      "feedAction": "Import file",
+      "emptyCta": "Import from a file"
+    }
   }
 }

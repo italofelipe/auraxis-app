@@ -56,6 +56,8 @@ const preview: ImportPreview = {
   fileType: "csv",
   totalCount: 2,
   duplicatesCount: 1,
+  incompleteCount: 0,
+  rejectedRows: [],
   transactions: [
     {
       id: "draft-1",
@@ -66,6 +68,7 @@ const preview: ImportPreview = {
       category: "transporte",
       confidence: 0.92,
       isDuplicate: false,
+      missingFields: [],
     },
     {
       id: "draft-2",
@@ -76,7 +79,18 @@ const preview: ImportPreview = {
       category: "receita",
       confidence: null,
       isDuplicate: true,
+      missingFields: [],
     },
+  ],
+};
+
+const incompletePreview: ImportPreview = {
+  ...preview,
+  incompleteCount: 2,
+  rejectedRows: [{ lineNumber: 9, reason: "Data invalida" }],
+  transactions: [
+    { ...preview.transactions[0]!, description: "", missingFields: ["description"] },
+    { ...preview.transactions[1]!, isDuplicate: false, amount: "0", missingFields: ["amount"] },
   ],
 };
 
@@ -194,5 +208,246 @@ describe("useImportScreenController", () => {
       importedCount: 1,
       skippedCount: 1,
     });
+  });
+});
+
+describe("useImportScreenController — conferência de linhas incompletas", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedDocumentPicker.mockResolvedValue({
+      canceled: false,
+      assets: [
+        {
+          uri: "file:///cache/extrato.csv",
+          name: "extrato.csv",
+          mimeType: "text/csv",
+          size: 1024,
+          lastModified: 0,
+        },
+      ],
+    });
+    mockedUseDetect.mockReturnValue(buildMutation(detectResult) as never);
+    mockedUsePreview.mockReturnValue(buildMutation(preview) as never);
+    mockedUseConfirm.mockReturnValue(
+      buildMutation({ importedCount: 1, skippedCount: 1, errors: [] }) as never,
+    );
+  });
+
+  it("desvia para a conferencia em vez de importar quando ha linha incompleta", async () => {
+    mockedUsePreview.mockReturnValue(buildMutation(incompletePreview) as never);
+    const confirmMutation = buildMutation({
+      importedCount: 2,
+      skippedCount: 0,
+      errors: [],
+    });
+    mockedUseConfirm.mockReturnValue(confirmMutation as never);
+    const { result } = renderHook(() => useImportScreenController());
+
+    await act(async () => {
+      await result.current.handlePickFile();
+    });
+    await act(async () => {
+      await result.current.handleConfirmMapping();
+    });
+    await act(async () => {
+      await result.current.handleConfirmImport();
+    });
+
+    // Nada entra pela metade sem o usuario saber (#760).
+    expect(result.current.phase).toBe("review");
+    expect(confirmMutation.mutateAsync).not.toHaveBeenCalled();
+    expect(result.current.review.totalCount).toBe(2);
+    expect(result.current.review.pendingCount).toBe(2);
+  });
+
+  it("expoe as linhas que o parser nao conseguiu ler", async () => {
+    mockedUsePreview.mockReturnValue(buildMutation(incompletePreview) as never);
+    const { result } = renderHook(() => useImportScreenController());
+
+    await act(async () => {
+      await result.current.handlePickFile();
+    });
+    await act(async () => {
+      await result.current.handleConfirmMapping();
+    });
+
+    expect(result.current.rejectedRows).toEqual([
+      { lineNumber: 9, reason: "Data invalida" },
+    ]);
+  });
+
+  it("bloqueia o envio da conferencia enquanto sobrar pendencia", async () => {
+    mockedUsePreview.mockReturnValue(buildMutation(incompletePreview) as never);
+    const confirmMutation = buildMutation({
+      importedCount: 2,
+      skippedCount: 0,
+      errors: [],
+    });
+    mockedUseConfirm.mockReturnValue(confirmMutation as never);
+    const { result } = renderHook(() => useImportScreenController());
+
+    await act(async () => {
+      await result.current.handlePickFile();
+    });
+    await act(async () => {
+      await result.current.handleConfirmMapping();
+    });
+    await act(async () => {
+      await result.current.handleConfirmImport();
+    });
+    await act(async () => {
+      await result.current.handleSubmitReview();
+    });
+
+    expect(confirmMutation.mutateAsync).not.toHaveBeenCalled();
+    expect(result.current.phase).toBe("review");
+  });
+
+  it("confirma com as respostas da conferencia quando tudo foi preenchido", async () => {
+    mockedUsePreview.mockReturnValue(buildMutation(incompletePreview) as never);
+    const confirmMutation = buildMutation({
+      importedCount: 2,
+      skippedCount: 0,
+      errors: [],
+    });
+    mockedUseConfirm.mockReturnValue(confirmMutation as never);
+    const { result } = renderHook(() => useImportScreenController());
+
+    await act(async () => {
+      await result.current.handlePickFile();
+    });
+    await act(async () => {
+      await result.current.handleConfirmMapping();
+    });
+    await act(async () => {
+      await result.current.handleConfirmImport();
+    });
+    act(() => {
+      result.current.review.answer("draft-1", "description", "Mercado");
+      result.current.review.answer("draft-2", "amount", "149,90");
+    });
+    await act(async () => {
+      await result.current.handleSubmitReview();
+    });
+
+    expect(confirmMutation.mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        previewToken: "preview-1",
+        completions: {
+          "draft-1": { description: "Mercado" },
+          "draft-2": { amount: "149,90" },
+        },
+      }),
+    );
+    expect(result.current.phase).toBe("success");
+  });
+});
+
+describe("useImportScreenController — terminar depois e seleção", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedDocumentPicker.mockResolvedValue({
+      canceled: false,
+      assets: [
+        {
+          uri: "file:///cache/extrato.csv",
+          name: "extrato.csv",
+          mimeType: "text/csv",
+          size: 1024,
+          lastModified: 0,
+        },
+      ],
+    });
+    mockedUseDetect.mockReturnValue(buildMutation(detectResult) as never);
+    mockedUsePreview.mockReturnValue(buildMutation(preview) as never);
+    mockedUseConfirm.mockReturnValue(
+      buildMutation({ importedCount: 1, skippedCount: 1, errors: [] }) as never,
+    );
+  });
+
+  it("terminar depois confirma com placeholders sem descartar o que ja foi respondido", async () => {
+    mockedUsePreview.mockReturnValue(buildMutation(incompletePreview) as never);
+    const confirmMutation = buildMutation({
+      importedCount: 2,
+      skippedCount: 0,
+      errors: [],
+    });
+    mockedUseConfirm.mockReturnValue(confirmMutation as never);
+    const { result } = renderHook(() => useImportScreenController());
+
+    await act(async () => {
+      await result.current.handlePickFile();
+    });
+    await act(async () => {
+      await result.current.handleConfirmMapping();
+    });
+    await act(async () => {
+      await result.current.handleConfirmImport();
+    });
+    act(() => {
+      result.current.review.answer("draft-1", "description", "Mercado");
+      result.current.handleOpenFinishLater();
+    });
+
+    expect(result.current.isFinishLaterOpen).toBe(true);
+
+    await act(async () => {
+      await result.current.handleConfirmWithPlaceholders();
+    });
+
+    expect(confirmMutation.mutateAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        useGenericPlaceholders: true,
+        completions: { "draft-1": { description: "Mercado" } },
+      }),
+    );
+    expect(result.current.isFinishLaterOpen).toBe(false);
+    expect(result.current.phase).toBe("success");
+  });
+
+  it("linha desmarcada deixa de exigir conferencia", async () => {
+    mockedUsePreview.mockReturnValue(buildMutation(incompletePreview) as never);
+    const confirmMutation = buildMutation({
+      importedCount: 1,
+      skippedCount: 1,
+      errors: [],
+    });
+    mockedUseConfirm.mockReturnValue(confirmMutation as never);
+    const { result } = renderHook(() => useImportScreenController());
+
+    await act(async () => {
+      await result.current.handlePickFile();
+    });
+    await act(async () => {
+      await result.current.handleConfirmMapping();
+    });
+    act(() => {
+      result.current.handleToggleTransaction("draft-1");
+      result.current.handleToggleTransaction("draft-2");
+    });
+
+    // Desmarcar e uma resposta valida para "nao quero essa transacao".
+    expect(result.current.review.totalCount).toBe(0);
+  });
+
+  it("volta da conferencia para o preview sem perder a selecao", async () => {
+    mockedUsePreview.mockReturnValue(buildMutation(incompletePreview) as never);
+    const { result } = renderHook(() => useImportScreenController());
+
+    await act(async () => {
+      await result.current.handlePickFile();
+    });
+    await act(async () => {
+      await result.current.handleConfirmMapping();
+    });
+    await act(async () => {
+      await result.current.handleConfirmImport();
+    });
+    act(() => {
+      result.current.handleCancelReview();
+    });
+
+    expect(result.current.phase).toBe("preview");
+    expect(result.current.selectedImportCount).toBe(2);
   });
 });

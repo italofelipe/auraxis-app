@@ -36,7 +36,7 @@
       "createdAt": "2026-05-17",
       "removeBy": "2026-12-31",
       "type": "release",
-      "status": "enabled-dev",
+      "status": "enabled-prod",
       "description": "Controla o fluxo mobile de importacao CSV/XLSX com mapeamento, preview e confirmacao.",
       "repositories": ["auraxis-app", "auraxis-api-v2", "auraxis-web"]
     },
