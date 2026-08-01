@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.15.0](https://github.com/italofelipe/auraxis-app/compare/v1.14.1...v1.15.0) (2026-08-01)
+
+
+### Features
+
+* **import:** import de planilha em produção, com conferência das linhas incompletas ([#761](https://github.com/italofelipe/auraxis-app/issues/761)) ([0483d55](https://github.com/italofelipe/auraxis-app/commit/0483d55ce0d31d64555db236c22f3f87b3c203cb))
+
 ## [1.14.1](https://github.com/italofelipe/auraxis-app/compare/v1.14.0...v1.14.1) (2026-07-26)
 
 
