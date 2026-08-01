@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.1](https://github.com/italofelipe/auraxis-app/compare/v1.16.0...v1.16.1) (2026-08-01)
+
+
+### Bug Fixes
+
+* **ota:** limitar o job de OTA para não queimar 6h num hang ([#769](https://github.com/italofelipe/auraxis-app/issues/769)) ([693b446](https://github.com/italofelipe/auraxis-app/commit/693b44664d2838ec126dc11e797137be1674b186))
+
 ## [1.16.0](https://github.com/italofelipe/auraxis-app/compare/v1.15.0...v1.16.0) (2026-08-01)
 
 
