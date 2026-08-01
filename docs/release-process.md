@@ -210,6 +210,24 @@ do PR com plataforma, versão, build e SHA.
 Actions → `OTA Update (EAS Update)` → escolher canal → informar changelog
 detalhado → executar. O mesmo limite de 100–500 caracteres é aplicado.
 
+### OTA sem depender da Expo (servidor próprio)
+
+Actions → `OTA Update (servidor próprio)` → escolher canal → executar. Publica
+no nosso servidor de updates (épico platform#978) sem passar por serviço da
+Expo: `expo export` roda local, os assets vão para o nosso bucket e o registro
+é um POST no api-v2.
+
+Existe porque em 01/08/2026 o `eas update` travou duas vezes seguidas no
+upload, 6h de runner cada, sem publicar nada (#763).
+
+> ⚠️ **Só atende binários publicados com `updates.url` apontando para o nosso
+> servidor.** A URL é gravada em tempo de build, então o parque instalado hoje
+> continua ouvindo `u.expo.dev` — os dois caminhos convivem até a versão nova
+> ter adoção.
+
+Runbook completo, incluindo rollback e rotação da chave de assinatura:
+`auraxis-platform/docs/wiki/OTA-Servidor-Proprio.md`.
+
 ### Build de loja
 
 Actions → `Store Release (Manual + Tag)` → escolher plataforma/profile →
