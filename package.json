@@ -46,7 +46,7 @@
     "@expo-google-fonts/newsreader": "^0.4.1",
     "@expo/vector-icons": "^15.0.3",
     "@gorhom/bottom-sheet": "^5.2.14",
-    "@hookform/resolvers": "^5.4.0",
+    "@hookform/resolvers": "^5.5.7",
     "@react-navigation/bottom-tabs": "^7.15.5",
     "@react-navigation/elements": "2.9.35",
     "@react-navigation/native": "^7.1.33",
