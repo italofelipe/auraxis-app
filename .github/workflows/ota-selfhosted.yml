@@ -1,0 +1,67 @@
+name: OTA Update (servidor próprio)
+
+# Publica um update no nosso servidor de updates, sem passar por serviço da
+# Expo (épico platform#978). Alternativa ao `ota-update.yml`, que depende do
+# EAS — e que em 01/08 travou duas vezes no upload, 6h de runner cada, sem
+# publicar nada (app#763).
+
+on:
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: "Canal do update"
+        required: true
+        default: preview
+        type: choice
+        options:
+          - preview
+          - production
+      dry_run:
+        description: "Só mostrar o que seria publicado"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: ota-selfhosted-${{ inputs.channel }}
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    name: Publicar update
+    runs-on: ubuntu-latest
+    # O job do EAS não tinha limite e queimou 6h de runner num hang que não
+    # publicou nada. Exportar + subir leva minutos; passar disso é sintoma.
+    timeout-minutes: 25
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v7.0.1
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci --ignore-scripts
+
+      - name: Configurar credenciais AWS (OIDC)
+        if: ${{ !inputs.dry_run }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN_PROD }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Publicar
+        run: |
+          node scripts/ota-publish.mjs \
+            --channel "${{ inputs.channel }}" \
+            ${{ inputs.dry_run && '--dry-run' || '' }}
+        env:
+          OTA_BUCKET: ${{ vars.OTA_BUCKET }}
+          OTA_CDN_BASE: ${{ vars.OTA_CDN_BASE }}
+          OTA_API_BASE: ${{ vars.OTA_API_BASE }}
+          OTA_PUBLISH_TOKEN: ${{ secrets.OTA_PUBLISH_TOKEN }}
