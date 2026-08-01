@@ -29,6 +29,12 @@ jobs:
   publish-update:
     name: Publish OTA update
     runs-on: ubuntu-latest
+    # Sem limite, um `eas update` pendurado consome as 6h de teto do runner
+    # antes de o GitHub cancelar — foi o que aconteceu duas vezes em 01/08
+    # (#763), com o job travado no upload depois de exportar o bundle. O
+    # export leva ~2min e o upload alguns minutos; passar de 30 é sintoma,
+    # não trabalho em andamento.
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
