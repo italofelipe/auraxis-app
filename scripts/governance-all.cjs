@@ -42,6 +42,11 @@ const GOVERNANCE_CHECKS = [
     script: "scripts/check-runtime-release-governance.cjs",
   },
   {
+    id: "store-release-workflow",
+    label: "Store delivery workflow shape",
+    script: "scripts/check-store-release-workflow.cjs",
+  },
+  {
     id: "client-security",
     label: "Client security",
     script: "scripts/check-client-security-governance.cjs",

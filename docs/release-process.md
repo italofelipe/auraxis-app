@@ -20,11 +20,16 @@ merge na main
 
 tag vX.Y.Z
   └─ store-release.yml, uma execução por vez
-      ├─ gera changelog a partir dos PRs da versão
-      ├─ valida versão + credenciais + duplicidade
-      ├─ build e submit Android/iOS
-      ├─ App Store/TestFlight recebe What to Test + release notes
-      └─ Google Play draft recebe release notes e só então vira completed
+      ├─ job prepare
+      │   ├─ gera changelog a partir dos PRs da versão
+      │   ├─ valida versão + credenciais + duplicidade
+      │   └─ publica o changelog validado como artifact da execução
+      ├─ job android-delivery (independente)
+      │   ├─ build → submit (aguarda a submission)
+      │   └─ Google Play draft recebe release notes e só então vira completed
+      └─ job ios-delivery (independente)
+          ├─ build → eas metadata:push (release notes) → submit (aguarda)
+          └─ TestFlight recebe What to Test pela API do App Store Connect
 ```
 
 O PR mecânico `chore(main): release X.Y.Z` não cria outro preview ou build. A
@@ -102,6 +107,78 @@ tempo:
 Todas as execuções de loja compartilham a mesma fila de concorrência. Um
 dispatch manual e uma tag não podem mais iniciar builds em paralelo.
 
+## Isolamento por plataforma
+
+Android e iOS são jobs irmãos: os dois dependem só do `prepare` e nunca um do
+outro. Consequências práticas:
+
+- a falha de uma loja não cancela nem invalida a entrega da outra;
+- cada plataforma faz `eas build` e `eas submit` em passos separados. O
+  `--auto-submit` foi removido: ele acopla as duas plataformas no mesmo comando
+  e esconde o resultado da submission;
+- nenhuma submissão usa `--no-wait`. A finalização (notas do Play, What to Test)
+  só começa depois que a submission daquela plataforma terminou;
+- o changelog validado é gerado uma única vez no `prepare` e distribuído como
+  artifact. Nenhum job revalida ou regenera o texto, então as duas lojas
+  recebem exatamente os mesmos bytes.
+
+O gate `scripts/check-store-release-workflow.cjs` (dentro de
+`npm run policy:check`) congela esse formato: ele falha se os jobs voltarem a
+ser um só, se um depender do outro, se um flag proibido reaparecer ou se a
+ordem submit → finalização for invertida.
+
+### Recuperação de falha parcial
+
+Uma execução com Android verde e iOS vermelho (ou o inverso) **não deve ser
+re-executada inteira**. Use `Re-run failed jobs`: o `prepare` já concluiu e o
+job da plataforma que passou não é refeito. Se o build da plataforma que falhou
+já existir no EAS, o `prepare` o classifica como `ready` e a nova execução só
+submete, sem consumir outro build.
+
+Recuperação manual, na ordem em que o pipeline faria:
+
+```bash
+eas build:list --platform ios --profile production --status finished --limit 5 --json --non-interactive
+eas metadata:push --profile production --non-interactive          # notas pt-BR antes do submit
+eas submit --platform ios --id <BUILD_ID> --profile production --non-interactive
+node scripts/app-store-connect-release-notes.cjs \
+  --app-id 6772551270 --build-number <BUILD_NUMBER> \
+  --metadata-file build/store-release/metadata.json
+```
+
+```bash
+eas submit --platform android --id <BUILD_ID> --profile production --non-interactive
+node scripts/google-play-release.cjs \
+  --metadata-file build/store-release/metadata.json \
+  --package com.sensoriumit.auraxis --track internal --version-code <VERSION_CODE>
+```
+
+O `metadata.json` está no artifact `store-release-changelog` da execução.
+
+## Limitações do plano EAS
+
+O plano atual não é Enterprise. Isso proíbe, de forma permanente:
+
+- passar o texto de "what to test" ao `eas submit` — o parâmetro existe apenas
+  no Enterprise e aborta o comando nos demais planos. O What to Test é gravado
+  pela API oficial do App Store Connect (`betaBuildLocalizations`);
+- depender de qualquer automação que exija esse parâmetro para concluir.
+
+O que continua disponível e é usado: `eas build`, `eas submit`, `eas update`,
+`eas metadata:lint` e `eas metadata:push`.
+
+## Deploy Minimum
+
+`deploy-minimum.yml` tem dois jobs com exigências diferentes:
+
+- `web-baseline-artifact` roda em todo push de `main` e apenas exporta o bundle
+  web. Ele **não** exige changelog de loja: pushes não carregam o input
+  `release_notes` e o gate derrubava o job antes de exportar qualquer coisa;
+- `eas-preview-build` só roda por `workflow_dispatch` com
+  `run_eas_build = true`. Esse job exige e valida o changelog detalhado no
+  próprio runner, porque `build/store-release/` é local ao job e não sobrevive
+  entre jobs.
+
 ## Google Play internal
 
 O EAS Submit envia somente o AAB. Ele não administra release notes. Por isso o
@@ -116,7 +193,10 @@ Depois que o submit termina:
 3. localiza exatamente esse `versionCode` no track `internal`;
 4. grava nome da release e `releaseNotes` em `pt-BR`;
 5. muda somente essa release de `draft` para `completed`;
-6. commita o edit.
+6. commita o edit;
+7. abre um edit somente-leitura, relê o track e confirma que o Google Play
+   reporta `completed`, com o nome `versão (versionCode)` e as notas pt-BR
+   exatas. Só então o passo é considerado bem-sucedido.
 
 Qualquer falha mantém o draft não distribuído. A promoção
 `internal → production` continua manual no Play Console.

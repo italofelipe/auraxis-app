@@ -149,6 +149,94 @@ const publishGooglePlayRelease = async ({
   return updatedTrack;
 };
 
+const findPublishedRelease = ({ track, versionCode }) => {
+  const releases = (track.releases ?? []).filter((release) =>
+    release.versionCodes?.includes(String(versionCode)),
+  );
+
+  if (releases.length !== 1) {
+    throw new Error(
+      `Expected one ${track.track} release for versionCode ${versionCode}, found ${releases.length}`,
+    );
+  }
+
+  return releases[0];
+};
+
+/**
+ * A release only counts as delivered when Google Play itself reports it as
+ * `completed`, carrying the human name and the pt-BR notes we pushed. Reading
+ * the track back is what turns "the API accepted the edit" into evidence.
+ */
+const assertPublishedRelease = ({ release, releaseNotes, version, versionCode }) => {
+  const expectedName = `${version} (${versionCode})`;
+  const notes = (release.releaseNotes ?? []).find((entry) => entry.language === "pt-BR");
+  const problems = [];
+
+  if (release.status !== "completed") {
+    problems.push(`status is "${release.status}" instead of "completed"`);
+  }
+
+  if (release.name !== expectedName) {
+    problems.push(`name is "${release.name}" instead of "${expectedName}"`);
+  }
+
+  if (!notes) {
+    problems.push("pt-BR release notes are missing");
+  } else if (notes.text !== releaseNotes) {
+    problems.push("pt-BR release notes do not match the validated changelog");
+  }
+
+  if (problems.length > 0) {
+    throw new Error(
+      `Google Play internal release ${expectedName} was not published as expected: ${problems.join("; ")}`,
+    );
+  }
+
+  return release;
+};
+
+const verifyGooglePlayRelease = async ({
+  accessToken,
+  fetchImpl = fetch,
+  packageName,
+  releaseNotes,
+  trackName = "internal",
+  version,
+  versionCode,
+}) => {
+  const applicationUrl = `${GOOGLE_API_ROOT}/applications/${packageName}`;
+  const edit = await googleRequest({
+    accessToken,
+    fetchImpl,
+    method: "POST",
+    url: `${applicationUrl}/edits`,
+  });
+
+  try {
+    const track = await googleRequest({
+      accessToken,
+      fetchImpl,
+      url: `${applicationUrl}/edits/${edit.id}/tracks/${trackName}`,
+    });
+    return assertPublishedRelease({
+      release: findPublishedRelease({ track, versionCode }),
+      releaseNotes,
+      version,
+      versionCode,
+    });
+  } finally {
+    // Read-only edit: dropping it keeps the app free of dangling edits even
+    // when the assertion above fails.
+    await googleRequest({
+      accessToken,
+      fetchImpl,
+      method: "DELETE",
+      url: `${applicationUrl}/edits/${edit.id}`,
+    }).catch(() => undefined);
+  }
+};
+
 const parseArguments = (argv) => {
   const values = {};
 
@@ -165,14 +253,17 @@ const run = async () => {
   const metadata = JSON.parse(fs.readFileSync(args["metadata-file"], "utf8"));
   const accessToken = await requestAccessToken({ credentials });
 
-  await publishGooglePlayRelease({
+  const releaseInput = {
     accessToken,
     packageName: args.package,
     releaseNotes: metadata.releaseNotes,
     trackName: args.track ?? "internal",
     version: metadata.version,
     versionCode: args["version-code"],
-  });
+  };
+
+  await publishGooglePlayRelease(releaseInput);
+  await verifyGooglePlayRelease(releaseInput);
   process.stdout.write(
     `Google Play ${args.track ?? "internal"} release ${metadata.version} (${args["version-code"]}) completed with pt-BR notes.\n`,
   );
@@ -189,9 +280,12 @@ module.exports = {
   ANDROID_PUBLISHER_SCOPE,
   GOOGLE_API_ROOT,
   GOOGLE_TOKEN_URL,
+  assertPublishedRelease,
   createServiceAccountAssertion,
+  findPublishedRelease,
   publishGooglePlayRelease,
   requestAccessToken,
   updateRelease,
   updateTrackForVersion,
+  verifyGooglePlayRelease,
 };
