@@ -107,6 +107,7 @@ describe("TxHero", () => {
         periodLabel="Junho de 2026"
         kpis={kpis}
         onToggleCalendar={jest.fn()}
+        onCreate={jest.fn()}
         calendarActive={false}
       />,
     );
@@ -122,12 +123,28 @@ describe("TxHero", () => {
         periodLabel="Junho de 2026"
         kpis={kpis}
         onToggleCalendar={onToggleCalendar}
+        onCreate={jest.fn()}
         calendarActive={false}
       />,
     );
     expect(queryByTestId("tx-hero-theme-toggle")).toBeNull();
     fireEvent.press(getByTestId("tx-hero-calendar-toggle"));
     expect(onToggleCalendar).toHaveBeenCalled();
+  });
+
+  it("dispara a criação de transação pelo botão do herói (#755)", () => {
+    const onCreate = jest.fn();
+    const { getByTestId } = wrap(
+      <TxHero
+        periodLabel="Junho de 2026"
+        kpis={kpis}
+        onToggleCalendar={jest.fn()}
+        onCreate={onCreate}
+        calendarActive={false}
+      />,
+    );
+    fireEvent.press(getByTestId("tx-hero-create-button"));
+    expect(onCreate).toHaveBeenCalledTimes(1);
   });
 });
 

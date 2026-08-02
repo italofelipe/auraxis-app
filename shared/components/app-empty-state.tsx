@@ -51,6 +51,14 @@ export interface AppEmptyStateProps {
     readonly onPress: () => void;
   };
   /**
+   * Optional secondary call to action, rendered below the primary one.
+   * Use for alternative paths (ex.: importar em vez de criar à mão).
+   */
+  readonly secondaryCta?: {
+    readonly label: string;
+    readonly onPress: () => void;
+  };
+  /**
    * Optional custom node rendered above the title. Use to override the
    * default icon when a feature has a more bespoke visual.
    */
@@ -76,6 +84,7 @@ export function AppEmptyState({
   title,
   description,
   cta,
+  secondaryCta,
   customIllustration,
   testID,
 }: AppEmptyStateProps): ReactElement {
@@ -132,6 +141,12 @@ export function AppEmptyState({
       {cta ? (
         <AppButton onPress={cta.onPress} hapticTone="medium">
           {cta.label}
+        </AppButton>
+      ) : null}
+
+      {secondaryCta ? (
+        <AppButton tone="secondary" onPress={secondaryCta.onPress}>
+          {secondaryCta.label}
         </AppButton>
       ) : null}
     </AppStack>

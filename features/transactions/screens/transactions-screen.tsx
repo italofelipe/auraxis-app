@@ -46,6 +46,7 @@ export function TransactionsScreen(): ReactElement {
         periodLabel={controller.periodLabel}
         kpis={controller.heroKpis}
         onToggleCalendar={controller.toggleCalendar}
+        onCreate={controller.handleOpenCreate}
         calendarActive={controller.calendarActive}
       />
     </RevealInView>

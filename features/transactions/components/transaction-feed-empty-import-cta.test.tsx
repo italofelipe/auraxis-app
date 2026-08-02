@@ -1,4 +1,4 @@
-import { render } from "@testing-library/react-native";
+import { fireEvent, render } from "@testing-library/react-native";
 
 import { AppProviders } from "@/core/providers/app-providers";
 import { IMPORT_FEATURE_FLAG_KEY } from "@/features/import/import-config";
@@ -17,9 +17,12 @@ beforeAll(async () => {
   await initI18n("pt");
 });
 
+const handleOpenCreate = jest.fn();
+
 const buildController = (): TransactionsFeedController =>
   ({
     feedItems: [],
+    handleOpenCreate,
     viewMode: "facil",
     setViewMode: jest.fn(),
     periodLabel: "Julho de 2026",
@@ -69,5 +72,53 @@ describe("TransactionFeed — CTA de import no estado vazio", () => {
     );
 
     expect(queryByText("Importar de uma planilha")).toBeNull();
+  });
+});
+
+describe("TransactionFeed — CTA de criar no estado vazio (#755)", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockedIsFeatureEnabled.mockReturnValue(false);
+  });
+
+  it("oferece criar transação e chama o controller", () => {
+    const { getByText } = render(
+      <AppProviders>
+        <TransactionFeed controller={buildController()} />
+      </AppProviders>,
+    );
+
+    fireEvent.press(getByText("Nova transação"));
+    expect(handleOpenCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it("não cita mais o botão central inexistente na tab bar", () => {
+    const { queryByText, getByText } = render(
+      <AppProviders>
+        <TransactionFeed controller={buildController()} />
+      </AppProviders>,
+    );
+
+    expect(queryByText(/botão central/i)).toBeNull();
+    expect(
+      getByText(
+        "Toque em “Nova transação” para lançar um movimento ou troque o filtro para ver outros lançamentos.",
+      ),
+    ).toBeTruthy();
+  });
+
+  it("mantém criar como ação principal e o import como secundária", () => {
+    mockedIsFeatureEnabled.mockImplementation(
+      (key: string) => key === IMPORT_FEATURE_FLAG_KEY,
+    );
+
+    const { getByText } = render(
+      <AppProviders>
+        <TransactionFeed controller={buildController()} />
+      </AppProviders>,
+    );
+
+    expect(getByText("Nova transação")).toBeTruthy();
+    expect(getByText("Importar de uma planilha")).toBeTruthy();
   });
 });

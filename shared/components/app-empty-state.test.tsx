@@ -37,6 +37,28 @@ describe("AppEmptyState", () => {
     expect(onPress).toHaveBeenCalledTimes(1);
   });
 
+  it("dispara a CTA secundaria sem perder a principal", () => {
+    const onPress = jest.fn();
+    const onSecondaryPress = jest.fn();
+    const { getByText } = render(
+      <AppProviders>
+        <AppEmptyState
+          illustration="transactions"
+          title="Sem transacoes"
+          cta={{ label: "Nova transacao", onPress }}
+          secondaryCta={{ label: "Importar", onPress: onSecondaryPress }}
+        />
+      </AppProviders>,
+    );
+
+    fireEvent.press(getByText("Importar"));
+    expect(onSecondaryPress).toHaveBeenCalledTimes(1);
+    expect(onPress).not.toHaveBeenCalled();
+
+    fireEvent.press(getByText("Nova transacao"));
+    expect(onPress).toHaveBeenCalledTimes(1);
+  });
+
   it("renderiza customIllustration quando fornecida", () => {
     const { getByText } = render(
       <AppProviders>

@@ -26,6 +26,8 @@ export interface TxHeroProps {
   readonly kpis: FeedKpis;
   /** Alterna entre lista e calendário. */
   readonly onToggleCalendar: () => void;
+  /** Abre o formulário de criação de transação (#755). */
+  readonly onCreate: () => void;
   /** True quando a visão de calendário está ativa (controla ícone/label). */
   readonly calendarActive: boolean;
 }
@@ -131,8 +133,9 @@ function HeroResultRow({ kpis }: { readonly kpis: FeedKpis }): ReactElement {
 /**
  * Herói teal da tela de Transações: título, período + nº de lançamentos,
  * RESULTADO (mono assinado, verde/vermelho) e, à direita, os fluxos curtos
- * (↑ receitas / ↓ despesas). O único controle auxiliar alterna o calendário;
- * a preferência de tema fica exclusivamente em Configurações.
+ * (↑ receitas / ↓ despesas). Os controles auxiliares são criar transação
+ * (#755 — a aba não tinha nenhum caminho de criação) e o alternador de
+ * calendário; a preferência de tema fica exclusivamente em Configurações.
  * O gradiente segue o tema resolvido (mesmo padrão dos Cartões).
  *
  * @param props Período, KPIs, estado de tema/calendário e handlers.
@@ -142,6 +145,7 @@ export function TxHero({
   periodLabel,
   kpis,
   onToggleCalendar,
+  onCreate,
   calendarActive,
 }: TxHeroProps): ReactElement {
   const resolvedTheme = useResolvedTheme();
@@ -173,6 +177,12 @@ export function TxHero({
             </Paragraph>
           </YStack>
           <XStack gap="$2">
+            <HeroRoundButton
+              icon="plus"
+              accessibilityLabel="Nova transação"
+              testID="tx-hero-create-button"
+              onPress={onCreate}
+            />
             <HeroRoundButton
               icon={calendarActive ? "format-list-bulleted" : "calendar-month-outline"}
               accessibilityLabel={calendarActive ? "Ver lista" : "Ver calendário"}
