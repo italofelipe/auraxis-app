@@ -284,8 +284,13 @@ const validateMobileE2EGovernance = ({ easConfig, e2eWorkflow, e2eFlow }) => {
     "05-insights",
     "06-cartoes",
   ];
+  // O nome é relativo de propósito (#774): a partir de certa versão o Maestro
+  // restringe `takeScreenshot` à pasta daquela execução — cujo nome carrega
+  // timestamp e não existe antes do teste começar —, então caminho absoluto
+  // via variável passou a ser recusado. O que este gate garante continua sendo
+  // o mesmo: que as seis telas críticas sejam capturadas.
   const missingScreenshots = requiredScreenshots.filter(
-    (screenshot) => !flow.includes(`MAESTRO_TESTS_DIR}/${screenshot}`),
+    (screenshot) => !new RegExp(`takeScreenshot:\\s*${screenshot}\\b`, "u").test(flow),
   );
   if (missingScreenshots.length > 0) {
     errors.push(
