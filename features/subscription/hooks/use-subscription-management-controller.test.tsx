@@ -39,7 +39,7 @@ const buildSubscription = (
   offerCode: null,
   status: "active",
   billingCycle: "monthly",
-  provider: "abacatepay",
+  provider: "asaas",
   providerSubscriptionId: "provider-sub-1",
   trialEndsAt: null,
   currentPeriodStart: "2026-07-01T00:00:00Z",
@@ -120,7 +120,7 @@ describe("subscription management via API", () => {
     expect(analyticsClient.capture).toHaveBeenCalledWith(
       "subscription.cancel.completed",
       {
-        provider: "abacatepay",
+        provider: "asaas",
         mode: "api",
         status: "completed",
       },
