@@ -114,7 +114,7 @@ jobs:
             adb wait-for-device
             until adb shell true 2>/dev/null; do sleep 2; done
             adb install -r "$RUNNER_TEMP/auraxis-e2e.apk" || { sleep 15; adb install -r "$RUNNER_TEMP/auraxis-e2e.apk"; }
-            MAESTRO_TESTS_DIR="$RUNNER_TEMP/maestro-results" maestro test --debug-output "$RUNNER_TEMP/maestro-results/debug" -e E2E_EMAIL="$E2E_EMAIL" -e E2E_PASSWORD="$E2E_PASSWORD" .maestro/10_mobile_stability_visual.yaml
+            maestro test --debug-output "$RUNNER_TEMP/maestro-results/debug" -e E2E_EMAIL="$E2E_EMAIL" -e E2E_PASSWORD="$E2E_PASSWORD" .maestro/10_mobile_stability_visual.yaml
 
       - name: Upload Android screenshots and build identity
         if: ${{ always() && steps.validate-e2e-credentials.outcome == 'success' }}
@@ -200,7 +200,7 @@ jobs:
           test -n "$app_path"
           xcrun simctl install "$device_id" "$app_path"
           mkdir -p "$RUNNER_TEMP/maestro-results"
-          MAESTRO_TESTS_DIR="$RUNNER_TEMP/maestro-results" maestro test \
+          maestro test \
             --debug-output "$RUNNER_TEMP/maestro-results/debug" \
             -e E2E_EMAIL="$E2E_EMAIL" \
             -e E2E_PASSWORD="$E2E_PASSWORD" \
