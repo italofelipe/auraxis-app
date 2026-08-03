@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.16.2](https://github.com/italofelipe/auraxis-app/compare/v1.16.1...v1.16.2) (2026-08-03)
+
+
+### Bug Fixes
+
+* **ci:** gravar screenshot do Maestro dentro da pasta que ele permite ([#775](https://github.com/italofelipe/auraxis-app/issues/775)) ([4d58e65](https://github.com/italofelipe/auraxis-app/commit/4d58e65833edb000539ee322df880cb17c81071c)), closes [#774](https://github.com/italofelipe/auraxis-app/issues/774)
+* **transactions:** dar caminho de criação na aba Transações ([#772](https://github.com/italofelipe/auraxis-app/issues/772)) ([cbfc8db](https://github.com/italofelipe/auraxis-app/commit/cbfc8dbaa841f3d4c1e0d8b6478c6558ca14403b)), closes [#755](https://github.com/italofelipe/auraxis-app/issues/755)
+
 ## [1.16.1](https://github.com/italofelipe/auraxis-app/compare/v1.16.0...v1.16.1) (2026-08-01)
 
 
