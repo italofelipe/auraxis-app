@@ -50,6 +50,9 @@ describe("check-runtime-release-governance", () => {
     );
   });
 
+});
+
+describe("release readiness config", () => {
   test("accepts a valid release readiness config baseline", () => {
     const errors = validateReleaseReadinessGovernance({
       appConfig: {
@@ -150,6 +153,9 @@ describe("check-runtime-release-governance", () => {
     expect(errors).toContain("app.json must define expo.ios.bundleIdentifier");
   });
 
+});
+
+describe("Expo SDK 55 native switches", () => {
   test("rejects native switches removed by Expo SDK 55", () => {
     const errors = validateReleaseReadinessGovernance({
       appConfig: {
@@ -265,11 +271,7 @@ describe("native E2E governance", () => {
       "05-insights",
       "06-cartoes",
     ]
-      .map((value) =>
-        value.startsWith("tab-")
-          ? value
-          : `takeScreenshot: \${MAESTRO_TESTS_DIR}/${value}`,
-      )
+      .map((value) => (value.startsWith("tab-") ? value : `takeScreenshot: ${value}`))
       .join("\n"),
   };
 
