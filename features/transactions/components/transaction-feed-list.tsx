@@ -83,10 +83,13 @@ function FeedList({
       <AppEmptyState
         illustration="transactions"
         title="Nenhuma transação no filtro atual"
-        description="Crie uma nova transação no botão central ou troque o filtro para visualizar movimentos."
+        // A copy antiga mandava usar um "botão central" que não existe na tab
+        // bar; o caminho real é o [+] do herói, replicado aqui como CTA (#755).
+        description="Toque em “Nova transação” para lançar um movimento ou troque o filtro para ver outros lançamentos."
+        cta={{ label: "Nova transação", onPress: controller.handleOpenCreate }}
         // Feed vazio é o melhor momento para oferecer o import: quem chega aqui
         // ou não lançou nada ainda, ou tem o histórico só na planilha (#749).
-        cta={
+        secondaryCta={
           importEnabled
             ? {
                 label: t("import.entry.emptyCta"),
@@ -97,7 +100,7 @@ function FeedList({
         testID="transactions-empty-state"
       />
     ),
-    [importEnabled, router, t],
+    [controller.handleOpenCreate, importEnabled, router, t],
   );
 
   return (

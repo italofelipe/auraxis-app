@@ -11,6 +11,7 @@ import type { TransactionViewModel } from "@/features/transactions/hooks/use-tra
 const mockSetViewMode = jest.fn();
 const mockToggleCalendar = jest.fn();
 const mockHandleOpenEdit = jest.fn();
+const mockHandleOpenCreate = jest.fn();
 const mockPush = jest.fn();
 
 let mockOverrides: Partial<TransactionsFeedController> = {};
@@ -81,7 +82,7 @@ const mockBaseController: TransactionsFeedController = {
   deletingTransactionId: null,
   duplicatingTransactionId: null,
   payingTransactionId: null,
-  handleOpenCreate: jest.fn(),
+  handleOpenCreate: mockHandleOpenCreate,
   handleOpenEdit: mockHandleOpenEdit,
   handleCloseForm: jest.fn(),
   handleSubmit: jest.fn(),
@@ -173,6 +174,19 @@ describe("TransactionsScreen", () => {
     fireEvent.press(getByTestId("tx-card-tx-1"));
     expect(getByTestId("transaction-action-sheet")).toBeTruthy();
     expect(getByTestId("action-delete")).toBeTruthy();
+  });
+
+  it("abre o formulário de criação pelo botão do herói (#755)", () => {
+    const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("tx-hero-create-button"));
+    expect(mockHandleOpenCreate).toHaveBeenCalledTimes(1);
+  });
+
+  it("mantém o botão de criar disponível na visão de calendário (#755)", () => {
+    mockOverrides = { calendarActive: true };
+    const { getByTestId } = renderScreen();
+    fireEvent.press(getByTestId("tx-hero-create-button"));
+    expect(mockHandleOpenCreate).toHaveBeenCalledTimes(1);
   });
 
   it("alterna o calendário pelo botão do herói", () => {
