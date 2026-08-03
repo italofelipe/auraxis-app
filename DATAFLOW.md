@@ -97,7 +97,7 @@ No network call or database mutation is required until the user explicitly saves
 
 1. `SubscriptionScreen` reads `/subscriptions/me` through `useSubscriptionStateQuery`.
 2. `resolveSubscriptionManagementAction` normalizes the returned `provider` and chooses exactly one owner:
-   - `abacatepay`, `asaas`, `stub` or a provider-less active/trial subscription: Auraxis API;
+   - `asaas`, `stub` or a provider-less active/trial subscription: Auraxis API;
    - Apple aliases: App Store subscriptions center;
    - Google aliases: Google Play subscriptions center;
    - unknown provider: canonical Auraxis Web page `/subscription`.

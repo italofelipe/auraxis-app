@@ -37,7 +37,7 @@ que a API nao possui autoridade para executar.
 
 | Provider normalizado | Superficie de gestao | Comportamento |
 |---|---|---|
-| `abacatepay`, `asaas`, `stub` | API Auraxis | Confirmacao local e `POST /subscriptions/cancel` |
+| `asaas`, `stub` | API Auraxis | Confirmacao local e `POST /subscriptions/cancel` |
 | provider ausente em `trialing`, `active` ou `past_due` | API Auraxis | Mesmo fluxo, cobrindo trial interno |
 | `apple`, `app_store`, `app-store`, `appstore` | App Store | Abre `https://apps.apple.com/account/subscriptions` |
 | `google`, `google_play`, `google-play`, `play_store`, `play-store` | Google Play | Abre `https://play.google.com/store/account/subscriptions` |
@@ -98,7 +98,7 @@ CI=1 npm test -- --runInBand --forceExit \
 
 Os testes cobrem:
 
-- AbacatePay, Asaas, stub, trial sem provider, Apple, Google e provider
+- Asaas, stub, trial sem provider, Apple, Google e provider
   desconhecido;
 - rota e mapeamento de `POST /subscriptions/cancel`;
 - atualizacao de cache e invalidacao de entitlements;
@@ -116,7 +116,7 @@ npm run quality-check
 
 Executar o mesmo roteiro em um build iOS e em um Android:
 
-1. Entrar com usuario que tenha assinatura ativa AbacatePay/Asaas.
+1. Entrar com usuario que tenha assinatura ativa Asaas.
 2. Abrir `Mais > Assinatura` ou o deep link `auraxisapp://assinatura`.
 3. Confirmar plano, status, provider contextual e data da proxima cobranca.
 4. Tocar `Cancelar assinatura` e confirmar que nenhuma alteracao ocorre antes

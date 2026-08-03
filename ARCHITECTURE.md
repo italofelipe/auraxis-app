@@ -42,7 +42,7 @@ Auraxis App is the Expo/React Native client for logged-in Auraxis product flows.
 
 - `/assinatura` remains the canonical private mobile route and composes subscription state, plan catalog, checkout, trial and management in `SubscriptionScreen`.
 - `useSubscriptionManagementController` isolates cancellation side effects from the screen/checkout controller. It calls the existing `POST /subscriptions/cancel` mutation, writes the returned subscription into the canonical query cache and invalidates both `subscription` and `entitlements`.
-- `subscription-management.ts` resolves the management owner from the API `provider`: `abacatepay`, `asaas`, `stub` and provider-less trials use the Auraxis API; Apple and Google providers open their official store management centers; unknown providers fall back to the canonical Web route `/subscription`.
+- `subscription-management.ts` resolves the management owner from the API `provider`: `asaas`, `stub` and provider-less trials use the Auraxis API; Apple and Google providers open their official store management centers; unknown providers fall back to the canonical Web route `/subscription`.
 - API-managed cancellation requires an explicit confirmation sheet, blocks concurrent submissions with a synchronous in-flight guard and preserves the confirmed access-end date returned by the backend.
 - Store-managed subscriptions never call the Auraxis cancellation endpoint. The store remains responsible for confirmation, renewal and cancellation.
 - The provider matrix, recovery behavior and iOS/Android smoke procedure are documented in `docs/wiki/subscription-management-and-cancellation-2026-07-23.md`.

@@ -109,7 +109,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
         },
         {
           kind: "paragraph",
-          text: "O processamento de cobrança é realizado pela AbacatePay (Abacatepay Tecnologia LTDA, CNPJ 58.271.413/0001-90). O Auraxis não armazena dados de cartão de crédito. Tributos eventualmente aplicáveis seguem a legislação vigente.",
+          text: "O processamento de cobrança é realizado pela Asaas (provedor de pagamento brasileiro). O Auraxis não armazena dados de cartão de crédito. Tributos eventualmente aplicáveis seguem a legislação vigente.",
         },
         {
           kind: "paragraph",
@@ -140,7 +140,7 @@ export const TERMS_OF_SERVICE_DOCUMENT: LegalDocument = {
             "Em caso de falha na cobrança automática (por exemplo, cartão expirado ou saldo insuficiente), o provedor de pagamento pode tentar a cobrança novamente conforme regras próprias.",
             "Após a confirmação de falha definitiva, o usuário será notificado por email e poderá atualizar o método de pagamento ou cancelar o plano. Durante o período de carência (3 dias), o acesso Premium continua ativo.",
             "Após a carência sem regularização, o plano é rebaixado para Free e funcionalidades Premium ficam indisponíveis. Os dados do usuário permanecem preservados.",
-            "Para disputas envolvendo cobranças, o usuário deve entrar em contato pelo canal oficial de suporte. O Auraxis colabora com a AbacatePay para investigação e resolução conforme normas do setor.",
+            "Para disputas envolvendo cobranças, o usuário deve entrar em contato pelo canal oficial de suporte. O Auraxis colabora com a Asaas para investigação e resolução conforme normas do setor.",
           ],
         },
       ],
