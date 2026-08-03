@@ -39,14 +39,9 @@ jobs:
       - name: Install dependencies
         run: npm ci --ignore-scripts
 
-      - name: Validate detailed preview changelog
-        env:
-          STORE_RELEASE_NOTES: ${{ inputs.release_notes }}
-        run: |
-          node scripts/store-release-notes.cjs from-text \
-            --version "$(jq -r '.version' package.json)" \
-            --output-dir build/store-release
-
+      # O changelog de loja é exigido de quem publica (job `eas-preview-build`),
+      # não deste export. Todo push em `main` chega aqui sem `release_notes` e
+      # o gate derrubava o job antes de exportar qualquer coisa (#722).
       - name: Export web bundle
         env:
           CI: "1"
@@ -91,6 +86,26 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --ignore-scripts
+
+      - name: Require detailed release notes for any published build
+        env:
+          STORE_RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          set -euo pipefail
+          if [ -z "${STORE_RELEASE_NOTES:-}" ]; then
+            echo "::error::Informe release_notes (2+ bullets pt-BR, 100–500 caracteres) para publicar um build."
+            exit 1
+          fi
+
+      # Roda no mesmo job que dispara o build: `build/store-release/` é local ao
+      # runner e não sobrevive entre jobs (#722).
+      - name: Validate detailed preview changelog
+        env:
+          STORE_RELEASE_NOTES: ${{ inputs.release_notes }}
+        run: |
+          node scripts/store-release-notes.cjs from-text \
+            --version "$(jq -r '.version' package.json)" \
+            --output-dir build/store-release
 
       - name: Validate EXPO_TOKEN
         env:

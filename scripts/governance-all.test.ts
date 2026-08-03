@@ -14,6 +14,7 @@ describe("governance-all", () => {
       "openapi-secret-hygiene",
       "sonar-config",
       "runtime-release",
+      "store-release-workflow",
       "client-security",
       "client-logging",
       "new-feature-flags",

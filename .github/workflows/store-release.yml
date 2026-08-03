@@ -33,13 +33,27 @@ concurrency:
   group: store-release
   cancel-in-progress: false
 
+# Android e iOS são jobs irmãos e independentes (#722): os dois dependem apenas
+# do `prepare`, nunca um do outro. A falha de uma loja não cancela nem invalida
+# a entrega da outra, e cada plataforma aguarda a própria submission terminar
+# antes de finalizar a release.
 jobs:
-  build-and-submit:
-    name: Build, submit and attach store changelog
+  prepare:
+    name: Resolve release, changelog and native reuse
     runs-on: ubuntu-latest
     permissions:
       contents: read
       pull-requests: read
+    outputs:
+      android_build_id: ${{ steps.policy.outputs.android_build_id }}
+      android_state: ${{ steps.policy.outputs.android_state }}
+      auto_submit: ${{ steps.params.outputs.auto_submit }}
+      ios_build_id: ${{ steps.policy.outputs.ios_build_id }}
+      ios_state: ${{ steps.policy.outputs.ios_state }}
+      platform: ${{ steps.params.outputs.platform }}
+      profile: ${{ steps.params.outputs.profile }}
+      states: ${{ steps.policy.outputs.states }}
+      version: ${{ steps.params.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -171,9 +185,10 @@ jobs:
             eas metadata:lint --profile production
           fi
 
-      - name: Prevent duplicate native builds
+      - name: Resolve native reuse per platform
         id: policy
         env:
+          PLATFORM: ${{ steps.params.outputs.platform }}
           PROFILE: ${{ steps.params.outputs.profile }}
           VERSION: ${{ steps.params.outputs.version }}
         run: |
@@ -191,144 +206,134 @@ jobs:
             --android-fingerprint "$android_fingerprint" \
             --ios-fingerprint "$ios_fingerprint" \
             --app-version "$VERSION" \
-            --platform "${{ steps.params.outputs.platform }}" \
+            --platform "$PLATFORM" \
             --profile "$PROFILE")"
           {
-            echo "mode=$(jq -r '.mode' <<< "$resolution")"
             echo "states=$(jq -c '.states' <<< "$resolution")"
+            echo "android_state=$(jq -r '.states.android // "skipped"' <<< "$resolution")"
+            echo "ios_state=$(jq -r '.states.ios // "skipped"' <<< "$resolution")"
             echo "android_build_id=$(jq -r '.buildIds.android // empty' <<< "$resolution")"
             echo "ios_build_id=$(jq -r '.buildIds.ios // empty' <<< "$resolution")"
           } >> "$GITHUB_OUTPUT"
 
       - name: Stop while an identical build is already running
-        if: steps.policy.outputs.mode == 'wait'
-        run: |
-          echo "::error::A build for this exact app version and native runtime is already running. Rerun after it completes."
-          exit 1
-
-      - name: Publish App Store release notes
-        if: >-
-          steps.policy.outputs.mode != 'wait' &&
-          steps.params.outputs.auto_submit == 'true' &&
-          steps.params.outputs.profile == 'production' &&
-          (steps.params.outputs.platform == 'ios' ||
-           steps.params.outputs.platform == 'all')
-        run: eas metadata:push --profile production --non-interactive
-
-      - name: Build and submit once
-        if: steps.policy.outputs.mode == 'build'
         env:
-          AUTO_SUBMIT: ${{ steps.params.outputs.auto_submit }}
-          NOTES_FILE: build/store-release/what-to-test-pt-BR.txt
-          PLATFORM: ${{ steps.params.outputs.platform }}
-          PROFILE: ${{ steps.params.outputs.profile }}
+          ANDROID_STATE: ${{ steps.policy.outputs.android_state }}
+          IOS_STATE: ${{ steps.policy.outputs.ios_state }}
         run: |
           set -euo pipefail
-          args=(
-            --platform "$PLATFORM"
-            --profile "$PROFILE"
-            --message "$(cat "$NOTES_FILE")"
-            --non-interactive
-          )
-          if [ "$AUTO_SUBMIT" = "true" ]; then
-            args+=(--auto-submit)
-          fi
-          eas build "${args[@]}"
-
-      - name: Submit reusable native builds
-        if: >-
-          steps.policy.outputs.mode == 'ota' &&
-          steps.params.outputs.auto_submit == 'true' &&
-          steps.params.outputs.profile == 'production'
-        env:
-          ANDROID_BUILD_ID: ${{ steps.policy.outputs.android_build_id }}
-          IOS_BUILD_ID: ${{ steps.policy.outputs.ios_build_id }}
-          PLATFORM: ${{ steps.params.outputs.platform }}
-        run: |
-          set -euo pipefail
-          if [ "$PLATFORM" = "android" ] || [ "$PLATFORM" = "all" ]; then
-            eas submit --platform android --id "$ANDROID_BUILD_ID" --profile production --non-interactive
-          fi
-          if [ "$PLATFORM" = "ios" ] || [ "$PLATFORM" = "all" ]; then
-            eas submit --platform ios --id "$IOS_BUILD_ID" --profile production --non-interactive
-          fi
-
-      - name: Resolve submitted iOS build number
-        id: ios
-        if: >-
-          steps.policy.outputs.mode != 'wait' &&
-          steps.params.outputs.auto_submit == 'true' &&
-          steps.params.outputs.profile == 'production' &&
-          (steps.params.outputs.platform == 'ios' ||
-           steps.params.outputs.platform == 'all')
-        env:
-          IOS_BUILD_ID: ${{ steps.policy.outputs.ios_build_id }}
-          VERSION: ${{ steps.params.outputs.version }}
-        run: |
-          set -euo pipefail
-          eas build:list --platform ios --profile production --status finished \
-            --limit 50 --json --non-interactive > "$RUNNER_TEMP/finished-ios-builds.json"
-          build_number="$(jq -r \
-            --arg build_id "$IOS_BUILD_ID" \
-            --arg sha "$GITHUB_SHA" \
-            --arg version "$VERSION" \
-            '[.[] | select(
-              (.appVersion == $version) and
-              (($build_id != "" and .id == $build_id) or
-               ($build_id == "" and .gitCommitHash == $sha))
-            )][0].appBuildVersion // empty' \
-            "$RUNNER_TEMP/finished-ios-builds.json")"
-          if [ -z "$build_number" ]; then
-            echo "::error::The finished iOS build for $GITHUB_SHA / $VERSION was not found."
+          if [ "$ANDROID_STATE" = "building" ] || [ "$IOS_STATE" = "building" ]; then
+            echo "::error::A build for this exact app version and native runtime is already running. Rerun after it completes."
             exit 1
           fi
-          echo "build_number=$build_number" >> "$GITHUB_OUTPUT"
 
-      - name: Attach TestFlight What to Test notes
-        if: steps.ios.outputs.build_number != ''
-        env:
-          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
-          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
-          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
-        run: |
-          node scripts/app-store-connect-release-notes.cjs \
-            --app-id 6772551270 \
-            --build-number "${{ steps.ios.outputs.build_number }}" \
-            --metadata-file build/store-release/metadata.json
+      - name: Upload the validated store changelog
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: store-release-changelog
+          path: build/store-release/
+          retention-days: 14
 
-      - name: Resolve submitted Android versionCode
-        id: android
-        if: >-
-          steps.policy.outputs.mode != 'wait' &&
-          steps.params.outputs.auto_submit == 'true' &&
-          steps.params.outputs.profile == 'production' &&
-          (steps.params.outputs.platform == 'android' ||
-           steps.params.outputs.platform == 'all')
+  android-delivery:
+    name: Android build, submit and Play internal release
+    needs: prepare
+    if: >-
+      needs.prepare.outputs.platform == 'android' ||
+      needs.prepare.outputs.platform == 'all'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Download the validated store changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: store-release-changelog
+          path: build/store-release
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: 21.2.0
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      # Build e submit são passos separados de propósito: `--auto-submit`
+      # esconde o resultado da submission e acopla as duas plataformas no
+      # mesmo comando. Aqui o build termina, o submit espera (padrão do
+      # eas-cli, sem `--no-wait`) e só então a release é finalizada.
+      - name: Build the Android artifact
+        if: needs.prepare.outputs.android_state == 'missing'
         env:
-          ANDROID_BUILD_ID: ${{ steps.policy.outputs.android_build_id }}
-          VERSION: ${{ steps.params.outputs.version }}
+          NOTES_FILE: build/store-release/what-to-test-pt-BR.txt
+          PROFILE: ${{ needs.prepare.outputs.profile }}
         run: |
           set -euo pipefail
-          eas build:list --platform android --profile production --status finished \
+          eas build \
+            --platform android \
+            --profile "$PROFILE" \
+            --message "$(cat "$NOTES_FILE")" \
+            --non-interactive
+
+      - name: Resolve the finished Android build
+        id: build
+        env:
+          PROFILE: ${{ needs.prepare.outputs.profile }}
+          REUSED_BUILD_ID: ${{ needs.prepare.outputs.android_build_id }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          eas build:list --platform android --profile "$PROFILE" --status finished \
             --limit 50 --json --non-interactive > "$RUNNER_TEMP/finished-android-builds.json"
-          version_code="$(jq -r \
-            --arg build_id "$ANDROID_BUILD_ID" \
+          selection="$(jq -c \
+            --arg build_id "$REUSED_BUILD_ID" \
             --arg sha "$GITHUB_SHA" \
             --arg version "$VERSION" \
             '[.[] | select(
               (.appVersion == $version) and
               (($build_id != "" and .id == $build_id) or
                ($build_id == "" and .gitCommitHash == $sha))
-            )][0].appBuildVersion // empty' \
+            )][0] // {}' \
             "$RUNNER_TEMP/finished-android-builds.json")"
-          if [ -z "$version_code" ]; then
+          build_id="$(jq -r '.id // empty' <<< "$selection")"
+          version_code="$(jq -r '.appBuildVersion // empty' <<< "$selection")"
+          if [ -z "$build_id" ] || [ -z "$version_code" ]; then
             echo "::error::The finished Android build for $GITHUB_SHA / $VERSION was not found."
             exit 1
           fi
-          echo "version_code=$version_code" >> "$GITHUB_OUTPUT"
+          {
+            echo "build_id=$build_id"
+            echo "version_code=$version_code"
+          } >> "$GITHUB_OUTPUT"
 
-      - name: Attach Google Play notes and complete internal release
-        if: steps.android.outputs.version_code != ''
+      - name: Submit the Android build and wait for the submission
+        if: >-
+          needs.prepare.outputs.auto_submit == 'true' &&
+          needs.prepare.outputs.profile == 'production'
+        env:
+          BUILD_ID: ${{ steps.build.outputs.build_id }}
+        run: |
+          set -euo pipefail
+          eas submit \
+            --platform android \
+            --id "$BUILD_ID" \
+            --profile production \
+            --non-interactive
+
+      - name: Attach pt-BR notes and complete the internal release
+        if: >-
+          needs.prepare.outputs.auto_submit == 'true' &&
+          needs.prepare.outputs.profile == 'production'
         env:
           GOOGLE_PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
         run: |
@@ -336,20 +341,155 @@ jobs:
             --metadata-file build/store-release/metadata.json \
             --package com.sensoriumit.auraxis \
             --track internal \
-            --version-code "${{ steps.android.outputs.version_code }}"
+            --version-code "${{ steps.build.outputs.version_code }}"
 
-      - name: Release summary
-        if: always()
+  ios-delivery:
+    name: iOS build, App Store notes and TestFlight submit
+    needs: prepare
+    if: >-
+      needs.prepare.outputs.platform == 'ios' ||
+      needs.prepare.outputs.platform == 'all'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Download the validated store changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: store-release-changelog
+          path: build/store-release
+
+      - name: Setup Expo
+        uses: expo/expo-github-action@eab7a230208c952974db8c3245cfd78402c7b385 # v9
+        with:
+          eas-version: 21.2.0
+          token: ${{ secrets.EXPO_TOKEN }}
+
+      - name: Build the iOS artifact
+        if: needs.prepare.outputs.ios_state == 'missing'
         env:
-          MODE: ${{ steps.policy.outputs.mode }}
-          STATES: ${{ steps.policy.outputs.states }}
-          VERSION: ${{ steps.params.outputs.version }}
+          NOTES_FILE: build/store-release/what-to-test-pt-BR.txt
+          PROFILE: ${{ needs.prepare.outputs.profile }}
+        run: |
+          set -euo pipefail
+          eas build \
+            --platform ios \
+            --profile "$PROFILE" \
+            --message "$(cat "$NOTES_FILE")" \
+            --non-interactive
+
+      - name: Resolve the finished iOS build
+        id: build
+        env:
+          PROFILE: ${{ needs.prepare.outputs.profile }}
+          REUSED_BUILD_ID: ${{ needs.prepare.outputs.ios_build_id }}
+          VERSION: ${{ needs.prepare.outputs.version }}
+        run: |
+          set -euo pipefail
+          eas build:list --platform ios --profile "$PROFILE" --status finished \
+            --limit 50 --json --non-interactive > "$RUNNER_TEMP/finished-ios-builds.json"
+          selection="$(jq -c \
+            --arg build_id "$REUSED_BUILD_ID" \
+            --arg sha "$GITHUB_SHA" \
+            --arg version "$VERSION" \
+            '[.[] | select(
+              (.appVersion == $version) and
+              (($build_id != "" and .id == $build_id) or
+               ($build_id == "" and .gitCommitHash == $sha))
+            )][0] // {}' \
+            "$RUNNER_TEMP/finished-ios-builds.json")"
+          build_id="$(jq -r '.id // empty' <<< "$selection")"
+          build_number="$(jq -r '.appBuildVersion // empty' <<< "$selection")"
+          if [ -z "$build_id" ] || [ -z "$build_number" ]; then
+            echo "::error::The finished iOS build for $GITHUB_SHA / $VERSION was not found."
+            exit 1
+          fi
+          {
+            echo "build_id=$build_id"
+            echo "build_number=$build_number"
+          } >> "$GITHUB_OUTPUT"
+
+      # O changelog público pt-BR chega ao App Store Connect ANTES do submit:
+      # `eas metadata:push` é a rota suportada no plano atual (o parâmetro de
+      # "what to test" do eas submit é exclusivo do plano Enterprise).
+      - name: Publish App Store release notes before submitting
+        if: >-
+          needs.prepare.outputs.auto_submit == 'true' &&
+          needs.prepare.outputs.profile == 'production'
+        run: eas metadata:push --profile production --non-interactive
+
+      - name: Submit the iOS build and wait for the submission
+        if: >-
+          needs.prepare.outputs.auto_submit == 'true' &&
+          needs.prepare.outputs.profile == 'production'
+        env:
+          BUILD_ID: ${{ steps.build.outputs.build_id }}
+        run: |
+          set -euo pipefail
+          eas submit \
+            --platform ios \
+            --id "$BUILD_ID" \
+            --profile production \
+            --non-interactive
+
+      - name: Attach TestFlight What to Test notes
+        if: >-
+          needs.prepare.outputs.auto_submit == 'true' &&
+          needs.prepare.outputs.profile == 'production'
+        env:
+          APP_STORE_CONNECT_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+          APP_STORE_CONNECT_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          APP_STORE_CONNECT_PRIVATE_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+        run: |
+          node scripts/app-store-connect-release-notes.cjs \
+            --app-id 6772551270 \
+            --build-number "${{ steps.build.outputs.build_number }}" \
+            --metadata-file build/store-release/metadata.json
+
+  release-summary:
+    name: Release summary
+    needs: [prepare, android-delivery, ios-delivery]
+    if: always() && needs.prepare.result != 'skipped'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Download the validated store changelog
+        if: needs.prepare.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: store-release-changelog
+          path: build/store-release
+
+      - name: Record the per-platform outcome
+        env:
+          ANDROID_RESULT: ${{ needs.android-delivery.result }}
+          IOS_RESULT: ${{ needs.ios-delivery.result }}
+          PLATFORM: ${{ needs.prepare.outputs.platform }}
+          STATES: ${{ needs.prepare.outputs.states }}
+          VERSION: ${{ needs.prepare.outputs.version }}
         run: |
           {
-            echo "### Store release ${VERSION}"
+            echo "### Store release ${VERSION:-unknown}"
             echo
-            echo "- Native decision: \`${MODE:-not-evaluated}\`"
-            echo "- Platform states: \`${STATES:-not-evaluated}\`"
+            echo "- Target platform: \`${PLATFORM:-not-evaluated}\`"
+            echo "- Native reuse states: \`${STATES:-not-evaluated}\`"
+            echo "- Android delivery: \`${ANDROID_RESULT}\`"
+            echo "- iOS delivery: \`${IOS_RESULT}\`"
+            echo
+            echo "Plataformas são independentes: uma loja pode concluir enquanto a outra falha."
             if [ -f build/store-release/metadata.json ]; then
               echo
               echo "#### Changelog pt-BR"

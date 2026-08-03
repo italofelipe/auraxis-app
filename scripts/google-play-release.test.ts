@@ -1,10 +1,13 @@
 import {
   GOOGLE_API_ROOT,
   GOOGLE_TOKEN_URL,
+  assertPublishedRelease,
   createServiceAccountAssertion,
+  findPublishedRelease,
   publishGooglePlayRelease,
   requestAccessToken,
   updateTrackForVersion,
+  verifyGooglePlayRelease,
 } from "./google-play-release.cjs";
 import { generateKeyPairSync } from "node:crypto";
 
@@ -151,5 +154,130 @@ describe("google-play-release", () => {
       `${applicationUrl}/edits/edit-123:commit`,
       expect.objectContaining({ method: "POST" }),
     );
+  });
+
+});
+
+describe("google-play-release — evidência pós-commit", () => {
+  test("reads the committed track back and drops the read-only edit", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(response({ id: "edit-999" }))
+      .mockResolvedValueOnce(
+        response({
+          track: "internal",
+          releases: [
+            {
+              name: "1.13.7 (41)",
+              releaseNotes: [{ language: "pt-BR", text: releaseNotes }],
+              status: "completed",
+              versionCodes: ["41"],
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(response({}, 204));
+
+    await expect(
+      verifyGooglePlayRelease({
+        accessToken: "access-token",
+        fetchImpl,
+        packageName: "com.sensoriumit.auraxis",
+        releaseNotes,
+        version: "1.13.7",
+        versionCode: "41",
+      }),
+    ).resolves.toEqual(expect.objectContaining({ status: "completed" }));
+
+    expect(fetchImpl).toHaveBeenNthCalledWith(
+      3,
+      `${GOOGLE_API_ROOT}/applications/com.sensoriumit.auraxis/edits/edit-999`,
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
+  test("fails when Google Play kept the release as a draft", async () => {
+    const fetchImpl = jest
+      .fn()
+      .mockResolvedValueOnce(response({ id: "edit-999" }))
+      .mockResolvedValueOnce(
+        response({
+          track: "internal",
+          releases: [
+            {
+              name: "1.13.7 (41)",
+              releaseNotes: [{ language: "pt-BR", text: releaseNotes }],
+              status: "draft",
+              versionCodes: ["41"],
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(response({}, 204));
+
+    await expect(
+      verifyGooglePlayRelease({
+        accessToken: "access-token",
+        fetchImpl,
+        packageName: "com.sensoriumit.auraxis",
+        releaseNotes,
+        version: "1.13.7",
+        versionCode: "41",
+      }),
+    ).rejects.toThrow("status is \"draft\" instead of \"completed\"");
+
+    // Mesmo falhando, o edit temporário é descartado.
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+  });
+
+  test("names the exact drift when the published release does not match", () => {
+    expect(() =>
+      assertPublishedRelease({
+        release: {
+          name: "1.13.6 (40)",
+          releaseNotes: [{ language: "pt-BR", text: "outro texto" }],
+          status: "completed",
+          versionCodes: ["41"],
+        },
+        releaseNotes,
+        version: "1.13.7",
+        versionCode: "41",
+      }),
+    ).toThrow(
+      "Google Play internal release 1.13.7 (41) was not published as expected: " +
+        "name is \"1.13.6 (40)\" instead of \"1.13.7 (41)\"; " +
+        "pt-BR release notes do not match the validated changelog",
+    );
+  });
+
+  test("fails when the pt-BR notes never landed", () => {
+    expect(() =>
+      assertPublishedRelease({
+        release: {
+          name: "1.13.7 (41)",
+          releaseNotes: [{ language: "en-US", text: releaseNotes }],
+          status: "completed",
+          versionCodes: ["41"],
+        },
+        releaseNotes,
+        version: "1.13.7",
+        versionCode: "41",
+      }),
+    ).toThrow("pt-BR release notes are missing");
+  });
+
+  test("refuses to validate an ambiguous versionCode", () => {
+    expect(() =>
+      findPublishedRelease({
+        track: {
+          track: "internal",
+          releases: [
+            { status: "completed", versionCodes: ["41"] },
+            { status: "draft", versionCodes: ["41"] },
+          ],
+        },
+        versionCode: "41",
+      }),
+    ).toThrow("Expected one internal release for versionCode 41, found 2");
   });
 });
