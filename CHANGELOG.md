@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.3](https://github.com/italofelipe/auraxis-app/compare/v1.16.2...v1.16.3) (2026-08-03)
+
+
+### Bug Fixes
+
+* **release:** tornar a publicação automática resiliente sem EAS Enterprise ([#773](https://github.com/italofelipe/auraxis-app/issues/773)) ([a416467](https://github.com/italofelipe/auraxis-app/commit/a4164672bc318b6ab162a9d2b690063b0e18a28f)), closes [#722](https://github.com/italofelipe/auraxis-app/issues/722)
+
 ## [1.16.2](https://github.com/italofelipe/auraxis-app/compare/v1.16.1...v1.16.2) (2026-08-03)
 
 
