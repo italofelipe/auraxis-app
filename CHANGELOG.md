@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.5](https://github.com/italofelipe/auraxis-app/compare/v1.16.4...v1.16.5) (2026-08-10)
+
+
+### Bug Fixes
+
+* **legal:** remover a AbacatePay do app, começando pelos documentos públicos ([#785](https://github.com/italofelipe/auraxis-app/issues/785)) ([6e9ac53](https://github.com/italofelipe/auraxis-app/commit/6e9ac5326ac5c79abe46efc06e9a3f5014f0113c)), closes [#784](https://github.com/italofelipe/auraxis-app/issues/784)
+
 ## [1.16.4](https://github.com/italofelipe/auraxis-app/compare/v1.16.3...v1.16.4) (2026-08-10)
 
 
