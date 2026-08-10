@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.4](https://github.com/italofelipe/auraxis-app/compare/v1.16.3...v1.16.4) (2026-08-10)
+
+
+### Bug Fixes
+
+* **ci:** destravar o main — codegen drift + leva nova de CVEs de 08/08 ([#789](https://github.com/italofelipe/auraxis-app/issues/789)) ([5fcf6cd](https://github.com/italofelipe/auraxis-app/commit/5fcf6cd3d6aa63372aff3cf6c149977e186b2a77))
+
 ## [1.16.3](https://github.com/italofelipe/auraxis-app/compare/v1.16.2...v1.16.3) (2026-08-03)
 
 
