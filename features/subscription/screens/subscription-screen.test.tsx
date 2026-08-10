@@ -31,7 +31,7 @@ const buildSubscription = (
   offerCode: "premium-monthly",
   status: "active",
   billingCycle: "monthly",
-  provider: "abacatepay",
+  provider: "asaas",
   providerSubscriptionId: "bill-1",
   trialEndsAt: null,
   currentPeriodStart: "2026-07-01T00:00:00Z",

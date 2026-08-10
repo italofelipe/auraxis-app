@@ -174,7 +174,7 @@ canal e invalida `subscription`/`entitlements` depois do retorno.
 
 Depois da compra, a gestao usa o `provider` retornado por
 `GET /subscriptions/me`, nao `EXPO_PUBLIC_CHECKOUT_PROVIDER`. Assinaturas
-`abacatepay`, `asaas`, `stub` e trials internos cancelam por
+`asaas`, `stub` e trials internos cancelam por
 `POST /subscriptions/cancel`; assinaturas Apple/Google abrem a gestao oficial
 da loja; provider desconhecido usa `https://app.auraxis.com.br/subscription`.
 

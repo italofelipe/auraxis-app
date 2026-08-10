@@ -15,7 +15,7 @@ const buildSubscription = (
   offerCode: null,
   status: "active",
   billingCycle: "monthly",
-  provider: "abacatepay",
+  provider: "asaas",
   providerSubscriptionId: "provider-sub-1",
   trialEndsAt: null,
   currentPeriodStart: "2026-07-01T00:00:00Z",
@@ -27,7 +27,7 @@ const buildSubscription = (
 });
 
 describe("resolveSubscriptionManagementAction", () => {
-  it.each(["abacatepay", "asaas", "stub"])(
+  it.each(["asaas", "stub"])(
     "cancela provider %s pela API canonica",
     (provider) => {
       expect(

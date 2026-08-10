@@ -21,7 +21,7 @@ export interface SubscriptionManagementAction {
   readonly url: string | null;
 }
 
-const API_MANAGED_PROVIDERS = new Set(["abacatepay", "asaas", "stub"]);
+const API_MANAGED_PROVIDERS = new Set(["asaas", "stub"]);
 const APP_STORE_PROVIDERS = new Set([
   "apple",
   "app_store",
