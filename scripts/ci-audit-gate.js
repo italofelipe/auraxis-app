@@ -20,6 +20,12 @@ const allowedIds = new Set([
   // (2026-07-23, #691) brace-expansion/js-yaml/shell-quote saíram do allowlist:
   // corrigidas de verdade via npm overrides no package.json (fixes dentro de
   // cada linha de major). Não re-allowlistar — regressão deve quebrar o gate.
+  // image-size — (2026-08-09, #792): TODAS as versões publicadas são
+  // vulneráveis (≤2.0.2, aqui 1.2.1 via expo→metro); não existe override
+  // possível. Uso é build-time do Metro sobre assets do próprio repo — nunca
+  // input de usuário. Remover quando upstream publicar patch.
+  "GHSA-w3rx-r6r6-pgpr",
+  "GHSA-5p2g-fcmc-qvqq",
 ]);
 
 const TEMPORARY_BRACE_EXPANSION_ADVISORY = "GHSA-mh99-v99m-4gvg";
