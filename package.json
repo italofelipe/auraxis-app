@@ -84,7 +84,7 @@
     "posthog-react-native": "^4.58.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
-    "react-hook-form": "^7.82.0",
+    "react-hook-form": "^7.84.0",
     "react-i18next": "^17.0.11",
     "react-native": "0.83.10",
     "react-native-gesture-handler": "~2.30.0",
