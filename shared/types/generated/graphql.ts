@@ -1570,6 +1570,8 @@ export type QueryAiInsightChangeStatusArgs = {
 export type QueryAiInsightHistoryArgs = {
   page?: InputMaybe<Scalars['Int']['input']>;
   perPage?: InputMaybe<Scalars['Int']['input']>;
+  periodLabel?: InputMaybe<Scalars['String']['input']>;
+  periodType?: InputMaybe<Scalars['String']['input']>;
 };
 
 
