@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.16.6](https://github.com/italofelipe/auraxis-app/compare/v1.16.5...v1.16.6) (2026-08-11)
+
+
+### Bug Fixes
+
+* **flags:** promote app.notifications.push to enabled-prod ([#802](https://github.com/italofelipe/auraxis-app/issues/802)) ([17f02be](https://github.com/italofelipe/auraxis-app/commit/17f02bee2ea154b8e711829464b45978d3789757))
+
 ## [1.16.5](https://github.com/italofelipe/auraxis-app/compare/v1.16.4...v1.16.5) (2026-08-10)
 
 
