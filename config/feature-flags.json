@@ -46,8 +46,8 @@
       "createdAt": "2026-05-17",
       "removeBy": "2026-12-31",
       "type": "release",
-      "status": "enabled-dev",
-      "description": "Controla o registro de push notifications nativas no app.",
+      "status": "enabled-prod",
+      "description": "Controla o registro de push notifications nativas no app. Promovido a enabled-prod em 2026-08-11 (#801); QA em dispositivo pós-merge pelo PO. Rollback: reverter para enabled-dev.",
       "repositories": ["auraxis-app", "auraxis-api"]
     },
     {
