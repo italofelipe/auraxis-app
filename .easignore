@@ -74,3 +74,7 @@ AuthKey_*.p8
 gen-lang-client-*.json
 *service-account*.json
 *.keystore
+# Chave privada de code signing (platform#978): fora do git e fora do
+# tarball do build — o gate de runtime-release exige superset do .gitignore.
+*.pem
+private-key*.pem

@@ -59,6 +59,11 @@ reports/mutation/
 # EAS submit credentials — NUNCA commitar
 *.p8
 AuthKey_*.p8
+# Chave privada de code signing do OTA (platform#978). Entra aqui ANTES de
+# qualquer chave ser gerada: uma privada commitada por engano obriga a
+# rotacionar e a republicar binário, porque o certificado vai embarcado.
+*.pem
+private-key*.pem
 gen-lang-client-*.json
 *service-account*.json
 *.keystore
